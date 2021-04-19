@@ -1,7 +1,7 @@
 image: jangrewe/gitlab-ci-android
 
 stages:
-- test
+- build
 
 before_script:
 - cd Luca
@@ -13,7 +13,10 @@ cache:
   paths:
   - .gradle/
 
-test:
+build:
   stage: build
   script:
   - ./gradlew :app:test
+  artifacts:
+    paths:
+    - app/build/outputs/apk/app-debug.apk
