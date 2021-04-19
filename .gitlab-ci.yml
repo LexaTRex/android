@@ -18,5 +18,6 @@ build:
   script:
   - ./gradlew :app:test
   artifacts:
-    paths:
-    - app/build/outputs/apk/app-debug.apk
+    when: always
+    reports:
+      junit: Luca/app/build/test-results/test/**/TEST-*.xml
