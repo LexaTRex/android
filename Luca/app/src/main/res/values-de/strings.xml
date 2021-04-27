@@ -151,14 +151,14 @@
     <!-- Private Meeting -->
     <string name="meeting_heading">Privates Treffen</string>
     <string name="meeting_description">Lass deine Freunde und Familie den QR-Code scannen, um sie bei deinem Treffen einzuchecken.</string>
-    <string name="meeting_description_info">Wenn Freunde und Familie bei deinem privaten Treffen einchecken, werden ihre Vor- und Nachnamen in deiner App angezeigt. Sie sehen in ihrer App auch deinen Vor- und Nachnamen.\n\nUnabhängig vom Gesundheitsamt kannst du diese Funktion jetzt schon an Orten nutzen, die noch nicht Teil des luca-Systems sind, um private Treffen für dich selbst zu dokumentieren.</string>
+    <string name="meeting_description_info">Private Treffen sind für kleine Zusammenkünfte mit Freunden und Familie gedacht. Sie sind nur Gedächtnisstützen und werden nicht mit dem Gesundheitsamt geteilt. Deshalb werden hier Vor- und Nachnamen von dir und deinen Gästen angezeigt.</string>
     <string name="meeting_duration_heading">Dauer</string>
     <string name="meeting_members_heading">Teilnehmer</string>
     <string name="meeting_members_info"><xliff:g example="2/4" id="count">%1$s</xliff:g>\n\nEingecheckt:\n<xliff:g example="- John Doe\n- Jane Doe" id="checkedIn">%2$s</xliff:g>\n\nAusgecheckt:\n<xliff:g example="- John Doe\n- Jane Doe" id="checkedOut">%3$s</xliff:g></string>
     <string name="meeting_create_action">Privates Treffen erstellen</string>
     <string name="meeting_create_modal_action">Starten</string>
     <string name="meeting_create_modal_heading">Privates Treffen erstellen</string>
-    <string name="meeting_create_modal_description">Möchtest du ein privates Treffen starten?\n\nFreunde und Familie erscheinen nach dem Check-in mit ihrem Vor- und Nachnamen in deiner Historie. Sie sehen auch deinen Vor- und Nachnamen in ihrer App.</string>
+    <string name="meeting_create_modal_description">Möchtest du ein privates Treffen starten?\n\nFreunde und Familie erscheinen nach dem Check-in mit ihren Vor-und Nachnamen in deiner Historie. Auch dein Name wird in ihrer App hinterlegt.\n\nPrivate Treffen sind nur Gedächtnisstützen und werden nicht mit dem Gesundheitsamt geteilt.</string>
     <string name="meeting_end_confirmation_heading">@string/meeting_end_action</string>
     <string name="meeting_end_confirmation_description">Willst du dieses Treffen wirklich beenden?</string>
     <string name="meeting_end_action">Treffen beenden</string>
@@ -166,7 +166,7 @@
     <string name="meeting_was_ended_hint">Das Treffen wurde beendet</string>
 
     <string name="meeting_join_heading">Privates Treffen</string>
-    <string name="meeting_join_description">Wenn du dich bei einem privaten Treffen eincheckst, werden deinem Gastgeber dein Vor- und Nachname angezeigt.</string>
+    <string name="meeting_join_description">Wenn du dich bei einem privaten Treffen eincheckst, werden deinem Gastgeber dein Vor- und Nachname angezeigt.\n\nPrivate Treffen sind nur Gedächtnisstützen und werden nicht mit dem Gesundheitsamt geteilt.</string>
 
     <!-- Venues -->
     <string name="venue_heading">@string/dummy_heading</string>
@@ -259,6 +259,8 @@
     <string name="verification_timeout_action_use_last">Vorherige TAN eingeben</string>
     <string name="verification_rate_limit_title">Anfragelimit erreicht</string>
     <string name="verification_rate_limit_description">In diesem Netzwerk wurde das Limit der zulässigen TAN-Anfragen erreicht. Teste bitte, ob du das Netzwerk wechseln kannst. Versuche es sonst zu einem späteren Zeitpunkt erneut.</string>
+    <string name="verification_bad_gateway_title">Service nicht verfügbar</string>
+    <string name="verification_bad_gateway_description">Der luca-Service ist im Moment nicht verfügbar, bitte versuche es später erneut.</string>
 
     <!-- Update -->
     <string name="update_required_title">Update benötigt</string>

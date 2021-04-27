@@ -23,6 +23,7 @@ import okhttp3.CertificatePinner;
 import okhttp3.Credentials;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
+import okhttp3.Request;
 import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.HttpException;
 import retrofit2.Retrofit;
@@ -34,6 +35,7 @@ public class NetworkManager extends Manager {
     private static final String API_BASE_URL_PRODUCTION = "https://app.luca-app.de/api/v3/";
     private static final String API_BASE_URL_STAGING = "https://staging.luca-app.de/api/v3/";
     public static final String API_BASE_URL = BuildConfig.DEBUG ? API_BASE_URL_STAGING : API_BASE_URL_PRODUCTION;
+    private static final long DEFAULT_REQUEST_TIMEOUT = TimeUnit.SECONDS.toMillis(10);
     private static final String USER_AGENT = createUserAgent();
 
     private final RxJava3CallAdapterFactory rxAdapter;
@@ -81,16 +83,21 @@ public class NetworkManager extends Manager {
                 .header("User-Agent", USER_AGENT)
                 .build());
 
+        Interceptor timeoutInterceptor = chain -> {
+            int timeout = (int) getRequestTimeout(chain.request());
+            return chain.withConnectTimeout(timeout, TimeUnit.MILLISECONDS)
+                    .withReadTimeout(timeout, TimeUnit.MILLISECONDS)
+                    .withWriteTimeout(timeout, TimeUnit.MILLISECONDS)
+                    .proceed(chain.request());
+        };
+
         CertificatePinner certificatePinner = new CertificatePinner.Builder()
                 .add("**.luca-app.de", "sha256/wjD2X9ht0iXPN2sSXiXd2aF6ar5cxHOmXZnnkAiwVpU=") // CN=*.luca-app.de,O=neXenio GmbH,L=Berlin,ST=Berlin,C=DE,2.5.4.5=#130c43534d303233353532353339
                 .build();
 
         OkHttpClient.Builder builder = new OkHttpClient.Builder()
-                .callTimeout(10, TimeUnit.SECONDS)
-                .connectTimeout(10, TimeUnit.SECONDS)
-                .readTimeout(10, TimeUnit.SECONDS)
-                .writeTimeout(10, TimeUnit.SECONDS)
                 .addInterceptor(userAgentInterceptor)
+                .addInterceptor(timeoutInterceptor)
                 .certificatePinner(certificatePinner);
 
         if (BuildConfig.DEBUG) {
@@ -140,6 +147,17 @@ public class NetworkManager extends Manager {
         String deviceName = Build.MANUFACTURER + " " + Build.MODEL;
         String androidVersionName = Build.VERSION.RELEASE;
         return "luca/" + appVersionName + " (Android " + androidVersionName + ";" + deviceName + ")";
+    }
+
+    private static long getRequestTimeout(@NonNull Request request) {
+        long timeout;
+        String path = request.url().encodedPath();
+        if (path.contains("/sms/request")) {
+            timeout = TimeUnit.SECONDS.toMillis(45);
+        } else {
+            timeout = DEFAULT_REQUEST_TIMEOUT;
+        }
+        return timeout;
     }
 
     public static boolean isHttpException(@NonNull Throwable throwable, int expectedStatusCode) {

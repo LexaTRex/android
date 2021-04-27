@@ -97,6 +97,12 @@ public class RegistrationFragment extends BaseFragment<RegistrationViewModel> {
                 }));
     }
 
+    @Override
+    public void onPause() {
+        super.onPause();
+        viewModel.updateRegistrationDataWithFormValuesAsSideEffect();
+    }
+
     private void initializeSharedViews() {
         progressIndicator = getView().findViewById(R.id.registrationProgressIndicator);
         observe(viewModel.getProgress(), this::indicateProgress);

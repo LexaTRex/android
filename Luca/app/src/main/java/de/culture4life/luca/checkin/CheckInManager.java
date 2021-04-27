@@ -75,7 +75,7 @@ public class CheckInManager extends Manager {
     public static final String KEY_CHECK_IN_DATA = "check_in_data_2";
     public static final String KEY_ARCHIVED_CHECK_IN_DATA = "archived_check_in_data";
 
-    private static final long MINIMUM_CHECK_IN_DURATION = TimeUnit.MINUTES.toMillis(1);
+    private static final long MINIMUM_CHECK_IN_DURATION = TimeUnit.MINUTES.toMillis(2);
     private static final long LOCATION_REQUEST_TIMEOUT = TimeUnit.SECONDS.toMillis(3);
     private static final int RECENT_TRACE_IDS_LIMIT = (int) TimeUnit.HOURS.toMinutes(6);
     private static final long CHECK_OUT_POLLING_INTERVAL = TimeUnit.MINUTES.toMillis(1);
@@ -114,9 +114,6 @@ public class CheckInManager extends Manager {
         this.notificationManager = notificationManager;
 
         skipMinimumDistanceAssertion = true;
-        if (BuildConfig.DEBUG) {
-            skipMinimumCheckInDurationAssertion = true;
-        }
     }
 
     @Override

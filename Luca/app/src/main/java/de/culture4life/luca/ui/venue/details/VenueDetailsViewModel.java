@@ -49,11 +49,13 @@ public class VenueDetailsViewModel extends BaseViewModel {
 
     private final MutableLiveData<UUID> id = new MutableLiveData<>();
     private final MutableLiveData<String> title = new MutableLiveData<>();
+    private final MutableLiveData<String> subtitle = new MutableLiveData<>();
     private final MutableLiveData<String> description = new MutableLiveData<>();
     private final MutableLiveData<String> checkInTime = new MutableLiveData<>();
     private final MutableLiveData<String> checkInDuration = new MutableLiveData<>();
     private final MutableLiveData<Boolean> isCheckedIn = new MutableLiveData<>();
     private final MutableLiveData<Boolean> hasLocationRestriction = new MutableLiveData<>();
+    private final MutableLiveData<Boolean> isGeofencingSupported = new MutableLiveData<>();
     private final MutableLiveData<Boolean> shouldEnableAutomaticCheckOut = new MutableLiveData<>();
     private final MutableLiveData<Boolean> shouldEnableLocationServices = new MutableLiveData<>();
 
@@ -83,14 +85,22 @@ public class VenueDetailsViewModel extends BaseViewModel {
                         geofenceManager.initialize(application),
                         locationManager.initialize(application)
                 ))
+                .andThen(geofenceManager.isGeofencingSupported()
+                        .flatMapCompletable(supported -> update(isGeofencingSupported, supported)))
                 .andThen(initializeAutomaticCheckout())
                 .andThen(checkInManager.isCheckedIn()
                         .flatMapCompletable(checkedIn -> update(isCheckedIn, checkedIn)))
                 .andThen(checkInManager.getCheckInDataIfAvailable()
                         .doOnSuccess(checkInData -> {
                             updateAsSideEffect(id, checkInData.getLocationId());
-                            updateAsSideEffect(title, checkInData.getLocationDisplayName());
                             updateAsSideEffect(hasLocationRestriction, checkInData.hasLocationRestriction());
+                            if (checkInData.getLocationAreaName() != null) {
+                                updateAsSideEffect(subtitle, checkInData.getLocationGroupName());
+                                updateAsSideEffect(title, checkInData.getLocationAreaName());
+                            } else {
+                                updateAsSideEffect(subtitle, null);
+                                updateAsSideEffect(title, checkInData.getLocationGroupName());
+                            }
                         })
                         .ignoreElement());
     }
@@ -441,6 +451,10 @@ public class VenueDetailsViewModel extends BaseViewModel {
         return locationManager.isLocationServiceEnabled();
     }
 
+    public MutableLiveData<String> getSubtitle() {
+        return subtitle;
+    }
+
     public LiveData<String> getTitle() {
         return title;
     }
@@ -461,15 +475,19 @@ public class VenueDetailsViewModel extends BaseViewModel {
         return isCheckedIn;
     }
 
-    public MutableLiveData<Boolean> getHasLocationRestriction() {
+    public LiveData<Boolean> getHasLocationRestriction() {
         return hasLocationRestriction;
     }
 
-    public MutableLiveData<Boolean> getShouldEnableAutomaticCheckOut() {
+    public LiveData<Boolean> getIsGeofencingSupported() {
+        return isGeofencingSupported;
+    }
+
+    public LiveData<Boolean> getShouldEnableAutomaticCheckOut() {
         return shouldEnableAutomaticCheckOut;
     }
 
-    public MutableLiveData<Boolean> getShouldEnableLocationServices() {
+    public LiveData<Boolean> getShouldEnableLocationServices() {
         return shouldEnableLocationServices;
     }
 

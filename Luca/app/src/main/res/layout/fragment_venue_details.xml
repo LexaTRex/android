@@ -7,16 +7,41 @@
         android:background="@color/checked_in_light_green_gradient"
         tools:context="de.culture4life.luca.ui.history.HistoryFragment">
 
-    <TextView
-            android:id="@+id/headingTextView"
-            style="@style/HeadingTextView"
-            android:textColor="@android:color/black"
-            android:text="@string/venue_heading"
-            tools:ignore="MissingConstraints" />
+    <LinearLayout
+            android:id="@+id/headingTextViewsLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintRight_toLeftOf="parent"
+            android:layout_marginTop="@dimen/spacing_default"
+            android:layout_marginStart="@dimen/spacing_default"
+            android:layout_marginEnd="@dimen/spacing_default">
+
+        <TextView
+                android:id="@+id/subtitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="0dp"
+                style="@style/SubHeadingTextView"
+                android:textColor="@android:color/black"
+                tools:text="Private meeting" />
+
+        <TextView
+                android:id="@+id/title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="0dp"
+                style="@style/HeadingTextView"
+                android:textColor="@android:color/black"
+                android:text="@string/venue_heading" />
+
+    </LinearLayout>
 
     <View
             android:id="@+id/headingSeparatorView"
             style="@style/HeaderSeparatorView"
+            app:layout_constraintTop_toBottomOf="@id/headingTextViewsLayout"
             tools:ignore="MissingConstraints" />
 
     <TextView

@@ -1,6 +1,7 @@
 package de.culture4life.luca;
 
-import com.google.android.gms.instantapps.InstantApps;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import android.app.Activity;
@@ -298,10 +299,6 @@ public class LucaApplication extends MultiDexApplication {
         return currentNightMode == Configuration.UI_MODE_NIGHT_YES;
     }
 
-    public boolean isInstantApp() {
-        return InstantApps.getPackageManagerCompat(this).isInstantApp();
-    }
-
     public boolean isUiCurrentlyVisible() {
         return !startedActivities.isEmpty();
     }
@@ -354,6 +351,12 @@ public class LucaApplication extends MultiDexApplication {
             return null;
         }
         return new ArrayList<>(startedActivities).get(0);
+    }
+
+    public static boolean isGooglePlayServicesAvailable(@NonNull Context context) {
+        GoogleApiAvailability googleApiAvailability = GoogleApiAvailability.getInstance();
+        int resultCode = googleApiAvailability.isGooglePlayServicesAvailable(context);
+        return resultCode == ConnectionResult.SUCCESS;
     }
 
     public static boolean isRunningUnitTests() {

@@ -152,14 +152,14 @@
     <!-- Private Meeting -->
     <string name="meeting_heading">Private Meeting</string>
     <string name="meeting_description">Let your guests scan the QR code to check into your meeting.</string>
-    <string name="meeting_description_info">When friends and family check into your private meeting, their first and last names will be shown in your app.\n\nThey will also see your first and last name in their app.\n\nYou can already use this feature at locations that are not part of the luca system to keep track of private meetings yourself.</string>
+    <string name="meeting_description_info">Private meetings are meant for small gatherings with friends and family. They are used as reminders and won\'t be shared with health authorities - that\'s why they display the full names of you and your guests.</string>
     <string name="meeting_duration_heading">Duration</string>
     <string name="meeting_members_heading">Participants</string>
     <string name="meeting_members_info"><xliff:g example="2/4" id="count">%1$s</xliff:g>\n\nChecked in:\n<xliff:g example="- John Doe\n- Jane Doe" id="checkedIn">%2$s</xliff:g>\n\nChecked out:\n<xliff:g example="- John Doe\n- Jane Doe" id="checkedOut">%3$s</xliff:g></string>
     <string name="meeting_create_action">Create a private meeting</string>
     <string name="meeting_create_modal_action">Start</string>
     <string name="meeting_create_modal_heading">Set up a private meeting</string>
-    <string name="meeting_create_modal_description">Do you want to start a private meeting now?\n\nWhen friends and family check into your private meeting, their first and last names will be shown in your history. They will also see your first and last name in their app.</string>
+    <string name="meeting_create_modal_description">Do you want to start a private meeting now?\n\nWhen friends and family check into your private meeting, their first and last names will be shown in your app. They will also see your first and last name in their app.\n\nPrivate meetings are used as reminders and won\'t be shared with health authorities.</string>
     <string name="meeting_end_confirmation_heading">@string/meeting_end_action</string>
     <string name="meeting_end_confirmation_description">Do you really want to end this meeting?</string>
     <string name="meeting_end_action">End meeting</string>
@@ -167,7 +167,7 @@
     <string name="meeting_was_ended_hint">The meeting was ended</string>
 
     <string name="meeting_join_heading">@string/meeting_heading</string>
-    <string name="meeting_join_description">When you check yourself in at a private meeting, your host can see your first and last name.</string>
+    <string name="meeting_join_description">When you check yourself in at a private meeting, your host can see your first and last name.\n\nPrivate meetings are used as reminders and won\'t be shared with health authorities.</string>
 
     <!-- Venues -->
     <string name="venue_heading">@string/dummy_heading</string>
@@ -262,6 +262,8 @@
     <string name="verification_timeout_action_use_last">Enter last TAN</string>
     <string name="verification_rate_limit_title">Rate limit exceeded</string>
     <string name="verification_rate_limit_description">This network\'s TAN request limit has been reached. Please try to switch your network or try again at a later time.</string>
+    <string name="verification_bad_gateway_title">Service unavailable</string>
+    <string name="verification_bad_gateway_description">The luca service is currently unavailable, please try again later.</string>
 
     <!-- Update -->
     <string name="update_required_title">Update required</string>

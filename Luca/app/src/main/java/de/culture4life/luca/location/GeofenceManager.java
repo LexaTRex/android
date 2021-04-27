@@ -13,6 +13,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 
 import de.culture4life.luca.BuildConfig;
+import de.culture4life.luca.LucaApplication;
 import de.culture4life.luca.Manager;
 import de.culture4life.luca.util.RxTasks;
 
@@ -26,6 +27,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresPermission;
 import io.reactivex.rxjava3.core.Completable;
+import io.reactivex.rxjava3.core.Maybe;
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.core.Single;
 import io.reactivex.rxjava3.processors.PublishProcessor;
@@ -74,7 +76,24 @@ public class GeofenceManager extends Manager {
 
     @Override
     protected Completable doInitialize(@NonNull Context context) {
-        return Completable.fromAction(() -> geofenceClient = LocationServices.getGeofencingClient(context));
+        return Completable.fromAction(() -> {
+            if (LucaApplication.isGooglePlayServicesAvailable(context)) {
+                geofenceClient = LocationServices.getGeofencingClient(context);
+            } else {
+                Timber.w("No Google Play Services available, geofencing will not be supported");
+                // TODO: 26.04.21 provide a fallback implementation
+            }
+        });
+    }
+
+    /**
+     * The Google Play Services are required for the current geofencing implementation, which are
+     * not available on every device.
+     */
+    public Single<Boolean> isGeofencingSupported() {
+        return Maybe.fromCallable(() -> geofenceClient)
+                .map(geofencingClient -> true)
+                .defaultIfEmpty(false);
     }
 
     /*

@@ -13,6 +13,7 @@ import com.google.zxing.EncodeHintType;
 import android.annotation.SuppressLint;
 import android.app.Application;
 import android.graphics.Bitmap;
+import android.net.Uri;
 import android.webkit.URLUtil;
 
 import de.culture4life.luca.R;
@@ -408,14 +409,14 @@ public class QrCodeViewModel extends BaseViewModel implements ImageAnalysis.Anal
     }
 
     private Single<MeetingAdditionalData> getMeetingAdditionalDataFromUrl(@NonNull String url) {
-        return getAdditionalFromUrlIfAvailable(url)
+        return getAdditionalDataFromUrlIfAvailable(url)
                 .toSingle()
                 .map(json -> new Gson().fromJson(json, MeetingAdditionalData.class));
     }
 
     private Completable handleSelfCheckInDeepLink(@NonNull String url) {
         Single<UUID> scannerId = getScannerIdFromUrl(url);
-        Single<String> additionalData = getAdditionalFromUrlIfAvailable(url).defaultIfEmpty("");
+        Single<String> additionalData = getAdditionalDataFromUrlIfAvailable(url).defaultIfEmpty("");
 
         return Single.zip(scannerId, additionalData, Pair::new)
                 .flatMapCompletable(scannerIdAndAdditionalData -> performSelfCheckIn(scannerIdAndAdditionalData.first, scannerIdAndAdditionalData.second));
@@ -524,26 +525,27 @@ public class QrCodeViewModel extends BaseViewModel implements ImageAnalysis.Anal
                 .doFinally(() -> updateAsSideEffect(isLoading, false));
     }
 
-    private static Single<UUID> getScannerIdFromUrl(@NonNull String url) {
-        return Single.fromCallable(() -> {
-            int startIndex = url.lastIndexOf('/');
-            int endIndex = url.indexOf('#');
-            if (startIndex < 0 || endIndex < 0) {
-                throw new IllegalArgumentException("Unable to get scanner ID from URL: " + url);
-            }
-            return UUID.fromString(url.substring(startIndex + 1, endIndex));
-        });
+    public static Single<UUID> getScannerIdFromUrl(@NonNull String url) {
+        return Single.fromCallable(() -> UUID.fromString(Uri.parse(url).getLastPathSegment()));
     }
 
-    private static Maybe<String> getAdditionalFromUrlIfAvailable(@NonNull String url) {
+    public static Maybe<String> getEncodedAdditionalDataFromUrlIfAvailable(@NonNull String url) {
         return Maybe.fromCallable(
                 () -> {
-                    int index = url.indexOf('#');
-                    if (index < 0) {
+                    int startIndex = url.indexOf('#') + 1;
+                    if (startIndex < 1 || startIndex >= url.length()) {
                         return null;
                     }
-                    return url.substring(index + 1);
-                })
+                    int endIndex = url.length();
+                    if (url.contains("/CWA")) {
+                        endIndex = url.indexOf("/CWA");
+                    }
+                    return url.substring(startIndex, endIndex);
+                });
+    }
+
+    public static Maybe<String> getAdditionalDataFromUrlIfAvailable(@NonNull String url) {
+        return getEncodedAdditionalDataFromUrlIfAvailable(url)
                 .flatMapSingle(SerializationUtil::deserializeFromBase64)
                 .map(String::new);
     }

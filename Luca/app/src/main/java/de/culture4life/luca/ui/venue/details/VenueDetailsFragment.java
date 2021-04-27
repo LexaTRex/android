@@ -32,7 +32,8 @@ public class VenueDetailsFragment extends BaseFragment<VenueDetailsViewModel> {
 
     private static final int REQUEST_ENABLE_LOCATION_SERVICES = 2;
 
-    private TextView headingTextView;
+    private TextView subtitle;
+    private TextView title;
     private TextView descriptionTextView;
     private TextView checkInDurationHeadingTextView;
     private TextView checkInDurationTextView;
@@ -56,8 +57,14 @@ public class VenueDetailsFragment extends BaseFragment<VenueDetailsViewModel> {
     protected Completable initializeViews() {
         return super.initializeViews()
                 .andThen(Completable.fromAction(() -> {
-                    headingTextView = getView().findViewById(R.id.headingTextView);
-                    observe(viewModel.getTitle(), value -> headingTextView.setText(value));
+                    subtitle = getView().findViewById(R.id.subtitle);
+                    observe(viewModel.getSubtitle(), value -> {
+                        subtitle.setText(value);
+                        subtitle.setVisibility(value == null ? View.GONE : View.VISIBLE);
+                    });
+
+                    title = getView().findViewById(R.id.title);
+                    observe(viewModel.getTitle(), value -> title.setText(value));
 
                     descriptionTextView = getView().findViewById(R.id.subHeadingTextView);
                     observe(viewModel.getDescription(), value -> descriptionTextView.setText(value));
@@ -78,11 +85,8 @@ public class VenueDetailsFragment extends BaseFragment<VenueDetailsViewModel> {
 
         automaticCheckoutSwitch = getView().findViewById(R.id.automaticCheckoutToggle);
 
-        observe(viewModel.getHasLocationRestriction(), hasLocation -> {
-            getView().findViewById(R.id.automaticCheckOutTextView).setVisibility(hasLocation ? View.VISIBLE : View.GONE);
-            getView().findViewById(R.id.automaticCheckoutInfoImageView).setVisibility(hasLocation ? View.VISIBLE : View.GONE);
-            automaticCheckoutSwitch.setVisibility(hasLocation ? View.VISIBLE : View.GONE);
-        });
+        observe(viewModel.getHasLocationRestriction(), hasLocationRestriction -> updateAutoCheckoutViewsVisibility());
+        observe(viewModel.getIsGeofencingSupported(), isGeofencingSupported -> updateAutoCheckoutViewsVisibility());
 
         automaticCheckoutSwitch.setOnCheckedChangeListener((compoundButton, isChecked) -> {
             if (automaticCheckoutSwitch.isEnabled() && isChecked) {
@@ -137,6 +141,13 @@ public class VenueDetailsFragment extends BaseFragment<VenueDetailsViewModel> {
                 slideToActView.resetSlider();
             }
         });
+    }
+
+    private void updateAutoCheckoutViewsVisibility() {
+        boolean enable = viewModel.getHasLocationRestriction().getValue() && viewModel.getIsGeofencingSupported().getValue();
+        getView().findViewById(R.id.automaticCheckOutTextView).setVisibility(enable ? View.VISIBLE : View.GONE);
+        getView().findViewById(R.id.automaticCheckoutInfoImageView).setVisibility(enable ? View.VISIBLE : View.GONE);
+        automaticCheckoutSwitch.setVisibility(enable ? View.VISIBLE : View.GONE);
     }
 
     @Override

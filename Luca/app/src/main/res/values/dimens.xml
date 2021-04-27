@@ -7,5 +7,5 @@
     <dimen name="font_size_default">14sp</dimen>
     <dimen name="font_size_large">20sp</dimen>
     <dimen name="font_size_xlarge">40sp</dimen>
-    <dimen name="qr_card_size">2000dp</dimen>
+    <dimen name="qr_card_size">160dp</dimen>
 </resources>

@@ -38,6 +38,7 @@ import timber.log.Timber;
 
 import static de.culture4life.luca.registration.RegistrationManager.REGISTRATION_COMPLETED_KEY;
 import static de.culture4life.luca.registration.RegistrationManager.REGISTRATION_DATA_KEY;
+import static java.net.HttpURLConnection.HTTP_BAD_GATEWAY;
 
 public class RegistrationViewModel extends BaseViewModel {
 
@@ -377,6 +378,10 @@ public class RegistrationViewModel extends BaseViewModel {
                             builder = builder
                                     .withTitle(R.string.verification_rate_limit_title)
                                     .withDescription(R.string.verification_rate_limit_description);
+                        } else if (NetworkManager.isHttpException(throwable, HTTP_BAD_GATEWAY)) {
+                            builder = builder
+                                    .withTitle(R.string.verification_bad_gateway_title)
+                                    .withDescription(R.string.verification_bad_gateway_description);
                         }
                     }
 

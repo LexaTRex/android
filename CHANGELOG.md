@@ -1,3 +1,13 @@
+# Release 1.6.7
+
+- Added support for CWA compatible QR codes
+- Added dedicated text view for location group name
+- Improved support for devices without Google Play Services
+- Increased timeout for verification TAN requests
+- Adjusted info texts for private events
+- Adjusted error messages
+- Fixed improperly scaling QR codes
+
 # Release 1.6.6
 
 - Improved accessibility features
