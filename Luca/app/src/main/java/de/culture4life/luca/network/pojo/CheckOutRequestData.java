@@ -5,6 +5,13 @@ import com.google.gson.annotations.SerializedName;
 import de.culture4life.luca.util.SerializationUtil;
 import de.culture4life.luca.util.TimeUtil;
 
+/**
+ * Check-out containing only a trace ID and a timestamp, indicating the time a Check-in associated
+ * with the trace ID has ended.
+ *
+ * @see <a href="https://www.luca-app.de/securityoverview/processes/guest_checkout.html#checkout-process">Security
+ *         Overview: Guest Checkout</a>
+ */
 public class CheckOutRequestData {
 
     @SerializedName("traceId")

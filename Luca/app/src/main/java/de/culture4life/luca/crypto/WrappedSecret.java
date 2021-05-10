@@ -9,6 +9,12 @@ import de.culture4life.luca.util.SerializationUtil;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+/**
+ * Model to store on-device secrets encrypted using the {@link WrappingCipherProvider}. This, among
+ * others, includes the BC key store password.
+ *
+ * @see CryptoManager#getKeyStorePassword()
+ */
 public class WrappedSecret {
 
     @Expose

@@ -5,6 +5,7 @@ import android.app.Application;
 import de.culture4life.luca.R;
 import de.culture4life.luca.dataaccess.AccessedTraceData;
 import de.culture4life.luca.dataaccess.DataAccessManager;
+import de.culture4life.luca.history.DataSharedItem;
 import de.culture4life.luca.history.HistoryItem;
 import de.culture4life.luca.history.HistoryManager;
 import de.culture4life.luca.history.MeetingEndedItem;
@@ -211,8 +212,9 @@ public class HistoryViewModel extends BaseViewModel {
                     break;
                 }
                 case HistoryItem.TYPE_CONTACT_DATA_REQUEST: {
+                    DataSharedItem dataSharedItem = (DataSharedItem) historyItem;
                     item.setTitle(application.getString(R.string.history_data_shared_title));
-                    item.setAdditionalDetails(application.getString(R.string.history_data_shared_description));
+                    item.setAdditionalDetails(application.getString(R.string.history_data_shared_description, dataSharedItem.getDays()));
                     item.setIconResourceId(R.drawable.ic_information_outline);
                     break;
                 }
@@ -225,10 +227,10 @@ public class HistoryViewModel extends BaseViewModel {
         });
     }
 
-    public void onShareHistoryRequested() {
-        Timber.d("onShareHistoryRequested() called");
+    public void onShareHistoryRequested(int days) {
+        Timber.d("onShareHistoryRequested() called with: days = [%s]", days);
         modelDisposable.add(application.getRegistrationManager()
-                .transferUserData()
+                .transferUserData(days)
                 .doOnSubscribe(disposable -> {
                     updateAsSideEffect(isLoading, true);
                     removeError(dataSharingError);
@@ -247,12 +249,12 @@ public class HistoryViewModel extends BaseViewModel {
                 })
                 .flatMapCompletable(tracingTan -> Completable.mergeArray(
                         update(tracingTanEvent, new ViewEvent<>(tracingTan)),
-                        historyManager.addDataSharedItem(tracingTan)
+                        historyManager.addDataSharedItem(tracingTan, days)
                 ))
                 .doOnError(throwable -> {
                     dataSharingError = createErrorBuilder(throwable)
                             .withTitle(R.string.error_request_failed_title)
-                            .withResolveAction(Completable.fromAction(this::onShareHistoryRequested))
+                            .withResolveAction(Completable.fromAction(() -> onShareHistoryRequested(days)))
                             .withResolveLabel(R.string.action_retry)
                             .build();
                     addError(dataSharingError);
@@ -266,7 +268,9 @@ public class HistoryViewModel extends BaseViewModel {
     }
 
     public void onShowAccessedDataRequested() {
-        navigationController.navigate(R.id.action_historyFragment_to_accessedDataFragment);
+        if (isCurrentDestinationId(R.id.historyFragment)) {
+            navigationController.navigate(R.id.action_historyFragment_to_accessedDataFragment);
+        }
     }
 
     private String getReadableTime(long timestamp) {

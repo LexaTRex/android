@@ -1,6 +1,5 @@
 package de.culture4life.luca.crypto;
 
-import android.content.Context;
 import android.util.Base64;
 
 import com.nexenio.rxkeystore.RxKeyStore;
@@ -8,26 +7,28 @@ import com.nexenio.rxkeystore.util.RxBase64;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.robolectric.annotation.Config;
 
 import java.math.BigInteger;
 import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
 
-import androidx.test.platform.app.InstrumentationRegistry;
+import androidx.test.runner.AndroidJUnit4;
 
+@Config(sdk = 28)
+@RunWith(AndroidJUnit4.class)
 public class AsymmetricCipherProviderTest {
 
     private static final String ENCODED_UNCOMPRESSED_PUBLIC_KEY = "BAIDQ7/zTOcV+XXX5io9XZn1t4MUOAswVfZKd6Fpup/MwlNssx4mCEPcO34AIiV0TbL2ywOP3QoHs41cfvv7uTo=";
     private static final String ENCODED_COMPRESSED_PUBLIC_KEY = "AgIDQ7/zTOcV+XXX5io9XZn1t4MUOAswVfZKd6Fpup/M";
     private static final String ENCODED_PRIVATE_KEY = "2J9dWi+NKANgXznZVthBygcElRk3XNy7IUPrqwGtEZE=";
 
-    private Context context;
     private AsymmetricCipherProvider asymmetricCipherProvider;
 
     @Before
     public void setup() {
         CryptoManager.setupSecurityProviders().blockingAwait();
-        context = InstrumentationRegistry.getInstrumentation().getTargetContext();
         RxKeyStore keyStore = new RxKeyStore(RxKeyStore.TYPE_BKS, RxKeyStore.PROVIDER_BOUNCY_CASTLE);
         asymmetricCipherProvider = new AsymmetricCipherProvider(keyStore);
     }

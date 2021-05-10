@@ -14,6 +14,7 @@ import de.culture4life.luca.network.NetworkManager;
 import de.culture4life.luca.network.pojo.ContactData;
 import de.culture4life.luca.network.pojo.DataTransferRequestData;
 import de.culture4life.luca.network.pojo.TransferData;
+import de.culture4life.luca.network.pojo.UserDeletionRequestData;
 import de.culture4life.luca.network.pojo.UserRegistrationRequestData;
 import de.culture4life.luca.preference.PreferencesManager;
 import de.culture4life.luca.util.SerializationUtil;
@@ -24,6 +25,7 @@ import java.security.interfaces.ECPublicKey;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -32,8 +34,16 @@ import io.reactivex.rxjava3.core.Maybe;
 import io.reactivex.rxjava3.core.Single;
 import timber.log.Timber;
 
+import static de.culture4life.luca.crypto.HashProvider.TRIMMED_HASH_LENGTH;
 import static de.culture4life.luca.util.SerializationUtil.serializeToBase64;
 
+/**
+ * Handles initial registration of a guest, after phone number verification appropriate secrets are
+ * created, encrypting {@link ContactData} before it is uploaded to the Luca Server.
+ *
+ * @see <a href="https://www.luca-app.de/securityoverview/processes/guest_registration.html">Security
+ *         Overview: Guest Registration</a>
+ */
 public class RegistrationManager extends Manager {
 
     public static final String REGISTRATION_COMPLETED_KEY = "registration_completed_2";
@@ -58,6 +68,28 @@ public class RegistrationManager extends Manager {
                 networkManager.initialize(context),
                 cryptoManager.initialize(context)
         ).andThen(Completable.fromAction(() -> this.context = context));
+    }
+
+    /**
+     * Delete account on the backend.
+     */
+    public Completable deleteRegistrationOnBackend() {
+        return getUserIdIfAvailable()
+                .toSingle()
+                .flatMapCompletable(userId -> createDeletionData(userId)
+                        .flatMapCompletable(data -> networkManager.getLucaEndpointsV3()
+                                .flatMapCompletable(endpoint -> endpoint.deleteUser(userId.toString(), data))));
+    }
+
+    protected Single<UserDeletionRequestData> createDeletionData(@NonNull UUID userIdParam) {
+        return Single.just(userIdParam)
+                .flatMap(CryptoManager::encode)
+                .flatMap(encodedUserId -> CryptoManager.concatenate(UserDeletionRequestData.DELETE_USER, encodedUserId))
+                .flatMap(data -> cryptoManager.getGuestKeyPairPrivateKey()
+                        .flatMap(userMasterPrivateKey -> cryptoManager.getSignatureProvider().sign(data, userMasterPrivateKey))
+                        .flatMap(SerializationUtil::serializeToBase64)
+                        .map(UserDeletionRequestData::new)
+                );
     }
 
     public Completable deleteRegistrationData() {
@@ -175,6 +207,17 @@ public class RegistrationManager extends Manager {
 
     }
 
+    /**
+     * Update contact data on the server side by encrypting the new data using the already present
+     * guest keypair and uploading it to the luca server.
+     *
+     * @see <a href="https://luca-app.de/securityoverview/processes/guest_registration.html#updating-the-contact-data">Security
+     *         Overview: Updating the Contact Data</a>
+     * @see <a href="https://luca-app.de/securityoverview/processes/guest_registration.html#process-guest-registration-encryption">Security
+     *         Overview: Encrypting the Contact Data</a>
+     * @see <a href="https://luca-app.de/securityoverview/properties/secrets.html#term-guest-keypair">Security
+     *         Overview: Secrets</a>
+     */
     public Completable updateUser() {
         return createUserRegistrationRequestData()
                 .doOnSuccess(data -> data.setGuestKeyPairPublicKey(null)) // not part of update request
@@ -185,6 +228,16 @@ public class RegistrationManager extends Manager {
 
     }
 
+    /**
+     * Generate data required to register a user. contact data is encrypted and authenticated using
+     * the guest keypair.
+     *
+     * @return encrypted guest data including IV, MAC, signature and the guest keypair's public key
+     * @see <a href="https://luca-app.de/securityoverview/processes/guest_registration.html#registering-to-the-luca-server">Security
+     *         Overview: Registering to the Luca Server</a>
+     * @see <a href="https://luca-app.de/securityoverview/properties/secrets.html#term-guest-keypair">Security
+     *         Overview: Secrets</a>
+     */
     private Single<UserRegistrationRequestData> createUserRegistrationRequestData() {
         return getOrCreateRegistrationData()
                 .flatMap(this::createContactData)
@@ -220,6 +273,16 @@ public class RegistrationManager extends Manager {
         return Single.just(new ContactData(registrationData));
     }
 
+    /**
+     * Encrypts given contact data with a symmetric key derived from the primary data secret.
+     *
+     * @param contactData to be encrypted
+     * @return IV and ciphertext of contact data
+     * @see <a href="https://www.luca-app.de/securityoverview/properties/secrets.html#term-data-secret">Security
+     *         Overview: Secrets</a>
+     * @see <a href="https://luca-app.de/securityoverview/processes/guest_registration.html#encrypting-the-contact-data">Security
+     *         Overview: Encrypting the Contact Data</a>
+     */
     public Single<Pair<byte[], byte[]>> encryptContactData(@NonNull ContactData contactData) {
         return SerializationUtil.serializeToJson(contactData)
                 .map(contactDataJson -> contactDataJson.getBytes(StandardCharsets.UTF_8))
@@ -227,13 +290,20 @@ public class RegistrationManager extends Manager {
                         cryptoManager.getDataSecret()
                                 .flatMap(cryptoManager::generateDataEncryptionSecret)
                                 .flatMap(CryptoManager::createKeyFromSecret),
-                        cryptoManager.generateSecureRandomData(16),
+                        cryptoManager.generateSecureRandomData(TRIMMED_HASH_LENGTH),
                         Pair::new
                 ).flatMap(dataEncryptionKeyAndIv -> cryptoManager.getSymmetricCipherProvider()
                         .encrypt(encodedContactData, dataEncryptionKeyAndIv.second, dataEncryptionKeyAndIv.first)
                         .map(encryptedData -> new Pair<>(encryptedData, dataEncryptionKeyAndIv.second))));
     }
 
+    /**
+     * Creates HMAC of encrypted contact data using the data authentication key, which is stored on
+     * the Luca server as part of the encrypted guest data.
+     *
+     * @see <a href="https://www.luca-app.de/securityoverview/properties/secrets.html#term-data-authentication-key">Security
+     *         Overview: Secrets</a>
+     */
     public Single<byte[]> createContactDataMac(byte[] encryptedContactData) {
         return cryptoManager.getDataSecret()
                 .flatMap(cryptoManager::generateDataAuthenticationSecret)
@@ -241,6 +311,12 @@ public class RegistrationManager extends Manager {
                 .flatMap(dataAuthenticationKey -> cryptoManager.getMacProvider().sign(encryptedContactData, dataAuthenticationKey));
     }
 
+    /**
+     * Sign given encrypted contact data using the guest's private key.
+     *
+     * @see <a href="https://luca-app.de/securityoverview/properties/secrets.html#term-guest-keypair">Security
+     *         Overview: Secrets</a>
+     */
     public Single<byte[]> createContactDataSignature(byte[] encryptedContactData, byte[] mac, byte[] iv) {
         return CryptoManager.concatenate(encryptedContactData, mac, iv)
                 .flatMap(concatenatedData -> cryptoManager.getGuestKeyPairPrivateKey()
@@ -252,17 +328,35 @@ public class RegistrationManager extends Manager {
         Data transfer request
      */
 
-    public Single<String> transferUserData() {
+    /**
+     * Upload encrypted {@link TransferData} to the luca server, yielding a TAN, allowing a health
+     * department to initiate tracing.
+     *
+     * @return tracing TAN to be shown to the user / communicated to a health department by
+     *         telephone
+     * @see <a href="https://www.luca-app.de/securityoverview/processes/tracing_access_to_history.html#process">Security
+     *         Overview: Tracing the Check-In History of an Infected Guest</a>
+     */
+    public Single<String> transferUserData(int days) {
         // TODO: 24.03.21 This doesn't seem to belong to the registration process
-        return createDataTransferRequestData()
+        return createDataTransferRequestData(days)
                 .doOnSuccess(data -> Timber.d("User data transfer request data: %s", data))
                 .flatMap(data -> networkManager.getLucaEndpoints().getTracingTan(data))
                 .map(jsonObject -> jsonObject.get("tan").getAsString());
     }
 
-    private Single<DataTransferRequestData> createDataTransferRequestData() {
+    /**
+     * Create, encrypt and authenticate {@link TransferData} to be uploaded to the luca server.
+     *
+     * @return encrypted guest data transfer object
+     * @see <a href="https://www.luca-app.de/securityoverview/processes/tracing_access_to_history.html#accessing-the-infected-guest-s-tracing-secrets">Security
+     *         Overview: Accessing the Infected Guest’s Tracing Secrets</a>
+     * @see <a href="https://www.luca-app.de/securityoverview/properties/secrets.html#term-guest-data-transfer-object">Security
+     *         Overview: Secrets</a>
+     */
+    private Single<DataTransferRequestData> createDataTransferRequestData(int days) {
         return Single.just(new DataTransferRequestData())
-                .flatMap(transferRequestData -> createTransferData()
+                .flatMap(transferRequestData -> createTransferData(days)
                         .doOnSuccess(transferData -> Timber.i("Encrypting transfer data: %s", transferData))
                         .flatMap(this::encryptTransferData)
                         .flatMap(encryptedTransferDataAndIv -> Completable.mergeArray(
@@ -288,7 +382,15 @@ public class RegistrationManager extends Manager {
                         ).toSingle(() -> transferRequestData)));
     }
 
-    public Single<TransferData> createTransferData() {
+    /**
+     * Create guest data transfer object containing tracing secrets (previous 14 days), user ID and
+     * the user's data secret.
+     *
+     * @return {@link TransferData}
+     * @see <a href="https://www.luca-app.de/securityoverview/processes/tracing_access_to_history.html#accessing-the-infected-guest-s-tracing-secrets">Security
+     *         Overview: Accessing the Infected Guest’s Tracing Secrets</a>
+     */
+    public Single<TransferData> createTransferData(int days) {
         return Single.just(new TransferData())
                 .flatMap(transferData -> Completable.mergeArray(
                         getUserIdIfAvailable()
@@ -296,7 +398,7 @@ public class RegistrationManager extends Manager {
                                 .map(UUID::toString)
                                 .doOnSuccess(transferData::setUserId)
                                 .ignoreElement(),
-                        cryptoManager.restoreRecentTracingSecrets(14)
+                        cryptoManager.restoreRecentTracingSecrets(TimeUnit.DAYS.toMillis(days))
                                 .map(pair -> {
                                     TransferData.TraceSecretWrapper traceSecretWrapper = new TransferData.TraceSecretWrapper();
                                     traceSecretWrapper.setTimestamp(TimeUtil.convertToUnixTimestamp(pair.first).blockingGet());
@@ -313,11 +415,17 @@ public class RegistrationManager extends Manager {
                 ).toSingle(() -> transferData));
     }
 
+    /**
+     * Encrypt given transfer data using the daily keypair before uploading to the luca server.
+     *
+     * @param transferData to be encrypted
+     * @return iv and ciphertext of transfer data
+     */
     public Single<Pair<byte[], byte[]>> encryptTransferData(@NonNull TransferData transferData) {
         return SerializationUtil.serializeToJson(transferData)
                 .doOnSuccess(transferDataJson -> Timber.d("Serialized transfer data: %s", transferDataJson))
                 .map(transferDataJson -> transferDataJson.getBytes(StandardCharsets.UTF_8))
-                .flatMap(encodedContactData -> cryptoManager.generateSecureRandomData(16)
+                .flatMap(encodedContactData -> cryptoManager.generateSecureRandomData(TRIMMED_HASH_LENGTH)
                         .flatMap(iv -> cryptoManager.getSharedDiffieHellmanSecret()
                                 .flatMap(cryptoManager::generateDataEncryptionSecret)
                                 .flatMap(CryptoManager::createKeyFromSecret)
@@ -327,6 +435,13 @@ public class RegistrationManager extends Manager {
                                 .map(encryptedData -> new Pair<>(encryptedData, dataEncryptionKeyAndIv.second))));
     }
 
+    /**
+     * Compute HMAC of given encrypted transfer data using the data authentication secret computed
+     * from base secret and daily key.
+     *
+     * @param encryptedTransferData to authenticate
+     * @return HMAC of passed data
+     */
     public Single<byte[]> createTransferDataMac(byte[] encryptedTransferData) {
         return cryptoManager.getSharedDiffieHellmanSecret()
                 .flatMap(cryptoManager::generateDataAuthenticationSecret)

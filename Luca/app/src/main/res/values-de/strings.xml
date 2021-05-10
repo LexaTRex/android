@@ -11,8 +11,8 @@
     <!-- Actions -->
     <string name="action_ok">@android:string/ok</string>
     <string name="action_cancel">@android:string/cancel</string>
-    <string name="action_yes">@android:string/yes</string>
-    <string name="action_no">@android:string/no</string>
+    <string name="action_yes">Ja</string>
+    <string name="action_no">Nein</string>
     <string name="action_no_thanks">Nein danke</string>
     <string name="action_stop">Stopp</string>
     <string name="action_retry">Wiederholen</string>
@@ -38,6 +38,8 @@
     <string name="error_qr_code_broken">QR-Code fehlerhaft. Bitte versuche es mit einem anderen.</string>
     <string name="error_certificate_pinning_title">Unerwartete Server Zertifikate</string>
     <string name="error_certificate_pinning_description">Wegen nicht vertrauenswürdigen Zertifikaten konnte keine sichere Verbindung zu den luca Servern hergestellt werden.\n\nBitte wechsle dein Netzwerk und vergewissere dich, dass du die aktuellste App Version nutzt.</string>
+    <string name="error_timestamp_offset_title">Falsche Uhrzeit</string>
+    <string name="error_timestamp_offset_description">Die Uhrzeit deines Handys stimmt nicht mit der Zeit unserer Server überein. Bitte öffne die Systemeinstellungen und vergewissere dich, dass die Uhreit korrekt ist. Eine falsche Uhrzeit kann zu unerwartetem Verhalten führen.</string>
 
     <!-- Statuses -->
     <string name="status_check_out_in_progress">Du wirst ausgecheckt…</string>
@@ -101,6 +103,8 @@
     <string name="registration_missing_info">Angaben fehlen</string>
     <string name="registration_missing_fields_error_text">Bitte gib deinen Namen, deine Telefonnummer und deine Adresse an. </string>
     <string name="registration_invalid_value_field_error">Dieses Feld ist ungültig</string>
+    <string name="registration_will_delete_tests_title">Änderungen speichern?</string>
+    <string name="registration_will_delete_tests_text">Durch die Namensänderung werden bereits importierte Testergebnisse gelöscht. Möchtest du deine Änderungen speichern?</string>
     <string name="registration_empty_but_required_field_error">Dieses Feld wird benötigt</string>
     <string name="registration_missing_first_name_hint">Bitte gib deinen Vornamen ein, um fortzufahren.</string>
     <string name="registration_missing_last_name_hint">Bitte gib deinen Nachnamen ein, um fortzufahren.</string>
@@ -129,6 +133,7 @@
     <string name="navigation_history">Historie</string>
     <string name="navigation_meeting">@string/meeting_heading</string>
     <string name="navigation_accessed_data">Datenzugriffe</string>
+    <string name="navigation_my_luca">@string/my_luca_heading</string>
 
     <!-- Menu -->
     <string name="menu_more_content_description">Mehr Menu</string>
@@ -138,13 +143,14 @@
     <string name="menu_terms_and_conditions">AGB</string>
     <string name="menu_imprint">Impressum</string>
     <string name="menu_app_data">App Details</string>
+    <string name="menu_delete_account">Account löschen</string>
 
     <!-- Contact Data -->
     <string name="qr_code_description">Das ist dein QR-Code. Lass ihn an einem luca-Standort scannen, um dich einzuchecken.</string>
     <string name="scan_qr_code_description">Scanne den QR-Code eines luca-Standorts oder eines privaten Treffens, um dich einzuchecken.</string>
     <string name="scan_qr_code">Selbst einchecken</string>
     <string name="camera_access_title">Kamera aktivieren</string>
-    <string name="camera_access_description">Um selbst einchecken zu können braucht luca Zugriff auf deine Kamera, damit du QR-Codes von Locations oder Privaten Meetings scannen kannst. Nur die Daten im QR-Code werden verarbeitet und keine anderen Daten werden gespeichert.</string>
+    <string name="camera_access_description">luca benötigt Zugriff auf deine Kamera, um QR-Codes von Testergebnisse, Locations oder Privaten Meetings scannen zu können. Nur die Daten im QR-Code werden verarbeitet und keine anderen Daten werden gespeichert.</string>
     <string name="close_qr_code_scanner">QR-Code-Scanner schließen</string>
     <string name="edit_contact_data">Kontaktdaten bearbeiten</string>
 
@@ -207,11 +213,15 @@
     <string name="history_requests"><xliff:g example="0" id="count">%1$d</xliff:g> Datenzugriffe</string>
     <string name="history_time"><xliff:g example="18.08.2020 – 19:23" id="time">%1$s</xliff:g> Uhr</string>
     <string name="history_share">Daten freigeben</string>
+    <string name="history_share_selection_title">Zeitraum festlegen</string>
+    <string name="history_share_selection_description">Die Historie sammelt die Check-ins der letzten 14&#160;Tage. Du kannst selbst entscheiden, wie viele Tage du davon mit dem Gesundheitsamt teilen möchtest. Lege zunächst die Anzahl der Tage fest:</string>
+    <string name="history_share_selection_action">Wählen</string>
+    <string name="history_share_selection_hint">Tage</string>
     <string name="history_share_confirmation_title">@string/history_share</string>
-    <string name="history_share_confirmation_description">Möchtest du deine Historie der letzten 14&#160;Tage und deine Kontaktdaten für das Gesundheitsamt freigeben? Dies erfolgt nur aufgrund deiner freiwilligen Einwilligung gem. Art. 9 (2) a) DSGVO (mehr: <a href="https://www.luca-app.de/app-privacy-policy/">Datenschutz - App</a>).</string>
+    <string name="history_share_confirmation_description">Möchtest du deine Historie der letzten <xliff:g example="14" id="count">%1$d</xliff:g>&#160;Tage und deine Kontaktdaten für das Gesundheitsamt freigeben? Dies erfolgt nur aufgrund deiner freiwilligen Einwilligung gem. Art. 9 (2) a) DSGVO (mehr: <a href="https://www.luca-app.de/app-privacy-policy/">Datenschutz - App</a>).</string>
     <string name="history_share_confirmation_action">Freigeben</string>
     <string name="history_share_tan_title">@string/history_share</string>
-    <string name="history_share_tan_description">Bitte gib die folgende TAN an, sobald du vom Gesundheitsamt darum gebeten wirst:\n\n<xliff:g example="VU5S-86V6-H8FV" id="tan">%1$s</xliff:g></string>
+    <string name="history_share_tan_description">Wenn du einem Gesundheitsamt diese TAN nennst, kann es deine Historie entschlüsseln und die luca-Standorte informieren:\n\n<xliff:g example="VU5S-86V6-H8FV" id="tan">%1$s</xliff:g></string>
     <string name="history_contact_data_update_title">Kontaktdaten aktualisiert</string>
     <string name="history_contact_data_update_description"><xliff:g example="John Doe" id="userName">%1$s</xliff:g></string>
     <string name="history_check_in_title">Check-In</string>
@@ -227,7 +237,7 @@
     <string name="history_data_cleared_description">Alle Einträge wurden von diesem Gerät entfernt.</string>
     <string name="history_data_accessed_details">Im Rahmen einer Kontaktnachverfolgung wurden die Daten dieses Check-Ins von einem Gesundheitsamt entschlüsselt.</string>
     <string name="history_data_shared_title">Daten freigegeben</string>
-    <string name="history_data_shared_description">Du hast deine Kontaktdaten und Historie der letzten 14&#160;Tage für das Gesundheitsamt freigegeben.</string>
+    <string name="history_data_shared_description">Du hast deine Kontaktdaten und Historie der letzten <xliff:g example="14" id="count">%1$d</xliff:g>&#160;Tage für das Gesundheitsamt freigegeben.</string>
     <string name="history_clear_title">Möchtest du deine Historie wirklich leeren?</string>
     <string name="history_clear_description">Vergangene Einträge werden in deiner App nicht mehr angezeigt, bleiben aber noch bis zu 30&#160;Tage im System und werden bei einer Datenfreigabe mit dem Gesundheitsamt geteilt.</string>
     <string name="history_clear_action">Leeren</string>
@@ -242,6 +252,31 @@
     <string name="accessed_data_dialog_description">Ein oder mehrere Gesundheitsämter haben im Rahmen einer Datenanfrage deine Kontaktdaten erhalten.\n\nIm Rahmen einer Kontaktnachverfolgung wurden deine Kontaktdaten von einem oder mehreren Gesundheitsämtern entschlüsselt. Diese werten gerade aus, ob ein Risiko besteht und werden sich möglicherweise bei dir melden. Bis dahin besteht kein Handlungsbedarf.\n\nBitte handle verantwortungsvoll.</string>
     <string name="accessed_data_dialog_action_show">Alle Datenzugriffe</string>
     <string name="accessed_data_dialog_action_dismiss">@string/action_ok</string>
+
+    <!-- Health -->
+    <string name="my_luca_heading">Mein luca</string>
+    <string name="my_luca_empty_title">@string/history_empty_title</string>
+    <string name="my_luca_empty_description">Aktuell hast du noch keinen Test in der App hinterlegt. Bitte beachte, dass wir aktuell nur bestimmte Testzentren unterstützen. Erkundige dich bei deinem Testzentrum, ob dieses dazugehört.</string>
+    <string name="test_import_action">Testergebnis importieren</string>
+    <string name="test_import_hint">Scanne den QR-Code deines Tests um ihn zur App hinzuzufügen.</string>
+    <string name="test_import_success_message">Das Testergebnis wurde importiert</string>
+    <string name="test_import_error_title">Testergebnis konnte nicht importiert werden</string>
+    <string name="test_import_error_verification_description">Es konnte nicht validiert werden, dass dieser Test von dir gemacht wurde. Bitte prüfe, ob dein Name richtig in der App hinterlegt ist.</string>
+    <string name="test_import_error_expired_description">Leider kann der Test nicht importiert werden, da er bereits abgelaufen ist.</string>
+    <string name="test_import_error_already_imported_description">Dieser Test wurde bereits importiert.</string>
+    <string name="test_import_error_unsupported_description">Der QR-Code konnte nicht gelesen werden. Das kann daran liegen, dass wir aktuell nur bestimmte Testzentren unterstützen. Erkundige dich bei deinem Testzentrum, ob dieses dazugehört.</string>
+    <string name="test_outcome_negative">Negativ</string>
+    <string name="test_outcome_positive">Positiv</string>
+    <string name="test_outcome_unknown">Unbekannt</string>
+    <string name="test_type_fast">Schnelltest</string>
+    <string name="test_type_pcr">PCR Test</string>
+    <string name="test_type_unknown">@string/test_outcome_unknown</string>
+    <string name="test_issued_by">Ausgestellt von</string>
+    <string name="test_issued_at">Ausstelldatum:</string>
+    <string name="test_lab_doctor_name">Durchgeführt von</string>
+    <string name="test_delete_button">Test Löschen</string>
+    <string name="test_delete_alert_dialog_title">Testergebnis löschen</string>
+    <string name="test_delete_alert_dialog_message">Soll das Testergebnis wirklich aus der App gelöscht werden?</string>
 
     <!-- Phone Number Verification -->
     <string name="verification_request_new_tan_action">TAN anfordern</string>
@@ -271,5 +306,10 @@
     <string name="time_minutes">Minuten</string>
     <string name="time_hours">Stunden</string>
     <string name="time_days">Tage</string>
+
+    <!-- Account deletion -->
+    <string name="delete_account_dialog_title">Möchtest du deinen Account wirklich löschen?</string>
+    <string name="delete_account_dialog_message">Löschst du deinen Account, kannst du keine neuen Check-ins vornehmen und auf deine Historie zugreifen.\n\nDaten, die durch einen Check-in bei einem Betreiber verschlüsselt hinterlegt wurden, werden gemäß der Corona/COVID-19 Infektionsschutzverordnung nach 4 Wochen gelöscht.\n\nNach der Löschung des Accounts kannst du noch bis zu 4 Wochen nach dem letzten Check-in von dem Gesundheitsamt benachrichtigt werden.</string>
+    <string name="delete_account_dialog_action">Löschen</string>
 
 </resources>

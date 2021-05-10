@@ -55,76 +55,70 @@ public class PreferencesManager extends Manager implements PreferencesProvider {
         return Completable.complete();
     }
 
+    private Single<PreferencesProvider> getInitializedProvider() {
+        return Single.defer(() -> getInitializedField(provider));
+    }
+
     @Override
     public Observable<String> getKeys() {
-        return getInitializedField(provider)
-                .flatMapObservable(PreferencesProvider::getKeys);
+        return getInitializedProvider().flatMapObservable(PreferencesProvider::getKeys);
     }
 
     @Override
     public Single<Boolean> containsKey(@NonNull String key) {
-        return getInitializedField(provider)
-                .flatMap(provider -> provider.containsKey(key));
+        return getInitializedProvider().flatMap(provider -> provider.containsKey(key));
     }
 
     @Override
     public <Type> Single<Type> restore(@NonNull String key, @NonNull Class<Type> typeClass) {
-        return getInitializedField(provider)
-                .flatMap(provider -> provider.restore(key, typeClass));
+        return getInitializedProvider().flatMap(provider -> provider.restore(key, typeClass));
     }
 
     @Override
     public <Type> Single<Type> restoreOrDefault(@NonNull String key, @NonNull Type defaultValue) {
-        return getInitializedField(provider)
-                .flatMap(provider -> provider.restoreOrDefault(key, defaultValue));
+        return getInitializedProvider().flatMap(provider -> provider.restoreOrDefault(key, defaultValue));
     }
 
     @Override
     public <Type> Observable<Type> restoreOrDefaultAndGetChanges(@NonNull String key, @NonNull Type defaultValue) {
-        return getInitializedField(provider)
+        return getInitializedProvider()
                 .flatMapObservable(provider -> provider.restoreOrDefaultAndGetChanges(key, defaultValue));
     }
 
     @Override
     public <Type> Maybe<Type> restoreIfAvailable(@NonNull String key, @NonNull Class<Type> typeClass) {
-        return getInitializedField(provider)
-                .flatMapMaybe(provider -> provider.restoreIfAvailable(key, typeClass));
+        return getInitializedProvider().flatMapMaybe(provider -> provider.restoreIfAvailable(key, typeClass));
     }
 
     @Override
     public <Type> Observable<Type> restoreIfAvailableAndGetChanges(@NonNull String key, @NonNull Class<Type> typeClass) {
-        return getInitializedField(provider)
+        return getInitializedProvider()
                 .flatMapObservable(provider -> provider.restoreIfAvailableAndGetChanges(key, typeClass));
     }
 
     @Override
     public <Type> Completable persist(@NonNull String key, @NonNull Type value) {
-        return getInitializedField(provider)
-                .flatMapCompletable(provider -> provider.persist(key, value));
+        return getInitializedProvider().flatMapCompletable(provider -> provider.persist(key, value));
     }
 
     @Override
     public <Type> Completable persistIfNotYetAvailable(@NonNull String key, @NonNull Type value) {
-        return getInitializedField(provider)
-                .flatMapCompletable(provider -> provider.persistIfNotYetAvailable(key, value));
+        return getInitializedProvider().flatMapCompletable(provider -> provider.persistIfNotYetAvailable(key, value));
     }
 
     @Override
     public <Type> Observable<Type> getChanges(@NonNull String key, @NonNull Class<Type> typeClass) {
-        return getInitializedField(provider)
-                .flatMapObservable(provider -> provider.getChanges(key, typeClass));
+        return getInitializedProvider().flatMapObservable(provider -> provider.getChanges(key, typeClass));
     }
 
     @Override
     public Completable delete(@NonNull String key) {
-        return getInitializedField(provider)
-                .flatMapCompletable(provider -> provider.delete(key));
+        return getInitializedProvider().flatMapCompletable(provider -> provider.delete(key));
     }
 
     @Override
     public Completable deleteAll() {
-        return getInitializedField(provider)
-                .flatMapCompletable(PreferencesProvider::deleteAll);
+        return getInitializedProvider().flatMapCompletable(PreferencesProvider::deleteAll);
     }
 
 }

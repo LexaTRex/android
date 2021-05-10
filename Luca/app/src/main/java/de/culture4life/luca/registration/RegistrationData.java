@@ -3,8 +3,17 @@ package de.culture4life.luca.registration;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
+import de.culture4life.luca.network.pojo.ContactData;
+
 import java.util.UUID;
 
+/**
+ * Model of user-provided contact data, entered during registration. Will be transferred into {@link
+ * ContactData} and encrypted before leaving the device.
+ *
+ * @see <a href="https://www.luca-app.de/securityoverview/processes/guest_registration.html">Security
+ *         Overview: Guest Registration</a>
+ */
 public class RegistrationData {
 
     @SerializedName("id")
@@ -132,6 +141,13 @@ public class RegistrationData {
 
     public void setPostalCode(String postalCode) {
         this.postalCode = postalCode;
+    }
+
+    /**
+     * @return the full name with firstName and lastName, separated by a space
+     */
+    public String getFullName() {
+        return getFirstName() + " " + getLastName();
     }
 
 }

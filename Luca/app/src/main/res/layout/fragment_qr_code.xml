@@ -8,29 +8,38 @@
 
     <TextView
             android:id="@+id/headingTextView"
-            style="@style/HeadingTextView"
+            style="@style/TextAppearance.Luca.Headline2"
+            android:layout_margin="@dimen/spacing_default"
             android:text="@string/navigation_check_in"
-            tools:ignore="MissingConstraints" />
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
 
     <ImageView
             android:id="@+id/menuImageView"
             style="@style/MenuImageView"
             android:contentDescription="@string/menu_more_content_description"
-            tools:ignore="MissingConstraints" />
+            app:layout_constraintBottom_toBottomOf="@id/headingTextView"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@id/headingTextView" />
 
     <View
             android:id="@+id/headingSeparatorView"
             style="@style/HeaderSeparatorView"
-            tools:ignore="MissingConstraints" />
+            app:layout_constraintTop_toBottomOf="@id/headingTextView"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
 
     <TextView
             android:id="@+id/subHeadingTextView"
-            style="@style/SubHeadingTextView"
+            style="@style/TextAppearance.Luca.Headline3"
             android:text="@string/qr_code_description"
-            tools:ignore="MissingConstraints" />
+            app:layout_constraintTop_toBottomOf="@id/headingSeparatorView"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
 
     <com.google.android.material.card.MaterialCardView
-            android:id="@+id/qrCodeCardView"
+            android:id="@+id/cardView"
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:layout_marginTop="@dimen/spacing_large"
@@ -103,7 +112,7 @@
 
     <TextView
             android:id="@+id/qrCodeCaptionTextView"
-            style="@style/TextAppearance.App.Body1"
+            style="@style/TextAppearance.Luca.Body1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/spacing_small"
@@ -112,7 +121,7 @@
             android:visibility="gone"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/qrCodeCardView" />
+            app:layout_constraintTop_toBottomOf="@id/cardView" />
 
     <com.google.android.material.card.MaterialCardView
             android:id="@+id/contactDataCardView"
@@ -149,14 +158,16 @@
                     style="@style/CardHeading"
                     android:text="John Doe"
                     app:layout_constraintEnd_toStartOf="@id/cardMenuImageView"
-                    tools:ignore="MissingConstraints" />
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent" />
 
             <ImageView
                     android:id="@+id/addressImageView"
                     style="@style/CardAttributeIconImageView"
                     android:src="@drawable/ic_home"
                     app:layout_constraintTop_toBottomOf="@id/nameTextView"
-                    tools:ignore="MissingConstraints" />
+                    app:layout_constraintStart_toStartOf="parent" />
 
             <TextView
                     android:id="@+id/descriptionTextView"
@@ -164,6 +175,7 @@
                     android:maxLines="3"
                     android:text="Charlottenstraße 59\n10117 Berlin"
                     app:layout_constraintStart_toEndOf="@id/addressImageView"
+                    app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toTopOf="@id/addressImageView" />
 
             <ImageView
@@ -171,7 +183,7 @@
                     style="@style/CardAttributeIconImageView"
                     android:src="@drawable/ic_phone"
                     app:layout_constraintTop_toBottomOf="@id/descriptionTextView"
-                    tools:ignore="MissingConstraints" />
+                    app:layout_constraintStart_toStartOf="parent" />
 
             <TextView
                     android:id="@+id/phoneNumberTextView"
@@ -179,6 +191,7 @@
                     android:maxLines="3"
                     android:text="03022183850"
                     app:layout_constraintStart_toEndOf="@id/phoneNumberImageView"
+                    app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toTopOf="@id/phoneNumberImageView" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
@@ -187,25 +200,30 @@
 
     <com.google.android.material.button.MaterialButton
             android:id="@+id/cameraToggleButton"
-            style="@style/PrimaryActionButton"
+            style="@style/Button.Luca.PrimaryActionButton"
             app:icon="@drawable/ic_qr_code"
-            app:layout_constraintBottom_toTopOf="@id/buttonSeparatorView"
             android:text="@string/scan_qr_code"
-            tools:ignore="MissingConstraints" />
+            android:layout_margin="@dimen/spacing_default"
+            app:layout_constraintBottom_toTopOf="@id/buttonSeparatorView"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
 
     <View
             android:id="@+id/buttonSeparatorView"
             style="@style/HeaderSeparatorView"
             android:layout_marginBottom="@dimen/spacing_default"
-            app:layout_constraintTop_toBottomOf="@null"
-            app:layout_constraintBottom_toTopOf="@id/createMeetingButton"
-            tools:ignore="MissingConstraints" />
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/createMeetingButton" />
 
     <com.google.android.material.button.MaterialButton
             android:id="@+id/createMeetingButton"
-            style="@style/SecondaryActionButton"
+            style="@style/Button.Luca.SecondaryActionButton"
             app:icon="@drawable/ic_people_outline_24"
             android:text="@string/meeting_create_action"
-            tools:ignore="MissingConstraints" />
+            android:layout_margin="@dimen/spacing_default"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

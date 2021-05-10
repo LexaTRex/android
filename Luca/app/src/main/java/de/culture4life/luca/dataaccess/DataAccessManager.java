@@ -39,8 +39,16 @@ import io.reactivex.rxjava3.core.Single;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 import timber.log.Timber;
 
+import static de.culture4life.luca.crypto.HashProvider.TRIMMED_HASH_LENGTH;
 import static de.culture4life.luca.notification.LucaNotificationManager.NOTIFICATION_ID_DATA_ACCESS;
 
+/**
+ * Periodically polls the luca server, checking if a user's data has been accessed by a health
+ * department. The user is notified in case the data was accessed.
+ *
+ * @see <a href="https://www.luca-app.de/securityoverview/processes/tracing_find_contacts.html#notifying-guests-about-data-access">Security
+ *         Overview: Notifying Guests about Data Access</a>
+ */
 public class DataAccessManager extends Manager {
 
     private static final String UPDATE_TAG = "data_access_update";
@@ -336,7 +344,7 @@ public class DataAccessManager extends Manager {
 
         return Single.zip(getMessage, getKey, (message, key) -> cryptoManager.getMacProvider().sign(message, key))
                 .flatMap(sign -> sign)
-                .flatMap(signature -> CryptoManager.trim(signature, 16))
+                .flatMap(signature -> CryptoManager.trim(signature, TRIMMED_HASH_LENGTH))
                 .flatMap(CryptoManager::encodeToString);
     }
 

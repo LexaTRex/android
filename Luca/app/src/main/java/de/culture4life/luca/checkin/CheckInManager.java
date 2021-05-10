@@ -61,12 +61,23 @@ import timber.log.Timber;
 
 import static android.Manifest.permission.ACCESS_COARSE_LOCATION;
 import static android.Manifest.permission.ACCESS_FINE_LOCATION;
+import static de.culture4life.luca.crypto.HashProvider.TRIMMED_HASH_LENGTH;
+import static de.culture4life.luca.history.HistoryManager.KEEP_DATA_DURATION;
 import static de.culture4life.luca.location.GeofenceManager.MAXIMUM_GEOFENCE_RADIUS;
 import static de.culture4life.luca.location.GeofenceManager.MINIMUM_GEOFENCE_RADIUS;
 import static de.culture4life.luca.location.GeofenceManager.UPDATE_INTERVAL_DEFAULT;
 import static de.culture4life.luca.notification.LucaNotificationManager.NOTIFICATION_ID_EVENT;
 import static de.culture4life.luca.util.SerializationUtil.serializeToBase64;
 
+/**
+ * Facilitates check-in to a venues either by having a shown barcode scanned or scanning a printed
+ * QR-code.
+ *
+ * @see <a href="https://www.luca-app.de/securityoverview/processes/guest_app_checkin.html">Security
+ *         Overview: Check-In via Mobile Phone App</a>
+ * @see <a href="https://www.luca-app.de/securityoverview/processes/guest_self_checkin.html">Security
+ *         Overview: Check-In via a Printed QR Code</a>
+ */
 public class CheckInManager extends Manager {
 
     public static final String KEY_CHECKED_IN_TRACE_ID = "checked_in_trace_id";
@@ -142,6 +153,13 @@ public class CheckInManager extends Manager {
         Check-in
      */
 
+    /**
+     * Perform self check-in, generating the check-in data locally and uploading it to the luca
+     * server.
+     *
+     * @see <a href="https://www.luca-app.de/securityoverview/processes/guest_self_checkin.html">Security
+     *         Overview: Check-In via a Printed QR Code</a>
+     */
     public Completable checkIn(@NonNull UUID scannerId, @NonNull QrCodeData qrCodeData) {
         return assertNotCheckedIn()
                 .andThen(generateCheckInData(qrCodeData, scannerId)
@@ -152,7 +170,7 @@ public class CheckInManager extends Manager {
     }
 
     /**
-     * Should be called after a check-in occurred (either triggered by the user or in the backend)
+     * Should be called after a check-in occurred (either triggered by the user or in the backend).
      */
     private Completable processCheckIn(@NonNull CheckInData checkInData) {
         return Completable.fromAction(() -> this.checkInData = checkInData)
@@ -189,6 +207,13 @@ public class CheckInManager extends Manager {
                 .doOnSuccess(checkInRequestData -> checkInRequestData.setScannerId(scannerId.toString()));
     }
 
+    /**
+     * Generate data required for checking in. The encrypted contact data is encrypted a second time
+     * using the venue's key.
+     *
+     * @see <a href="https://www.luca-app.de/securityoverview/processes/guest_self_checkin.html">Security
+     *         Overview: Check-In via a Printed QR Code</a>
+     */
     private Single<CheckInRequestData> generateCheckInData(@NonNull QrCodeData qrCodeData, @NonNull PublicKey locationPublicKey) {
         return Single.fromCallable(() -> {
             CheckInRequestData checkInRequestData = new CheckInRequestData();
@@ -209,7 +234,7 @@ public class CheckInManager extends Manager {
                     .flatMap(SerializationUtil::serializeToBase64).blockingGet();
             checkInRequestData.setScannerEphemeralPublicKey(serializedScannerPublicKey);
 
-            byte[] iv = cryptoManager.generateSecureRandomData(16).blockingGet();
+            byte[] iv = cryptoManager.generateSecureRandomData(TRIMMED_HASH_LENGTH).blockingGet();
             String encodedIv = serializeToBase64(iv).blockingGet();
             checkInRequestData.setIv(encodedIv);
 
@@ -311,7 +336,7 @@ public class CheckInManager extends Manager {
             String serializedTraceId = serializeToBase64(traceId).blockingGet();
             additionalCheckInProperties.setTraceId(serializedTraceId);
 
-            byte[] iv = cryptoManager.generateSecureRandomData(16).blockingGet();
+            byte[] iv = cryptoManager.generateSecureRandomData(TRIMMED_HASH_LENGTH).blockingGet();
             String encodedIv = serializeToBase64(iv).blockingGet();
             additionalCheckInProperties.setIv(encodedIv);
 
@@ -352,6 +377,12 @@ public class CheckInManager extends Manager {
         Check-out
      */
 
+    /**
+     * Perform check-out, uploading trace ID and checkout time to the luca server.
+     *
+     * @see <a href="https://www.luca-app.de/securityoverview/processes/guest_checkout.html#checkout-process">Security
+     *         Overview: Checkout Process</a>
+     */
     @SuppressLint("MissingPermission")
     public Completable checkOut() {
         return assertCheckedIn()
@@ -377,7 +408,8 @@ public class CheckInManager extends Manager {
     }
 
     /**
-     * Should be called after a check-out occurred (either triggered by the user or in the backend)
+     * Should be called after a check-out occurred (either triggered by the user or in the
+     * backend).
      */
     private Completable processCheckOut() {
         return getCheckInDataIfAvailable()
@@ -386,6 +418,12 @@ public class CheckInManager extends Manager {
                 .andThen(disableAutomaticCheckOut());
     }
 
+    /**
+     * Create check-out data of current trace ID and the current timestamp.
+     *
+     * @see <a href="https://www.luca-app.de/securityoverview/processes/guest_checkout.html#checkout-process">Security
+     *         Overview: Checkout Process</a>
+     */
     private Single<CheckOutRequestData> generateCheckOutData() {
         return Single.just(new CheckOutRequestData())
                 .flatMap(checkOutRequestData -> getCheckedInTraceId()
@@ -601,6 +639,15 @@ public class CheckInManager extends Manager {
                 .doOnNext(checkInData -> Timber.v("Check-in data updated from preferences: %s", checkInData));
     }
 
+    /**
+     * Checking in using a scanner doesn't require the device to be online, nevertheless the backend
+     * is polled regularly in an attempt to provide visual feedback of a successful check-in.
+     *
+     * @param interval to poll backend at (millis)
+     * @return Completable to finalize check-in {@link #processCheckIn(CheckInData)}
+     * @see <a href="https://luca-app.de/securityoverview/processes/guest_app_checkin.html#qr-code-scanning-feedback">Security
+     *         Overview: QR Code Scanning Feedback</a>
+     */
     public Completable requestCheckInDataUpdates(long interval) {
         return pollCheckInData(interval)
                 .distinctUntilChanged((previous, current) -> {
@@ -773,7 +820,7 @@ public class CheckInManager extends Manager {
 
     public Completable deleteOldArchivedCheckInData() {
         return getArchivedCheckInData()
-                .filter(checkInData -> checkInData.getTimestamp() > System.currentTimeMillis() - TimeUnit.DAYS.toMillis(14))
+                .filter(checkInData -> checkInData.getTimestamp() > System.currentTimeMillis() - KEEP_DATA_DURATION)
                 .toList()
                 .map(ArchivedCheckInData::new)
                 .flatMapCompletable(archivedCheckInData -> preferencesManager.persist(KEY_ARCHIVED_CHECK_IN_DATA, archivedCheckInData))

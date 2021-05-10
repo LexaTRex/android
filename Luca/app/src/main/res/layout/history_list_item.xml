@@ -41,7 +41,7 @@
 
     <TextView
             android:id="@+id/itemTitleTextView"
-            style="@style/TextAppearance.App.Body1"
+            style="@style/TextAppearance.Luca.Body1"
             app:fontFamily="@font/montserrat_bold"
             android:textStyle="bold"
             android:layout_width="wrap_content"
@@ -60,7 +60,7 @@
 
     <TextView
             android:id="@+id/itemDescriptionTextView"
-            style="@style/TextAppearance.App.Body2"
+            style="@style/TextAppearance.Luca.Body2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/spacing_small"
@@ -76,7 +76,7 @@
 
     <TextView
             android:id="@+id/itemTimeTextView"
-            style="@style/TextAppearance.App.Body2"
+            style="@style/TextAppearance.Luca.Body2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/spacing_small"

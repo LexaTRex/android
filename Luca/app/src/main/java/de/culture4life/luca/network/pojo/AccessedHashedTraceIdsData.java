@@ -5,6 +5,13 @@ import com.google.gson.annotations.SerializedName;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Contains a list of trace IDs that have been accessed by a given health department. The trace IDs
+ * are hashed and truncated to 16 bytes requiring matching to occur locally.
+ *
+ * @see <a href="https://www.luca-app.de/securityoverview/processes/tracing_find_contacts.html#notifying-guests-about-data-access">Security
+ *         Overview: Notifying Guests about Data Access</a>
+ */
 public class AccessedHashedTraceIdsData {
 
     @SerializedName("healthDepartment")

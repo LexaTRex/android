@@ -49,7 +49,7 @@
 
                 <TextView
                         android:id="@+id/registrationHeading"
-                        style="@style/TextAppearance.App.Headline4"
+                        style="@style/TextAppearance.Luca.Headline2"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="@dimen/spacing_default"
@@ -57,7 +57,7 @@
 
                 <de.culture4life.luca.ui.registration.RegistrationTextInputLayout
                         android:id="@+id/firstNameLayout"
-                        style="@style/RegistrationTextBox"
+                        style="@style/TextInputLayout.Luca.RegistrationTextBox"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:hint="@string/registration_first_name"
@@ -67,6 +67,7 @@
                     <com.google.android.material.textfield.TextInputEditText
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
+                            android:inputType="textCapSentences"
                             android:imeOptions="actionNext"
                             android:singleLine="true" />
 
@@ -74,7 +75,7 @@
 
                 <de.culture4life.luca.ui.registration.RegistrationTextInputLayout
                         android:id="@+id/lastNameLayout"
-                        style="@style/RegistrationTextBox"
+                        style="@style/TextInputLayout.Luca.RegistrationTextBox"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="0dp"
@@ -84,15 +85,15 @@
                     <com.google.android.material.textfield.TextInputEditText
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
+                            android:inputType="textCapSentences"
                             android:imeOptions="actionNext"
-                            android:inputType="text"
                             android:singleLine="true" />
 
                 </de.culture4life.luca.ui.registration.RegistrationTextInputLayout>
 
                 <TextView
                         android:id="@+id/contactInfoTextView"
-                        style="@style/TextAppearance.App.Body3"
+                        style="@style/TextAppearance.Luca.Body3"
                         android:alpha="0.75"
                         android:text="@string/registration_contact_info"
                         android:layout_width="match_parent"
@@ -101,7 +102,7 @@
 
                 <de.culture4life.luca.ui.registration.RegistrationTextInputLayout
                         android:id="@+id/phoneNumberLayout"
-                        style="@style/RegistrationTextBox"
+                        style="@style/TextInputLayout.Luca.RegistrationTextBox"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:hint="@string/registration_phone_number"
@@ -118,7 +119,7 @@
 
                 <de.culture4life.luca.ui.registration.RegistrationTextInputLayout
                         android:id="@+id/emailLayout"
-                        style="@style/RegistrationTextBox"
+                        style="@style/TextInputLayout.Luca.RegistrationTextBox"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:hint="@string/registration_email"
@@ -136,7 +137,7 @@
 
                 <TextView
                         android:id="@+id/addressInfoTextView"
-                        style="@style/TextAppearance.App.Body3"
+                        style="@style/TextAppearance.Luca.Body3"
                         android:alpha="0.75"
                         android:text="@string/registration_address_info"
                         android:layout_width="match_parent"
@@ -151,7 +152,7 @@
 
                     <de.culture4life.luca.ui.registration.RegistrationTextInputLayout
                             android:id="@+id/streetLayout"
-                            style="@style/RegistrationTextBox"
+                            style="@style/TextInputLayout.Luca.RegistrationTextBox"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_marginEnd="@dimen/spacing_default"
@@ -170,7 +171,7 @@
 
                     <de.culture4life.luca.ui.registration.RegistrationTextInputLayout
                             android:id="@+id/houseNumberLayout"
-                            style="@style/RegistrationTextBox"
+                            style="@style/TextInputLayout.Luca.RegistrationTextBox"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
@@ -190,7 +191,7 @@
 
                 <de.culture4life.luca.ui.registration.RegistrationTextInputLayout
                         android:id="@+id/postalCodeLayout"
-                        style="@style/RegistrationTextBox"
+                        style="@style/TextInputLayout.Luca.RegistrationTextBox"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:hint="@string/registration_postal_code"
@@ -207,7 +208,7 @@
 
                 <de.culture4life.luca.ui.registration.RegistrationTextInputLayout
                         android:id="@+id/cityNameLayout"
-                        style="@style/RegistrationTextBox"
+                        style="@style/TextInputLayout.Luca.RegistrationTextBox"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:hint="@string/registration_city_name"
@@ -227,7 +228,7 @@
 
             <com.google.android.material.button.MaterialButton
                     android:id="@+id/registrationActionButton"
-                    style="@style/RegistrationButton"
+                    style="@style/Button.Luca.RegistrationButton"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_margin="@dimen/spacing_default"

@@ -5,6 +5,9 @@ import java.util.Collection;
 
 import androidx.annotation.NonNull;
 
+/**
+ * Collection of {@link TraceIdWrapper}.
+ */
 public class TraceIdWrapperList extends ArrayList<TraceIdWrapper> {
 
     public TraceIdWrapperList() {

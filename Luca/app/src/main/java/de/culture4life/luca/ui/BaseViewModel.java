@@ -1,12 +1,14 @@
 package de.culture4life.luca.ui;
 
 import android.app.Application;
+import android.content.Intent;
 
 import com.tbruyelle.rxpermissions3.Permission;
 
 import de.culture4life.luca.LucaApplication;
 import de.culture4life.luca.R;
 import de.culture4life.luca.notification.LucaNotificationManager;
+import de.culture4life.luca.ui.splash.SplashActivity;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -14,6 +16,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import androidx.annotation.CallSuper;
+import androidx.annotation.IdRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
@@ -21,10 +24,12 @@ import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.navigation.NavController;
+import androidx.navigation.NavDestination;
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
+import io.reactivex.rxjava3.schedulers.Schedulers;
 import timber.log.Timber;
 
 import static de.culture4life.luca.notification.LucaNotificationManager.NOTIFICATION_ID_EVENT;
@@ -36,7 +41,9 @@ public abstract class BaseViewModel extends AndroidViewModel {
     protected final MutableLiveData<Boolean> isLoading = new MutableLiveData<>();
     protected final MutableLiveData<Set<ViewError>> errors = new MutableLiveData<>();
     protected final MutableLiveData<ViewEvent<? extends Set<String>>> requiredPermissions = new MutableLiveData<>();
+    protected final MutableLiveData<Boolean> showCameraPreview = new MutableLiveData<>();
     protected NavController navigationController;
+    private ViewError deleteAccountError;
 
     public BaseViewModel(@NonNull Application application) {
         super(application);
@@ -55,6 +62,7 @@ public abstract class BaseViewModel extends AndroidViewModel {
     @CallSuper
     public Completable initialize() {
         return updateRequiredPermissions()
+                .andThen(update(showCameraPreview, false))
                 .doOnSubscribe(disposable -> Timber.d("Initializing %s", this));
     }
 
@@ -191,6 +199,11 @@ public abstract class BaseViewModel extends AndroidViewModel {
         Timber.i("Permission result: %s", permission);
     }
 
+    protected boolean isCurrentDestinationId(@IdRes int destinationId) {
+        NavDestination currentDestination = navigationController.getCurrentDestination();
+        return currentDestination != null && currentDestination.getId() == destinationId;
+    }
+
     public LiveData<Boolean> getIsLoading() {
         return isLoading;
     }
@@ -210,6 +223,44 @@ public abstract class BaseViewModel extends AndroidViewModel {
     @Override
     public String toString() {
         return this.getClass().getSimpleName();
+    }
+
+    /**
+     * Delete the account data on backend and clear data locally. Restart the app from scratch when
+     * successful, show error dialog when an error occurred.
+     */
+    public void deleteAccount() {
+        modelDisposable.add(application.getRegistrationManager().deleteRegistrationOnBackend()
+                .doOnSubscribe(disposable -> {
+                    updateAsSideEffect(isLoading, true);
+                    removeError(deleteAccountError);
+                })
+                .andThen(application.getRegistrationManager().deleteRegistrationData())
+                .andThen(application.getCryptoManager().deleteAllKeyStoreEntries())
+                .andThen(application.getPreferencesManager().deleteAll())
+                .doFinally(() -> updateAsSideEffect(isLoading, false))
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(() -> {
+                    Timber.i("Account deleted");
+                    Intent intent = new Intent(application, SplashActivity.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    application.startActivity(intent);
+                }, throwable -> {
+                    Timber.w("Unable to delete account: %s", throwable);
+                    deleteAccountError = createErrorBuilder(throwable)
+                            .withTitle(R.string.error_request_failed_title)
+                            .build();
+                    addError(deleteAccountError);
+                }));
+    }
+
+    public void showCameraPreview(boolean isActive) {
+        showCameraPreview.postValue(isActive);
+    }
+
+    public MutableLiveData<Boolean> getShowCameraPreview() {
+        return showCameraPreview;
     }
 
 }

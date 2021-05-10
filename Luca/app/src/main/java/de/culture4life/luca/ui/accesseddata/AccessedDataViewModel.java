@@ -3,14 +3,11 @@ package de.culture4life.luca.ui.accesseddata;
 import android.app.Application;
 
 import de.culture4life.luca.R;
-import de.culture4life.luca.dataaccess.AccessedTraceData;
 import de.culture4life.luca.dataaccess.DataAccessManager;
 import de.culture4life.luca.history.HistoryItem;
 import de.culture4life.luca.history.HistoryManager;
 import de.culture4life.luca.history.TraceDataAccessedItem;
 import de.culture4life.luca.ui.BaseViewModel;
-import de.culture4life.luca.ui.ViewError;
-import de.culture4life.luca.ui.ViewEvent;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -34,9 +31,6 @@ public class AccessedDataViewModel extends BaseViewModel {
     private final SimpleDateFormat readableDateFormat;
 
     private final MutableLiveData<List<AccessedDataListItem>> accessedDataItems = new MutableLiveData<>();
-    private final MutableLiveData<ViewEvent<List<AccessedTraceData>>> accessedData = new MutableLiveData<>();
-
-    private ViewError dataSharingError;
 
     public AccessedDataViewModel(@NonNull Application application) {
         super(application);
@@ -59,8 +53,8 @@ public class AccessedDataViewModel extends BaseViewModel {
         return Completable.fromAction(() -> modelDisposable.add(updateAccessedDataItems()
                 .subscribeOn(Schedulers.io())
                 .subscribe(
-                        () -> Timber.i("Updated history"),
-                        throwable -> Timber.w("Unable to update history: %s", throwable.toString())
+                        () -> Timber.i("Updated accessed data"),
+                        throwable -> Timber.w("Unable to update accessed data: %s", throwable.toString())
                 )));
     }
 
@@ -98,10 +92,6 @@ public class AccessedDataViewModel extends BaseViewModel {
 
     public LiveData<List<AccessedDataListItem>> getAccessedDataItems() {
         return accessedDataItems;
-    }
-
-    public LiveData<ViewEvent<List<AccessedTraceData>>> getAccessedData() {
-        return accessedData;
     }
 
 }

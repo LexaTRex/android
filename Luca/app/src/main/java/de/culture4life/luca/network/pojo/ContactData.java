@@ -8,8 +8,10 @@ import de.culture4life.luca.registration.RegistrationData;
 import androidx.annotation.NonNull;
 
 /**
- * Example:
+ * Contact data entered during initial registration (see {@link RegistrationData}), will be
+ * encrypted before leaving the device.
  *
+ * Example:
  * <pre>
  * {
  *   "v": 3, // version
@@ -23,6 +25,9 @@ import androidx.annotation.NonNull;
  *   "c": "Entenhausen", // city
  * }
  * </pre>
+ *
+ * @see <a href="https://www.luca-app.de/securityoverview/processes/guest_registration.html">Security
+ *         Overview: Guest Registration</a>
  */
 public class ContactData {
 

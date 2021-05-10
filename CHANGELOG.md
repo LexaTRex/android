@@ -1,3 +1,10 @@
+# Release 1.7.0
+
+-Include "my luca" tab
+-Bug fixes and improvements
+
+With this update we introduce another tab: The "my luca" tab. In this tab you are able to import documents that may be helpful for the locations you check into.
+
 # Release 1.6.7
 
 - Added support for CWA compatible QR codes

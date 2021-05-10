@@ -9,12 +9,10 @@
 
     <TextView
             android:id="@+id/appNameTextView"
-            style="@style/TextAppearance.App.Headline3"
+            style="@style/TextAppearance.Luca.Headline1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/app_name"
-            android:textFontWeight="100"
-            android:textSize="48sp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -34,7 +32,7 @@
 
     <TextView
             android:id="@+id/headingTextView"
-            style="@style/TextAppearance.App.Body1"
+            style="@style/TextAppearance.Luca.Body1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/spacing_large"
@@ -59,7 +57,7 @@
 
         <TextView
                 android:id="@+id/descriptionTextView"
-                style="@style/TextAppearance.App.Body2"
+                style="@style/TextAppearance.Luca.Body2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/onboarding_info_description"
@@ -70,9 +68,10 @@
 
     <com.google.android.material.button.MaterialButton
             android:id="@+id/primaryActionButton"
-            style="@style/PrimaryActionButton"
-            android:layout_margin="0dp"
+            style="@style/Button.Luca.PrimaryActionButton"
             android:text="@string/onboarding_info_action"
-            tools:ignore="MissingConstraints" />
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

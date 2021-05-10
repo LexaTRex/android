@@ -3,21 +3,28 @@ package de.culture4life.luca.ui.history;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
 import de.culture4life.luca.R;
 import de.culture4life.luca.dataaccess.AccessedTraceData;
+import de.culture4life.luca.history.HistoryManager;
 import de.culture4life.luca.ui.BaseFragment;
 import de.culture4life.luca.ui.UiUtil;
 import de.culture4life.luca.ui.dialog.BaseDialogFragment;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import androidx.annotation.NonNull;
 import io.reactivex.rxjava3.core.Completable;
+import io.reactivex.rxjava3.core.Observable;
 
 public class HistoryFragment extends BaseFragment<HistoryViewModel> {
 
@@ -65,7 +72,7 @@ public class HistoryFragment extends BaseFragment<HistoryViewModel> {
 
     private void initializeShareHistoryViews() {
         shareHistoryButton = getView().findViewById(R.id.primaryActionButton);
-        shareHistoryButton.setOnClickListener(button -> showShareHistoryConfirmationDialog());
+        shareHistoryButton.setOnClickListener(button -> showShareHistorySelectionDialog());
         observe(viewModel.getHistoryItems(), items -> shareHistoryButton.setVisibility(items.isEmpty() ? View.GONE : View.VISIBLE));
         observe(viewModel.getTracingTanEvent(), tracingTanEvent -> {
             if (!tracingTanEvent.hasBeenHandled()) {
@@ -111,11 +118,37 @@ public class HistoryFragment extends BaseFragment<HistoryViewModel> {
                 .show();
     }
 
-    private void showShareHistoryConfirmationDialog() {
+    private void showShareHistorySelectionDialog() {
+        ViewGroup viewGroup = getActivity().findViewById(android.R.id.content);
+        View dialogView = LayoutInflater.from(getContext()).inflate(R.layout.days_selection_dialog, viewGroup, false);
+
+        int maximumDays = (int) TimeUnit.MILLISECONDS.toDays(HistoryManager.KEEP_DATA_DURATION);
+        String[] items = new String[maximumDays];
+        Observable.range(1, maximumDays)
+                .map(String::valueOf)
+                .toList().blockingGet().toArray(items);
+
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(), R.layout.day_selection_item, items);
+        AutoCompleteTextView autoCompleteTextView = dialogView.findViewById(R.id.dayInputAutoCompleteTextView);
+        autoCompleteTextView.setAdapter(adapter);
+        autoCompleteTextView.setText(String.valueOf(maximumDays), false);
+
+        new BaseDialogFragment(new MaterialAlertDialogBuilder(getContext())
+                .setView(dialogView)
+                .setTitle(getString(R.string.history_share_selection_title))
+                .setPositiveButton(R.string.history_share_selection_action, (dialogInterface, i) -> {
+                    int selectedDays = Integer.parseInt(autoCompleteTextView.getText().toString());
+                    showShareHistoryConfirmationDialog(selectedDays);
+                })
+                .setNegativeButton(R.string.action_cancel, (dialogInterface, i) -> dialogInterface.cancel()))
+                .show();
+    }
+
+    private void showShareHistoryConfirmationDialog(int days) {
         new BaseDialogFragment(new MaterialAlertDialogBuilder(getContext())
                 .setTitle(getString(R.string.history_share_confirmation_title))
-                .setMessage(R.string.history_share_confirmation_description)
-                .setPositiveButton(R.string.history_share_confirmation_action, (dialogInterface, i) -> viewModel.onShareHistoryRequested())
+                .setMessage(getString(R.string.history_share_confirmation_description, days))
+                .setPositiveButton(R.string.history_share_confirmation_action, (dialogInterface, i) -> viewModel.onShareHistoryRequested(days))
                 .setNegativeButton(R.string.action_cancel, (dialogInterface, i) -> dialogInterface.cancel()))
                 .show();
     }

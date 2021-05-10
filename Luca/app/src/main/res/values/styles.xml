@@ -1,6 +1,6 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
 
-    <style name="Theme.App.DayNight" parent="Theme.MaterialComponents.DayNight">
+    <style name="Theme.Luca.DayNight" parent="Theme.MaterialComponents.DayNight">
         <item name="colorPrimary">@color/primaryColor</item>
         <item name="colorPrimaryTranslucent">@color/primaryTranslucentColor</item>
         <item name="colorPrimaryLight">@color/primaryLightColor</item>
@@ -39,44 +39,121 @@
         <item name="android:windowNoTitle">true</item>
         <item name="android:windowActionBar">false</item>
 
-        <item name="materialAlertDialogTheme">@style/ThemeOverlay.App.MaterialAlertDialog</item>
+        <item name="materialAlertDialogTheme">@style/ThemeOverlay.Luca.AlertDialog</item>
     </style>
 
-    <style name="Theme.App.DayNight.Splash">
+    <style name="Theme.Luca.DayNight.Splash">
         <item name="android:windowBackground">?attr/colorSurface</item>
     </style>
 
-    <style name="ThemeOverlay.App.MaterialAlertDialog" parent="ThemeOverlay.MaterialComponents.MaterialAlertDialog">
+    <!--  Text  -->
+
+    <style name="TextAppearance.Luca.Headline1" parent="TextAppearance.MaterialComponents.Headline3">
+        <item name="android:fontWeight" tools:targetApi="o">100</item>
+        <item name="android:textFontWeight" tools:targetApi="p">100</item>
+        <item name="android:lineSpacingExtra">4dp</item>
+        <item name="android:textSize">48sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">?attr/colorOnSurface</item>
+    </style>
+
+    <style name="TextAppearance.Luca.Headline2" parent="TextAppearance.MaterialComponents.Headline4">
+        <item name="fontFamily">@font/montserrat_bold</item>
+        <item name="android:lineSpacingExtra">4dp</item>
+        <item name="android:textSize">@dimen/font_size_large</item>
+        <item name="android:textColor">?attr/colorOnSurface</item>
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:ellipsize">end</item>
+        <item name="android:maxLines">2</item>
+    </style>
+
+    <style name="TextAppearance.Luca.Headline3" parent="TextAppearance.Luca.Body1">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_margin">@dimen/spacing_default</item>
+    </style>
+
+    <style name="TextAppearance.Luca.Body1" parent="TextAppearance.MaterialComponents.Body1">
+        <item name="android:lineSpacingExtra">4dp</item>
+        <item name="android:textSize">@dimen/font_size_default</item>
+        <item name="android:textColor">?attr/colorOnSurface</item>
+        <item name="android:fontWeight" tools:targetApi="o">400</item>
+        <item name="android:textFontWeight" tools:targetApi="p">400</item>
+    </style>
+
+    <style name="TextAppearance.Luca.Body2" parent="TextAppearance.Luca.Body1">
+        <item name="android:textSize">@dimen/font_size_small</item>
+        <item name="android:fontWeight" tools:targetApi="o">300</item>
+        <item name="android:textFontWeight" tools:targetApi="p">300</item>
+    </style>
+
+    <style name="TextAppearance.Luca.Body3" parent="TextAppearance.Luca.Body2">
+        <item name="android:textSize">@dimen/font_size_small</item>
+        <item name="android:lineSpacingExtra">0dp</item>
+    </style>
+
+    <style name="TextAppearance.Luca.SlideToActView" parent="TextAppearance.Luca.Body2">
+        <item name="android:textColor">?attr/colorSurface</item>
+        <item name="textAllCaps">true</item>
+    </style>
+
+    <style name="Widget.Luca.Button.UnelevatedButton" parent="Widget.MaterialComponents.Button.UnelevatedButton">
+        <item name="android:textColor">?attr/colorSurface</item>
+        <item name="android:backgroundTint">?attr/colorPrimary</item>
+        <item name="cornerRadius">100dp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="Button.Luca.PrimaryActionButton" parent="Widget.Luca.Button.UnelevatedButton">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="iconTint">?attr/colorSurface</item>
+        <item name="iconGravity">textStart</item>
+        <item name="android:padding">@dimen/spacing_default</item>
+    </style>
+
+    <style name="Button.Luca.SecondaryActionButton" parent="Button.Luca.PrimaryActionButton">
+        <item name="android:textColor">?attr/colorOnSurface</item>
+        <item name="iconTint">?attr/colorOnSurface</item>
+        <item name="strokeColor">?attr/colorPrimary</item>
+        <item name="strokeWidth">@dimen/mtrl_btn_stroke_size</item>
+        <item name="android:backgroundTint">@android:color/transparent</item>
+    </style>
+
+    <!--  AlertDialog  -->
+
+    <style name="ThemeOverlay.Luca.AlertDialog" parent="ThemeOverlay.MaterialComponents.MaterialAlertDialog">
         <item name="android:background">@android:color/white</item>
         <item name="colorSurface">@android:color/white</item>
         <item name="colorOnSurface">@android:color/black</item>
-        <item name="alertDialogStyle">@style/MaterialAlertDialog.App</item>
-        <item name="materialAlertDialogTitleTextStyle">@style/MaterialAlertDialog.App.Title.Text
+        <item name="alertDialogStyle">@style/MaterialAlertDialog.Luca</item>
+        <item name="materialAlertDialogTitleTextStyle">@style/MaterialAlertDialog.Luca.Title.Text
         </item>
-        <item name="materialAlertDialogBodyTextStyle">@style/MaterialAlertDialog.App.Body.Text
+        <item name="materialAlertDialogBodyTextStyle">@style/MaterialAlertDialog.Luca.Body.Text
         </item>
-        <item name="buttonBarPositiveButtonStyle">@style/MaterialAlertDialog.App.Button</item>
-        <item name="buttonBarNegativeButtonStyle">@style/MaterialAlertDialog.App.Button</item>
-        <item name="buttonBarNeutralButtonStyle">@style/MaterialAlertDialog.App.Button</item>
-        <item name="buttonBarStyle">@style/MaterialAlertDialog.App.Background</item>
-        <item name="materialAlertDialogTitlePanelStyle">@style/MaterialAlertDialog.App.Title.Panel
+        <item name="buttonBarPositiveButtonStyle">@style/MaterialAlertDialog.Luca.Button</item>
+        <item name="buttonBarNegativeButtonStyle">@style/MaterialAlertDialog.Luca.Button</item>
+        <item name="buttonBarNeutralButtonStyle">@style/MaterialAlertDialog.Luca.Button</item>
+        <item name="buttonBarStyle">@style/MaterialAlertDialog.Luca.Background</item>
+        <item name="materialAlertDialogTitlePanelStyle">@style/MaterialAlertDialog.Luca.Title.Panel
         </item>
         <item name="android:backgroundDimEnabled">true</item>
         <item name="android:backgroundDimAmount">0.5</item>
     </style>
 
-    <style name="MaterialAlertDialog.App" parent="MaterialAlertDialog.MaterialComponents">
+    <style name="MaterialAlertDialog.Luca" parent="MaterialAlertDialog.MaterialComponents">
 
     </style>
 
-    <style name="MaterialAlertDialog.App.Title.Text" parent="MaterialAlertDialog.MaterialComponents.Title.Text">
+    <style name="MaterialAlertDialog.Luca.Title.Text" parent="MaterialAlertDialog.MaterialComponents.Title.Text">
         <item name="fontFamily">@font/montserrat_bold</item>
         <item name="android:lineSpacingExtra">4dp</item>
         <item name="android:layout_marginBottom">0dp</item>
         <item name="android:textSize">@dimen/font_size_large</item>
     </style>
 
-    <style name="MaterialAlertDialog.App.Body.Text" parent="MaterialAlertDialog.MaterialComponents.Body.Text">
+    <style name="MaterialAlertDialog.Luca.Body.Text" parent="MaterialAlertDialog.MaterialComponents.Body.Text">
         <item name="fontFamily">@font/montserrat_regular</item>
         <item name="android:textAppearance">@null</item>
         <item name="android:textColor">@android:color/black</item>
@@ -85,153 +162,23 @@
         <item name="android:textFontWeight" tools:targetApi="p">400</item>
     </style>
 
-    <style name="MaterialAlertDialog.App.Button" parent="Widget.MaterialComponents.Button.TextButton.Dialog">
+    <style name="MaterialAlertDialog.Luca.Button" parent="Widget.MaterialComponents.Button.TextButton.Dialog">
         <item name="fontFamily">@font/montserrat_bold</item>
         <item name="android:textColor">@color/luca_dark_blue</item>
         <item name="rippleColor">@color/material_grey500</item>
     </style>
 
-    <style name="MaterialAlertDialog.App.Title.Panel" parent="MaterialAlertDialog.MaterialComponents.Title.Panel">
+    <style name="MaterialAlertDialog.Luca.Title.Panel" parent="MaterialAlertDialog.MaterialComponents.Title.Panel">
         <item name="android:background">@android:color/white</item>
     </style>
 
-    <style name="MaterialAlertDialog.App.Background">
+    <style name="MaterialAlertDialog.Luca.Background">
         <item name="android:background">@android:color/white</item>
-    </style>
-
-    <style name="TextAppearance.App.Headline3" parent="TextAppearance.MaterialComponents.Headline3">
-        <item name="android:fontWeight" tools:targetApi="o">100</item>
-        <item name="android:textFontWeight" tools:targetApi="p">100</item>
-        <item name="android:lineSpacingExtra">4dp</item>
-        <item name="android:textStyle">bold</item>
-        <item name="android:textSize">@dimen/font_size_large</item>
-        <item name="android:textColor">?attr/colorOnSurface</item>
-    </style>
-
-    <style name="TextAppearance.App.Headline4" parent="TextAppearance.MaterialComponents.Headline4">
-        <item name="fontFamily">@font/montserrat_bold</item>
-        <item name="android:lineSpacingExtra">4dp</item>
-        <item name="android:textSize">@dimen/font_size_large</item>
-        <item name="android:textColor">?attr/colorOnSurface</item>
-    </style>
-
-    <style name="TextAppearance.App.Subtitle1" parent="TextAppearance.MaterialComponents.Subtitle1">
-        <item name="android:textColor">?attr/colorOnSurface</item>
-    </style>
-
-    <style name="TextAppearance.App.Caption" parent="TextAppearance.MaterialComponents.Caption">
-
-    </style>
-
-    <style name="TextAppearance.App.Body1" parent="TextAppearance.MaterialComponents.Body1">
-        <item name="android:lineSpacingExtra">4dp</item>
-        <item name="android:textSize">@dimen/font_size_default</item>
-        <item name="android:textColor">?attr/colorOnSurface</item>
-        <item name="android:fontWeight" tools:targetApi="o">400</item>
-        <item name="android:textFontWeight" tools:targetApi="p">400</item>
-    </style>
-
-    <style name="TextAppearance.App.Body2" parent="TextAppearance.App.Body1">
-        <item name="android:textSize">@dimen/font_size_small</item>
-        <item name="android:fontWeight" tools:targetApi="o">300</item>
-        <item name="android:textFontWeight" tools:targetApi="p">300</item>
-    </style>
-
-    <style name="TextAppearance.App.Body3" parent="TextAppearance.App.Body2">
-        <item name="android:textSize">@dimen/font_size_small</item>
-        <item name="android:lineSpacingExtra">0dp</item>
-    </style>
-
-    <style name="TextAppearance.App.SlideToActView" parent="TextAppearance.App.Body2">
-        <item name="android:textColor">?attr/colorSurface</item>
-        <item name="textAllCaps">true</item>
-    </style>
-
-    <style name="Widget.App.TextInputLayout.OutlinedBox" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
-        <item name="hintTextColor">?attr/colorOnSurface</item>
-    </style>
-
-    <style name="Widget.App.TextInputLayout.FilledBox" parent="Widget.MaterialComponents.TextInputLayout.FilledBox">
-        <item name="hintTextColor">?attr/colorOnSurface</item>
-        <item name="boxBackgroundColor">@color/greyTranslucentColor</item>
-    </style>
-
-    <style name="Widget.App.TextInputEditText" parent="">
-
-    </style>
-
-    <style name="Widget.App.Button.UnelevatedButton" parent="Widget.MaterialComponents.Button.UnelevatedButton">
-        <item name="android:textColor">?attr/colorSurface</item>
-        <item name="android:backgroundTint">?attr/colorPrimary</item>
-        <item name="cornerRadius">100dp</item>
-        <item name="android:textStyle">bold</item>
-    </style>
-
-    <style name="HeadingTextView" parent="TextAppearance.App.Headline4">
-        <item name="android:layout_width">0dp</item>
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:layout_margin">@dimen/spacing_default</item>
-        <item name="android:ellipsize">end</item>
-        <item name="android:maxLines">2</item>
-        <item name="layout_constraintTop_toTopOf">parent</item>
-        <item name="layout_constraintStart_toStartOf">parent</item>
-        <item name="layout_constraintEnd_toEndOf">parent</item>
-    </style>
-
-    <style name="SubHeadingTextView" parent="TextAppearance.App.Body1">
-        <item name="android:layout_width">0dp</item>
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:layout_margin">@dimen/spacing_default</item>
-        <item name="layout_constraintTop_toBottomOf">@id/headingSeparatorView</item>
-        <item name="layout_constraintStart_toStartOf">parent</item>
-        <item name="layout_constraintEnd_toEndOf">parent</item>
-    </style>
-
-    <style name="HeaderSeparatorView">
-        <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_height">1dp</item>
-        <item name="android:layout_marginTop">@dimen/spacing_default</item>
-        <item name="android:background">?attr/colorControlNormal</item>
-        <item name="layout_constraintTop_toBottomOf">@id/headingTextView</item>
-        <item name="layout_constraintStart_toStartOf">parent</item>
-        <item name="layout_constraintEnd_toEndOf">parent</item>
-    </style>
-
-    <style name="MenuImageView">
-        <item name="android:layout_width">30dp</item>
-        <item name="android:layout_height">0dp</item>
-        <item name="android:layout_marginEnd">@dimen/spacing_default</item>
-        <item name="android:scaleType">fitCenter</item>
-        <item name="android:src">@drawable/ic_more_menu_vertical</item>
-        <item name="layout_constraintBottom_toBottomOf">@id/headingTextView</item>
-        <item name="layout_constraintEnd_toEndOf">parent</item>
-        <item name="layout_constraintTop_toTopOf">@id/headingTextView</item>
-        <item name="tint">?attr/colorOnSurface</item>
-    </style>
-
-    <style name="PrimaryActionButton" parent="Widget.App.Button.UnelevatedButton">
-        <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:layout_margin">@dimen/spacing_default</item>
-        <item name="layout_constraintBottom_toBottomOf">parent</item>
-        <item name="layout_constraintStart_toStartOf">parent</item>
-        <item name="layout_constraintEnd_toEndOf">parent</item>
-        <item name="iconTint">?attr/colorSurface</item>
-        <item name="iconGravity">textStart</item>
-        <item name="android:padding">@dimen/spacing_default</item>
-    </style>
-
-    <style name="SecondaryActionButton" parent="PrimaryActionButton">
-        <item name="android:textColor">?attr/colorOnSurface</item>
-        <item name="iconTint">?attr/colorOnSurface</item>
-        <item name="strokeColor">?attr/colorPrimary</item>
-        <item name="strokeWidth">@dimen/mtrl_btn_stroke_size</item>
-        <item name="android:backgroundTint">@android:color/transparent</item>
     </style>
 
     <!-- Registration -->
 
-    <style name="RegistrationButton" parent="Widget.App.Button.UnelevatedButton">
+    <style name="Button.Luca.RegistrationButton" parent="Widget.Luca.Button.UnelevatedButton">
         <item name="android:padding">@dimen/spacing_default</item>
         <item name="android:layout_width">0dp</item>
         <item name="android:layout_height">wrap_content</item>
@@ -239,9 +186,10 @@
         <item name="android:layout_marginBottom">@dimen/spacing_default</item>
     </style>
 
-    <style name="RegistrationTextBox" parent="Widget.App.TextInputLayout.OutlinedBox">
+    <style name="TextInputLayout.Luca.RegistrationTextBox" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
         <item name="android:layout_marginBottom">8dp</item>
         <item name="errorEnabled">true</item>
+        <item name="hintTextColor">?attr/colorOnSurface</item>
     </style>
 
     <!-- Navigation -->
@@ -252,7 +200,7 @@
 
     <!-- Contact Data -->
 
-    <style name="CardHeading" parent="TextAppearance.App.Caption">
+    <style name="CardHeading" parent="TextAppearance.MaterialComponents.Caption">
         <item name="android:ellipsize">end</item>
         <item name="android:textAllCaps">true</item>
         <item name="android:textColor">?attr/colorSurface</item>
@@ -263,9 +211,6 @@
         <item name="android:layout_width">0dp</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:maxLines">2</item>
-        <item name="layout_constraintTop_toTopOf">parent</item>
-        <item name="layout_constraintStart_toStartOf">parent</item>
-        <item name="layout_constraintEnd_toEndOf">parent</item>
     </style>
 
     <style name="CardAttributeIconImageView">
@@ -273,36 +218,31 @@
         <item name="android:layout_height">20dp</item>
         <item name="android:layout_marginTop">@dimen/spacing_default</item>
         <item name="android:scaleType">fitCenter</item>
-        <item name="layout_constraintStart_toStartOf">parent</item>
         <item name="tint">?attr/colorSurface</item>
     </style>
 
-    <style name="CardAttributeTextView" parent="TextAppearance.App.Body1">
+    <style name="CardAttributeTextView" parent="TextAppearance.Luca.Body1">
         <item name="android:layout_width">0dp</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:layout_marginStart">8dp</item>
         <item name="android:ellipsize">end</item>
         <item name="android:textColor">?attr/colorSurface</item>
-        <item name="layout_constraintEnd_toEndOf">parent</item>
     </style>
 
     <!-- Empty States-->
 
-    <style name="EmptyStateTitleTextView" parent="SubHeadingTextView">
+    <style name="EmptyStateTitleTextView" parent="TextAppearance.Luca.Headline3">
         <item name="android:visibility">gone</item>
         <item name="fontFamily">@font/montserrat_bold</item>
         <item name="android:lineSpacingExtra">4dp</item>
         <item name="android:textSize">@dimen/font_size_default</item>
     </style>
 
-    <style name="EmptyStateDescriptionTextView" parent="TextAppearance.App.Body2">
+    <style name="EmptyStateDescriptionTextView" parent="TextAppearance.Luca.Body2">
         <item name="android:visibility">gone</item>
         <item name="android:layout_width">0dp</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:layout_marginTop">8dp</item>
-        <item name="layout_constraintTop_toBottomOf">@id/emptyTitleTextView</item>
-        <item name="layout_constraintStart_toStartOf">@id/emptyTitleTextView</item>
-        <item name="layout_constraintEnd_toEndOf">@id/emptyTitleTextView</item>
     </style>
 
     <style name="EmptyStateImageView">
@@ -312,11 +252,24 @@
         <item name="android:layout_height">200dp</item>
         <item name="android:layout_margin">@dimen/spacing_default</item>
         <item name="android:scaleType">centerInside</item>
-        <item name="layout_constraintVertical_bias">0.25</item>
-        <item name="layout_constraintTop_toBottomOf">@id/emptyDescriptionTextView</item>
-        <item name="layout_constraintBottom_toBottomOf">parent</item>
-        <item name="layout_constraintStart_toStartOf">@id/emptyDescriptionTextView</item>
-        <item name="layout_constraintEnd_toEndOf">@id/emptyDescriptionTextView</item>
+    </style>
+
+    <!--  Misc  -->
+
+    <style name="HeaderSeparatorView">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">1dp</item>
+        <item name="android:layout_marginTop">@dimen/spacing_default</item>
+        <item name="android:background">?attr/colorControlNormal</item>
+    </style>
+
+    <style name="MenuImageView">
+        <item name="android:layout_width">30dp</item>
+        <item name="android:layout_height">0dp</item>
+        <item name="android:layout_marginEnd">@dimen/spacing_default</item>
+        <item name="android:scaleType">fitCenter</item>
+        <item name="android:src">@drawable/ic_more_menu_vertical</item>
+        <item name="tint">?attr/colorOnSurface</item>
     </style>
 
 </resources>

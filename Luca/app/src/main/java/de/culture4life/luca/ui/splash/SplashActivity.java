@@ -14,7 +14,7 @@ public class SplashActivity extends BaseActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        setTheme(R.style.Theme_App_DayNight);
+        setTheme(R.style.Theme_Luca_DayNight);
         super.onCreate(savedInstanceState);
         hideActionBar();
 

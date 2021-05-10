@@ -35,6 +35,8 @@ import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.core.Single;
 import timber.log.Timber;
 
+import static de.culture4life.luca.history.HistoryManager.KEEP_DATA_DURATION;
+
 public class MeetingManager extends Manager {
 
     public static final String KEY_CURRENT_MEETING_DATA = "current_meeting_data";
@@ -257,7 +259,7 @@ public class MeetingManager extends Manager {
 
     public Completable deleteOldArchivedMeetingData() {
         return getArchivedMeetingData()
-                .filter(meetingData -> meetingData.getCreationTimestamp() > System.currentTimeMillis() - TimeUnit.DAYS.toMillis(14))
+                .filter(meetingData -> meetingData.getCreationTimestamp() > System.currentTimeMillis() - KEEP_DATA_DURATION)
                 .toList()
                 .map(ArchivedMeetingData::new)
                 .flatMapCompletable(meetingsDataArchive -> preferencesManager.persist(KEY_ARCHIVED_MEETING_DATA, meetingsDataArchive))

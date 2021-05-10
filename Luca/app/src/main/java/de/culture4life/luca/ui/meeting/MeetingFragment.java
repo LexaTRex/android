@@ -62,7 +62,7 @@ public class MeetingFragment extends BaseFragment<MeetingViewModel> {
                 .andThen(Completable.fromAction(() -> {
                     observe(viewModel.getIsHostingMeeting(), isHostingMeeting -> {
                         if (!isHostingMeeting) {
-                            navigationController.navigate(R.id.action_meetingFragment_to_qrCodeFragment);
+                            safeNavigateFromNavController(R.id.action_meetingFragment_to_qrCodeFragment);
                         }
                         AccessibilityServiceUtil.speak(getContext(), getString(R.string.meeting_was_ended_hint));
                     });

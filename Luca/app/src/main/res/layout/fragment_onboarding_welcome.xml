@@ -9,11 +9,10 @@
 
     <TextView
             android:id="@+id/appNameTextView"
-            style="@style/TextAppearance.App.Headline3"
+            style="@style/TextAppearance.Luca.Headline1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/app_name"
-            android:textSize="48sp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -33,7 +32,7 @@
 
     <TextView
             android:id="@+id/headingTextView"
-            style="@style/TextAppearance.App.Body1"
+            style="@style/TextAppearance.Luca.Body1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/spacing_large"
@@ -52,14 +51,14 @@
             android:fillViewport="true"
             android:orientation="vertical"
             android:requiresFadingEdge="vertical"
-            app:layout_constraintBottom_toTopOf="@id/termsCheckBox"
+            app:layout_constraintBottom_toTopOf="@id/termsLayout"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/headingTextView">
 
         <TextView
                 android:id="@+id/descriptionTextView"
-                style="@style/TextAppearance.App.Body2"
+                style="@style/TextAppearance.Luca.Body2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/welcome_description"
@@ -68,56 +67,68 @@
 
     </ScrollView>
 
-    <com.google.android.material.checkbox.MaterialCheckBox
-            android:id="@+id/termsCheckBox"
-            android:layout_width="wrap_content"
+
+    <LinearLayout
+            android:id="@+id/termsLayout"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"
-            android:contentDescription="@string/welcome_terms_checkbox_content_description"
-            app:layout_constraintBottom_toTopOf="@id/privacyCheckBox"
-            app:layout_constraintStart_toStartOf="parent" />
+            android:gravity="center_vertical"
+            app:layout_constraintBottom_toTopOf="@id/privacyLayout"
+            app:layout_constraintStart_toStartOf="parent">
 
-    <TextView
-            android:id="@+id/termsTextView"
-            android:text="@string/welcome_terms_description"
-            style="@style/TextAppearance.App.Body2"
-            android:textColor="?attr/colorOnSurface"
-            android:textColorLink="?attr/colorOnSurface"
-            app:layout_constraintStart_toEndOf="@id/termsCheckBox"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="@id/termsCheckBox"
-            app:layout_constraintBottom_toBottomOf="@id/termsCheckBox"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content" />
+        <com.google.android.material.checkbox.MaterialCheckBox
+                android:id="@+id/termsCheckBox"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:buttonTint="?attr/colorOnSurface"
+                android:contentDescription="@string/welcome_terms_checkbox_content_description" />
 
-    <com.google.android.material.checkbox.MaterialCheckBox
-            android:id="@+id/privacyCheckBox"
-            android:layout_width="wrap_content"
+        <TextView
+                android:id="@+id/termsTextView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:text="@string/welcome_terms_description"
+                style="@style/TextAppearance.Luca.Body2"
+                android:textColor="?attr/colorOnSurface"
+                android:textColorLink="?attr/colorOnSurface" />
+
+    </LinearLayout>
+
+    <LinearLayout
+            android:id="@+id/privacyLayout"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="@dimen/spacing_large"
-            android:contentDescription="@string/welcome_privacy_checkbox_content_description"
+            android:gravity="center_vertical"
             app:layout_constraintBottom_toTopOf="@id/primaryActionButton"
-            app:layout_constraintStart_toStartOf="parent" />
+            app:layout_constraintStart_toStartOf="parent">
 
-    <TextView
-            android:id="@+id/privacyTextView"
-            android:text="@string/welcome_privacy_description"
-            style="@style/TextAppearance.App.Body2"
-            android:textColor="?attr/colorOnSurface"
-            android:textColorLink="?attr/colorOnSurface"
-            app:layout_constraintStart_toEndOf="@id/privacyCheckBox"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="@id/privacyCheckBox"
-            app:layout_constraintBottom_toBottomOf="@id/privacyCheckBox"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content" />
+        <com.google.android.material.checkbox.MaterialCheckBox
+                android:id="@+id/privacyCheckBox"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:buttonTint="?attr/colorOnSurface"
+                android:contentDescription="@string/welcome_privacy_checkbox_content_description" />
+
+        <TextView
+                android:id="@+id/privacyTextView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:text="@string/welcome_privacy_description"
+                style="@style/TextAppearance.Luca.Body2"
+                android:textColor="?attr/colorOnSurface"
+                android:textColorLink="?attr/colorOnSurface" />
+
+    </LinearLayout>
 
     <com.google.android.material.button.MaterialButton
             android:id="@+id/primaryActionButton"
-            style="@style/PrimaryActionButton"
-            android:layout_margin="0dp"
-            android:enabled="false"
+            style="@style/Button.Luca.PrimaryActionButton"
             android:text="@string/welcome_action"
-            tools:ignore="MissingConstraints" />
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

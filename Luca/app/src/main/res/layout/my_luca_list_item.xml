@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@android:color/transparent"
+        android:descendantFocusability="blocksDescendants"
+        android:paddingStart="@dimen/spacing_default"
+        android:paddingEnd="@dimen/spacing_default"
+        android:paddingBottom="@dimen/spacing_default">
+
+    <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardView"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:cardBackgroundColor="?attr/colorOnSurface"
+            app:cardCornerRadius="8dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="@dimen/spacing_default"
+                android:animateLayoutChanges="true">
+
+            <TextView
+                    android:id="@+id/itemTitleTextView"
+                    style="@style/TextAppearance.Luca.Body1"
+                    app:fontFamily="@font/montserrat_bold"
+                    android:textColor="@android:color/black"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="30dp"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    tools:text="Negativ"
+                    app:layout_constraintHorizontal_bias="0"
+                    app:layout_constrainedWidth="true"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                    android:id="@+id/itemDescriptionTextView"
+                    style="@style/TextAppearance.Luca.Body2"
+                    android:textColor="@android:color/black"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/spacing_default"
+                    android:layout_marginEnd="30dp"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    tools:text="Roche Antigen Test"
+                    app:layout_constraintHorizontal_bias="0"
+                    app:layout_constrainedWidth="true"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="@id/itemTitleTextView"
+                    app:layout_constraintTop_toBottomOf="@id/itemTitleTextView" />
+
+            <TextView
+                    android:id="@+id/itemTimeDescriptionTextView"
+                    style="@style/TextAppearance.Luca.Body2"
+                    android:textColor="@android:color/black"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="end"
+                    android:text="@string/test_issued_at"
+                    app:layout_constraintHorizontal_bias="0"
+                    app:layout_constrainedWidth="true"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="@id/itemTitleTextView"
+                    app:layout_constraintTop_toBottomOf="@id/itemDescriptionTextView" />
+
+            <TextView
+                    android:id="@+id/itemTimeTextView"
+                    style="@style/TextAppearance.Luca.Body2"
+                    app:fontFamily="@font/montserrat_bold"
+                    android:textColor="@android:color/black"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="30dp"
+                    android:ellipsize="end"
+                    tools:text="26.03. - 14:13 Uhr"
+                    app:layout_constraintHorizontal_bias="0"
+                    app:layout_constrainedWidth="true"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@id/itemTimeDescriptionTextView"
+                    app:layout_constraintTop_toBottomOf="@id/itemDescriptionTextView" />
+
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/collapseLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:visibility="visible"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/itemTimeTextView">
+
+                <LinearLayout
+                        android:id="@+id/additional_info"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        android:orientation="vertical">
+
+                    <TextView
+                            android:id="@+id/testLabHeader"
+                            style="@style/TextAppearance.Luca.Body2"
+                            android:textColor="@android:color/black"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="@dimen/spacing_default"
+                            android:layout_marginEnd="30dp"
+                            android:ellipsize="end"
+                            android:maxLines="1"
+                            android:text="@string/test_issued_by" />
+
+                    <TextView
+                            android:id="@+id/testLab"
+                            style="@style/TextAppearance.Luca.Body2"
+                            app:fontFamily="@font/montserrat_bold"
+                            android:textColor="@android:color/black"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginEnd="30dp"
+                            android:ellipsize="end"
+                            android:maxLines="1"
+                            tools:text="Testzentrum Rostock" />
+
+                    <TextView
+                            android:id="@+id/testTypeHeader"
+                            style="@style/TextAppearance.Luca.Body2"
+                            android:textColor="@android:color/black"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="@dimen/spacing_default"
+                            android:layout_marginEnd="30dp"
+                            android:ellipsize="end"
+                            android:maxLines="1"
+                            android:text="@string/test_lab_doctor_name" />
+
+                    <TextView
+                            android:id="@+id/testLabDoctorName"
+                            style="@style/TextAppearance.Luca.Body2"
+                            app:fontFamily="@font/montserrat_bold"
+                            android:textColor="@android:color/black"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginEnd="30dp"
+                            android:ellipsize="end"
+                            android:maxLines="1"
+                            tools:text="Prof. Dr. Coronafight" />
+
+                </LinearLayout>
+
+                <ImageView
+                        android:id="@+id/qrCodeImageView"
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:scaleType="fitCenter"
+                        android:padding="@dimen/spacing_default"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/additional_info"
+                        app:layout_constraintDimensionRatio="1:1" />
+
+                <com.google.android.material.button.MaterialButton
+                        android:id="@+id/deleteTestResultButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="0dp"
+                        style="@style/Button.Luca.PrimaryActionButton"
+                        android:textColor="@android:color/black"
+                        android:fontFamily="@font/montserrat_bold"
+                        android:backgroundTint="@android:color/transparent"
+                        android:text="@string/test_delete_button"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/qrCodeImageView" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </com.google.android.material.card.MaterialCardView>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -8,6 +8,12 @@ import androidx.annotation.IntDef;
 
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
+/**
+ * Model holding necessary details to facilitate checking in at a venue.
+ *
+ * @see <a href="https://www.luca-app.de/securityoverview/processes/guest_app_checkin.html#qr-code-generation-and-check-in">Security
+ *         Overview: QR Code Generation and Check-In</a>
+ */
 public class QrCodeData {
 
     private static final byte VERSION_CURRENT = 3;

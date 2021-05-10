@@ -3,8 +3,13 @@ package de.culture4life.luca.crypto;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
+import de.culture4life.luca.checkin.CheckInData;
+
 import java.security.interfaces.ECPublicKey;
 
+/**
+ * Public part of the daily key pair, used to encrypt {@link CheckInData}.
+ */
 public class DailyKeyPairPublicKeyWrapper {
 
     @SerializedName("id")

@@ -3,7 +3,13 @@
         xmlns:app="http://schemas.android.com/apk/res-auto"
         xmlns:tools="http://schemas.android.com/tools"
         android:id="@+id/mainNavigation"
-        app:startDestination="@+id/qrCodeFragment">
+        app:startDestination="@+id/myLucaFragment">
+
+    <fragment
+            android:id="@+id/myLucaFragment"
+            android:name="de.culture4life.luca.ui.myluca.MyLucaFragment"
+            android:label="@string/navigation_my_luca"
+            tools:layout="@layout/fragment_my_luca" />
 
     <fragment
             android:id="@+id/qrCodeFragment"

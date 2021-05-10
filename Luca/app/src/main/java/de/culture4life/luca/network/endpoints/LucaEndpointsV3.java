@@ -11,6 +11,7 @@ import de.culture4life.luca.network.pojo.DataTransferRequestData;
 import de.culture4life.luca.network.pojo.LocationResponseData;
 import de.culture4life.luca.network.pojo.TraceData;
 import de.culture4life.luca.network.pojo.TracesResponseData;
+import de.culture4life.luca.network.pojo.UserDeletionRequestData;
 import de.culture4life.luca.network.pojo.UserRegistrationRequestData;
 
 import java.util.List;
@@ -20,6 +21,7 @@ import io.reactivex.rxjava3.core.Single;
 import retrofit2.http.Body;
 import retrofit2.http.DELETE;
 import retrofit2.http.GET;
+import retrofit2.http.HTTP;
 import retrofit2.http.Headers;
 import retrofit2.http.PATCH;
 import retrofit2.http.POST;
@@ -64,6 +66,10 @@ public interface LucaEndpointsV3 {
     @PATCH("users/{userId}")
     @Headers("Content-Type: application/json")
     Completable updateUser(@Path("userId") String userId, @Body UserRegistrationRequestData data);
+
+    @HTTP(method = "DELETE", path = "users/{userId}", hasBody = true)
+    @Headers("Content-Type: application/json")
+    Completable deleteUser(@Path("userId") String userId, @Body UserDeletionRequestData data);
 
     /*
         Traces
@@ -139,5 +145,12 @@ public interface LucaEndpointsV3 {
     @POST("sms/verify/bulk")
     @Headers("Content-Type: application/json")
     Completable verifyPhoneNumberBulk(@Body JsonObject message);
+
+    /*
+        Time
+     */
+
+    @GET("timesync")
+    Single<JsonObject> getServerTime();
 
 }

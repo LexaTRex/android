@@ -6,8 +6,10 @@ import com.google.gson.annotations.SerializedName;
 import java.util.List;
 
 /**
- * Example:
+ * Contains tracing secrets, user ID and the user's data secret. Will be encrypted using the daily
+ * keypair to be accessed by the health department only.
  *
+ * Example:
  * <pre>
  * {
  *   "v": 3, // version
@@ -16,6 +18,8 @@ import java.util.List;
  *   "uds": "OUR2Tnpohdf6ZQukgqPZ", // userDataSecret (3944764e7a6885d7fa650ba482a3d9)
  * }
  * </pre>
+ *
+ * @see <a href="https://www.luca-app.de/securityoverview/properties/secrets.html#term-guest-data-transfer-object">https://www.luca-app.de/securityoverview/properties/secrets.html#term-guest-data-transfer-object</a>
  */
 public class TransferData {
 

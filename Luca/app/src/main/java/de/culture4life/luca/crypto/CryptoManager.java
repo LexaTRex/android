@@ -11,9 +11,14 @@ import com.nexenio.rxkeystore.provider.hash.RxHashProvider;
 import com.nexenio.rxkeystore.util.RxBase64;
 
 import de.culture4life.luca.Manager;
+import de.culture4life.luca.checkin.CheckInManager;
+import de.culture4life.luca.meeting.MeetingGuestData;
 import de.culture4life.luca.network.NetworkManager;
 import de.culture4life.luca.network.endpoints.LucaEndpointsV3;
+import de.culture4life.luca.network.pojo.CheckInRequestData;
 import de.culture4life.luca.preference.PreferencesManager;
+import de.culture4life.luca.ui.qrcode.QrCodeData;
+import de.culture4life.luca.ui.qrcode.QrCodeViewModel;
 import de.culture4life.luca.util.SerializationUtil;
 import de.culture4life.luca.util.TimeUtil;
 
@@ -49,6 +54,11 @@ import io.reactivex.rxjava3.core.Single;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 import timber.log.Timber;
 
+import static de.culture4life.luca.crypto.HashProvider.TRIMMED_HASH_LENGTH;
+
+/**
+ * Provides access to all cryptographic methods, handles Bouncy-Castle key store persistence.
+ */
 public class CryptoManager extends Manager {
 
     public static final String KEYSTORE_FILE_NAME = "keys.ks";
@@ -119,6 +129,10 @@ public class CryptoManager extends Manager {
         secureRandom = new SecureRandom();
     }
 
+    /**
+     * Initialize manager, setup security providers, load {@link #bouncyCastleKeyStore} and migrate
+     * insecure tracing secret of older app versions (if any).
+     */
     @Override
     protected Completable doInitialize(@NonNull Context context) {
         return Completable.mergeArray(
@@ -151,6 +165,9 @@ public class CryptoManager extends Manager {
         }
     }
 
+    /**
+     * Substitute outdated Android-provided Bouncy Castle with bundled one.
+     */
     public static Completable setupSecurityProviders() {
         return Completable.fromAction(() -> {
             final Provider provider = Security.getProvider(BouncyCastleProvider.PROVIDER_NAME);
@@ -188,6 +205,12 @@ public class CryptoManager extends Manager {
                 ));
     }
 
+    /**
+     * Load {@link #bouncyCastleKeyStore} from internal file, decrypt it using {@link
+     * #androidKeyStore}-backed password.
+     *
+     * @see WrappedSecret
+     */
     private Completable loadKeyStoreFromFile() {
         return getKeyStorePasswordOrHardcodedValue()
                 .flatMapCompletable(password -> {
@@ -198,6 +221,11 @@ public class CryptoManager extends Manager {
                 .doOnError(throwable -> Timber.w("Unable to load keystore from file: %s", throwable.toString()));
     }
 
+    /**
+     * Store BC keystore using {@link #androidKeyStore}-backed password.
+     *
+     * @see WrappedSecret
+     */
     private Completable persistKeyStoreToFile() {
         return getKeyStorePassword()
                 .flatMapCompletable(password -> {
@@ -219,6 +247,10 @@ public class CryptoManager extends Manager {
                 .flatMap(hasPassword -> hasPassword ? getKeyStorePassword() : Single.just("luca"));
     }
 
+    /**
+     * Fetch {@link #bouncyCastleKeyStore} password if available, otherwise generate new random
+     * password and persist it using {@link #androidKeyStore}-backed {@link WrappedSecret}}.
+     */
     private Single<String> getKeyStorePassword() {
         return restoreWrappedSecretIfAvailable(ALIAS_KEYSTORE_PASSWORD)
                 .switchIfEmpty(generateSecureRandomData(128)
@@ -236,7 +268,7 @@ public class CryptoManager extends Manager {
      * Will get or generate a key pair using the {@link #wrappingCipherProvider} which may be used
      * for restoring or persisting {@link WrappedSecret}s.
      */
-    private Single<KeyPair> getSecretWrappingKeyPair() {
+    protected Single<KeyPair> getSecretWrappingKeyPair() {
         return wrappingCipherProvider.getKeyPairIfAvailable(ALIAS_SECRET_WRAPPING_KEY_PAIR)
                 .switchIfEmpty(wrappingCipherProvider.generateKeyPair(ALIAS_SECRET_WRAPPING_KEY_PAIR, context)
                         .doOnSubscribe(disposable -> Timber.d("Generating new secret wrapping key pair"))
@@ -246,6 +278,8 @@ public class CryptoManager extends Manager {
     /**
      * Will restore the {@link WrappedSecret} using the {@link #preferencesManager} and decrypt it
      * using the {@link #wrappingCipherProvider}.
+     *
+     * {@link WrappedSecret}s are encrypted using an AndroidKeyStore-backed key.
      */
     private Maybe<byte[]> restoreWrappedSecretIfAvailable(@NonNull String alias) {
         return preferencesManager.restoreIfAvailable(alias, WrappedSecret.class)
@@ -270,6 +304,9 @@ public class CryptoManager extends Manager {
         Check-in
      */
 
+    /**
+     * Generate and persist a trace ID from given user ID.
+     */
     public Single<TraceIdWrapper> getTraceIdWrapper(@NonNull UUID userId) {
         return generateTraceIdWrapper(userId)
                 .flatMap(traceIdWrapper -> persistTraceIdWrapper(traceIdWrapper)
@@ -289,20 +326,29 @@ public class CryptoManager extends Manager {
                 .flatMap(encodedData -> getCurrentTracingSecret()
                         .flatMap(CryptoManager::createKeyFromSecret)
                         .flatMap(traceKey -> macProvider.sign(encodedData, traceKey)))
-                .flatMap(traceId -> trim(traceId, 16))
+                .flatMap(traceId -> trim(traceId, TRIMMED_HASH_LENGTH))
                 .doOnSuccess(traceId -> Timber.d("Generated new trace ID: %s", SerializationUtil.serializeToBase64(traceId).blockingGet()));
     }
 
+    /**
+     * Get current {@link TraceIdWrapper}s ordered by timestamp.
+     */
     public Observable<TraceIdWrapper> getTraceIdWrappers() {
         return restoreTraceIdWrappers();
     }
 
+    /**
+     * Restore {@link TraceIdWrapperList} from {@link PreferencesManager} and sort by timestamp.
+     */
     private Observable<TraceIdWrapper> restoreTraceIdWrappers() {
         return preferencesManager.restoreIfAvailable(TRACE_ID_WRAPPERS_KEY, TraceIdWrapperList.class)
                 .flatMapObservable(Observable::fromIterable)
                 .sorted((first, second) -> Long.compare(first.getTimestamp(), second.getTimestamp()));
     }
 
+    /**
+     * Persist given {@link TraceIdWrapper}, appending it to the list of stored ones.
+     */
     private Completable persistTraceIdWrapper(@NonNull TraceIdWrapper traceIdWrapper) {
         return getTraceIdWrappers()
                 .mergeWith(Observable.just(traceIdWrapper))
@@ -311,6 +357,11 @@ public class CryptoManager extends Manager {
                 .flatMapCompletable(traceIdWrappers -> preferencesManager.persist(TRACE_ID_WRAPPERS_KEY, traceIdWrappers));
     }
 
+    /**
+     * Delete all trace IDs and their associated user ephemeral key pair.
+     *
+     * @see CryptoManager#deleteUserEphemeralKeyPair
+     */
     public Completable deleteTraceData() {
         return getTraceIdWrappers()
                 .map(TraceIdWrapper::getTraceId)
@@ -340,6 +391,10 @@ public class CryptoManager extends Manager {
                 .doOnSubscribe(disposable -> Timber.d("Updating daily key pair public key"));
     }
 
+    /**
+     * Get {@link DailyKeyPairPublicKeyWrapper}, restore it if available, attempt fetching it from
+     * server otherwise using {@link #updateDailyKeyPairPublicKey()}.
+     */
     public Single<DailyKeyPairPublicKeyWrapper> getDailyKeyPairPublicKeyWrapper() {
         return Maybe.fromCallable(() -> dailyKeyPairPublicKeyWrapper)
                 .switchIfEmpty(restoreDailyKeyPairPublicKeyWrapper()
@@ -348,6 +403,10 @@ public class CryptoManager extends Manager {
                                 .andThen(Single.fromCallable(() -> dailyKeyPairPublicKeyWrapper))));
     }
 
+    /**
+     * Fetch {@link DailyKeyPairPublicKeyWrapper} from server, verify its authenticity and ensure
+     * its less than 7 days old.
+     */
     private Single<DailyKeyPairPublicKeyWrapper> fetchDailyKeyPairPublicKeyWrapperFromBackend() {
         return networkManager.getLucaEndpointsV3()
                 .flatMap(LucaEndpointsV3::getDailyKeyPairPublicKey)
@@ -385,6 +444,12 @@ public class CryptoManager extends Manager {
                 })).doOnSuccess(wrapper -> Timber.d("Fetched daily key pair public key from backend: %s", wrapper));
     }
 
+    /**
+     * Fetch Health Department Signing Key (HDSKP), used to verify authenticity of the daily
+     * keypair.
+     *
+     * @param issuerId individual ID of given health department
+     */
     private Single<PublicKey> getKeyIssuerSigningKey(@NonNull String issuerId) {
         // TODO: 18.03.21 cache previously requested issuers
         return networkManager.getLucaEndpointsV3()
@@ -394,6 +459,9 @@ public class CryptoManager extends Manager {
                 .flatMap(AsymmetricCipherProvider::decodePublicKey);
     }
 
+    /**
+     * Restore {@link DailyKeyPairPublicKeyWrapper} if available.
+     */
     private Maybe<DailyKeyPairPublicKeyWrapper> restoreDailyKeyPairPublicKeyWrapper() {
         Maybe<Integer> restoreId = preferencesManager.restoreIfAvailable(DAILY_KEY_PAIR_PUBLIC_KEY_ID_KEY, Integer.class);
         Maybe<ECPublicKey> restoreKey = preferencesManager.restoreIfAvailable(DAILY_KEY_PAIR_PUBLIC_KEY_POINT_KEY, String.class)
@@ -402,7 +470,12 @@ public class CryptoManager extends Manager {
         return Maybe.zip(restoreId, restoreKey, DailyKeyPairPublicKeyWrapper::new);
     }
 
-    private Completable persistDailyKeyPairPublicKeyWrapper(@NonNull DailyKeyPairPublicKeyWrapper wrapper) {
+    /**
+     * Persist given daily public key wrapper to preferences.
+     *
+     * @param wrapper {@link DailyKeyPairPublicKeyWrapper}
+     */
+    protected Completable persistDailyKeyPairPublicKeyWrapper(@NonNull DailyKeyPairPublicKeyWrapper wrapper) {
         Completable persistId = preferencesManager.persist(DAILY_KEY_PAIR_PUBLIC_KEY_ID_KEY, wrapper.getId());
         Completable persistKey = AsymmetricCipherProvider.encode(wrapper.getPublicKey(), false)
                 .flatMap(CryptoManager::encodeToString)
@@ -414,6 +487,11 @@ public class CryptoManager extends Manager {
         Guest key pair
      */
 
+    /**
+     * Get guest key pair or create if not yet generated. The keypair’s private key is used to sign
+     * the encrypted guest data and guest data transfer object. The public key is uploaded to the
+     * luca Server.
+     */
     public Single<KeyPair> getGuestKeyPair() {
         return restoreGuestKeyPair()
                 .switchIfEmpty(generateGuestKeyPair()
@@ -432,15 +510,27 @@ public class CryptoManager extends Manager {
                 .cast(ECPublicKey.class);
     }
 
+    /**
+     * Generate guest key pair, used to sign encrypted {@link MeetingGuestData}.
+     *
+     * @see <a href="https://luca-app.de/securityoverview/properties/secrets.html#term-guest-keypair">Security
+     *         Overview: Secrets</a>
+     */
     private Single<KeyPair> generateGuestKeyPair() {
         return asymmetricCipherProvider.generateKeyPair(ALIAS_GUEST_KEY_PAIR, context)
                 .doOnSuccess(guestKeyPair -> Timber.d("Generated new guest key pair: %s", guestKeyPair.getPublic()));
     }
 
+    /**
+     * Restore Guest key pair from {@link #bouncyCastleKeyStore} if available.
+     */
     private Maybe<KeyPair> restoreGuestKeyPair() {
         return asymmetricCipherProvider.getKeyPairIfAvailable(ALIAS_GUEST_KEY_PAIR);
     }
 
+    /**
+     * Persist given guest keypair to {@link #bouncyCastleKeyStore}.
+     */
     private Completable persistGuestKeyPair(@NonNull KeyPair keyPair) {
         return asymmetricCipherProvider.setKeyPair(ALIAS_GUEST_KEY_PAIR, keyPair)
                 .andThen(persistKeyStoreToFile());
@@ -450,6 +540,12 @@ public class CryptoManager extends Manager {
         User ephemeral key pair
      */
 
+    /**
+     * Get or generate user ephemeral keypair used to encrypt user ID and secret during generation
+     * of QR-codes.
+     *
+     * @see QrCodeViewModel#generateQrCodeData()
+     */
     public Single<KeyPair> getUserEphemeralKeyPair(@NonNull byte[] traceId) {
         return restoreUserEphemeralKeyPair(traceId)
                 .switchIfEmpty(generateUserEphemeralKeyPair(traceId)
@@ -466,6 +562,9 @@ public class CryptoManager extends Manager {
         return getUserEphemeralKeyPair(traceId).map(KeyPair::getPublic);
     }
 
+    /**
+     * Generate keypair of given traceId.
+     */
     private Single<KeyPair> generateUserEphemeralKeyPair(@NonNull byte[] traceId) {
         return getUserEphemeralKeyPairAlias(traceId)
                 .flatMap(alias -> asymmetricCipherProvider.generateKeyPair(alias, context))
@@ -477,7 +576,11 @@ public class CryptoManager extends Manager {
                 .flatMapMaybe(asymmetricCipherProvider::getKeyPairIfAvailable);
     }
 
-    private Completable persistUserEphemeralKeyPair(@NonNull byte[] traceId, @NonNull KeyPair keyPair) {
+    /**
+     * Persist given keypair to BC keystore.
+     */
+    private Completable persistUserEphemeralKeyPair(@NonNull byte[] traceId,
+                                                    @NonNull KeyPair keyPair) {
         return getUserEphemeralKeyPairAlias(traceId)
                 .flatMapCompletable(alias -> asymmetricCipherProvider.setKeyPair(alias, keyPair))
                 .andThen(persistKeyStoreToFile());
@@ -497,6 +600,21 @@ public class CryptoManager extends Manager {
         Tracing secrets
      */
 
+    /**
+     * Get or create tracing secret - a randomly generated seed used to derive trace IDs when
+     * checking in using the Guest App. It is stored locally on the Guest App until it is shared
+     * with the Health Department during contact tracing. Moreover, the tracing secret is rotated on
+     * a regular basis in order to limit the number of trace IDs that can be reconstructed when the
+     * secret is shared
+     * <br>
+     * Rotation of the daily tracing secret is ensured by the method either restoring today's secret
+     * or generating (and persisting) a new one for today.
+     *
+     * @see <a href="https://www.luca-app.de/securityoverview/properties/secrets.html#term-tracing-secret">Security
+     *         Overview: Secrets</a>
+     * @see <a href="https://luca-app.de/securityoverview/processes/guest_registration.html#rotating-the-tracing-secret">Security
+     *         Overview: Rotating the Tracing Secret</a>
+     */
     public Single<byte[]> getCurrentTracingSecret() {
         return restoreCurrentTracingSecret()
                 .switchIfEmpty(generateTracingSecret()
@@ -506,31 +624,39 @@ public class CryptoManager extends Manager {
     }
 
     private Single<byte[]> generateTracingSecret() {
-        return generateSecureRandomData(16)
+        return generateSecureRandomData(TRIMMED_HASH_LENGTH)
                 .doOnSuccess(bytes -> Timber.d("Generated new tracing secret"));
     }
 
+    /**
+     * Restore only the recent most tracing secret, meaning today's secret.
+     *
+     * @return today's tracing secret if available
+     */
     private Maybe<byte[]> restoreCurrentTracingSecret() {
-        return restoreRecentTracingSecrets(1)
+        return restoreRecentTracingSecrets(0)
                 .map(pair -> pair.second)
                 .firstElement();
     }
 
+    /**
+     * Persist given tracing secret to preferences, encrypted as a {@link WrappedSecret}.
+     */
     private Completable persistCurrentTracingSecret(@NonNull byte[] secret) {
         return TimeUtil.getStartOfDayTimestamp()
                 .map(startOfDayTimestamp -> TRACING_SECRET_KEY_PREFIX + startOfDayTimestamp)
                 .flatMapCompletable(preferenceKey -> persistWrappedSecret(preferenceKey, secret));
     }
 
-    public Observable<Pair<Long, byte[]>> restoreRecentTracingSecrets(int days) {
-        return generateRecentStartOfDayTimestamps(days)
+    public Observable<Pair<Long, byte[]>> restoreRecentTracingSecrets(long duration) {
+        return generateRecentStartOfDayTimestamps(duration)
                 .flatMapMaybe(startOfDayTimestamp -> restoreWrappedSecretIfAvailable(TRACING_SECRET_KEY_PREFIX + startOfDayTimestamp)
                         .map(secret -> new Pair<>(startOfDayTimestamp, secret)));
     }
 
-    public Observable<Long> generateRecentStartOfDayTimestamps(int days) {
+    public Observable<Long> generateRecentStartOfDayTimestamps(long duration) {
         return TimeUtil.getStartOfDayTimestamp()
-                .flatMapObservable(firstStartOfDayTimestamp -> Observable.range(0, days)
+                .flatMapObservable(firstStartOfDayTimestamp -> Observable.range(0, (int) TimeUnit.MILLISECONDS.toDays(duration) + 1)
                         .map(dayIndex -> firstStartOfDayTimestamp - TimeUnit.DAYS.toMillis(dayIndex)));
     }
 
@@ -549,6 +675,14 @@ public class CryptoManager extends Manager {
         User data secret
      */
 
+    /**
+     * Get or generate data secret - a cryptographic seed which is used to derive both the data
+     * encryption key and the data authentication key. This seed is encrypted twice before being
+     * sent to the Luca Server during Check-In and ultimately protects the Guest’s Contact Data.
+     *
+     * @see <a href="https://www.luca-app.de/securityoverview/properties/secrets.html#term-data-secret">Security
+     *         Overview: Secrets</a>
+     */
     public Single<byte[]> getDataSecret() {
         return restoreDataSecret()
                 .switchIfEmpty(generateDataSecret()
@@ -558,7 +692,7 @@ public class CryptoManager extends Manager {
     }
 
     public Single<byte[]> generateDataSecret() {
-        return generateSecureRandomData(16)
+        return generateSecureRandomData(TRIMMED_HASH_LENGTH)
                 .doOnSuccess(bytes -> Timber.d("Generated new user data secret"));
     }
 
@@ -566,6 +700,9 @@ public class CryptoManager extends Manager {
         return restoreWrappedSecretIfAvailable(DATA_SECRET_KEY);
     }
 
+    /**
+     * Persist data secret to preferences, encrypted as a {@link WrappedSecret}.
+     */
     private Completable persistDataSecret(@NonNull byte[] secret) {
         return persistWrappedSecret(DATA_SECRET_KEY, secret);
     }
@@ -574,15 +711,26 @@ public class CryptoManager extends Manager {
         Shared Diffie-Hellman secret
      */
 
+    /**
+     * Convenience method for {@link #generateSharedDiffieHellmanSecret()}.
+     */
     public Single<byte[]> getSharedDiffieHellmanSecret() {
         return generateSharedDiffieHellmanSecret();
     }
 
+    /**
+     * Compute shared DH secret of {@link DailyKeyPairPublicKeyWrapper} and the guest private key.
+     */
     public Single<byte[]> generateSharedDiffieHellmanSecret() {
         return getGuestKeyPairPrivateKey()
                 .flatMap(this::generateSharedDiffieHellmanSecret);
     }
 
+    /**
+     * Compute shared DH secret of {@link DailyKeyPairPublicKeyWrapper} and a given private key.
+     *
+     * @return shared DH secret
+     */
     public Single<byte[]> generateSharedDiffieHellmanSecret(@NonNull PrivateKey privateKey) {
         return getDailyKeyPairPublicKeyWrapper()
                 .map(DailyKeyPairPublicKeyWrapper::getPublicKey)
@@ -594,16 +742,24 @@ public class CryptoManager extends Manager {
         Encryption secret
      */
 
+    /**
+     * Generate data encryption secret by appending {@link #DATA_ENCRYPTION_SECRET_SUFFIX} to given
+     * baseSecret, hashing it and trimming it to a length of 16.
+     */
     public Single<byte[]> generateDataEncryptionSecret(@NonNull byte[] baseSecret) {
         return concatenate(baseSecret, DATA_ENCRYPTION_SECRET_SUFFIX)
                 .flatMap(hashProvider::hash)
-                .flatMap(secret -> trim(secret, 16));
+                .flatMap(secret -> trim(secret, TRIMMED_HASH_LENGTH));
     }
 
     /*
         Authentication secret
      */
 
+    /**
+     * Generate data authentication secret by appending {@link #DATA_AUTHENTICATION_SECRET_SUFFIX}
+     * to given baseSecret, hashing it and trimming it to a length of 16.
+     */
     public Single<byte[]> generateDataAuthenticationSecret(@NonNull byte[] baseSecret) {
         return concatenate(baseSecret, DATA_AUTHENTICATION_SECRET_SUFFIX)
                 .flatMap(hashProvider::hash);
@@ -613,15 +769,33 @@ public class CryptoManager extends Manager {
         Scanner
      */
 
+    /**
+     * Get previously persisted scanner ephemeral key - used during self check-in to complete
+     * re-encryption of {@link CheckInRequestData} usually performed by the Scanner Frontend.
+     *
+     * @see <a href="https://luca-app.de/securityoverview/processes/guest_self_checkin.html">Security
+     *         Overview: Check-In via a Printed QR Code</a>
+     */
     public Single<KeyPair> getScannerEphemeralKeyPair() {
         return asymmetricCipherProvider.getKeyPair(ALIAS_SCANNER_EPHEMERAL_KEY_PAIR);
     }
 
+    /**
+     * Generate a new scanner ephemeral key - used during self check-in to re-encrypt {@link
+     * CheckInRequestData}.
+     *
+     * @see CheckInManager#generateCheckInData(QrCodeData, UUID)
+     */
     public Single<KeyPair> generateScannerEphemeralKeyPair() {
         return asymmetricCipherProvider.generateKeyPair(ALIAS_SCANNER_EPHEMERAL_KEY_PAIR, context)
                 .doOnSuccess(keyPair -> Timber.d("Generated new scanner ephemeral key pair: %s", keyPair.getPublic()));
     }
 
+    /**
+     * Persist given scanner ephemeral keypair to BC keystore.
+     *
+     * @param keyPair ephemeral scanner key to persist
+     */
     public Completable persistScannerEphemeralKeyPair(@NonNull KeyPair keyPair) {
         return asymmetricCipherProvider.setKeyPair(ALIAS_SCANNER_EPHEMERAL_KEY_PAIR, keyPair)
                 .andThen(persistKeyStoreToFile());
@@ -656,7 +830,8 @@ public class CryptoManager extends Manager {
                 .flatMapMaybe(asymmetricCipherProvider::getKeyPairIfAvailable);
     }
 
-    public Completable persistMeetingEphemeralKeyPair(@NonNull UUID meetingId, @NonNull KeyPair keyPair) {
+    public Completable persistMeetingEphemeralKeyPair(@NonNull UUID meetingId, @NonNull KeyPair
+            keyPair) {
         return getMeetingEphemeralKeyPairAlias(meetingId)
                 .flatMapCompletable(alias -> asymmetricCipherProvider.setKeyPair(alias, keyPair))
                 .andThen(persistKeyStoreToFile());
@@ -720,6 +895,14 @@ public class CryptoManager extends Manager {
             System.arraycopy(data, 0, trimmedData, 0, length);
             return trimmedData;
         });
+    }
+
+    /**
+     * Delete data stored in the {@link #androidKeyStore} and {@link #bouncyCastleKeyStore}.
+     */
+    public Completable deleteAllKeyStoreEntries() {
+        return androidKeyStore.deleteAllEntries()
+                .andThen(bouncyCastleKeyStore.deleteAllEntries());
     }
 
     /*

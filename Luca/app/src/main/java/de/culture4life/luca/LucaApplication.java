@@ -25,8 +25,10 @@ import de.culture4life.luca.notification.LucaNotificationManager;
 import de.culture4life.luca.preference.PreferencesManager;
 import de.culture4life.luca.registration.RegistrationManager;
 import de.culture4life.luca.service.LucaService;
+import de.culture4life.luca.testing.TestingManager;
 import de.culture4life.luca.ui.ViewError;
 import de.culture4life.luca.ui.dialog.BaseDialogFragment;
+import de.culture4life.luca.util.TimeUtil;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -55,6 +57,8 @@ import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 
 public class LucaApplication extends MultiDexApplication {
 
+    private static final long MAXIMUM_TIMESTAMP_OFFSET = TimeUnit.MINUTES.toMillis(1);
+
     private final PreferencesManager preferencesManager;
     private final CryptoManager cryptoManager;
     private final NetworkManager networkManager;
@@ -65,6 +69,7 @@ public class LucaApplication extends MultiDexApplication {
     private final MeetingManager meetingManager;
     private final HistoryManager historyManager;
     private final DataAccessManager dataAccessManager;
+    private final TestingManager testingManager;
     private final GeofenceManager geofenceManager;
 
     private final CompositeDisposable applicationDisposable;
@@ -91,6 +96,7 @@ public class LucaApplication extends MultiDexApplication {
         meetingManager = new MeetingManager(preferencesManager, networkManager, locationManager, historyManager, cryptoManager);
         checkInManager = new CheckInManager(preferencesManager, networkManager, geofenceManager, locationManager, historyManager, cryptoManager, notificationManager);
         dataAccessManager = new DataAccessManager(preferencesManager, networkManager, notificationManager, checkInManager, historyManager, cryptoManager);
+        testingManager = new TestingManager(preferencesManager, historyManager, registrationManager);
 
         applicationDisposable = new CompositeDisposable();
 
@@ -152,12 +158,42 @@ public class LucaApplication extends MultiDexApplication {
                 checkInManager.initialize(this).subscribeOn(Schedulers.io()),
                 historyManager.initialize(this).subscribeOn(Schedulers.io()),
                 dataAccessManager.initialize(this).subscribeOn(Schedulers.io()),
+                testingManager.initialize(this).subscribeOn(Schedulers.io()),
                 geofenceManager.initialize(this).subscribeOn(Schedulers.io())
         ).andThen(Completable.mergeArray(
+                invokeServerTimeCheck(),
                 invokeRotatingBackendPublicKeyUpdate(),
                 invokeAccessedDataUpdate(),
                 startKeepingDataUpdated()
         ));
+    }
+
+    private Completable invokeServerTimeCheck() {
+        return Completable.fromAction(() -> applicationDisposable.add(networkManager.getLucaEndpointsV3()
+                .flatMap(LucaEndpointsV3::getServerTime)
+                .map(jsonObject -> jsonObject.get("unix").getAsInt())
+                .flatMap(TimeUtil::convertFromUnixTimestamp)
+                .map(serverTimestamp -> Math.abs(System.currentTimeMillis() - serverTimestamp))
+                .subscribeOn(Schedulers.io())
+                .subscribe(
+                        timestampOffset -> {
+                            Timber.d("Timestamp offset: %d", timestampOffset);
+                            if (timestampOffset > MAXIMUM_TIMESTAMP_OFFSET) {
+                                showErrorAsDialog(new ViewError.Builder(this)
+                                        .withTitle(R.string.error_timestamp_offset_title)
+                                        .withDescription(R.string.error_timestamp_offset_description)
+                                        .withResolveLabel(R.string.action_resolve)
+                                        .withResolveAction(Completable.fromAction(() -> {
+                                            Intent intent = new Intent(android.provider.Settings.ACTION_DATE_SETTINGS);
+                                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                            startActivity(intent);
+                                        }))
+                                        .removeWhenShown()
+                                        .build());
+                            }
+                        },
+                        throwable -> Timber.w("Unable to get server time offset: %s", throwable.toString())
+                )));
     }
 
     private Completable invokeRotatingBackendPublicKeyUpdate() {
@@ -262,6 +298,8 @@ public class LucaApplication extends MultiDexApplication {
         notificationManager.dispose();
         preferencesManager.dispose();
         geofenceManager.dispose();
+        dataAccessManager.dispose();
+        testingManager.dispose();
         stopService();
         Timber.i("Stopping application");
         System.exit(0);
@@ -406,6 +444,10 @@ public class LucaApplication extends MultiDexApplication {
 
     public DataAccessManager getDataAccessManager() {
         return dataAccessManager;
+    }
+
+    public TestingManager getTestingManager() {
+        return testingManager;
     }
 
     public GeofenceManager getGeofenceManager() {

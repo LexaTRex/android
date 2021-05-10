@@ -32,9 +32,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class NetworkManager extends Manager {
 
-    private static final String API_BASE_URL_PRODUCTION = "https://app.luca-app.de/api/v3/";
-    private static final String API_BASE_URL_STAGING = "https://staging.luca-app.de/api/v3/";
-    public static final String API_BASE_URL = BuildConfig.DEBUG ? API_BASE_URL_STAGING : API_BASE_URL_PRODUCTION;
+    public static final String API_BASE_URL = BuildConfig.API_BASE_URL + "/api/v3/";
     private static final long DEFAULT_REQUEST_TIMEOUT = TimeUnit.SECONDS.toMillis(10);
     private static final String USER_AGENT = createUserAgent();
 

@@ -10,6 +10,7 @@ import de.culture4life.luca.meeting.MeetingGuestData;
 import de.culture4life.luca.meeting.MeetingManager;
 import de.culture4life.luca.preference.PreferencesManager;
 import de.culture4life.luca.registration.RegistrationData;
+import de.culture4life.luca.testing.TestResult;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -24,7 +25,8 @@ import timber.log.Timber;
 
 public class HistoryManager extends Manager {
 
-    private static final long MAXIMUM_ITEM_AGE = TimeUnit.DAYS.toMillis(14);
+    public static final long MAXIMUM_CHECK_IN_DURATION = TimeUnit.DAYS.toMillis(1);
+    public static final long KEEP_DATA_DURATION = TimeUnit.DAYS.toMillis(14);
     public static final String KEY_HISTORY_ITEMS = "history_items_2";
 
     @Deprecated
@@ -72,7 +74,7 @@ public class HistoryManager extends Manager {
                 .map(data -> {
                     HistoryItem item = new HistoryItem(HistoryItem.TYPE_CHECK_OUT);
                     item.setRelatedId(checkInData.getTraceId());
-                    item.setTimestamp(System.currentTimeMillis());
+                    item.setTimestamp(Math.min(checkInData.getTimestamp() + MAXIMUM_CHECK_IN_DURATION, System.currentTimeMillis()));
                     item.setDisplayName(checkInData.getLocationDisplayName());
                     return item;
                 })
@@ -84,7 +86,7 @@ public class HistoryManager extends Manager {
                 .map(data -> {
                     HistoryItem item = new HistoryItem(HistoryItem.TYPE_CONTACT_DATA_UPDATE);
                     item.setRelatedId(registrationData.getId() != null ? registrationData.getId().toString() : null);
-                    item.setDisplayName(registrationData.getFirstName() + " " + registrationData.getLastName());
+                    item.setDisplayName(registrationData.getFullName());
                     return item;
                 })
                 .flatMapCompletable(this::addItem);
@@ -132,12 +134,14 @@ public class HistoryManager extends Manager {
         }).flatMapCompletable(this::addItem);
     }
 
-    public Completable addDataSharedItem(@NonNull String tracingTan) {
-        return Single.fromCallable(() -> {
-            HistoryItem item = new HistoryItem(HistoryItem.TYPE_CONTACT_DATA_REQUEST);
-            item.setRelatedId(tracingTan);
-            return item;
-        }).flatMapCompletable(this::addItem);
+    public Completable addDataSharedItem(@NonNull String tracingTan, int days) {
+        return Single.fromCallable(() -> new DataSharedItem(tracingTan, days))
+                .flatMapCompletable(this::addItem);
+    }
+
+    public Completable addTestResultImportedItem(@NonNull TestResult testResult) {
+        return Single.fromCallable(() -> new TestImportedItem(testResult))
+                .flatMapCompletable(this::addItem);
     }
 
     public Completable addItem(@NonNull HistoryItem historyItem) {
@@ -169,7 +173,7 @@ public class HistoryManager extends Manager {
     }
 
     private Completable deleteOldItems() {
-        return Single.fromCallable(() -> System.currentTimeMillis() - MAXIMUM_ITEM_AGE)
+        return Single.fromCallable(() -> System.currentTimeMillis() - KEEP_DATA_DURATION)
                 .flatMapCompletable(this::deleteItemsCreatedBefore);
     }
 

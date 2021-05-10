@@ -21,12 +21,12 @@
             android:label="@string/app_name"
             android:roundIcon="@mipmap/ic_launcher_round"
             android:supportsRtl="true"
-            android:theme="@style/Theme.App.DayNight">
+            android:theme="@style/Theme.Luca.DayNight">
 
         <activity
                 android:name=".ui.splash.SplashActivity"
                 android:screenOrientation="portrait"
-                android:theme="@style/Theme.App.DayNight.Splash">
+                android:theme="@style/Theme.Luca.DayNight.Splash">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

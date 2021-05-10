@@ -19,7 +19,7 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
 public class HistoryItem {
 
     @IntDef({TYPE_CHECK_IN, TYPE_CHECK_OUT, TYPE_CONTACT_DATA_UPDATE, TYPE_CONTACT_DATA_REQUEST,
-            TYPE_MEETING_STARTED, TYPE_MEETING_ENDED, TYPE_DATA_DELETED, TYPE_TRACE_DATA_ACCESSED})
+            TYPE_MEETING_STARTED, TYPE_MEETING_ENDED, TYPE_DATA_DELETED, TYPE_TRACE_DATA_ACCESSED, TYPE_TEST_RESULT_IMPORTED})
     @Retention(SOURCE)
     public @interface Type {
 
@@ -33,22 +33,23 @@ public class HistoryItem {
     public final static int TYPE_DATA_DELETED = 6;
     public final static int TYPE_MEETING_STARTED = 7;
     public final static int TYPE_TRACE_DATA_ACCESSED = 8;
+    public final static int TYPE_TEST_RESULT_IMPORTED = 9;
 
     @SerializedName("type")
     @Expose
-    private int type;
+    protected int type;
 
     @SerializedName("relatedId")
     @Expose
-    private String relatedId;
+    protected String relatedId;
 
     @SerializedName("timestamp")
     @Expose
-    private long timestamp;
+    protected long timestamp;
 
     @SerializedName("displayName")
     @Expose
-    private String displayName;
+    protected String displayName;
 
     /**
      * Empty constructor for GSON.
@@ -125,6 +126,8 @@ public class HistoryItem {
                     return MeetingEndedItem.class;
                 case TYPE_TRACE_DATA_ACCESSED:
                     return TraceDataAccessedItem.class;
+                case TYPE_CONTACT_DATA_REQUEST:
+                    return DataSharedItem.class;
                 default:
                     return HistoryItem.class;
             }

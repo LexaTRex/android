@@ -23,7 +23,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="0dp"
-                style="@style/SubHeadingTextView"
+                style="@style/TextAppearance.Luca.Headline3"
                 android:textColor="@android:color/black"
                 tools:text="Private meeting" />
 
@@ -31,8 +31,7 @@
                 android:id="@+id/title"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_margin="0dp"
-                style="@style/HeadingTextView"
+                style="@style/TextAppearance.Luca.Headline2"
                 android:textColor="@android:color/black"
                 android:text="@string/venue_heading" />
 
@@ -42,21 +41,23 @@
             android:id="@+id/headingSeparatorView"
             style="@style/HeaderSeparatorView"
             app:layout_constraintTop_toBottomOf="@id/headingTextViewsLayout"
-            tools:ignore="MissingConstraints" />
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
 
     <TextView
             android:id="@+id/subHeadingTextView"
-            style="@style/SubHeadingTextView"
+            style="@style/TextAppearance.Luca.Headline3"
             android:textColor="@android:color/black"
             android:text="@string/venue_description"
             app:layout_constraintBottom_toTopOf="@+id/checkInDurationHeadingTextView"
             app:layout_constraintTop_toBottomOf="@id/headingSeparatorView"
             app:layout_constraintVertical_bias="0"
-            tools:ignore="MissingConstraints" />
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
 
     <TextView
             android:id="@+id/checkInDurationHeadingTextView"
-            style="@style/TextAppearance.App.Body1"
+            style="@style/TextAppearance.Luca.Body1"
             android:textColor="@android:color/black"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -70,7 +71,7 @@
 
     <TextView
             android:id="@+id/checkInDurationTextView"
-            style="@style/TextAppearance.App.Body1"
+            style="@style/TextAppearance.Luca.Body1"
             android:textColor="@android:color/black"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -142,6 +143,6 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:outer_color="@android:color/white"
             app:text="@string/venue_check_in_action"
-            app:text_appearance="@style/TextAppearance.App.SlideToActView" />
+            app:text_appearance="@style/TextAppearance.Luca.SlideToActView" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

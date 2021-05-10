@@ -12,6 +12,7 @@ import de.culture4life.luca.network.NetworkManager;
 import de.culture4life.luca.preference.PreferencesManager;
 import de.culture4life.luca.registration.RegistrationData;
 import de.culture4life.luca.registration.RegistrationManager;
+import de.culture4life.luca.testing.TestingManager;
 import de.culture4life.luca.ui.BaseViewModel;
 import de.culture4life.luca.ui.ViewError;
 import de.culture4life.luca.util.TimeUtil;
@@ -30,6 +31,7 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.core.Completable;
+import io.reactivex.rxjava3.core.Maybe;
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.core.Single;
 import io.reactivex.rxjava3.schedulers.Schedulers;
@@ -56,6 +58,7 @@ public class RegistrationViewModel extends BaseViewModel {
 
     private final RegistrationManager registrationManager;
     private final PreferencesManager preferencesManager;
+    private final TestingManager testingManager;
     private final PhoneNumberUtil phoneNumberUtil;
 
     private final MutableLiveData<Double> progress = new MutableLiveData<>();
@@ -79,11 +82,13 @@ public class RegistrationViewModel extends BaseViewModel {
     private ViewError registrationError;
 
     private boolean isInEditMode;
+    private boolean shouldReImportTestData;
 
     public RegistrationViewModel(@NonNull Application application) {
         super(application);
         preferencesManager = this.application.getPreferencesManager();
         registrationManager = this.application.getRegistrationManager();
+        testingManager = this.application.getTestingManager();
         phoneNumberUtil = PhoneNumberUtil.getInstance();
 
         progress.setValue(0D);
@@ -198,6 +203,13 @@ public class RegistrationViewModel extends BaseViewModel {
         modelDisposable.add(updateRegistrationDataWithFormValues()
                 .andThen(registrationManager.updateUser())
                 .andThen(persistUserDataUpdateInHistory())
+                .andThen(Completable.defer(() -> {
+                    if (shouldReImportTestData) {
+                        return testingManager.reImportTestResults();
+                    } else {
+                        return Completable.complete();
+                    }
+                }))
                 .doOnSubscribe(disposable -> {
                     updateAsSideEffect(isLoading, true);
                     removeError(registrationError);
@@ -256,19 +268,21 @@ public class RegistrationViewModel extends BaseViewModel {
     }
 
     public Completable updateRegistrationDataWithFormValues() {
-        return updatePhoneNumberVerificationStatus()
-                .andThen(Completable.fromAction(() -> {
-                    registrationData.setFirstName(firstName.getValue());
-                    registrationData.setLastName(lastName.getValue());
-                    if (!isInEditMode) {
-                        registrationData.setPhoneNumber(phoneNumber.getValue());
-                    }
-                    registrationData.setEmail(email.getValue());
-                    registrationData.setStreet(street.getValue());
-                    registrationData.setHouseNumber(houseNumber.getValue());
-                    registrationData.setCity(city.getValue());
-                    registrationData.setPostalCode(postalCode.getValue());
-                })).andThen(preferencesManager.persist(REGISTRATION_DATA_KEY, registrationData));
+        return Completable.mergeArray(
+                updatePhoneNumberVerificationStatus(),
+                updateShouldReImportingTestData()
+        ).andThen(Completable.fromAction(() -> {
+            registrationData.setFirstName(firstName.getValue());
+            registrationData.setLastName(lastName.getValue());
+            if (!isInEditMode) {
+                registrationData.setPhoneNumber(phoneNumber.getValue());
+            }
+            registrationData.setEmail(email.getValue());
+            registrationData.setStreet(street.getValue());
+            registrationData.setHouseNumber(houseNumber.getValue());
+            registrationData.setCity(city.getValue());
+            registrationData.setPostalCode(postalCode.getValue());
+        })).andThen(preferencesManager.persist(REGISTRATION_DATA_KEY, registrationData));
     }
 
     private Completable updateFormValuesWithRegistrationData() {
@@ -315,6 +329,28 @@ public class RegistrationViewModel extends BaseViewModel {
                 .count()
                 .map(validValuesCount -> validValuesCount / (double) formValueSubjects.size())
                 .flatMapCompletable(validValuesRatio -> update(progress, validValuesRatio));
+    }
+
+    public Completable updateShouldReImportingTestData() {
+        Single<Boolean> hasTestResults = testingManager.getOrRestoreTestResults()
+                .isEmpty()
+                .map(isEmpty -> !isEmpty);
+
+        Single<Boolean> isSameFirstName = Maybe.fromCallable(firstName::getValue)
+                .map(value -> value.equals(registrationData.getFirstName()))
+                .defaultIfEmpty(false);
+
+        Single<Boolean> isSameLastName = Maybe.fromCallable(lastName::getValue)
+                .map(value -> value.equals(registrationData.getLastName()))
+                .defaultIfEmpty(false);
+
+        Single<Boolean> hasRelevantDataChanged = Single.zip(isSameFirstName, isSameLastName, (sameFirstName, sameLastName) -> !sameFirstName || !sameLastName);
+
+        return Single.zip(hasTestResults, hasRelevantDataChanged, (testResults, relevantDataChanged) -> testResults && relevantDataChanged)
+                .doOnSuccess(reImportTestData -> {
+                    Timber.d("Should re-import test data: %b", reImportTestData);
+                    this.shouldReImportTestData = reImportTestData;
+                }).ignoreElement();
     }
 
     public void onFormValueChanged(LiveData<String> liveData, @NonNull String newValue) {
@@ -536,7 +572,7 @@ public class RegistrationViewModel extends BaseViewModel {
         return name.length() > 0;
     }
 
-    boolean isValidPhoneNumber(String phoneNumberString) {
+    boolean isValidPhoneNumber(@NonNull String phoneNumberString) {
         if (isUsingTestingCredentials()) {
             return true;
         }
@@ -557,7 +593,7 @@ public class RegistrationViewModel extends BaseViewModel {
         }
     }
 
-    static boolean isValidEMailAddress(String emailAddress) {
+    static boolean isValidEMailAddress(@NonNull String emailAddress) {
         return emailAddress.length() > 3 && emailAddress.contains("@");
     }
 
@@ -640,6 +676,10 @@ public class RegistrationViewModel extends BaseViewModel {
 
     public LiveData<Boolean> getCompleted() {
         return completed;
+    }
+
+    public boolean getShouldReImportTestData() {
+        return shouldReImportTestData;
     }
 
 }

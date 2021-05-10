@@ -32,4 +32,9 @@
             android:title="@string/menu_app_data"
             app:showAsAction="never" />
 
+    <item
+            android:id="@+id/deleteAccountMenuItem"
+            android:title="@string/menu_delete_account"
+            app:showAsAction="never" />
+
 </menu>

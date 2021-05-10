@@ -8,8 +8,8 @@ android {
         applicationId "de.culture4life.luca"
         minSdkVersion 21
         targetSdkVersion 30
-        versionCode 58
-        versionName "1.6.7"
+        versionCode 59
+        versionName "1.7.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     signingConfigs {
@@ -33,6 +33,7 @@ android {
             shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             signingConfig signingConfigs.culture4life
+            buildConfigField "String", "API_BASE_URL", '"https://app.luca-app.de"'
             buildConfigField "String", "STAGING_API_USERNAME", '""'
             buildConfigField "String", "STAGING_API_PASSWORD", '""'
         }
@@ -42,8 +43,15 @@ android {
             versionNameSuffix " Debug"
             applicationIdSuffix ".debug"
             signingConfig signingConfigs.debug
+            buildConfigField "String", "API_BASE_URL", '"https://app-dev.luca-app.de"'
             buildConfigField "String", "STAGING_API_USERNAME", project.getProperties().getOrDefault("STAGING_API_USERNAME", '"<staging username>"')
             buildConfigField "String", "STAGING_API_PASSWORD", project.getProperties().getOrDefault("STAGING_API_PASSWORD", '"<staging password>"')
+        }
+        qa {
+            initWith debug
+            versionNameSuffix " QA"
+            applicationIdSuffix ".qa"
+            buildConfigField "String", "API_BASE_URL", '"https://app-qs.luca-app.de"'
         }
     }
     compileOptions {
@@ -51,14 +59,18 @@ android {
         targetCompatibility JavaVersion.VERSION_1_8
     }
     testOptions {
-        unitTests.includeAndroidResources true
+        animationsDisabled true
+        unitTests {
+            includeAndroidResources = true
+            returnDefaultValues = false
+        }
     }
 }
 
 play {
     serviceAccountCredentials.set(file("service-account.json"))
     defaultToAppBundles.set(true)
-    track.set("internal-testing")
+    track.set("internal")
 }
 
 dependencies {
@@ -76,6 +88,8 @@ dependencies {
     implementation 'androidx.navigation:navigation-ui:2.3.4'
     implementation 'androidx.work:work-runtime:2.5.0'
     implementation 'androidx.work:work-rxjava3:2.5.0'
+
+    implementation 'com.auth0:java-jwt:3.15.0'
 
     implementation 'com.github.akarnokd:rxjava3-extensions:3.0.1'
     implementation 'com.github.akarnokd:rxjava3-bridge:3.0.0'

@@ -4,6 +4,8 @@ import com.google.android.material.button.MaterialButton;
 import com.google.android.material.checkbox.MaterialCheckBox;
 
 import android.content.Intent;
+import android.content.res.ColorStateList;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.text.method.LinkMovementMethod;
 import android.widget.CompoundButton;
@@ -19,7 +21,12 @@ public class OnboardingActivity extends BaseActivity {
 
     private MaterialButton primaryActionButton;
     private MaterialCheckBox termsCheckBox;
+    private TextView termsTextView;
     private MaterialCheckBox privacyCheckBox;
+    private TextView privacyTextView;
+    private Drawable errorDrawable;
+    private int errorTint;
+    private int normalTint;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,16 +40,23 @@ public class OnboardingActivity extends BaseActivity {
 
         primaryActionButton = findViewById(R.id.primaryActionButton);
         primaryActionButton.setOnClickListener(view -> {
-            if (termsCheckBox.isChecked()) {
+            if (termsCheckBox.isChecked() && privacyCheckBox.isChecked()) {
                 activityDisposable.add(application.getPreferencesManager()
                         .persist(WELCOME_SCREEN_SEEN_KEY, true)
                         .onErrorComplete()
                         .subscribe(this::showInfoScreen));
+            } else {
+                showCheckboxErrors();
             }
         });
 
         CompoundButton.OnCheckedChangeListener checkBoxListener = (view, isChecked) -> {
-            primaryActionButton.setEnabled(termsCheckBox.isChecked() && privacyCheckBox.isChecked());
+            if (termsCheckBox.isChecked()) {
+                setErrorFor(termsCheckBox, termsTextView, false);
+            }
+            if (privacyCheckBox.isChecked()) {
+                setErrorFor(privacyCheckBox, privacyTextView, false);
+            }
         };
 
         termsCheckBox = findViewById(R.id.termsCheckBox);
@@ -51,11 +65,26 @@ public class OnboardingActivity extends BaseActivity {
         privacyCheckBox = findViewById(R.id.privacyCheckBox);
         privacyCheckBox.setOnCheckedChangeListener(checkBoxListener);
 
-        TextView termsTextView = findViewById(R.id.termsTextView);
+        termsTextView = findViewById(R.id.termsTextView);
         termsTextView.setMovementMethod(LinkMovementMethod.getInstance());
 
-        TextView privacyTextView = findViewById(R.id.privacyTextView);
+        privacyTextView = findViewById(R.id.privacyTextView);
         privacyTextView.setMovementMethod(LinkMovementMethod.getInstance());
+
+        errorTint = getResources().getColor(R.color.material_red_300);
+        normalTint = termsCheckBox.getButtonTintList().getDefaultColor();
+        errorDrawable = getDrawable(R.drawable.ic_error_outline);
+        errorDrawable.setTint(errorTint);
+    }
+
+    private void setErrorFor(MaterialCheckBox checkBox, TextView textView, boolean hasError) {
+        checkBox.setButtonTintList(ColorStateList.valueOf(hasError ? errorTint : normalTint));
+        textView.setCompoundDrawablesWithIntrinsicBounds(null, null, hasError ? errorDrawable : null, null);
+    }
+
+    private void showCheckboxErrors() {
+        setErrorFor(termsCheckBox, termsTextView, !termsCheckBox.isChecked());
+        setErrorFor(privacyCheckBox, privacyTextView, !privacyCheckBox.isChecked());
     }
 
     private void showInfoScreen() {

@@ -59,6 +59,7 @@ import io.reactivex.rxjava3.disposables.Disposable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 import timber.log.Timber;
 
+import static de.culture4life.luca.crypto.HashProvider.TRIMMED_HASH_LENGTH;
 import static de.culture4life.luca.registration.RegistrationManager.USER_ID_KEY;
 
 public class QrCodeViewModel extends BaseViewModel implements ImageAnalysis.Analyzer {
@@ -147,13 +148,21 @@ public class QrCodeViewModel extends BaseViewModel implements ImageAnalysis.Anal
                 ));
     }
 
+    /**
+     * Poll backend for a processed check-in referencing trace IDs previously shown as QR-code.
+     *
+     * @return Completable providing visual feedback, e.g. redirecting the user to the venue
+     *         fragment
+     * @see <a href="https://luca-app.de/securityoverview/processes/guest_app_checkin.html#qr-code-scanning-feedback">Security
+     *         Overview: QR Code Scanning Feedback</a>
+     */
     private Completable observeCheckInDataChanges() {
         return Completable.mergeArray(
                 checkInManager.requestCheckInDataUpdates(CHECK_IN_POLLING_INTERVAL),
                 checkInManager.getCheckInDataChanges()
                         .flatMapCompletable(updatedCheckInData -> Completable.fromAction(() -> {
                             updateAsSideEffect(checkInData, updatedCheckInData);
-                            if (navigationController.getCurrentDestination().getId() == R.id.qrCodeFragment) {
+                            if (isCurrentDestinationId(R.id.qrCodeFragment)) {
                                 navigationController.navigate(R.id.action_qrCodeFragment_to_venueDetailFragmentCheckedIn);
                             }
                         })));
@@ -184,10 +193,7 @@ public class QrCodeViewModel extends BaseViewModel implements ImageAnalysis.Anal
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
                         isHostingMeeting -> {
-                            // TODO: 08.01.21 sometimes NullPointerException for getId() (on emulator)
-                            int currentDestinationId = navigationController.getCurrentDestination().getId();
-                            boolean isAtQrCodeFragment = currentDestinationId == R.id.qrCodeFragment;
-                            if (isAtQrCodeFragment && isHostingMeeting) {
+                            if (isCurrentDestinationId(R.id.qrCodeFragment) && isHostingMeeting) {
                                 navigationController.navigate(R.id.action_qrCodeFragment_to_meetingFragment);
                             }
                         },
@@ -208,6 +214,8 @@ public class QrCodeViewModel extends BaseViewModel implements ImageAnalysis.Anal
                         .doOnSuccess(serializedQrCodeData -> Timber.d("Serialized QR code data: %s", serializedQrCodeData))
                         .flatMap(this::generateQrCode)
                         .flatMapCompletable(bitmap -> update(qrCode, bitmap))
+                        .doOnError(throwable -> Timber.w("Unable to update QR code: %s", throwable.toString()))
+                        .onErrorComplete()
                         .doFinally(() -> updateAsSideEffect(isLoading, false)));
     }
 
@@ -244,7 +252,7 @@ public class QrCodeViewModel extends BaseViewModel implements ImageAnalysis.Anal
         return Single.just(userEphemeralKeyPair.getPublic())
                 .cast(ECPublicKey.class)
                 .flatMap(publicKey -> AsymmetricCipherProvider.encode(publicKey, true))
-                .flatMap(encodedPublicKey -> CryptoManager.trim(encodedPublicKey, 16))
+                .flatMap(encodedPublicKey -> CryptoManager.trim(encodedPublicKey, TRIMMED_HASH_LENGTH))
                 .flatMap(iv -> encryptUserIdAndSecret(userId, userEphemeralKeyPair.getPrivate(), iv)
                         .map(bytes -> new android.util.Pair<>(bytes, iv)));
     }
@@ -378,7 +386,11 @@ public class QrCodeViewModel extends BaseViewModel implements ImageAnalysis.Anal
                 return handleSelfCheckInDeepLink(url);
             }
         })
-                .doOnSubscribe(disposable -> removeError(deepLinkError))
+                .doOnSubscribe(disposable -> {
+                    removeError(deepLinkError);
+                    updateAsSideEffect(showCameraPreview, false);
+                    updateAsSideEffect(isLoading, true);
+                })
                 .doOnError(throwable -> {
                     deepLinkError = createErrorBuilder(throwable)
                             .withTitle(R.string.error_check_in_failed)
@@ -386,6 +398,9 @@ public class QrCodeViewModel extends BaseViewModel implements ImageAnalysis.Anal
                             .withResolveLabel(R.string.action_retry)
                             .build();
                     addError(deepLinkError);
+                })
+                .doFinally(() -> {
+                    updateAsSideEffect(isLoading, false);
                 });
     }
 
@@ -502,7 +517,9 @@ public class QrCodeViewModel extends BaseViewModel implements ImageAnalysis.Anal
                 .subscribe(
                         () -> {
                             Timber.i("Meeting created");
-                            navigationController.navigate(R.id.action_qrCodeFragment_to_meetingFragment);
+                            if (isCurrentDestinationId(R.id.qrCodeFragment)) {
+                                navigationController.navigate(R.id.action_qrCodeFragment_to_meetingFragment);
+                            }
                         },
                         throwable -> Timber.w("Unable to create meeting: %s", throwable.toString())
                 ));

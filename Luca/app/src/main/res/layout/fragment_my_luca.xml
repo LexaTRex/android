@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:context=".ui.myluca.MyLucaFragment">
+
+    <TextView
+            android:id="@+id/headingTextView"
+            style="@style/TextAppearance.Luca.Headline2"
+            android:text="@string/navigation_my_luca"
+            android:layout_margin="@dimen/spacing_default"
+            app:layout_constraintEnd_toStartOf="@id/importTestImageView"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
+    <ImageView
+            android:id="@+id/importTestImageView"
+            style="@style/MenuImageView"
+            android:src="@drawable/ic_qr_code_scanner"
+            app:layout_constraintEnd_toStartOf="@id/menuImageView"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="@id/headingTextView"
+            app:layout_constraintTop_toTopOf="@id/headingTextView" />
+
+    <ImageView
+            android:id="@+id/menuImageView"
+            style="@style/MenuImageView"
+            app:layout_constraintBottom_toBottomOf="@id/headingTextView"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@id/headingTextView" />
+
+    <View
+            android:id="@+id/headingSeparatorView"
+            style="@style/HeaderSeparatorView"
+            app:layout_constraintTop_toBottomOf="@id/headingTextView"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+    <TextView
+            android:id="@+id/emptyTitleTextView"
+            style="@style/EmptyStateTitleTextView"
+            android:text="@string/my_luca_empty_title"
+            app:layout_constraintTop_toBottomOf="@id/headingSeparatorView"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+    <TextView
+            android:id="@+id/emptyDescriptionTextView"
+            style="@style/EmptyStateDescriptionTextView"
+            android:text="@string/my_luca_empty_description"
+            app:layout_constraintTop_toBottomOf="@id/emptyTitleTextView"
+            app:layout_constraintStart_toStartOf="@id/emptyTitleTextView"
+            app:layout_constraintEnd_toEndOf="@id/emptyTitleTextView" />
+
+    <ImageView
+            android:id="@+id/emptyImageView"
+            style="@style/EmptyStateImageView"
+            app:layout_constraintVertical_bias="0.25"
+            app:layout_constraintTop_toBottomOf="@id/emptyDescriptionTextView"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="@id/emptyDescriptionTextView"
+            app:layout_constraintEnd_toEndOf="@id/emptyDescriptionTextView" />
+
+    <ListView
+            android:id="@+id/myLucaListView"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_marginTop="@dimen/spacing_small"
+            android:cacheColorHint="@android:color/transparent"
+            android:divider="@null"
+            android:fadingEdgeLength="@dimen/spacing_large"
+            android:listSelector="@android:color/transparent"
+            android:requiresFadingEdge="vertical"
+            app:layout_constraintBottom_toTopOf="@id/primaryActionButton"
+            app:layout_constraintTop_toBottomOf="@id/headingSeparatorView"
+            tools:listitem="@layout/my_luca_list_item" />
+
+    <TextView
+            android:id="@+id/hintTextScanTestResult"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:background="@android:color/black"
+            android:padding="@dimen/spacing_large"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/headingSeparatorView"
+            style="@style/EmptyStateDescriptionTextView"
+            android:text="@string/test_import_hint" />
+
+    <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardView"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginTop="@dimen/spacing_large"
+            android:layout_marginBottom="@dimen/spacing_large"
+            android:layout_marginStart="@dimen/spacing_large"
+            android:layout_marginEnd="@dimen/spacing_large"
+            app:cardBackgroundColor="?attr/colorOnSurface"
+            app:cardCornerRadius="8dp"
+            app:layout_constraintDimensionRatio="w,1:1"
+            app:layout_constraintBottom_toTopOf="@id/primaryActionButton"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/headingSeparatorView"
+            app:layout_constraintWidth_max="@dimen/qr_card_size"
+            app:layout_constraintHeight_max="@dimen/qr_card_size">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+            <ImageView
+                    android:id="@+id/qrCodeImageView"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:keepScreenOn="true"
+                    android:scaleType="fitCenter"
+                    android:padding="@dimen/spacing_default"
+                    app:layout_constraintDimensionRatio="1:1"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+            <androidx.camera.view.PreviewView
+                    android:id="@+id/cameraPreviewView"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:keepScreenOn="true"
+                    android:scaleType="fitCenter"
+                    android:visibility="gone"
+                    app:layout_constraintDimensionRatio="1:1"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/loadingLayout"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:background="#CCFFFFFF"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent">
+
+                <ProgressBar
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:indeterminateTintMode="src_atop"
+                        android:indeterminateTint="?attr/colorSurface"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </com.google.android.material.card.MaterialCardView>
+
+    <com.google.android.material.button.MaterialButton
+            android:id="@+id/primaryActionButton"
+            style="@style/Button.Luca.PrimaryActionButton"
+            android:text="@string/test_import_action"
+            android:layout_margin="@dimen/spacing_default"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

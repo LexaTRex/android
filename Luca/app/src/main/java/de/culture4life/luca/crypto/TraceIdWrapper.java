@@ -12,6 +12,11 @@ import de.culture4life.luca.util.SerializationUtil;
 
 import java.lang.reflect.Type;
 
+/**
+ * An opaque identifier derived from a Guest’s user ID and tracing secret during Guest Check-In. It
+ * is used to identify Check-Ins by an Infected Guest after that Guest shared their tracing secret
+ * with the Health Department.
+ */
 public class TraceIdWrapper {
 
     private long timestamp;

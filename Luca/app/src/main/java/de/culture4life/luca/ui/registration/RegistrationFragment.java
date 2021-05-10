@@ -153,8 +153,10 @@ public class RegistrationFragment extends BaseFragment<RegistrationViewModel> {
         headingTextView.setText(getString(R.string.navigation_contact_data));
         confirmationButton.setText(R.string.action_update);
 
-        confirmationButton.setOnClickListener(v -> viewDisposable.add(viewModel.updatePhoneNumberVerificationStatus()
-                .andThen(viewModel.getPhoneNumberVerificationStatus())
+        confirmationButton.setOnClickListener(v -> viewDisposable.add(Completable.mergeArray(
+                viewModel.updatePhoneNumberVerificationStatus(),
+                viewModel.updateShouldReImportingTestData()
+        ).andThen(viewModel.getPhoneNumberVerificationStatus())
                 .delaySubscription(DELAY_DURATION, TimeUnit.MILLISECONDS, AndroidSchedulers.mainThread())
                 .doOnSubscribe(disposable -> hideKeyboard())
                 .subscribeOn(Schedulers.io())
@@ -164,7 +166,11 @@ public class RegistrationFragment extends BaseFragment<RegistrationViewModel> {
                             if (!numberVerified && !shouldSkipVerification()) {
                                 showCurrentPhoneNumberVerificationStep();
                             } else if (areAllStepsCompleted()) {
-                                viewModel.onUserDataUpdateRequested();
+                                if (viewModel.getShouldReImportTestData()) {
+                                    showWillDeleteTestResultsDialog();
+                                } else {
+                                    viewModel.onUserDataUpdateRequested();
+                                }
                             } else {
                                 showMissingInfoDialog();
                             }
@@ -390,6 +396,18 @@ public class RegistrationFragment extends BaseFragment<RegistrationViewModel> {
                 .setPositiveButton(R.string.action_ok, (dialog, which) -> {
                     // do nothing
                 });
+
+        AlertDialog alertDialog = builder.create();
+        alertDialog.show();
+    }
+
+    private void showWillDeleteTestResultsDialog() {
+        MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(getContext())
+                .setTitle(R.string.registration_will_delete_tests_title)
+                .setMessage(R.string.registration_will_delete_tests_text)
+                .setNegativeButton(R.string.action_no, ((dialog, which) -> {
+                }))
+                .setPositiveButton(R.string.action_yes, (dialog, which) -> viewModel.onUserDataUpdateRequested());
 
         AlertDialog alertDialog = builder.create();
         alertDialog.show();

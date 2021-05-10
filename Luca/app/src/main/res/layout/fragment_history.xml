@@ -8,48 +8,61 @@
 
     <TextView
             android:id="@+id/headingTextView"
-            style="@style/HeadingTextView"
+            style="@style/TextAppearance.Luca.Headline2"
             android:text="@string/navigation_history"
-            app:layout_constraintEnd_toEndOf="@null"
+            android:layout_margin="@dimen/spacing_default"
             app:layout_constraintEnd_toStartOf="@id/accessedDataImageView"
-            tools:ignore="MissingConstraints" />
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
 
     <ImageView
             android:id="@+id/accessedDataImageView"
             style="@style/MenuImageView"
             android:contentDescription="@string/menu_more_content_description"
             android:src="@drawable/ic_eye"
-            app:layout_constraintEnd_toEndOf="@null"
             app:layout_constraintEnd_toStartOf="@id/menuImageView"
-            tools:ignore="MissingConstraints" />
+            app:layout_constraintBottom_toBottomOf="@id/headingTextView"
+            app:layout_constraintTop_toTopOf="@id/headingTextView" />
 
     <ImageView
             android:id="@+id/menuImageView"
             style="@style/MenuImageView"
             android:contentDescription="@string/menu_more_content_description"
-            tools:ignore="MissingConstraints" />
+            app:layout_constraintBottom_toBottomOf="@id/headingTextView"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@id/headingTextView" />
 
     <View
             android:id="@+id/headingSeparatorView"
             style="@style/HeaderSeparatorView"
-            tools:ignore="MissingConstraints" />
+            app:layout_constraintTop_toBottomOf="@id/headingTextView"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
 
     <TextView
             android:id="@+id/emptyTitleTextView"
             style="@style/EmptyStateTitleTextView"
             android:text="@string/history_empty_title"
-            tools:ignore="MissingConstraints" />
+            app:layout_constraintTop_toBottomOf="@id/headingSeparatorView"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
 
     <TextView
             android:id="@+id/emptyDescriptionTextView"
             style="@style/EmptyStateDescriptionTextView"
             android:text="@string/history_empty_description"
-            tools:ignore="MissingConstraints" />
+            app:layout_constraintTop_toBottomOf="@id/emptyTitleTextView"
+            app:layout_constraintStart_toStartOf="@id/emptyTitleTextView"
+            app:layout_constraintEnd_toEndOf="@id/emptyTitleTextView" />
 
     <ImageView
             android:id="@+id/emptyImageView"
             style="@style/EmptyStateImageView"
-            tools:ignore="MissingConstraints" />
+            app:layout_constraintVertical_bias="0.25"
+            app:layout_constraintTop_toBottomOf="@id/emptyDescriptionTextView"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="@id/emptyDescriptionTextView"
+            app:layout_constraintEnd_toEndOf="@id/emptyDescriptionTextView" />
 
     <ListView
             android:id="@+id/historyListView"
@@ -67,8 +80,11 @@
 
     <com.google.android.material.button.MaterialButton
             android:id="@+id/primaryActionButton"
-            style="@style/PrimaryActionButton"
+            style="@style/Button.Luca.PrimaryActionButton"
             android:text="@string/history_share"
-            tools:ignore="MissingConstraints" />
+            android:layout_margin="@dimen/spacing_default"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

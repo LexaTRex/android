@@ -6,12 +6,22 @@ import android.os.Build;
 import com.nexenio.rxkeystore.RxKeyStore;
 import com.nexenio.rxkeystore.provider.cipher.symmetric.aes.AesCipherProvider;
 
+import de.culture4life.luca.network.pojo.ContactData;
+import de.culture4life.luca.network.pojo.TransferData;
+import de.culture4life.luca.ui.qrcode.QrCodeData;
+
 import javax.crypto.SecretKey;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import io.reactivex.rxjava3.core.Single;
 
+/**
+ * Symmetric cipher provider, used to encrypt {@link ContactData}, {@link TransferData} and {@link
+ * QrCodeData} using AES-CTR with 128 bit keys.
+ *
+ * Uses Bouncy Castle due to Android limitations
+ */
 @RequiresApi(api = Build.VERSION_CODES.M)
 public class SymmetricCipherProvider extends AesCipherProvider {
 

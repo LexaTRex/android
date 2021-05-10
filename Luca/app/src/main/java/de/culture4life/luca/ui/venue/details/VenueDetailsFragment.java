@@ -131,7 +131,7 @@ public class VenueDetailsFragment extends BaseFragment<VenueDetailsViewModel> {
             checkInDurationHeadingTextView.setVisibility(isCheckedIn ? View.VISIBLE : View.GONE);
             checkInDurationTextView.setVisibility(isCheckedIn ? View.VISIBLE : View.GONE);
             if (!isCheckedIn) {
-                navigationController.navigate(R.id.action_venueDetailFragment_to_qrCodeFragment);
+                safeNavigateFromNavController(R.id.action_venueDetailFragment_to_qrCodeFragment);
                 AccessibilityServiceUtil.speak(getContext(), getString(R.string.venue_checked_out));
             }
         });

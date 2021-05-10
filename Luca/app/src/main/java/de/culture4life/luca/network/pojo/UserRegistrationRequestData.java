@@ -4,7 +4,6 @@ import com.google.gson.annotations.SerializedName;
 
 /**
  * Example:
- *
  * <pre>
  * {
  *   "data": "u1GUhaHK3lCY+AJuc8m5ZN0ncE+Yypc7o4VeYavV8pbwbFM+5mpOWTzhisCbsLcUiApARPrHAaEyT75lVA/hdRUEJ4Z6p/uinEkb9N6KJ4fgQYK2PoYYhaSRdapTH3ETYXkWVmxdFBBDYKTZV1eaCBYCgZqF3Ydx1Pxxt9TMaMCFimUVW2CyiZXbofWhnVfXIBnvEFHnfgQbJjxWCZ2IP4JoCT28Rmvi/AHC4PGs2hysLv7WbXE9IUEnLw7PvplK",

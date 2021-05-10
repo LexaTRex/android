@@ -14,7 +14,7 @@
 
         <TextView
                 android:id="@+id/messageTextView"
-                style="@style/MaterialAlertDialog.App.Body.Text"
+                style="@style/MaterialAlertDialog.Luca.Body.Text"
                 android:text="@string/verification_enter_tan_description"
                 app:layout_constraintTop_toTopOf="parent"
                 android:layout_width="match_parent"
@@ -22,7 +22,7 @@
 
         <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/tanInputLayout"
-                style="@style/RegistrationTextBox"
+                style="@style/TextInputLayout.Luca.RegistrationTextBox"
                 android:hint="TAN"
                 android:textColorHint="@android:color/black"
                 app:hintTextColor="@android:color/black"
@@ -57,7 +57,7 @@
 
         <TextView
                 android:id="@+id/infoTextView"
-                style="@style/MaterialAlertDialog.App.Body.Text"
+                style="@style/MaterialAlertDialog.Luca.Body.Text"
                 app:layout_constraintTop_toTopOf="@id/infoImageView"
                 app:layout_constraintBottom_toBottomOf="@id/infoImageView"
                 app:layout_constraintStart_toStartOf="@id/tanInputLayout"

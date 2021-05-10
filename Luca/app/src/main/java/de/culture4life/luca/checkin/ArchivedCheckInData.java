@@ -6,6 +6,10 @@ import com.google.gson.annotations.SerializedName;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Model of previous check-ins, stored locally and removed after two weeks {@link
+ * CheckInManager#deleteOldArchivedCheckInData()}.
+ */
 public class ArchivedCheckInData {
 
     @Expose

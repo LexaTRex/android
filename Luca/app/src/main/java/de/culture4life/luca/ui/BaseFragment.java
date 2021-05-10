@@ -3,6 +3,7 @@ package de.culture4life.luca.ui;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.snackbar.Snackbar;
 
+import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -26,6 +27,7 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import androidx.annotation.CallSuper;
+import androidx.annotation.IdRes;
 import androidx.annotation.LayoutRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -36,6 +38,7 @@ import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
+import androidx.navigation.fragment.FragmentNavigator;
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Observable;
@@ -207,6 +210,10 @@ public abstract class BaseFragment<ViewModelType extends BaseViewModel> extends 
                 application.openAppSettings();
                 break;
             }
+            case R.id.deleteAccountMenuItem: {
+                showDeleteAccountDialog();
+                break;
+            }
             default: {
                 Timber.w("Unknown menu item selected: %s", item.getTitle());
                 return false;
@@ -343,6 +350,70 @@ public abstract class BaseFragment<ViewModelType extends BaseViewModel> extends 
         }
         InputMethodManager imm = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.hideSoftInputFromWindow(view.getRootView().getWindowToken(), 0);
+    }
+
+    private void showDeleteAccountDialog() {
+        new BaseDialogFragment(new MaterialAlertDialogBuilder(getContext())
+                .setTitle(R.string.delete_account_dialog_title)
+                .setMessage(R.string.delete_account_dialog_message)
+                .setPositiveButton(R.string.delete_account_dialog_action, (dialog, which) -> viewModel.deleteAccount())
+                .setNegativeButton(R.string.action_cancel, (dialog, which) -> dialog.dismiss()))
+                .show();
+    }
+
+    protected Completable getCameraPermission() {
+        return rxPermissions.request(Manifest.permission.CAMERA)
+                .flatMapCompletable(granted -> {
+                    if (granted) {
+                        return Completable.complete();
+                    } else {
+                        showCameraPermissionPermanentlyDeniedError();
+                        return Completable.error(new IllegalStateException("Camera permission missing"));
+                    }
+                });
+    }
+
+    protected void showCameraDialog(boolean directToSettings) {
+        MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(getContext())
+                .setTitle(R.string.camera_access_title)
+                .setMessage(R.string.camera_access_description)
+                .setNegativeButton(R.string.action_cancel, (dialog, which) -> dialog.cancel());
+
+        if (directToSettings) {
+            builder = builder.setPositiveButton(R.string.action_settings, (dialog, which) -> {
+                application.openAppSettings();
+                dialog.dismiss();
+            });
+        } else {
+            builder = builder.setPositiveButton(R.string.action_enable, (dialog, which) -> {
+                viewModel.showCameraPreview(true);
+                dialog.dismiss();
+            });
+        }
+        new BaseDialogFragment(builder).show();
+    }
+
+    protected void showCameraPermissionPermanentlyDeniedError() {
+        Context context = getContext();
+        if (context == null) {
+            return;
+        }
+        ViewError viewError = new ViewError.Builder(context)
+                .withTitle(getString(R.string.missing_permission_arg, getString(R.string.permission_name_camera)))
+                .withDescription(getString(R.string.missing_permission_arg, getString(R.string.permission_name_camera)))
+                .withResolveLabel(getString(R.string.action_resolve))
+                .withResolveAction(Completable.fromAction(() -> showCameraDialog(true)))
+                .build();
+
+        showErrorAsSnackbar(viewError);
+    }
+
+    protected void safeNavigateFromNavController(@IdRes int destination) {
+        FragmentNavigator.Destination currentDestination = (FragmentNavigator.Destination) navigationController.getCurrentDestination();
+        boolean isCurrentDestination = getClass().getName().equals(currentDestination.getClassName());
+        if (isCurrentDestination) {
+            navigationController.navigate(destination);
+        }
     }
 
     @Override

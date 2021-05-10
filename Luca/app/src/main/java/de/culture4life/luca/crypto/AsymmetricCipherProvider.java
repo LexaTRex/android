@@ -29,6 +29,11 @@ import io.reactivex.rxjava3.core.Single;
 
 import static com.nexenio.rxkeystore.RxKeyStore.PROVIDER_BOUNCY_CASTLE;
 
+/**
+ * Provides EC cryptography using the secp256r1 curve.
+ *
+ * Uses Bouncy Castle due to Android limitations.
+ */
 public class AsymmetricCipherProvider extends EcCipherProvider {
 
     private static final String CURVE_NAME = "secp256r1";
