@@ -380,7 +380,7 @@ public class QrCodeViewModel extends BaseViewModel implements ImageAnalysis.Anal
 
     private Completable handleDeepLink(@NonNull String url) {
         return Completable.defer(() -> {
-            if (url.contains("/meeting")) {
+            if (MeetingManager.isPrivateMeeting(url)) {
                 return handleMeetingCheckInDeepLink(url);
             } else {
                 return handleSelfCheckInDeepLink(url);

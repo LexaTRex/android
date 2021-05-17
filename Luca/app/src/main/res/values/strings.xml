@@ -256,17 +256,19 @@
     <string name="accessed_data_dialog_action_show">All data requests</string>
     <string name="accessed_data_dialog_action_dismiss">@string/action_ok</string>
 
-    <!-- Health -->
+    <!-- My Luca -->
     <string name="my_luca_heading">My luca</string>
-    <string name="my_luca_empty_title">@string/history_empty_title</string>
-    <string name="my_luca_empty_description">You haven\'t imported a test into the app yet. Please note that we only support certain test providers at the moment. Check with your test provider to see if it is included.</string>
-    <string name="test_import_action">Import test result</string>
+    <string name="my_luca_empty_title">Welcome</string>
+    <string name="my_luca_empty_description">Welcome to your \"My luca\" tab, this is your personal space where you can add documents to make your check in easier. If you want to check in at a location, go to the Check in tab at the bottom left.</string>
+    <string name="test_import_action">Add</string>
     <string name="test_import_hint">Scan the QR code of your test to store it in the app.</string>
     <string name="test_import_success_message">The test result was imported</string>
+    <string name="test_import_consent">I hereby give my consent in accordance with Art. 9 (2) a) GDPR to the transmission of a pseudonymized identifier in the course of storing my COVID-19 test in the luca app. This serves exclusively to prevent misuse, so that the same test cannot be stored multiple times in the luca app, possibly by different people. The individual identifier is automatically deleted from the luca system after 72 hours. It is not possible to remove the identifier beforehand.</string>
     <string name="test_import_error_title">The test result could not be imported</string>
     <string name="test_import_error_verification_description">It was not possible to validate that this test belongs to you. Please check if your name is entered correctly in the app.</string>
     <string name="test_import_error_expired_description">Unfortunately, the test cannot be imported because it already expired.</string>
     <string name="test_import_error_already_imported_description">This test was already imported.</string>
+    <string name="test_import_error_positive_description">luca helps you to check in easily. Since positive test results are not relevant for checkin, you can only add negative results right now.</string>
     <string name="test_import_error_unsupported_description">The QR code could not be scanned. This could have happened because we only support certain test providers at the moment. Check with your test provider to see if it is included.</string>
     <string name="test_outcome_negative">Negative</string>
     <string name="test_outcome_positive">Positive</string>

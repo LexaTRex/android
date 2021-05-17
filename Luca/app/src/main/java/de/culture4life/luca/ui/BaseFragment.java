@@ -7,6 +7,8 @@ import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.SpannedString;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -31,7 +33,9 @@ import androidx.annotation.IdRes;
 import androidx.annotation.LayoutRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.StringRes;
 import androidx.appcompat.widget.PopupMenu;
+import androidx.core.text.HtmlCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.Observer;
@@ -414,6 +418,14 @@ public abstract class BaseFragment<ViewModelType extends BaseViewModel> extends 
         if (isCurrentDestination) {
             navigationController.navigate(destination);
         }
+    }
+
+    public CharSequence getFormattedString(@StringRes int id, Object... args) {
+        for (int i = 0; i < args.length; ++i) {
+            args[i] = args[i] instanceof String ? TextUtils.htmlEncode((String) args[i]) : args[i];
+        }
+        String html = HtmlCompat.toHtml(new SpannedString(getText(id)), HtmlCompat.TO_HTML_PARAGRAPH_LINES_INDIVIDUAL);
+        return HtmlCompat.fromHtml(String.format(html, args), HtmlCompat.FROM_HTML_MODE_COMPACT);
     }
 
     @Override

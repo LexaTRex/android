@@ -145,7 +145,7 @@ public class MyLucaFragment extends BaseFragment<MyLucaViewModel> implements MyL
 
     private void toggleCameraPreview() {
         if (cameraPreviewDisposable == null) {
-            showCameraDialog(false);
+            showTestImportConsentDialog();
         } else {
             hideCameraPreview();
         }
@@ -211,6 +211,15 @@ public class MyLucaFragment extends BaseFragment<MyLucaViewModel> implements MyL
 
         preview.setSurfaceProvider(cameraPreviewView.getSurfaceProvider());
         Camera camera = cameraProvider.bindToLifecycle((LifecycleOwner) getContext(), cameraSelector, imageAnalysis, preview);
+    }
+
+    private void showTestImportConsentDialog() {
+        new BaseDialogFragment(new MaterialAlertDialogBuilder(getContext())
+                .setTitle(R.string.test_import_action)
+                .setMessage(R.string.test_import_consent)
+                .setPositiveButton(R.string.action_ok, (dialog, which) -> showCameraDialog(false))
+                .setNegativeButton(R.string.action_cancel, (dialog, which) -> dialog.cancel()))
+                .show();
     }
 
     private void showDeleteTestResultDialog(int position) {

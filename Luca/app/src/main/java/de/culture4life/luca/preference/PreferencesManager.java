@@ -10,6 +10,7 @@ import com.nexenio.rxpreferences.provider.PreferencesProvider;
 import com.nexenio.rxpreferences.provider.TrayPreferencesProvider;
 import com.nexenio.rxpreferences.serializer.GsonSerializer;
 
+import de.culture4life.luca.BuildConfig;
 import de.culture4life.luca.LucaApplication;
 import de.culture4life.luca.Manager;
 import de.culture4life.luca.crypto.TraceIdWrapper;
@@ -27,6 +28,13 @@ import io.reactivex.rxjava3.core.Single;
 public class PreferencesManager extends Manager implements PreferencesProvider {
 
     private static final int VERSION = 1;
+    public static final String LAST_MIGRATION_VERSION_CODE_KEY = "last_migration_version_code";
+    public static final GsonSerializer SERIALIZER = new GsonSerializer(new GsonBuilder()
+            .setPrettyPrinting()
+            .excludeFieldsWithoutExposeAnnotation()
+            .registerTypeAdapter(TraceIdWrapper.class, new TraceIdWrapper.TypeAdapter())
+            .registerTypeAdapter(HistoryItem.class, new HistoryItem.TypeAdapter())
+            .create());
 
     private PreferencesProvider provider;
 
@@ -37,18 +45,29 @@ public class PreferencesManager extends Manager implements PreferencesProvider {
             if (LucaApplication.isRunningUnitTests()) {
                 preferencesProvider = new InMemoryPreferencesProvider();
             } else {
-                TrayPreferences trayPreferences = new TrayPreferences(context, context.getPackageName(), VERSION, TrayStorage.Type.DEVICE);
-                preferencesProvider = new TrayPreferencesProvider(trayPreferences);
+                preferencesProvider = new EncryptedSharedPreferencesProvider(context);
             }
-            preferencesProvider.setSerializer(new GsonSerializer(new GsonBuilder()
-                    .setPrettyPrinting()
-                    .excludeFieldsWithoutExposeAnnotation()
-                    .registerTypeAdapter(TraceIdWrapper.class, new TraceIdWrapper.TypeAdapter())
-                    .registerTypeAdapter(HistoryItem.class, new HistoryItem.TypeAdapter())
-                    .create()));
-
+            preferencesProvider.setSerializer(SERIALIZER);
             this.provider = preferencesProvider;
-        }).andThen(persistDefaultValues());
+        }).andThen(migratePreferencesIfRequired())
+                .andThen(persistDefaultValues());
+    }
+
+    private Completable migratePreferencesIfRequired() {
+        return Single.defer(() -> getInitializedField(provider))
+                .flatMapCompletable(preferencesProvider -> preferencesProvider.restoreOrDefault(LAST_MIGRATION_VERSION_CODE_KEY, 0)
+                        .filter(lastMigrationVersionCode -> lastMigrationVersionCode < 58 && !LucaApplication.isRunningUnitTests())
+                        .flatMapCompletable(this::migratePreferences));
+    }
+
+    private Completable migratePreferences(int lastMigrationVersionCode) {
+        return Single.fromCallable(() -> {
+            TrayPreferences trayPreferences = new TrayPreferences(context, context.getPackageName(), VERSION, TrayStorage.Type.DEVICE);
+            TrayPreferencesProvider trayPreferencesProvider = new TrayPreferencesProvider(trayPreferences);
+            trayPreferencesProvider.setSerializer(SERIALIZER);
+            return trayPreferencesProvider;
+        }).flatMapCompletable(trayPreferencesProvider -> PreferencesMigrationUtil.migrate(trayPreferencesProvider, provider))
+                .andThen(provider.persist(LAST_MIGRATION_VERSION_CODE_KEY, BuildConfig.VERSION_CODE));
     }
 
     private Completable persistDefaultValues() {

@@ -156,9 +156,8 @@ public class MeetingViewModel extends BaseViewModel {
     @SuppressWarnings("StringBufferReplaceableByString")
     private Single<String> generateQrCodeData(@NonNull UUID scannerId, @NonNull String additionalData) {
         return Single.fromCallable(() -> new StringBuilder()
-                .append("https://")
-                .append(BuildConfig.DEBUG ? "staging" : "app")
-                .append(".luca-app.de/webapp/meeting/")
+                .append(BuildConfig.API_BASE_URL)
+                .append("/webapp/meeting/")
                 .append(scannerId)
                 .append("#")
                 .append(additionalData)

@@ -1,10 +1,18 @@
 package de.culture4life.luca.testing;
 
+import com.google.gson.JsonObject;
+
 import android.content.Context;
+import android.util.Base64;
+
+import com.nexenio.rxkeystore.util.RxBase64;
 
 import de.culture4life.luca.BuildConfig;
 import de.culture4life.luca.Manager;
+import de.culture4life.luca.crypto.CryptoManager;
+import de.culture4life.luca.crypto.HashProvider;
 import de.culture4life.luca.history.HistoryManager;
+import de.culture4life.luca.network.NetworkManager;
 import de.culture4life.luca.preference.PreferencesManager;
 import de.culture4life.luca.registration.RegistrationManager;
 import de.culture4life.luca.testing.provider.ProvidedTestResult;
@@ -12,6 +20,8 @@ import de.culture4life.luca.testing.provider.TestResultProvider;
 import de.culture4life.luca.testing.provider.opentestcheck.OpenTestCheckTestResultProvider;
 import de.culture4life.luca.testing.provider.ubirch.UbirchTestResultProvider;
 
+import java.net.HttpURLConnection;
+import java.nio.charset.StandardCharsets;
 import java.util.NoSuchElementException;
 
 import androidx.annotation.NonNull;
@@ -25,21 +35,27 @@ import timber.log.Timber;
 
 public class TestingManager extends Manager {
 
-    private static final String KEY_TEST_RESULTS = "test_results";
+    public static final String KEY_TEST_RESULTS = "test_results";
+    public static final String KEY_TEST_RESULT_TAG = "test_result_tag_";
+    private static final byte[] TEST_REDEEM_HASH_SUFFIX = "testRedeemCheck".getBytes(StandardCharsets.UTF_8);
 
     private final PreferencesManager preferencesManager;
+    private final NetworkManager networkManager;
     private final HistoryManager historyManager;
     private final RegistrationManager registrationManager;
+    private final CryptoManager cryptoManager;
 
     private final UbirchTestResultProvider ubirchTestResultProvider;
     private final OpenTestCheckTestResultProvider openTestCheckTestResultProvider;
 
     private TestResults testResults;
 
-    public TestingManager(@NonNull PreferencesManager preferencesManager, @NonNull HistoryManager historyManager, @NonNull RegistrationManager registrationManager) {
+    public TestingManager(@NonNull PreferencesManager preferencesManager, @NonNull NetworkManager networkManager, @NonNull HistoryManager historyManager, @NonNull RegistrationManager registrationManager, @NonNull CryptoManager cryptoManager) {
         this.preferencesManager = preferencesManager;
+        this.networkManager = networkManager;
         this.historyManager = historyManager;
         this.registrationManager = registrationManager;
+        this.cryptoManager = cryptoManager;
         this.ubirchTestResultProvider = new UbirchTestResultProvider();
         this.openTestCheckTestResultProvider = new OpenTestCheckTestResultProvider();
     }
@@ -48,7 +64,10 @@ public class TestingManager extends Manager {
     protected Completable doInitialize(@NonNull Context context) {
         return Completable.mergeArray(
                 preferencesManager.initialize(context),
-                historyManager.initialize(context)
+                networkManager.initialize(context),
+                historyManager.initialize(context),
+                registrationManager.initialize(context),
+                cryptoManager.initialize(context)
         ).andThen(deleteOldTests());
     }
 
@@ -61,6 +80,9 @@ public class TestingManager extends Manager {
                     }
                     if (testResult.getExpirationTimestamp() < System.currentTimeMillis() && !BuildConfig.DEBUG) {
                         return Completable.error(new TestResultExpiredException());
+                    }
+                    if (testResult.getOutcome() == TestResult.OUTCOME_POSITIVE) {
+                        return Completable.error(new TestResultPositiveException());
                     }
                     return getOrRestoreTestResults()
                             .mergeWith(Observable.just(testResult))
@@ -97,6 +119,44 @@ public class TestingManager extends Manager {
 
     private Observable<? extends TestResultProvider<? extends ProvidedTestResult>> getTestResultProviders() {
         return Observable.just(openTestCheckTestResultProvider); // TODO: 07.05.21 add ubirchTestResultProvider
+    }
+
+    public Completable redeemTestResult(@NonNull TestResult testResult) {
+        if (BuildConfig.DEBUG) {
+            return Completable.complete();
+        }
+        return networkManager.getLucaEndpointsV3()
+                .flatMapCompletable(lucaEndpointsV3 -> Single.zip(generateEncodedTestResultHash(testResult), generateOrRestoreTestResultTag(testResult), (hash, tag) -> {
+                    JsonObject jsonObject = new JsonObject();
+                    jsonObject.addProperty("hash", hash);
+                    jsonObject.addProperty("tag", tag);
+                    return jsonObject;
+                }).flatMapCompletable(lucaEndpointsV3::redeemTest))
+                .onErrorResumeNext(throwable -> {
+                    if (NetworkManager.isHttpException(throwable, HttpURLConnection.HTTP_CONFLICT)) {
+                        return Completable.error(new TestResultAlreadyImportedException(throwable));
+                    } else {
+                        return Completable.error(throwable);
+                    }
+                });
+    }
+
+    protected Single<String> generateEncodedTestResultHash(@NonNull TestResult testResult) {
+        return Single.fromCallable(testResult::getHashableEncodedData)
+                .map(hashableEncodedData -> hashableEncodedData.getBytes(StandardCharsets.UTF_8))
+                .flatMap(bytes -> CryptoManager.createKeyFromSecret(TEST_REDEEM_HASH_SUFFIX)
+                        .flatMap(secretKey -> cryptoManager.getMacProvider().sign(bytes, secretKey)))
+                .flatMap(bytes -> RxBase64.encode(bytes, Base64.NO_WRAP));
+    }
+
+    private Single<String> generateOrRestoreTestResultTag(@NonNull TestResult testResult) {
+        return Single.just(KEY_TEST_RESULT_TAG + testResult.getId())
+                .flatMap(key -> preferencesManager.restoreIfAvailable(key, String.class)
+                        .switchIfEmpty(cryptoManager.generateSecureRandomData(HashProvider.TRIMMED_HASH_LENGTH)
+                                .flatMap(data -> RxBase64.encode(data, Base64.NO_WRAP))
+                                .doOnSuccess(tag -> Timber.d("Generated new tag for test: %s: %s", testResult, tag))
+                                .flatMap(tag -> preferencesManager.persist(key, tag)
+                                        .andThen(Single.just(tag)))));
     }
 
     private Completable addToHistory(@NonNull TestResult testResult) {
@@ -168,6 +228,13 @@ public class TestingManager extends Manager {
                 .toList()
                 .map(TestResults::new)
                 .flatMapCompletable(this::persistTestResults);
+    }
+
+    /**
+     * @return true if the given url is a test result in the <a href="https://app.luca-app.de/webapp/testresult/#eyJ0eXAi...">luca style</a>
+     */
+    public static boolean isTestResult(@NonNull String url) {
+        return url.contains("luca-app.de/webapp/testresult/#");
     }
 
 }

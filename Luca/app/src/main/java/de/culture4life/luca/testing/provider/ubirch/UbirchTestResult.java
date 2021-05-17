@@ -71,6 +71,7 @@ public class UbirchTestResult extends ProvidedTestResult {
         lucaTestResult.setImportTimestamp(System.currentTimeMillis());
         lucaTestResult.setId(UUID.nameUUIDFromBytes(toCompactJson().getBytes()).toString());
         lucaTestResult.setEncodedData(url);
+        lucaTestResult.setHashableEncodedData(toCompactJson());
     }
 
     void setField(@NonNull String key, String value) throws NoSuchFieldException, IllegalAccessException {
