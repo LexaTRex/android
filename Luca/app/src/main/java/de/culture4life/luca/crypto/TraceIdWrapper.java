@@ -11,6 +11,7 @@ import com.google.gson.JsonSerializer;
 import de.culture4life.luca.util.SerializationUtil;
 
 import java.lang.reflect.Type;
+import java.util.Arrays;
 
 /**
  * An opaque identifier derived from a Guest’s user ID and tracing secret during Guest Check-In. It
@@ -44,6 +45,14 @@ public class TraceIdWrapper {
 
     public void setTraceId(byte[] traceId) {
         this.traceId = traceId;
+    }
+
+    @Override
+    public String toString() {
+        return "TraceIdWrapper{" +
+                "timestamp=" + timestamp +
+                ", traceId=" + Arrays.toString(traceId) +
+                '}';
     }
 
     public static class TypeAdapter implements JsonSerializer<TraceIdWrapper>, JsonDeserializer<TraceIdWrapper> {

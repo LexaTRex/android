@@ -8,6 +8,7 @@ import com.tbruyelle.rxpermissions3.Permission;
 import de.culture4life.luca.LucaApplication;
 import de.culture4life.luca.R;
 import de.culture4life.luca.notification.LucaNotificationManager;
+import de.culture4life.luca.testing.TestingManager;
 import de.culture4life.luca.ui.splash.SplashActivity;
 
 import java.util.Arrays;
@@ -63,6 +64,7 @@ public abstract class BaseViewModel extends AndroidViewModel {
     public Completable initialize() {
         return updateRequiredPermissions()
                 .andThen(update(showCameraPreview, false))
+                .andThen(navigateForDeepLinkIfAvailable())
                 .doOnSubscribe(disposable -> Timber.d("Initializing %s", this));
     }
 
@@ -197,6 +199,18 @@ public abstract class BaseViewModel extends AndroidViewModel {
     @CallSuper
     public void onPermissionResult(@NonNull Permission permission) {
         Timber.i("Permission result: %s", permission);
+    }
+
+    private Completable navigateForDeepLinkIfAvailable() {
+        return application.getTestingManager().initialize(application)
+                .andThen(application.getDeepLink())
+                .doOnSuccess(url -> {
+                    if (!TestingManager.isTestResult(url)) {
+                        if (!isCurrentDestinationId(R.id.qrCodeFragment)) {
+                            navigationController.navigate(R.id.qrCodeFragment);
+                        }
+                    }
+                }).ignoreElement();
     }
 
     protected boolean isCurrentDestinationId(@IdRes int destinationId) {

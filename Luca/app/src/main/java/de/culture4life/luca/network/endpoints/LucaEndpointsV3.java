@@ -147,6 +147,13 @@ public interface LucaEndpointsV3 {
     Completable verifyPhoneNumberBulk(@Body JsonObject message);
 
     /*
+        Tests
+     */
+
+    @POST("tests/redeem")
+    Completable redeemTest(@Body JsonObject message);
+
+    /*
         Time
      */
 

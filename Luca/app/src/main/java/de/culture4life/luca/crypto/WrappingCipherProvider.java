@@ -10,6 +10,7 @@ public class WrappingCipherProvider extends RsaCipherProvider {
 
     public WrappingCipherProvider(RxKeyStore rxKeyStore) {
         super(rxKeyStore);
+        this.useStrongBoxIfAvailable = true;
     }
 
 }

@@ -81,6 +81,10 @@ public class TestResult {
     @SerializedName("encodedData")
     private String encodedData;
 
+    @Expose
+    @SerializedName("hashableEncodedData")
+    private String hashableEncodedData;
+
     public String getId() {
         return id;
     }
@@ -171,6 +175,14 @@ public class TestResult {
         this.encodedData = encodedData;
     }
 
+    public String getHashableEncodedData() {
+        return hashableEncodedData;
+    }
+
+    public void setHashableEncodedData(String hashableEncodedData) {
+        this.hashableEncodedData = hashableEncodedData;
+    }
+
     /**
      * @return The time in millis after which the test result becomes invalid
      */
@@ -192,6 +204,9 @@ public class TestResult {
                 ", resultTimestamp=" + resultTimestamp +
                 ", importTimestamp=" + importTimestamp +
                 ", labName='" + labName + '\'' +
+                ", labDoctorName='" + labDoctorName + '\'' +
+                ", firstName='" + firstName + '\'' +
+                ", lastName='" + lastName + '\'' +
                 ", encodedData='" + encodedData + '\'' +
                 '}';
     }

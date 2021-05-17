@@ -15,6 +15,7 @@ import de.culture4life.luca.testing.TestResult;
 import de.culture4life.luca.testing.TestResultAlreadyImportedException;
 import de.culture4life.luca.testing.TestResultExpiredException;
 import de.culture4life.luca.testing.TestResultParsingException;
+import de.culture4life.luca.testing.TestResultPositiveException;
 import de.culture4life.luca.testing.TestResultVerificationException;
 import de.culture4life.luca.testing.TestingManager;
 import de.culture4life.luca.ui.BaseViewModel;
@@ -67,9 +68,11 @@ public class MyLucaViewModel extends BaseViewModel implements ImageAnalysis.Anal
         return super.initialize()
                 .andThen(Completable.mergeArray(
                         testingManager.initialize(application),
-                        notificationManager.initialize(application)
+                        notificationManager.initialize(application),
+                        registrationManager.initialize(application)
                 ))
-                .andThen(invokeUpdate());
+                .andThen(invokeUpdate())
+                .andThen(handleApplicationDeepLinkIfAvailable());
     }
 
     public Completable invokeUpdate() {
@@ -166,13 +169,17 @@ public class MyLucaViewModel extends BaseViewModel implements ImageAnalysis.Anal
     private Completable importTestResult(@NonNull String encodedTestResult) {
         return testingManager.parseEncodedTestResult(encodedTestResult)
                 .doOnSuccess(testResult -> Timber.d("Parsed test result: %s", testResult))
-                .flatMapCompletable(testResult -> testingManager.addTestResult(testResult)
+                .flatMapCompletable(testResult -> testingManager.redeemTestResult(testResult)
+                        .andThen(testingManager.addTestResult(testResult))
                         .andThen(update(importedTestResult, new ViewEvent<>(testResult)))
                         .andThen(invokeUpdate()))
-                .doOnSubscribe(disposable -> removeError(importError))
+                .doOnSubscribe(disposable -> {
+                    removeError(importError);
+                    updateAsSideEffect(showCameraPreview, false);
+                    updateAsSideEffect(isLoading, true);
+                })
                 .doOnError(throwable -> {
                     Timber.w("Unable to import test result: %s", throwable.toString());
-                    showCameraPreview.postValue(false);
                     ViewError.Builder errorBuilder = createErrorBuilder(throwable)
                             .withTitle(R.string.test_import_error_title);
 
@@ -186,6 +193,8 @@ public class MyLucaViewModel extends BaseViewModel implements ImageAnalysis.Anal
                                 errorBuilder.withDescription(R.string.test_import_error_verification_description);
                                 break;
                         }
+                    } else if (throwable instanceof TestResultPositiveException) {
+                        errorBuilder.withDescription(R.string.test_import_error_positive_description);
                     } else if (throwable instanceof TestResultParsingException) {
                         errorBuilder.withDescription(R.string.test_import_error_unsupported_description);
                     } else if (throwable instanceof TestResultAlreadyImportedException) {
@@ -196,7 +205,10 @@ public class MyLucaViewModel extends BaseViewModel implements ImageAnalysis.Anal
 
                     importError = errorBuilder.build();
                     addError(importError);
-                }).subscribeOn(Schedulers.io());
+                })
+                .onErrorComplete()
+                .doFinally(() -> updateAsSideEffect(isLoading, false))
+                .subscribeOn(Schedulers.io());
     }
 
     /**
@@ -219,6 +231,29 @@ public class MyLucaViewModel extends BaseViewModel implements ImageAnalysis.Anal
 
     public MutableLiveData<String> getUserName() {
         return userName;
+    }
+
+    /*
+        Deep link handling
+     */
+
+    private Completable handleApplicationDeepLinkIfAvailable() {
+        return application.getDeepLink()
+                .flatMapCompletable(this::handleDeepLink)
+                .doOnComplete(() -> Timber.d("Handled application deep link"));
+    }
+
+    private Completable handleDeepLink(@NonNull String url) {
+        return Completable.defer(() -> {
+            if (TestingManager.isTestResult(url)) {
+                String[] parts = url.split("#", 2);
+                if (parts.length == 2) {
+                    return importTestResult(parts[1])
+                            .doFinally(() -> application.onDeepLinkHandled(url));
+                }
+            }
+            return Completable.complete();
+        });
     }
 
 }

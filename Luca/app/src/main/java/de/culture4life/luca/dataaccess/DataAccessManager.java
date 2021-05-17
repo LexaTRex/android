@@ -56,9 +56,9 @@ public class DataAccessManager extends Manager {
     public static final long UPDATE_FLEX_PERIOD = BuildConfig.DEBUG ? PeriodicWorkRequest.MIN_PERIODIC_FLEX_MILLIS : TimeUnit.HOURS.toMillis(2);
     public static final long UPDATE_INITIAL_DELAY = TimeUnit.SECONDS.toMillis(10);
 
-    private static final String LAST_UPDATE_TIMESTAMP_KEY = "last_accessed_data_update_timestamp";
-    private static final String LAST_INFO_SHOWN_TIMESTAMP_KEY = "last_accessed_data_info_shown_timestamp";
-    private static final String ACCESSED_DATA_KEY = "accessed_data";
+    public static final String LAST_UPDATE_TIMESTAMP_KEY = "last_accessed_data_update_timestamp";
+    public static final String LAST_INFO_SHOWN_TIMESTAMP_KEY = "last_accessed_data_info_shown_timestamp";
+    public static final String ACCESSED_DATA_KEY = "accessed_data";
 
     private final PreferencesManager preferencesManager;
     private final NetworkManager networkManager;

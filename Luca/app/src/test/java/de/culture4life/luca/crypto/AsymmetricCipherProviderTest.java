@@ -23,6 +23,7 @@ public class AsymmetricCipherProviderTest {
     private static final String ENCODED_UNCOMPRESSED_PUBLIC_KEY = "BAIDQ7/zTOcV+XXX5io9XZn1t4MUOAswVfZKd6Fpup/MwlNssx4mCEPcO34AIiV0TbL2ywOP3QoHs41cfvv7uTo=";
     private static final String ENCODED_COMPRESSED_PUBLIC_KEY = "AgIDQ7/zTOcV+XXX5io9XZn1t4MUOAswVfZKd6Fpup/M";
     private static final String ENCODED_PRIVATE_KEY = "2J9dWi+NKANgXznZVthBygcElRk3XNy7IUPrqwGtEZE=";
+    private static final String ENCODED_SECRET = "4PR4/hokDg6pSss4yGPjBGkU/1qCHsnM8YOjBqnK2LA=";
 
     private AsymmetricCipherProvider asymmetricCipherProvider;
 
@@ -85,6 +86,16 @@ public class AsymmetricCipherProviderTest {
                 .assertValue(ecPrivateKey -> ecPrivateKey.getAlgorithm().equals("ECDSA"))
                 .assertValue(ecPrivateKey -> ecPrivateKey.getFormat().equals("PKCS#8"))
                 .assertValue(ecPrivateKey -> ecPrivateKey.getS().equals(new BigInteger("97981148271098500605815445696501709458330601205038959054259534545461596459409")));
+    }
+
+    @Test
+    public void generateSecret_validKeys_expectedSecret() {
+        ECPublicKey publicKey = decodePublicKey(ENCODED_UNCOMPRESSED_PUBLIC_KEY);
+        ECPrivateKey privateKey = decodePrivateKey(ENCODED_PRIVATE_KEY);
+        asymmetricCipherProvider.generateSecret(privateKey, publicKey)
+                .flatMap(data -> RxBase64.encode(data, Base64.NO_WRAP))
+                .test()
+                .assertValue(ENCODED_SECRET);
     }
 
     public static ECPublicKey decodePublicKey(String encodedKey) {

@@ -99,26 +99,27 @@
     </style>
 
     <style name="Widget.Luca.Button.UnelevatedButton" parent="Widget.MaterialComponents.Button.UnelevatedButton">
-        <item name="android:textColor">?attr/colorSurface</item>
-        <item name="android:backgroundTint">?attr/colorPrimary</item>
-        <item name="cornerRadius">100dp</item>
+        <item name="android:textColor">@drawable/selector_primary_button_highlight_color</item>
         <item name="android:textStyle">bold</item>
+        <item name="backgroundTint">@drawable/selector_primary_button_background_color</item>
+        <item name="cornerRadius">100dp</item>
     </style>
 
     <style name="Button.Luca.PrimaryActionButton" parent="Widget.Luca.Button.UnelevatedButton">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
-        <item name="iconTint">?attr/colorSurface</item>
+        <item name="iconTint">@drawable/selector_primary_button_highlight_color</item>
         <item name="iconGravity">textStart</item>
         <item name="android:padding">@dimen/spacing_default</item>
     </style>
 
     <style name="Button.Luca.SecondaryActionButton" parent="Button.Luca.PrimaryActionButton">
-        <item name="android:textColor">?attr/colorOnSurface</item>
-        <item name="iconTint">?attr/colorOnSurface</item>
-        <item name="strokeColor">?attr/colorPrimary</item>
+        <item name="android:textColor">@drawable/selector_secondary_button_highlight_color</item>
+        <item name="iconTint">@drawable/selector_secondary_button_highlight_color</item>
+        <item name="strokeColor">@drawable/selector_secondary_button_highlight_color</item>
         <item name="strokeWidth">@dimen/mtrl_btn_stroke_size</item>
-        <item name="android:backgroundTint">@android:color/transparent</item>
+        <item name="android:backgroundTint">@drawable/selector_secondary_button_background_color
+        </item>
     </style>
 
     <!--  AlertDialog  -->

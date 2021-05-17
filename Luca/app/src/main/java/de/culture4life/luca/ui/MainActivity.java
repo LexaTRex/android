@@ -38,7 +38,6 @@ public class MainActivity extends BaseActivity {
         NavigationUI.setupActionBarWithNavController(this, navigationController, appBarConfiguration);
         BottomNavigationView navigationView = findViewById(R.id.bottomNavigationView);
         NavigationUI.setupWithNavController(navigationView, navigationController);
-        navigationView.setSelectedItemId(R.id.myLucaFragment);
 
         if (application.isInDarkMode()) {
             // workaround for removing the elevation color overlay

@@ -96,7 +96,7 @@ public class LucaApplication extends MultiDexApplication {
         meetingManager = new MeetingManager(preferencesManager, networkManager, locationManager, historyManager, cryptoManager);
         checkInManager = new CheckInManager(preferencesManager, networkManager, geofenceManager, locationManager, historyManager, cryptoManager, notificationManager);
         dataAccessManager = new DataAccessManager(preferencesManager, networkManager, notificationManager, checkInManager, historyManager, cryptoManager);
-        testingManager = new TestingManager(preferencesManager, historyManager, registrationManager);
+        testingManager = new TestingManager(preferencesManager, networkManager, historyManager, registrationManager, cryptoManager);
 
         applicationDisposable = new CompositeDisposable();
 
@@ -139,9 +139,8 @@ public class LucaApplication extends MultiDexApplication {
      */
     @CallSuper
     private Completable initializeBlocking() {
-        return Completable.mergeArray(
-                preferencesManager.initialize(this)
-        );
+        return cryptoManager.setupSecurityProviders()
+                .andThen(preferencesManager.initialize(this));
     }
 
     /**

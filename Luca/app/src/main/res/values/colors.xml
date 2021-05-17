@@ -6,6 +6,9 @@
 
     <color name="checked_in_light_green_gradient">#d3dec3</color>
 
+    <color name="light_button_pressed">#9badbf</color>
+    <color name="dark_button_pressed">#444444</color>
+
     <color name="switch_track_checked">#819e57</color>
     <color name="switch_track_default">#727272</color>
 
