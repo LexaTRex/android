@@ -27,6 +27,8 @@ import java.security.spec.EllipticCurve;
 import androidx.annotation.NonNull;
 import io.reactivex.rxjava3.core.Single;
 
+import static com.nexenio.rxkeystore.RxKeyStore.DIGEST_SHA256;
+import static com.nexenio.rxkeystore.RxKeyStore.KEY_AGREEMENT_ECDH;
 import static com.nexenio.rxkeystore.RxKeyStore.PROVIDER_BOUNCY_CASTLE;
 
 /**
@@ -88,7 +90,7 @@ public class AsymmetricCipherProvider extends EcCipherProvider {
 
     @Override
     protected String[] getBlockModes() {
-        return new String[]{"ECB"};
+        return new String[]{RxKeyStore.BLOCK_MODE_ECB};
     }
 
     @Override
@@ -103,7 +105,7 @@ public class AsymmetricCipherProvider extends EcCipherProvider {
 
     @Override
     protected String[] getDigests() {
-        return new String[]{"SHA-256"};
+        return new String[]{DIGEST_SHA256};
     }
 
     @Override
@@ -118,7 +120,7 @@ public class AsymmetricCipherProvider extends EcCipherProvider {
 
     @Override
     protected String getKeyAgreementAlgorithm() {
-        return "ECDH";
+        return KEY_AGREEMENT_ECDH;
     }
 
 }

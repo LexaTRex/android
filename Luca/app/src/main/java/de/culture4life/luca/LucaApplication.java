@@ -127,8 +127,11 @@ public class LucaApplication extends MultiDexApplication {
         super.onCreate();
         Timber.d("Creating application");
         if (!isRunningUnitTests()) {
+            long t = System.currentTimeMillis();
             initializeBlocking().blockingAwait(10, TimeUnit.SECONDS);
-            initializeAsync().subscribeOn(Schedulers.io()).subscribe();
+            initializeAsync().subscribeOn(Schedulers.io()).doFinally(() -> {
+                Timber.d("initialization took %d ms", (System.currentTimeMillis() - t));
+            }).subscribe();
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
         }
         Timber.d("Application created");
@@ -139,8 +142,7 @@ public class LucaApplication extends MultiDexApplication {
      */
     @CallSuper
     private Completable initializeBlocking() {
-        return cryptoManager.setupSecurityProviders()
-                .andThen(preferencesManager.initialize(this));
+        return cryptoManager.setupSecurityProviders();
     }
 
     /**
@@ -149,6 +151,7 @@ public class LucaApplication extends MultiDexApplication {
     @CallSuper
     private Completable initializeAsync() {
         return Completable.mergeArray(
+                preferencesManager.initialize(this).subscribeOn(Schedulers.io()),
                 notificationManager.initialize(this).subscribeOn(Schedulers.io()),
                 networkManager.initialize(this).subscribeOn(Schedulers.io()),
                 cryptoManager.initialize(this).subscribeOn(Schedulers.io()),

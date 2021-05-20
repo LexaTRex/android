@@ -2,8 +2,6 @@ package de.culture4life.luca;
 
 import android.content.Context;
 
-import java.util.concurrent.TimeUnit;
-
 import androidx.annotation.CallSuper;
 import androidx.annotation.NonNull;
 import io.reactivex.rxjava3.core.Completable;
@@ -28,29 +26,33 @@ public abstract class Manager {
     @CallSuper
     public Completable initialize(@NonNull Context context) {
         return Completable.defer(() -> {
-            Completable initializationCompletable;
             synchronized (this) {
-                if (isInitialized) {
-                    Timber.v("Not initializing %s, initialization already completed", this);
-                    initializationCompletable = Completable.complete();
-                } else if (isInitializing) {
-                    Timber.v("Deferring initialization of %s, initialization already in progress", this);
-                    initializationCompletable = initialize(context)
-                            .delaySubscription(10, TimeUnit.MILLISECONDS);
-                } else {
-                    isInitializing = true;
-                    this.context = context;
-                    this.managerDisposable = new CompositeDisposable();
-                    initializationCompletable = doInitialize(context)
-                            .doOnSubscribe(disposable -> Timber.d("Initializing %s", this))
-                            .doOnComplete(() -> {
-                                isInitialized = true;
-                                Timber.i("Completed initialization of %s", this);
-                            })
-                            .doFinally(() -> isInitializing = false);
+                if (isInitializing && !isInitialized) {
+                    wait();
+                }
+                isInitializing = !isInitialized;
+            }
+            if (!isInitialized) {
+                long startTime = System.currentTimeMillis();
+                this.context = context.getApplicationContext();
+                this.managerDisposable = new CompositeDisposable();
+                return doInitialize(context)
+                        .doOnComplete(() -> {
+                            isInitialized = true;
+                            Timber.i("Completed initialization of %s in %d ms", this, (System.currentTimeMillis() - startTime));
+                        })
+                        .doFinally(() -> {
+                            isInitializing = false;
+                            synchronized (this) {
+                                notify();
+                            }
+                        });
+            } else {
+                synchronized (this) {
+                    notifyAll();
                 }
             }
-            return initializationCompletable;
+            return Completable.complete();
         });
     }
 

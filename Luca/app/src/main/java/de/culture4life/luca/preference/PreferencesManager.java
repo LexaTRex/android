@@ -19,6 +19,9 @@ import de.culture4life.luca.history.HistoryItem;
 import net.grandcentrix.tray.TrayPreferences;
 import net.grandcentrix.tray.core.TrayStorage;
 
+import java.io.IOException;
+import java.security.GeneralSecurityException;
+
 import androidx.annotation.NonNull;
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Maybe;
@@ -40,17 +43,7 @@ public class PreferencesManager extends Manager implements PreferencesProvider {
 
     @Override
     public Completable doInitialize(@NonNull Context context) {
-        return Completable.fromAction(() -> {
-            BasePreferencesProvider preferencesProvider;
-            if (LucaApplication.isRunningUnitTests()) {
-                preferencesProvider = new InMemoryPreferencesProvider();
-            } else {
-                preferencesProvider = new EncryptedSharedPreferencesProvider(context);
-            }
-            preferencesProvider.setSerializer(SERIALIZER);
-            this.provider = preferencesProvider;
-        }).andThen(migratePreferencesIfRequired())
-                .andThen(persistDefaultValues());
+        return Completable.complete();
     }
 
     private Completable migratePreferencesIfRequired() {
@@ -70,11 +63,23 @@ public class PreferencesManager extends Manager implements PreferencesProvider {
                 .andThen(provider.persist(LAST_MIGRATION_VERSION_CODE_KEY, BuildConfig.VERSION_CODE));
     }
 
-    private Completable persistDefaultValues() {
-        return Completable.complete();
-    }
-
-    private Single<PreferencesProvider> getInitializedProvider() {
+    private synchronized Single<PreferencesProvider> getInitializedProvider() {
+        if (provider == null) {
+            BasePreferencesProvider preferencesProvider;
+            if (LucaApplication.isRunningUnitTests()) {
+                preferencesProvider = new InMemoryPreferencesProvider();
+            } else {
+                try {
+                    preferencesProvider = new EncryptedSharedPreferencesProvider(context);
+                } catch (GeneralSecurityException | IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+            preferencesProvider.setSerializer(SERIALIZER);
+            provider = preferencesProvider;
+            return migratePreferencesIfRequired()
+                    .andThen(getInitializedField(provider));
+        }
         return Single.defer(() -> getInitializedField(provider));
     }
 

@@ -47,7 +47,8 @@ public class MyLucaViewModel extends BaseViewModel implements ImageAnalysis.Anal
 
     private final MutableLiveData<String> userName = new MutableLiveData<>();
     private final MutableLiveData<List<MyLucaListItem>> myLucaItems = new MutableLiveData<>();
-    private final MutableLiveData<ViewEvent<TestResult>> importedTestResult = new MutableLiveData<>();
+    private final MutableLiveData<ViewEvent<TestResult>> parsedTestResult = new MutableLiveData<>();
+    private final MutableLiveData<ViewEvent<TestResult>> addedTestResult = new MutableLiveData<>();
 
     private final BarcodeScanner scanner;
 
@@ -103,6 +104,16 @@ public class MyLucaViewModel extends BaseViewModel implements ImageAnalysis.Anal
             MyLucaListItem item = MyLucaListItem.from(application, testResult);
             return item;
         });
+    }
+
+    /**
+     * Delete the test result
+     *
+     * @param position position in the list that will be deleted
+     */
+    public Completable deleteTestResult(int position) {
+        String testResultId = myLucaItems.getValue().get(position).getTestResultId();
+        return testingManager.deleteTestResult(testResultId).andThen(updateList());
     }
 
     /*
@@ -163,27 +174,26 @@ public class MyLucaViewModel extends BaseViewModel implements ImageAnalysis.Anal
                     notificationManager.vibrate().subscribe();
                 })
                 .map(barcodeValue -> barcodeValue.replace(TEST_VERIFY_URL_PREFIX, ""))
-                .flatMapCompletable(this::importTestResult);
+                .flatMapCompletable(this::parseAndValidateTestResult);
     }
 
-    private Completable importTestResult(@NonNull String encodedTestResult) {
-        return testingManager.parseEncodedTestResult(encodedTestResult)
+    private Completable parseAndValidateTestResult(@NonNull String encodedTestResult) {
+        return testingManager.parseAndValidateEncodedTestResult(encodedTestResult)
                 .doOnSuccess(testResult -> Timber.d("Parsed test result: %s", testResult))
-                .flatMapCompletable(testResult -> testingManager.redeemTestResult(testResult)
-                        .andThen(testingManager.addTestResult(testResult))
-                        .andThen(update(importedTestResult, new ViewEvent<>(testResult)))
-                        .andThen(invokeUpdate()))
+                .flatMapCompletable(testResult -> update(parsedTestResult, new ViewEvent<>(testResult)))
                 .doOnSubscribe(disposable -> {
                     removeError(importError);
                     updateAsSideEffect(showCameraPreview, false);
                     updateAsSideEffect(isLoading, true);
                 })
                 .doOnError(throwable -> {
-                    Timber.w("Unable to import test result: %s", throwable.toString());
+                    Timber.w("Unable to parse test result: %s", throwable.toString());
                     ViewError.Builder errorBuilder = createErrorBuilder(throwable)
                             .withTitle(R.string.test_import_error_title);
 
-                    if (throwable instanceof TestResultVerificationException) {
+                    if (throwable instanceof TestResultParsingException) {
+                        errorBuilder.withDescription(R.string.test_import_error_unsupported_description);
+                    } else if (throwable instanceof TestResultVerificationException) {
                         switch (((TestResultVerificationException) throwable).getReason()) {
                             case TEST_EXPIRED:
                                 errorBuilder.withDescription(R.string.test_import_error_expired_description);
@@ -193,10 +203,30 @@ public class MyLucaViewModel extends BaseViewModel implements ImageAnalysis.Anal
                                 errorBuilder.withDescription(R.string.test_import_error_verification_description);
                                 break;
                         }
-                    } else if (throwable instanceof TestResultPositiveException) {
+                    }
+
+                    importError = errorBuilder.build();
+                    addError(importError);
+                })
+                .doFinally(() -> updateAsSideEffect(isLoading, false))
+                .subscribeOn(Schedulers.io());
+    }
+
+    public Completable addTestResult(@NonNull TestResult testResult) {
+        return testingManager.redeemTestResult(testResult)
+                .andThen(testingManager.addTestResult(testResult))
+                .andThen(update(addedTestResult, new ViewEvent<>(testResult)))
+                .andThen(invokeUpdate())
+                .doOnSubscribe(disposable -> {
+                    removeError(importError);
+                    updateAsSideEffect(isLoading, true);
+                })
+                .doOnError(throwable -> {
+                    ViewError.Builder errorBuilder = createErrorBuilder(throwable)
+                            .withTitle(R.string.test_import_error_title);
+
+                    if (throwable instanceof TestResultPositiveException) {
                         errorBuilder.withDescription(R.string.test_import_error_positive_description);
-                    } else if (throwable instanceof TestResultParsingException) {
-                        errorBuilder.withDescription(R.string.test_import_error_unsupported_description);
                     } else if (throwable instanceof TestResultAlreadyImportedException) {
                         errorBuilder.withDescription(R.string.test_import_error_already_imported_description);
                     } else if (throwable instanceof TestResultExpiredException) {
@@ -206,31 +236,7 @@ public class MyLucaViewModel extends BaseViewModel implements ImageAnalysis.Anal
                     importError = errorBuilder.build();
                     addError(importError);
                 })
-                .onErrorComplete()
-                .doFinally(() -> updateAsSideEffect(isLoading, false))
-                .subscribeOn(Schedulers.io());
-    }
-
-    /**
-     * Delete the test result
-     *
-     * @param position position in the list that will be deleted
-     */
-    public Completable deleteTestResult(int position) {
-        String testResultId = myLucaItems.getValue().get(position).getTestResultId();
-        return testingManager.deleteTestResult(testResultId).andThen(updateList());
-    }
-
-    public LiveData<List<MyLucaListItem>> getMyLucaItems() {
-        return myLucaItems;
-    }
-
-    public LiveData<ViewEvent<TestResult>> getImportedTestResult() {
-        return importedTestResult;
-    }
-
-    public MutableLiveData<String> getUserName() {
-        return userName;
+                .doFinally(() -> updateAsSideEffect(isLoading, false));
     }
 
     /*
@@ -240,7 +246,7 @@ public class MyLucaViewModel extends BaseViewModel implements ImageAnalysis.Anal
     private Completable handleApplicationDeepLinkIfAvailable() {
         return application.getDeepLink()
                 .flatMapCompletable(this::handleDeepLink)
-                .doOnComplete(() -> Timber.d("Handled application deep link"));
+                .onErrorComplete();
     }
 
     private Completable handleDeepLink(@NonNull String url) {
@@ -248,12 +254,28 @@ public class MyLucaViewModel extends BaseViewModel implements ImageAnalysis.Anal
             if (TestingManager.isTestResult(url)) {
                 String[] parts = url.split("#", 2);
                 if (parts.length == 2) {
-                    return importTestResult(parts[1])
+                    return parseAndValidateTestResult(parts[1])
                             .doFinally(() -> application.onDeepLinkHandled(url));
                 }
             }
             return Completable.complete();
-        });
+        }).doOnComplete(() -> Timber.d("Handled application deep link: %s", url));
+    }
+
+    public LiveData<List<MyLucaListItem>> getMyLucaItems() {
+        return myLucaItems;
+    }
+
+    public LiveData<ViewEvent<TestResult>> getParsedTestResult() {
+        return parsedTestResult;
+    }
+
+    public LiveData<ViewEvent<TestResult>> getAddedTestResult() {
+        return addedTestResult;
+    }
+
+    public LiveData<String> getUserName() {
+        return userName;
     }
 
 }

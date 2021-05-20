@@ -112,17 +112,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
 
-            <ImageView
-                    android:id="@+id/qrCodeImageView"
-                    android:layout_width="match_parent"
-                    android:layout_height="0dp"
-                    android:keepScreenOn="true"
-                    android:scaleType="fitCenter"
-                    android:padding="@dimen/spacing_default"
-                    app:layout_constraintDimensionRatio="1:1"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
-
             <androidx.camera.view.PreviewView
                     android:id="@+id/cameraPreviewView"
                     android:layout_width="match_parent"

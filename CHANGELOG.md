@@ -1,7 +1,15 @@
+# Release 1.7.2
+
+- Minor improvements and bugfixes
+
+In this update, we have made minor adjustments to the "My luca" tab.
+
 # Release 1.7.1
+
 - Support import via deep links
 - Text and UI adjustments
 - Minor bugfixes
+
 This update allows you to import documents via deep links. We also updated the consent dialog for importing documents to clarify under which conditions data is being processed.
 
 Further, we have made minor adjustments to text and UI.

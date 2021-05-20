@@ -71,6 +71,24 @@ public class TestingManager extends Manager {
         ).andThen(deleteOldTests());
     }
 
+    public Single<TestResult> parseAndValidateEncodedTestResult(@NonNull String encodedTestResult) {
+        return Single.mergeDelayError(registrationManager.getOrCreateRegistrationData()
+                .flatMapPublisher(registrationData -> getTestResultProvidersFor(encodedTestResult)
+                        .doOnNext(testResultProvider -> Timber.v("Attempting to parse using %s", testResultProvider.getClass().getSimpleName()))
+                        .map(testResultProvider -> testResultProvider.parseAndValidate(encodedTestResult, registrationData)
+                                .doOnError(throwable -> Timber.w("Parsing failed: %s", throwable.toString()))
+                                .map(ProvidedTestResult::getLucaTestResult))
+                        .toFlowable(BackpressureStrategy.BUFFER)))
+                .firstOrError()
+                .onErrorResumeNext(throwable -> {
+                    if (throwable instanceof NoSuchElementException) {
+                        return Single.error(new TestResultParsingException("No parser available for encoded data"));
+                    } else {
+                        return Single.error(throwable);
+                    }
+                });
+    }
+
     public Completable addTestResult(@NonNull TestResult testResult) {
         return getTestResultIfAvailable(testResult.getId())
                 .isEmpty()
@@ -91,24 +109,6 @@ public class TestingManager extends Manager {
                             .flatMapCompletable(this::persistTestResults)
                             .andThen(addToHistory(testResult))
                             .doOnSubscribe(disposable -> Timber.d("Persisting test result: %s", testResult));
-                });
-    }
-
-    public Single<TestResult> parseEncodedTestResult(@NonNull String encodedTestResult) {
-        return Single.mergeDelayError(registrationManager.getOrCreateRegistrationData()
-                .flatMapPublisher(registrationData -> getTestResultProvidersFor(encodedTestResult)
-                        .doOnNext(testResultProvider -> Timber.v("Attempting to parse using %s", testResultProvider.getClass().getSimpleName()))
-                        .map(testResultProvider -> testResultProvider.parseAndValidate(encodedTestResult, registrationData)
-                                .doOnError(throwable -> Timber.w("Parsing failed: %s", throwable.toString()))
-                                .map(ProvidedTestResult::getLucaTestResult))
-                        .toFlowable(BackpressureStrategy.BUFFER)))
-                .firstOrError()
-                .onErrorResumeNext(throwable -> {
-                    if (throwable instanceof NoSuchElementException) {
-                        return Single.error(new TestResultParsingException("No parser available for encoded data"));
-                    } else {
-                        return Single.error(throwable);
-                    }
                 });
     }
 
@@ -196,7 +196,7 @@ public class TestingManager extends Manager {
                 .doOnSuccess(encodedTestResults -> Timber.i("Re-importing %d test results", encodedTestResults.size()))
                 .flatMapCompletable(encodedTestResults -> clearTestResults()
                         .andThen(Observable.fromIterable(encodedTestResults)
-                                .flatMapMaybe(encodedTestResult -> parseEncodedTestResult(encodedTestResult)
+                                .flatMapMaybe(encodedTestResult -> parseAndValidateEncodedTestResult(encodedTestResult)
                                         .doOnError(throwable -> Timber.w("Unable to re-import test result: %s", throwable.toString()))
                                         .onErrorComplete())
                                 .flatMapCompletable(this::addTestResult)));
@@ -231,7 +231,8 @@ public class TestingManager extends Manager {
     }
 
     /**
-     * @return true if the given url is a test result in the <a href="https://app.luca-app.de/webapp/testresult/#eyJ0eXAi...">luca style</a>
+     * @return true if the given url is a test result in the <a href="https://app.luca-app.de/webapp/testresult/#eyJ0eXAi...">luca
+     *         style</a>
      */
     public static boolean isTestResult(@NonNull String url) {
         return url.contains("luca-app.de/webapp/testresult/#");

@@ -100,7 +100,9 @@ public class RegistrationFragment extends BaseFragment<RegistrationViewModel> {
     @Override
     public void onPause() {
         super.onPause();
-        viewModel.updateRegistrationDataWithFormValuesAsSideEffect();
+        if (!viewModel.isInEditMode()) {
+            viewModel.updateRegistrationDataWithFormValuesAsSideEffect();
+        }
     }
 
     private void initializeSharedViews() {

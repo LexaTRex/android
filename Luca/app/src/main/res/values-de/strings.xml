@@ -256,7 +256,7 @@
     <!-- My Luca -->
     <string name="my_luca_heading">Mein luca</string>
     <string name="my_luca_empty_title">Willkommen</string>
-    <string name="my_luca_empty_description">Willkommen in deinem \"Mein luca\" Tab. Das ist dein persönlicher Bereich, an dem du Dokumente hinzufügen kannst, die dir den Check In erleichtern. Wenn du an einem Standort einchecken willst, gehe in den Check in Tab unten links.</string>
+    <string name="my_luca_empty_description">Willkommen in deinem \"Mein luca\" Tab. Das ist dein persönlicher Bereich, an dem du Dokumente hinzufügen kannst, die dir den Check-in erleichtern. Wenn du an einem Standort einchecken willst, gehe in den Check-in Tab unten links.</string>
     <string name="test_import_action">Hinzufügen</string>
     <string name="test_import_hint">Scanne den QR-Code deines Tests um ihn zur App hinzuzufügen.</string>
     <string name="test_import_success_message">Das Testergebnis wurde importiert</string>

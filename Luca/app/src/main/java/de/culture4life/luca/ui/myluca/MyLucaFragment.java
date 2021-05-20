@@ -126,11 +126,18 @@ public class MyLucaFragment extends BaseFragment<MyLucaViewModel> implements MyL
         loadingView = getView().findViewById(R.id.loadingLayout);
         observe(viewModel.getIsLoading(), loading -> loadingView.setVisibility(loading ? View.VISIBLE : View.GONE));
 
-        observe(viewModel.getImportedTestResult(), testResultViewEvent -> {
+        observe(viewModel.getParsedTestResult(), testResultViewEvent -> {
             if (!testResultViewEvent.hasBeenHandled()) {
                 TestResult testResult = testResultViewEvent.getValueAndMarkAsHandled();
-                Toast.makeText(getContext(), R.string.test_import_success_message, Toast.LENGTH_SHORT).show();
+                showTestImportConsentDialog(testResult);
                 hideCameraPreview();
+            }
+        });
+
+        observe(viewModel.getAddedTestResult(), testResultViewEvent -> {
+            if (!testResultViewEvent.hasBeenHandled()) {
+                testResultViewEvent.setHandled(true);
+                Toast.makeText(getContext(), R.string.test_import_success_message, Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -145,7 +152,7 @@ public class MyLucaFragment extends BaseFragment<MyLucaViewModel> implements MyL
 
     private void toggleCameraPreview() {
         if (cameraPreviewDisposable == null) {
-            showTestImportConsentDialog();
+            showCameraDialog(false);
         } else {
             hideCameraPreview();
         }
@@ -213,11 +220,18 @@ public class MyLucaFragment extends BaseFragment<MyLucaViewModel> implements MyL
         Camera camera = cameraProvider.bindToLifecycle((LifecycleOwner) getContext(), cameraSelector, imageAnalysis, preview);
     }
 
-    private void showTestImportConsentDialog() {
+    private void showTestImportConsentDialog(@NonNull TestResult testResult) {
         new BaseDialogFragment(new MaterialAlertDialogBuilder(getContext())
                 .setTitle(R.string.test_import_action)
                 .setMessage(R.string.test_import_consent)
-                .setPositiveButton(R.string.action_ok, (dialog, which) -> showCameraDialog(false))
+                .setPositiveButton(R.string.action_ok, (dialog, which) -> {
+                    viewDisposable.add(viewModel.addTestResult(testResult)
+                            .subscribeOn(Schedulers.io())
+                            .subscribe(
+                                    () -> Timber.i("Test added: %s", testResult),
+                                    throwable -> Timber.w("Unable to add test: %s", throwable.toString())
+                            ));
+                })
                 .setNegativeButton(R.string.action_cancel, (dialog, which) -> dialog.cancel()))
                 .show();
     }

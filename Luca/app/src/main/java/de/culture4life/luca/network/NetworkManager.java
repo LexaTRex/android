@@ -49,29 +49,25 @@ public class NetworkManager extends Manager {
 
     @Override
     protected Completable doInitialize(@NonNull Context context) {
-        return Completable.fromAction(() -> connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE))
-                .andThen(setupNetworking());
+        return Completable.fromAction(() -> connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE));
     }
 
-    private Completable setupNetworking() {
-        return Completable.fromAction(() -> {
+    private LucaEndpointsV3 createEndpoints() {
+        gson = new GsonBuilder()
+                .setLenient()
+                .setDateFormat("yyyy-MM-dd'T'HH:mm:ssZ")
+                .create();
 
-            gson = new GsonBuilder()
-                    .setLenient()
-                    .setDateFormat("yyyy-MM-dd'T'HH:mm:ssZ")
-                    .create();
+        OkHttpClient okHttpClient = createOkHttpClient();
 
-            OkHttpClient okHttpClient = createOkHttpClient();
+        retrofit = new Retrofit.Builder()
+                .baseUrl(API_BASE_URL)
+                .addConverterFactory(GsonConverterFactory.create(gson))
+                .addCallAdapterFactory(rxAdapter)
+                .client(okHttpClient)
+                .build();
 
-            retrofit = new Retrofit.Builder()
-                    .baseUrl(API_BASE_URL)
-                    .addConverterFactory(GsonConverterFactory.create(gson))
-                    .addCallAdapterFactory(rxAdapter)
-                    .client(okHttpClient)
-                    .build();
-
-            lucaEndpointsV3 = retrofit.create(LucaEndpointsV3.class);
-        });
+        return retrofit.create(LucaEndpointsV3.class);
     }
 
     @NonNull
@@ -115,11 +111,14 @@ public class NetworkManager extends Manager {
 
     @Deprecated
     public LucaEndpointsV3 getLucaEndpoints() {
+        if (lucaEndpointsV3 == null) {
+            lucaEndpointsV3 = createEndpoints();
+        }
         return lucaEndpointsV3;
     }
 
     public Single<LucaEndpointsV3> getLucaEndpointsV3() {
-        return Single.defer(() -> getInitializedField(lucaEndpointsV3));
+        return Single.defer(() -> getInitializedField(getLucaEndpoints()));
     }
 
     public Completable assertNetworkConnected() {
