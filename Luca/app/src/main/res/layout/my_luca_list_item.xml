@@ -36,7 +36,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginEnd="30dp"
                     android:ellipsize="end"
-                    android:maxLines="1"
+                    android:maxLines="2"
                     tools:text="Negativ"
                     app:layout_constraintHorizontal_bias="0"
                     app:layout_constrainedWidth="true"
@@ -106,6 +106,7 @@
                         android:layout_height="wrap_content"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent"
+                        android:layout_marginEnd="30dp"
                         android:orientation="vertical">
 
                     <TextView
@@ -115,7 +116,6 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="@dimen/spacing_default"
-                            android:layout_marginEnd="30dp"
                             android:ellipsize="end"
                             android:maxLines="1"
                             android:text="@string/test_issued_by" />
@@ -127,9 +127,8 @@
                             android:textColor="@android:color/black"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginEnd="30dp"
                             android:ellipsize="end"
-                            android:maxLines="1"
+                            android:maxLines="3"
                             tools:text="Testzentrum Rostock" />
 
                     <TextView
@@ -139,7 +138,6 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="@dimen/spacing_default"
-                            android:layout_marginEnd="30dp"
                             android:ellipsize="end"
                             android:maxLines="1"
                             android:text="@string/test_lab_doctor_name" />
@@ -151,12 +149,22 @@
                             android:textColor="@android:color/black"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginEnd="30dp"
                             android:ellipsize="end"
                             android:maxLines="1"
                             tools:text="Prof. Dr. Coronafight" />
 
+                    <LinearLayout
+                            android:id="@+id/proceduresContainer"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent"
+                            android:orientation="vertical">
+
+                    </LinearLayout>
+
                 </LinearLayout>
+
 
                 <ImageView
                         android:id="@+id/qrCodeImageView"

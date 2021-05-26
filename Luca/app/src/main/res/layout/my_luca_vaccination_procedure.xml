@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+    <TextView
+            android:id="@+id/vaccination_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            style="@style/TextAppearance.Luca.Body2"
+            android:textColor="@android:color/black"
+            tools:text="Comirnaty"
+            android:ellipsize="end" />
+
+    <TextView
+            android:id="@+id/vaccination_date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            style="@style/TextAppearance.Luca.Body2"
+            app:fontFamily="@font/montserrat_bold"
+            android:textColor="@android:color/black"
+            android:ellipsize="end"
+            tools:text="18.05.2021 11:31" />
+
+</LinearLayout>

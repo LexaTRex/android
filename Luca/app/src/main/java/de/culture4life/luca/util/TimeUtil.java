@@ -72,7 +72,27 @@ public final class TimeUtil {
             }
             return amount + " " + context.getString(unit);
         });
+    }
 
+    public static Single<String> getReadableDurationWithPlural(long duration, @NonNull Context context) {
+        return Single.fromCallable(() -> {
+            long amount;
+            int unit;
+            if (duration < TimeUnit.MINUTES.toMillis(2)) {
+                amount = TimeUnit.MILLISECONDS.toSeconds(duration);
+                unit = R.plurals.time_plural_seconds;
+            } else if (duration < TimeUnit.HOURS.toMillis(2)) {
+                amount = TimeUnit.MILLISECONDS.toMinutes(duration);
+                unit = R.plurals.time_plural_minutes;
+            } else if (duration < TimeUnit.DAYS.toMillis(2)) {
+                amount = TimeUnit.MILLISECONDS.toHours(duration);
+                unit = R.plurals.time_plural_hours;
+            } else {
+                amount = TimeUnit.MILLISECONDS.toDays(duration);
+                unit = R.plurals.time_plural_days;
+            }
+            return context.getResources().getQuantityString(unit, (int) amount, (int) amount);
+        });
     }
 
     public static Single<Long> getStartOfDayTimestamp() {

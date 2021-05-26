@@ -302,6 +302,18 @@ public class CheckInManager extends Manager {
                 });
     }
 
+    public Completable assertCheckedInToPrivateMeeting() {
+        return assertCheckedIn()
+                .andThen(getCheckInDataIfAvailable())
+                .flatMapCompletable(checkInData -> {
+                    if (checkInData.isPrivateMeeting()) {
+                        return Completable.complete();
+                    } else {
+                        return Completable.error(new IllegalStateException("Check-in data does not belong to a private meeting"));
+                    }
+                });
+    }
+
     public Observable<Boolean> getCheckedInStateChanges() {
         return Observable.interval(1, TimeUnit.SECONDS)
                 .flatMapSingle(tick -> isCheckedIn())
@@ -682,6 +694,8 @@ public class CheckInManager extends Manager {
                                 checkInData.setTraceId(traceData.getTraceId());
                                 checkInData.setTimestamp(TimeUtil.convertFromUnixTimestamp(traceData.getCheckInTimestamp()).blockingGet());
                                 checkInData.setLocationId(UUID.fromString(traceData.getLocationId()));
+                                checkInData.setPrivateMeeting(location.isPrivate());
+
                                 if (location.getGroupName() == null && location.getAreaName() == null) {
                                     // private meeting location
                                     if (meetingAdditionalData != null) {

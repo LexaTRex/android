@@ -8,8 +8,8 @@ android {
         applicationId "de.culture4life.luca"
         minSdkVersion 21
         targetSdkVersion 30
-        versionCode 61
-        versionName "1.7.2"
+        versionCode 63
+        versionName "1.7.4"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     signingConfigs {
@@ -118,6 +118,7 @@ dependencies {
     implementation 'io.reactivex.rxjava3:rxandroid:3.0.0'
     implementation 'net.grandcentrix.tray:tray:0.12.0'
     implementation 'org.bouncycastle:bcpkix-jdk15on:1.65'
+    implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-cbor:2.12.3'
 
 
     testImplementation 'androidx.test:core:1.3.0'

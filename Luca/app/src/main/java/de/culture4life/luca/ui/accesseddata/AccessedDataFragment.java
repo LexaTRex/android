@@ -11,6 +11,8 @@ import de.culture4life.luca.ui.UiUtil;
 
 import io.reactivex.rxjava3.core.Completable;
 
+import static androidx.core.view.ViewCompat.IMPORTANT_FOR_ACCESSIBILITY_NO;
+
 public class AccessedDataFragment extends BaseFragment<AccessedDataViewModel> {
 
     private TextView emptyTitleTextView;
@@ -42,6 +44,7 @@ public class AccessedDataFragment extends BaseFragment<AccessedDataViewModel> {
         accessedDataListView = getView().findViewById(R.id.accessedDataListView);
         View paddingView = new View(getContext());
         paddingView.setMinimumHeight((int) UiUtil.convertDpToPixel(16, getContext()));
+        paddingView.setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);
         accessedDataListView.addHeaderView(paddingView);
 
         accessedDataListAdapter = new AccessedDataListAdapter(getContext(), accessedDataListView.getId());

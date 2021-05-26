@@ -4,6 +4,7 @@ import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
 import java.lang.annotation.Retention;
+import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 
 import androidx.annotation.IntDef;
@@ -12,10 +13,37 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
 
 public class TestResult {
 
+    public static class Procedure {
+
+        @Expose
+        @SerializedName("name")
+        private de.culture4life.luca.testing.provider.baercode.Procedure.Type name;
+
+        @Expose
+        @SerializedName("timestamp")
+        private long timestamp;
+
+        public Procedure(de.culture4life.luca.testing.provider.baercode.Procedure.Type name, long timestamp) {
+            this.name = name;
+            this.timestamp = timestamp;
+        }
+
+        public de.culture4life.luca.testing.provider.baercode.Procedure.Type getName() {
+            return name;
+        }
+
+        public long getTimestamp() {
+            return timestamp;
+        }
+
+    }
+
     public static final long MAXIMUM_FAST_TEST_VALIDITY = TimeUnit.DAYS.toMillis(2);
     public static final long MAXIMUM_PCR_TEST_VALIDITY = TimeUnit.DAYS.toMillis(3);
+    public static final long TIME_UNTIL_VACCINATION_IS_VALID = TimeUnit.DAYS.toMillis(14);
+    public static final long MAXIMUM_VACCINATION_VALIDITY = TimeUnit.DAYS.toMillis(365);
 
-    @IntDef({TYPE_UNKNOWN, TYPE_FAST, TYPE_PCR})
+    @IntDef({TYPE_UNKNOWN, TYPE_FAST, TYPE_PCR, TYPE_VACCINATION})
     @Retention(SOURCE)
     public @interface Type {
 
@@ -24,8 +52,9 @@ public class TestResult {
     public static final int TYPE_UNKNOWN = 0;
     public static final int TYPE_FAST = 1;
     public static final int TYPE_PCR = 2;
+    public static final int TYPE_VACCINATION = 3;
 
-    @IntDef({OUTCOME_UNKNOWN, OUTCOME_POSITIVE, OUTCOME_NEGATIVE})
+    @IntDef({OUTCOME_UNKNOWN, OUTCOME_POSITIVE, OUTCOME_NEGATIVE, OUTCOME_PARTIALLY_VACCINATED, OUTCOME_FULLY_VACCINATED})
     @Retention(SOURCE)
     public @interface Outcome {
 
@@ -34,6 +63,8 @@ public class TestResult {
     public static final int OUTCOME_UNKNOWN = 0;
     public static final int OUTCOME_POSITIVE = 1;
     public static final int OUTCOME_NEGATIVE = 2;
+    public static final int OUTCOME_PARTIALLY_VACCINATED = 3;
+    public static final int OUTCOME_FULLY_VACCINATED = 4;
 
     @Expose
     @SerializedName("id")
@@ -84,6 +115,10 @@ public class TestResult {
     @Expose
     @SerializedName("hashableEncodedData")
     private String hashableEncodedData;
+
+    @Expose
+    @SerializedName("procedures")
+    private ArrayList<Procedure> procedures;
 
     public String getId() {
         return id;
@@ -183,14 +218,48 @@ public class TestResult {
         this.hashableEncodedData = hashableEncodedData;
     }
 
+    public ArrayList<Procedure> getProcedures() {
+        return procedures;
+    }
+
+    public void setProcedures(ArrayList<Procedure> procedures) {
+        this.procedures = procedures;
+    }
+
     /**
-     * @return The time in millis after which the test result becomes invalid
+     * @return timestamp from which the test result becomes valid. This is immediately for tests and
+     *         after two weeks for vaccinations.
+     */
+    public long getValidityStartTimestamp() {
+        if (type == TYPE_VACCINATION && outcome == OUTCOME_FULLY_VACCINATED) {
+            return getTestingTimestamp() + TIME_UNTIL_VACCINATION_IS_VALID;
+        } else {
+            return getTestingTimestamp();
+        }
+    }
+
+    /**
+     * The timestamp after which the test result should be treated as invalid. Depends on {@link
+     * #type} and {@link #testingTimestamp}.
      */
     public long getExpirationTimestamp() {
-        if (getType() == TYPE_PCR) {
-            return getTestingTimestamp() + MAXIMUM_PCR_TEST_VALIDITY;
-        } else {
-            return getTestingTimestamp() + MAXIMUM_FAST_TEST_VALIDITY;
+        return getTestingTimestamp() + getExpirationDuration(type);
+    }
+
+    /**
+     * The duration in milliseconds after which a test result with the specified {@link Type} should
+     * be treated as invalid.
+     */
+    public static long getExpirationDuration(@Type int type) {
+        switch (type) {
+            case TYPE_FAST:
+                return MAXIMUM_FAST_TEST_VALIDITY;
+            case TYPE_PCR:
+                return MAXIMUM_PCR_TEST_VALIDITY;
+            case TYPE_VACCINATION:
+                return MAXIMUM_VACCINATION_VALIDITY;
+            default:
+                return -1;
         }
     }
 

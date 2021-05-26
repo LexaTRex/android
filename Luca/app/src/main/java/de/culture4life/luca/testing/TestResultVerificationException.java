@@ -4,8 +4,9 @@ public class TestResultVerificationException extends TestResultImportException {
 
     public enum Reason {
         NAME_MISMATCH,
-        TEST_EXPIRED,
         INVALID_SIGNATURE,
+        PROCEDURES_EMPTY,
+        MIXED_TYPES_IN_PROCEDURES,
         UNKNOWN
     }
 
@@ -39,10 +40,13 @@ public class TestResultVerificationException extends TestResultImportException {
         switch (reason) {
             case NAME_MISMATCH:
                 return "Name mismatch";
-            case TEST_EXPIRED:
-                return "Test expired";
             case INVALID_SIGNATURE:
                 return "Invalid signature";
+            case PROCEDURES_EMPTY:
+                return "Procedures size in baercode is empty";
+            case MIXED_TYPES_IN_PROCEDURES:
+                return "Vaccination and non-vaccination types are mixed in procedures";
+            case UNKNOWN:
             default:
                 return "Unknown verification error";
         }

@@ -7,6 +7,7 @@
     <string name="url_imprint">https://luca-app.de/imprint</string>
     <string name="qr_code">QR Code</string>
     <string name="qr_code_scanner">QR Code Scanner</string>
+    <string name="additional_details_content_description">Mehr Details</string>
 
     <!-- Actions -->
     <string name="action_ok">@android:string/ok</string>
@@ -169,6 +170,7 @@
     <string name="meeting_end_confirmation_description">Willst du dieses Treffen wirklich beenden?</string>
     <string name="meeting_end_action">Treffen beenden</string>
     <string name="meeting_slider_text">TREFFEN BEENDEN</string>
+    <string name="meeting_slider_content_description">Treffen beenden Schalter</string>
     <string name="meeting_was_ended_hint">Das Treffen wurde beendet</string>
 
     <string name="meeting_join_heading">Privates Treffen</string>
@@ -181,6 +183,7 @@
 
     <string name="venue_check_in_action">EINCHECKEN</string>
     <string name="venue_check_out_action">AUSCHECKEN</string>
+    <string name="venue_check_out_content_description">Check-out Schalter</string>
     <string name="venue_checked_in_time_format">dd.MM.yyyy HH:mm</string>
     <string name="venue_checked_in_time">Eingecheckt seit:\n<xliff:g example="18.08.2020 – 19:23" id="time">%1$s</xliff:g> Uhr</string>
     <string name="venue_automatic_check_out">Automatisch auschecken</string>
@@ -255,8 +258,8 @@
 
     <!-- My Luca -->
     <string name="my_luca_heading">Mein luca</string>
-    <string name="my_luca_empty_title">Willkommen</string>
-    <string name="my_luca_empty_description">Willkommen in deinem \"Mein luca\" Tab. Das ist dein persönlicher Bereich, an dem du Dokumente hinzufügen kannst, die dir den Check-in erleichtern. Wenn du an einem Standort einchecken willst, gehe in den Check-in Tab unten links.</string>
+    <string name="my_luca_empty_title">Willkommen bei "Mein luca"</string>
+    <string name="my_luca_empty_description">Das ist dein persönlicher Bereich, in dem du Dokumente hinzufügen kannst, die dir den Check-in erleichtern.\n\nWenn du an einem Standort einchecken willst, gehe auf „Einchecken“ unten links.</string>
     <string name="test_import_action">Hinzufügen</string>
     <string name="test_import_hint">Scanne den QR-Code deines Tests um ihn zur App hinzuzufügen.</string>
     <string name="test_import_success_message">Das Testergebnis wurde importiert</string>
@@ -269,9 +272,13 @@
     <string name="test_import_error_unsupported_description">Der QR-Code konnte nicht gelesen werden. Das kann daran liegen, dass wir aktuell nur bestimmte Testzentren unterstützen. Erkundige dich bei deinem Testzentrum, ob dieses dazugehört.</string>
     <string name="test_outcome_negative">Negativ</string>
     <string name="test_outcome_positive">Positiv</string>
+    <string name="test_outcome_partially_vaccinated">Teilweise Immunisiert</string>
+    <string name="test_outcome_fully_vaccinated">Vollständig Immunisiert</string>
+    <string name="test_outcome_fully_vaccinated_in">Vollständig Immunisiert in %1$s</string>
     <string name="test_outcome_unknown">Unbekannt</string>
     <string name="test_type_fast">Schnelltest</string>
     <string name="test_type_pcr">PCR Test</string>
+    <string name="test_type_vaccination">Impfung</string>
     <string name="test_type_unknown">@string/test_outcome_unknown</string>
     <string name="test_issued_by">Ausgestellt von</string>
     <string name="test_issued_at">Ausstelldatum:</string>
@@ -279,6 +286,11 @@
     <string name="test_delete_button">Test Löschen</string>
     <string name="test_delete_alert_dialog_title">Testergebnis löschen</string>
     <string name="test_delete_alert_dialog_message">Soll das Testergebnis wirklich aus der App gelöscht werden?</string>
+    <string name="test_vaccination_procedure">Impfung %1$s - %2$s</string>
+    <string name="vaccine_comirnaty">BioNTech/Pfizer</string>
+    <string name="vaccine_jannsen">Johnson &amp; Johnson</string>
+    <string name="vaccine_moderna">Moderna</string>
+    <string name="vaccine_vaxzevria">AstraZeneca</string>
 
     <!-- Phone Number Verification -->
     <string name="verification_request_new_tan_action">TAN anfordern</string>
@@ -308,6 +320,22 @@
     <string name="time_minutes">Minuten</string>
     <string name="time_hours">Stunden</string>
     <string name="time_days">Tage</string>
+    <plurals name="time_plural_seconds">
+        <item quantity="one" formatted="true">%d Sekunde</item>
+        <item quantity="other" formatted="true">%d Sekunden</item>
+    </plurals>
+    <plurals name="time_plural_minutes">
+        <item quantity="one" formatted="true">%d Minute</item>
+        <item quantity="other" formatted="true">%d Minuten</item>
+    </plurals>
+    <plurals name="time_plural_hours">
+        <item quantity="one" formatted="true">%d Stunde</item>
+        <item quantity="other" formatted="true">%d Stunden</item>
+    </plurals>
+    <plurals name="time_plural_days">
+        <item quantity="one" formatted="true">%d Tag</item>
+        <item quantity="other" formatted="true">%d Tagen</item>
+    </plurals>
 
     <!-- Account deletion -->
     <string name="delete_account_dialog_title">Möchtest du deinen Account wirklich löschen?</string>

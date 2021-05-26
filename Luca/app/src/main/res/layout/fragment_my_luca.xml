@@ -19,14 +19,16 @@
             android:id="@+id/importTestImageView"
             style="@style/MenuImageView"
             android:src="@drawable/ic_qr_code_scanner"
-            app:layout_constraintEnd_toStartOf="@id/menuImageView"
             android:visibility="gone"
+            android:contentDescription="@string/test_import_action"
+            app:layout_constraintEnd_toStartOf="@id/menuImageView"
             app:layout_constraintBottom_toBottomOf="@id/headingTextView"
             app:layout_constraintTop_toTopOf="@id/headingTextView" />
 
     <ImageView
             android:id="@+id/menuImageView"
             style="@style/MenuImageView"
+            android:contentDescription="@string/menu_more_content_description"
             app:layout_constraintBottom_toBottomOf="@id/headingTextView"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="@id/headingTextView" />
@@ -57,6 +59,7 @@
     <ImageView
             android:id="@+id/emptyImageView"
             style="@style/EmptyStateImageView"
+            android:src="@drawable/g_my_luca_hello"
             app:layout_constraintVertical_bias="0.25"
             app:layout_constraintTop_toBottomOf="@id/emptyDescriptionTextView"
             app:layout_constraintBottom_toBottomOf="parent"

@@ -37,6 +37,8 @@ import io.reactivex.rxjava3.disposables.Disposable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 import timber.log.Timber;
 
+import static androidx.core.view.ViewCompat.IMPORTANT_FOR_ACCESSIBILITY_NO;
+
 public class MyLucaFragment extends BaseFragment<MyLucaViewModel> implements MyLucaListAdapter.MyLucaListClickListener {
 
     private MaterialCardView qrCodeCardView;
@@ -88,6 +90,7 @@ public class MyLucaFragment extends BaseFragment<MyLucaViewModel> implements MyL
         myLucaListView = getView().findViewById(R.id.myLucaListView);
         View paddingView = new View(getContext());
         paddingView.setMinimumHeight((int) UiUtil.convertDpToPixel(16, getContext()));
+        paddingView.setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);
         myLucaListView.addHeaderView(paddingView);
 
         myLucaListAdapter = new MyLucaListAdapter(getContext(), myLucaListView.getId(), this);

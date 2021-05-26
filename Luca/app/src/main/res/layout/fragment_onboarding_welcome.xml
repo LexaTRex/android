@@ -89,6 +89,7 @@
                 android:layout_height="wrap_content"
                 android:gravity="center_vertical"
                 android:text="@string/welcome_terms_description"
+                android:labelFor="@id/termsCheckBox"
                 style="@style/TextAppearance.Luca.Body2"
                 android:textColor="?attr/colorOnSurface"
                 android:textColorLink="?attr/colorOnSurface" />
@@ -117,6 +118,7 @@
                 android:layout_height="wrap_content"
                 android:gravity="center_vertical"
                 android:text="@string/welcome_privacy_description"
+                android:labelFor="@id/privacyCheckBox"
                 style="@style/TextAppearance.Luca.Body2"
                 android:textColor="?attr/colorOnSurface"
                 android:textColorLink="?attr/colorOnSurface" />

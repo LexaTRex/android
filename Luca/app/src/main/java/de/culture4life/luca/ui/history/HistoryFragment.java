@@ -26,6 +26,8 @@ import androidx.annotation.NonNull;
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Observable;
 
+import static androidx.core.view.ViewCompat.IMPORTANT_FOR_ACCESSIBILITY_NO;
+
 public class HistoryFragment extends BaseFragment<HistoryViewModel> {
 
     private ImageView accessedDataImageView;
@@ -61,6 +63,7 @@ public class HistoryFragment extends BaseFragment<HistoryViewModel> {
         historyListView = getView().findViewById(R.id.historyListView);
         View paddingView = new View(getContext());
         paddingView.setMinimumHeight((int) UiUtil.convertDpToPixel(16, getContext()));
+        paddingView.setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);
         historyListView.addHeaderView(paddingView);
 
         historyListAdapter = new HistoryListAdapter(getContext(), historyListView.getId());

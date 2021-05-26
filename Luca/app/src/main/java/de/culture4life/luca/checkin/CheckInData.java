@@ -52,6 +52,10 @@ public class CheckInData {
     @Expose
     private long minimumDuration;
 
+    @SerializedName("isPrivateMeeting")
+    @Expose
+    private boolean isPrivateMeeting;
+
     @Nullable
     public String getLocationDisplayName() {
         if (locationGroupName != null && locationAreaName != null) {
@@ -149,6 +153,14 @@ public class CheckInData {
         this.minimumDuration = minimumDuration;
     }
 
+    public boolean isPrivateMeeting() {
+        return isPrivateMeeting;
+    }
+
+    public void setPrivateMeeting(boolean privateMeeting) {
+        isPrivateMeeting = privateMeeting;
+    }
+
     @Override
     public String toString() {
         return "CheckInData{" +
@@ -161,6 +173,7 @@ public class CheckInData {
                 ", longitude=" + longitude +
                 ", radius=" + radius +
                 ", minimumDuration=" + minimumDuration +
+                ", isPrivateMeeting=" + isPrivateMeeting +
                 '}';
     }
 

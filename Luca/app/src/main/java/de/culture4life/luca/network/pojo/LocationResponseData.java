@@ -22,6 +22,9 @@ public class LocationResponseData {
     @SerializedName("radius")
     private long radius;
 
+    @SerializedName("isPrivate")
+    private boolean isPrivate;
+
     public String getLocationId() {
         return locationId;
     }
@@ -70,6 +73,14 @@ public class LocationResponseData {
         this.radius = radius;
     }
 
+    public boolean isPrivate() {
+        return isPrivate;
+    }
+
+    public void setPrivate(boolean isPrivate) {
+        this.isPrivate = isPrivate;
+    }
+
     @Override
     public String toString() {
         return "LocationResponseData{" +
@@ -79,6 +90,7 @@ public class LocationResponseData {
                 ", latitude=" + latitude +
                 ", longitude=" + longitude +
                 ", radius=" + radius +
+                ", isPrivate=" + isPrivate +
                 '}';
     }
 

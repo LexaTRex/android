@@ -22,11 +22,18 @@ import de.culture4life.luca.ui.qrcode.QrCodeViewModel;
 import de.culture4life.luca.util.SerializationUtil;
 import de.culture4life.luca.util.TimeUtil;
 
+import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Encoding;
+import org.bouncycastle.asn1.ASN1Integer;
+import org.bouncycastle.asn1.ASN1OutputStream;
+import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
+import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.security.KeyPair;
@@ -37,6 +44,7 @@ import java.security.SecureRandom;
 import java.security.Security;
 import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -895,6 +903,20 @@ public class CryptoManager extends Manager {
             System.arraycopy(data, 0, trimmedData, 0, length);
             return trimmedData;
         });
+    }
+
+    public static byte[] toDERSignature(byte[] tokenSignature) throws IOException {
+        byte[] r = Arrays.copyOfRange(tokenSignature, 0, tokenSignature.length / 2);
+        byte[] s = Arrays.copyOfRange(tokenSignature, tokenSignature.length / 2, tokenSignature.length);
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        ASN1OutputStream derOutputStream = ASN1OutputStream.create(byteArrayOutputStream, ASN1Encoding.DER);
+        ASN1EncodableVector v = new ASN1EncodableVector();
+
+        v.add(new ASN1Integer(new BigInteger(1, r)));
+        v.add(new ASN1Integer(new BigInteger(1, s)));
+        derOutputStream.writeObject(new DERSequence(v));
+
+        return byteArrayOutputStream.toByteArray();
     }
 
     /**

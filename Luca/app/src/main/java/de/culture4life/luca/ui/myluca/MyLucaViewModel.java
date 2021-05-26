@@ -33,13 +33,12 @@ import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Maybe;
 import io.reactivex.rxjava3.core.Observable;
+import io.reactivex.rxjava3.core.Single;
 import io.reactivex.rxjava3.disposables.Disposable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 import timber.log.Timber;
 
 public class MyLucaViewModel extends BaseViewModel implements ImageAnalysis.Analyzer {
-
-    public static final String TEST_VERIFY_URL_PREFIX = "https://testverify.io/v1#";
 
     private final TestingManager testingManager;
     private final LucaNotificationManager notificationManager;
@@ -82,7 +81,7 @@ public class MyLucaViewModel extends BaseViewModel implements ImageAnalysis.Anal
                 .flatMapCompletable(registrationData -> update(userName, registrationData.getFullName()))
                 .subscribeOn(Schedulers.io())
                 .subscribe(
-                        () -> Timber.i("Updated my luca list"),
+                        () -> Timber.d("Updated my luca list"),
                         throwable -> Timber.w("Unable to update my luca list: %s", throwable.toString())
                 )));
     }
@@ -173,12 +172,19 @@ public class MyLucaViewModel extends BaseViewModel implements ImageAnalysis.Anal
                     Timber.d("Processing barcode: %s", value);
                     notificationManager.vibrate().subscribe();
                 })
-                .map(barcodeValue -> barcodeValue.replace(TEST_VERIFY_URL_PREFIX, ""))
+                .flatMapSingle(barcodeData -> {
+                    if (TestingManager.isTestResult(barcodeData)) {
+                        return getEncodedTestResultFromDeepLink(barcodeData);
+                    } else {
+                        return Single.just(barcodeData);
+                    }
+                })
                 .flatMapCompletable(this::parseAndValidateTestResult);
     }
 
     private Completable parseAndValidateTestResult(@NonNull String encodedTestResult) {
         return testingManager.parseAndValidateEncodedTestResult(encodedTestResult)
+                .doOnSubscribe(disposable -> Timber.d("Attempting to parse encoded test result: %s", encodedTestResult))
                 .doOnSuccess(testResult -> Timber.d("Parsed test result: %s", testResult))
                 .flatMapCompletable(testResult -> update(parsedTestResult, new ViewEvent<>(testResult)))
                 .doOnSubscribe(disposable -> {
@@ -193,11 +199,10 @@ public class MyLucaViewModel extends BaseViewModel implements ImageAnalysis.Anal
 
                     if (throwable instanceof TestResultParsingException) {
                         errorBuilder.withDescription(R.string.test_import_error_unsupported_description);
+                    } else if (throwable instanceof TestResultExpiredException) {
+                        errorBuilder.withDescription(R.string.test_import_error_expired_description);
                     } else if (throwable instanceof TestResultVerificationException) {
                         switch (((TestResultVerificationException) throwable).getReason()) {
-                            case TEST_EXPIRED:
-                                errorBuilder.withDescription(R.string.test_import_error_expired_description);
-                                break;
                             case NAME_MISMATCH: // intended fall-through
                             case INVALID_SIGNATURE:
                                 errorBuilder.withDescription(R.string.test_import_error_verification_description);
@@ -252,14 +257,25 @@ public class MyLucaViewModel extends BaseViewModel implements ImageAnalysis.Anal
     private Completable handleDeepLink(@NonNull String url) {
         return Completable.defer(() -> {
             if (TestingManager.isTestResult(url)) {
-                String[] parts = url.split("#", 2);
-                if (parts.length == 2) {
-                    return parseAndValidateTestResult(parts[1])
-                            .doFinally(() -> application.onDeepLinkHandled(url));
-                }
+                return getEncodedTestResultFromDeepLink(url)
+                        .flatMapCompletable(this::parseAndValidateTestResult)
+                        .doFinally(() -> application.onDeepLinkHandled(url));
             }
             return Completable.complete();
         }).doOnComplete(() -> Timber.d("Handled application deep link: %s", url));
+    }
+
+    private Single<String> getEncodedTestResultFromDeepLink(@NonNull String url) {
+        return Single.fromCallable(() -> {
+            if (!TestingManager.isTestResult(url)) {
+                throw new IllegalArgumentException("Unable to get encoded test result from URL");
+            }
+            String[] parts = url.split("#", 2);
+            if (parts.length != 2) {
+                throw new IllegalArgumentException("Unable to get encoded test result from URL");
+            }
+            return parts[1];
+        });
     }
 
     public LiveData<List<MyLucaListItem>> getMyLucaItems() {

@@ -420,7 +420,7 @@ public class QrCodeViewModel extends BaseViewModel implements ImageAnalysis.Anal
                 .map(meetingAdditionalData -> new Gson().toJson(meetingAdditionalData));
 
         return extractMeetingHostName.andThen(Single.zip(scannerId, additionalData, Pair::new))
-                .flatMapCompletable(scannerIdAndAdditionalData -> performSelfCheckIn(scannerIdAndAdditionalData.first, scannerIdAndAdditionalData.second));
+                .flatMapCompletable(scannerIdAndAdditionalData -> performSelfCheckIn(scannerIdAndAdditionalData.first, scannerIdAndAdditionalData.second, true));
     }
 
     private Single<MeetingAdditionalData> getMeetingAdditionalDataFromUrl(@NonNull String url) {
@@ -434,13 +434,20 @@ public class QrCodeViewModel extends BaseViewModel implements ImageAnalysis.Anal
         Single<String> additionalData = getAdditionalDataFromUrlIfAvailable(url).defaultIfEmpty("");
 
         return Single.zip(scannerId, additionalData, Pair::new)
-                .flatMapCompletable(scannerIdAndAdditionalData -> performSelfCheckIn(scannerIdAndAdditionalData.first, scannerIdAndAdditionalData.second));
+                .flatMapCompletable(scannerIdAndAdditionalData -> performSelfCheckIn(scannerIdAndAdditionalData.first, scannerIdAndAdditionalData.second, false));
     }
 
-    private Completable performSelfCheckIn(UUID scannerId, @Nullable String additionalData) {
+    private Completable performSelfCheckIn(UUID scannerId, @Nullable String additionalData, boolean requirePrivateMeeting) {
         return generateQrCodeData()
                 .flatMapCompletable(qrCodeData -> checkInManager.checkIn(scannerId, qrCodeData))
-                .doOnComplete(() -> uploadAdditionalDataIfAvailableAsSideEffect(scannerId, additionalData));
+                .andThen(Completable.defer(() -> {
+                    if (requirePrivateMeeting) {
+                        return checkInManager.assertCheckedInToPrivateMeeting();
+                    } else {
+                        return Completable.complete();
+                    }
+                }))
+                .andThen(Completable.fromAction(() -> uploadAdditionalDataIfAvailableAsSideEffect(scannerId, additionalData)));
     }
 
     private void uploadAdditionalDataIfAvailableAsSideEffect(@NonNull UUID scannerId, @Nullable String additionalData) {

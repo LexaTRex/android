@@ -17,6 +17,7 @@ import de.culture4life.luca.preference.PreferencesManager;
 import de.culture4life.luca.registration.RegistrationManager;
 import de.culture4life.luca.testing.provider.ProvidedTestResult;
 import de.culture4life.luca.testing.provider.TestResultProvider;
+import de.culture4life.luca.testing.provider.baercode.BaercodeTestResultProvider;
 import de.culture4life.luca.testing.provider.opentestcheck.OpenTestCheckTestResultProvider;
 import de.culture4life.luca.testing.provider.ubirch.UbirchTestResultProvider;
 
@@ -47,6 +48,7 @@ public class TestingManager extends Manager {
 
     private final UbirchTestResultProvider ubirchTestResultProvider;
     private final OpenTestCheckTestResultProvider openTestCheckTestResultProvider;
+    private BaercodeTestResultProvider baercodeTestResultProvider;
 
     private TestResults testResults;
 
@@ -58,6 +60,7 @@ public class TestingManager extends Manager {
         this.cryptoManager = cryptoManager;
         this.ubirchTestResultProvider = new UbirchTestResultProvider();
         this.openTestCheckTestResultProvider = new OpenTestCheckTestResultProvider();
+        this.baercodeTestResultProvider = new BaercodeTestResultProvider();
     }
 
     @Override
@@ -118,7 +121,7 @@ public class TestingManager extends Manager {
     }
 
     private Observable<? extends TestResultProvider<? extends ProvidedTestResult>> getTestResultProviders() {
-        return Observable.just(openTestCheckTestResultProvider); // TODO: 07.05.21 add ubirchTestResultProvider
+        return Observable.just(openTestCheckTestResultProvider, baercodeTestResultProvider); // TODO: 07.05.21 add ubirchTestResultProvider
     }
 
     public Completable redeemTestResult(@NonNull TestResult testResult) {

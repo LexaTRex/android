@@ -1,12 +1,14 @@
 package de.culture4life.luca.ui.myluca;
 
 import android.content.Context;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import de.culture4life.luca.R;
@@ -67,6 +69,7 @@ public class MyLucaListAdapter extends ArrayAdapter<MyLucaListItem> {
         ImageView barcodeImageView = convertView.findViewById(R.id.qrCodeImageView);
         Button deleteTestResultButton = convertView.findViewById(R.id.deleteTestResultButton);
         ViewGroup collapseLayout = convertView.findViewById(R.id.collapseLayout);
+        TextView testLabDoctorTitle = convertView.findViewById(R.id.testTypeHeader);
         TextView testLabDoctorName = convertView.findViewById(R.id.testLabDoctorName);
         TextView testLab = convertView.findViewById(R.id.testLab);
 
@@ -81,10 +84,28 @@ public class MyLucaListAdapter extends ArrayAdapter<MyLucaListItem> {
             notifyDataSetChanged();
         });
         testLabDoctorName.setText(item.getTestLabDoctorName());
+        testLabDoctorTitle.setVisibility(TextUtils.isEmpty(item.getTestLabDoctorName()) ? View.GONE : View.VISIBLE);
+
         testLab.setText(item.getDescription());
         deleteTestResultButton.setOnClickListener(v -> this.clickListener.onDelete(position));
 
+        setupProcedures(convertView, item);
+
         return convertView;
+    }
+
+    private void setupProcedures(View convertView, MyLucaListItem item) {
+        LayoutInflater layoutInflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        LinearLayout proceduresContainer = convertView.findViewById(R.id.proceduresContainer);
+        proceduresContainer.removeAllViews();
+        if (item.getProcedures() != null) {
+            for (MyLucaListItem.Procedure procedure : item.getProcedures()) {
+                View procedureView = layoutInflater.inflate(R.layout.my_luca_vaccination_procedure, null);
+                ((TextView) procedureView.findViewById(R.id.vaccination_name)).setText(procedure.getName());
+                ((TextView) procedureView.findViewById(R.id.vaccination_date)).setText(procedure.getDate());
+                proceduresContainer.addView(procedureView);
+            }
+        }
     }
 
 }

@@ -10,6 +10,8 @@ import de.culture4life.luca.ui.MainActivity;
 import de.culture4life.luca.ui.onboarding.OnboardingActivity;
 import de.culture4life.luca.ui.registration.RegistrationActivity;
 
+import timber.log.Timber;
+
 public class SplashActivity extends BaseActivity {
 
     @Override
@@ -47,6 +49,7 @@ public class SplashActivity extends BaseActivity {
     private boolean hasSeenWelcomeScreenBefore() {
         return application.getPreferencesManager()
                 .restoreOrDefault(OnboardingActivity.WELCOME_SCREEN_SEEN_KEY, false)
+                .doOnError(throwable -> Timber.w("Unable to check if welcome screen has been seen before: %s", throwable.toString()))
                 .onErrorReturnItem(false)
                 .blockingGet();
     }

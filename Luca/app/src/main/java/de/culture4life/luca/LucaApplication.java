@@ -142,7 +142,8 @@ public class LucaApplication extends MultiDexApplication {
      */
     @CallSuper
     private Completable initializeBlocking() {
-        return cryptoManager.setupSecurityProviders();
+        return CryptoManager.setupSecurityProviders()
+                .andThen(preferencesManager.initialize(this));
     }
 
     /**
@@ -151,7 +152,6 @@ public class LucaApplication extends MultiDexApplication {
     @CallSuper
     private Completable initializeAsync() {
         return Completable.mergeArray(
-                preferencesManager.initialize(this).subscribeOn(Schedulers.io()),
                 notificationManager.initialize(this).subscribeOn(Schedulers.io()),
                 networkManager.initialize(this).subscribeOn(Schedulers.io()),
                 cryptoManager.initialize(this).subscribeOn(Schedulers.io()),

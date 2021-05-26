@@ -18,7 +18,7 @@
     <ImageView
             android:id="@+id/accessedDataImageView"
             style="@style/MenuImageView"
-            android:contentDescription="@string/menu_more_content_description"
+            android:contentDescription="@string/accessed_data_heading"
             android:src="@drawable/ic_eye"
             app:layout_constraintEnd_toStartOf="@id/menuImageView"
             app:layout_constraintBottom_toBottomOf="@id/headingTextView"

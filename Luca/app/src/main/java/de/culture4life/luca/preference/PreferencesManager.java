@@ -43,7 +43,20 @@ public class PreferencesManager extends Manager implements PreferencesProvider {
 
     @Override
     public Completable doInitialize(@NonNull Context context) {
-        return Completable.complete();
+        return Completable.fromAction(() -> {
+            BasePreferencesProvider preferencesProvider;
+            if (LucaApplication.isRunningUnitTests()) {
+                preferencesProvider = new InMemoryPreferencesProvider();
+            } else {
+                try {
+                    preferencesProvider = new EncryptedSharedPreferencesProvider(context);
+                } catch (GeneralSecurityException | IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+            preferencesProvider.setSerializer(SERIALIZER);
+            this.provider = preferencesProvider;
+        }).andThen(migratePreferencesIfRequired());
     }
 
     private Completable migratePreferencesIfRequired() {
@@ -63,44 +76,32 @@ public class PreferencesManager extends Manager implements PreferencesProvider {
                 .andThen(provider.persist(LAST_MIGRATION_VERSION_CODE_KEY, BuildConfig.VERSION_CODE));
     }
 
-    private synchronized Single<PreferencesProvider> getInitializedProvider() {
-        if (provider == null) {
-            BasePreferencesProvider preferencesProvider;
-            if (LucaApplication.isRunningUnitTests()) {
-                preferencesProvider = new InMemoryPreferencesProvider();
-            } else {
-                try {
-                    preferencesProvider = new EncryptedSharedPreferencesProvider(context);
-                } catch (GeneralSecurityException | IOException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-            preferencesProvider.setSerializer(SERIALIZER);
-            provider = preferencesProvider;
-            return migratePreferencesIfRequired()
-                    .andThen(getInitializedField(provider));
-        }
+    private Single<PreferencesProvider> getInitializedProvider() {
         return Single.defer(() -> getInitializedField(provider));
     }
 
     @Override
     public Observable<String> getKeys() {
-        return getInitializedProvider().flatMapObservable(PreferencesProvider::getKeys);
+        return getInitializedProvider()
+                .flatMapObservable(PreferencesProvider::getKeys);
     }
 
     @Override
     public Single<Boolean> containsKey(@NonNull String key) {
-        return getInitializedProvider().flatMap(provider -> provider.containsKey(key));
+        return getInitializedProvider()
+                .flatMap(provider -> provider.containsKey(key));
     }
 
     @Override
     public <Type> Single<Type> restore(@NonNull String key, @NonNull Class<Type> typeClass) {
-        return getInitializedProvider().flatMap(provider -> provider.restore(key, typeClass));
+        return getInitializedProvider()
+                .flatMap(provider -> provider.restore(key, typeClass));
     }
 
     @Override
     public <Type> Single<Type> restoreOrDefault(@NonNull String key, @NonNull Type defaultValue) {
-        return getInitializedProvider().flatMap(provider -> provider.restoreOrDefault(key, defaultValue));
+        return getInitializedProvider()
+                .flatMap(provider -> provider.restoreOrDefault(key, defaultValue));
     }
 
     @Override
@@ -111,7 +112,8 @@ public class PreferencesManager extends Manager implements PreferencesProvider {
 
     @Override
     public <Type> Maybe<Type> restoreIfAvailable(@NonNull String key, @NonNull Class<Type> typeClass) {
-        return getInitializedProvider().flatMapMaybe(provider -> provider.restoreIfAvailable(key, typeClass));
+        return getInitializedProvider()
+                .flatMapMaybe(provider -> provider.restoreIfAvailable(key, typeClass));
     }
 
     @Override
@@ -122,27 +124,32 @@ public class PreferencesManager extends Manager implements PreferencesProvider {
 
     @Override
     public <Type> Completable persist(@NonNull String key, @NonNull Type value) {
-        return getInitializedProvider().flatMapCompletable(provider -> provider.persist(key, value));
+        return getInitializedProvider()
+                .flatMapCompletable(provider -> provider.persist(key, value));
     }
 
     @Override
     public <Type> Completable persistIfNotYetAvailable(@NonNull String key, @NonNull Type value) {
-        return getInitializedProvider().flatMapCompletable(provider -> provider.persistIfNotYetAvailable(key, value));
+        return getInitializedProvider()
+                .flatMapCompletable(provider -> provider.persistIfNotYetAvailable(key, value));
     }
 
     @Override
     public <Type> Observable<Type> getChanges(@NonNull String key, @NonNull Class<Type> typeClass) {
-        return getInitializedProvider().flatMapObservable(provider -> provider.getChanges(key, typeClass));
+        return getInitializedProvider()
+                .flatMapObservable(provider -> provider.getChanges(key, typeClass));
     }
 
     @Override
     public Completable delete(@NonNull String key) {
-        return getInitializedProvider().flatMapCompletable(provider -> provider.delete(key));
+        return getInitializedProvider()
+                .flatMapCompletable(provider -> provider.delete(key));
     }
 
     @Override
     public Completable deleteAll() {
-        return getInitializedProvider().flatMapCompletable(PreferencesProvider::deleteAll);
+        return getInitializedProvider()
+                .flatMapCompletable(PreferencesProvider::deleteAll);
     }
 
 }

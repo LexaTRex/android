@@ -1,3 +1,13 @@
+# Release 1.7.4
+
+- Design update of the "My luca" tab
+- Improved accessibility
+- Bugfixes
+
+This update contains a redesign of the "My luca" tab.
+
+We also noticed that visually impaired users had a hard time using the app, so we improved the accessibility.
+
 # Release 1.7.2
 
 - Minor improvements and bugfixes

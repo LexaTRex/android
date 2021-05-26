@@ -84,6 +84,7 @@ public class MainActivity extends BaseActivity {
 
     private void showRegistrationIfRequired() {
         activityDisposable.add(application.getRegistrationManager().hasCompletedRegistration()
+                .doOnError(throwable -> Timber.w("Unable to check if registration has been completed: %s", throwable.toString()))
                 .onErrorReturnItem(false)
                 .subscribe(registrationCompleted -> {
                     if (!registrationCompleted) {
