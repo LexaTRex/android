@@ -182,6 +182,9 @@
     <string name="venue_description">You\'re checked in!\n\nCheck-in:\n<xliff:g example="18.08.2020 – 7:23 PM" id="time">%1$s</xliff:g></string>
     <string name="venue_current_stay_timer_heading">Current stay</string>
 
+    <string name="venue_property_table">Table</string>
+    <string name="venue_property_patient_name">Patient name</string>
+
     <string name="venue_check_in_action">CHECK IN</string>
     <string name="venue_check_out_action">CHECK OUT</string>
     <string name="venue_check_out_content_description">Check-out button</string>
@@ -263,16 +266,19 @@
     <string name="my_luca_heading">My luca</string>
     <string name="my_luca_empty_title">Welcome at "My luca"</string>
     <string name="my_luca_empty_description">This is your personal space, where you can add documents to make your check in easier.\n\nIf you want to check in at a location, go to the Check-in tab at the bottom left.</string>
+    <string name="appointment_action">Book appointment</string>
     <string name="test_import_action">Add</string>
     <string name="test_import_hint">Scan the QR code of your test to store it in the app.</string>
     <string name="test_import_success_message">The test result was imported</string>
     <string name="test_import_consent">I hereby give my consent in accordance with Art. 9 (2) a) GDPR to the transmission of a pseudonymized identifier in the course of storing my COVID-19 test in the luca app. This serves exclusively to prevent misuse, so that the same test cannot be stored multiple times in the luca app, possibly by different people. The individual identifier is automatically deleted from the luca system after 72 hours. It is not possible to remove the identifier beforehand.</string>
     <string name="test_import_error_title">The test result could not be imported</string>
-    <string name="test_import_error_verification_description">It was not possible to validate that this test belongs to you. Please check if your name is entered correctly in the app.</string>
+    <string name="test_import_error_name_mismatch_description">It was not possible to validate that this test belongs to you. Please check if your name is entered correctly in the app.</string>
+    <string name="test_import_error_invalid_signature_description">It was not possible to validate the signature of this test. The test provider may not be supported by luca yet.</string>
     <string name="test_import_error_expired_description">Unfortunately, the test cannot be imported because it already expired.</string>
     <string name="test_import_error_already_imported_description">This test was already imported.</string>
     <string name="test_import_error_positive_description">luca helps you to check in easily. Since positive test results are not relevant for checkin, you can only add negative results right now.</string>
-    <string name="test_import_error_unsupported_description">The QR code could not be scanned. This could have happened because we only support certain test providers at the moment. Check with your test provider to see if it is included.</string>
+    <string name="test_import_error_unsupported_description">The data couldn\'t be processed. This could have happened because we only support certain test providers at the moment. Check with your test provider to see if it is included.</string>
+    <string name="test_import_error_unsupported_but_url_description">The data didn\'t contain a valid test result from a provider that we support.\n\nHowever, it seems to point to a website where you may get more details about your test result.</string>
     <string name="test_outcome_negative">Negative</string>
     <string name="test_outcome_positive">Positive</string>
     <string name="test_outcome_partially_vaccinated">Partially Vaccinated</string>

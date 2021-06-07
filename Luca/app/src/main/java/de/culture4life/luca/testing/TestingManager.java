@@ -78,7 +78,7 @@ public class TestingManager extends Manager {
         return Single.mergeDelayError(registrationManager.getOrCreateRegistrationData()
                 .flatMapPublisher(registrationData -> getTestResultProvidersFor(encodedTestResult)
                         .doOnNext(testResultProvider -> Timber.v("Attempting to parse using %s", testResultProvider.getClass().getSimpleName()))
-                        .map(testResultProvider -> testResultProvider.parseAndValidate(encodedTestResult, registrationData)
+                        .map(testResultProvider -> testResultProvider.verifyParseAndValidate(encodedTestResult, registrationData)
                                 .doOnError(throwable -> Timber.w("Parsing failed: %s", throwable.toString()))
                                 .map(ProvidedTestResult::getLucaTestResult))
                         .toFlowable(BackpressureStrategy.BUFFER)))

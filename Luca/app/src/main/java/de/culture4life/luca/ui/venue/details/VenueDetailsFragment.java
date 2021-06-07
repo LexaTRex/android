@@ -35,6 +35,8 @@ public class VenueDetailsFragment extends BaseFragment<VenueDetailsViewModel> {
     private TextView subtitle;
     private TextView title;
     private TextView descriptionTextView;
+    private TextView additionalDataTitleTextView;
+    private TextView additionalDataValueTextView;
     private TextView checkInDurationHeadingTextView;
     private TextView checkInDurationTextView;
     private ImageView automaticCheckOutInfoImageView;
@@ -68,6 +70,12 @@ public class VenueDetailsFragment extends BaseFragment<VenueDetailsViewModel> {
 
                     descriptionTextView = getView().findViewById(R.id.subHeadingTextView);
                     observe(viewModel.getDescription(), value -> descriptionTextView.setText(value));
+
+                    additionalDataTitleTextView = getView().findViewById(R.id.additionalDataTitleTextView);
+                    observe(viewModel.getAdditionalDataTitle(), value -> additionalDataTitleTextView.setText(value));
+                    additionalDataValueTextView = getView().findViewById(R.id.additionalDataValueTextView);
+                    observe(viewModel.getAdditionalDataValue(), value -> additionalDataValueTextView.setText(value));
+                    observe(viewModel.getShowAdditionalData(), value -> setAdditionalDataVisibility(value ? View.VISIBLE : View.GONE));
 
                     checkInDurationHeadingTextView = getView().findViewById(R.id.checkInDurationHeadingTextView);
 
@@ -271,6 +279,11 @@ public class VenueDetailsFragment extends BaseFragment<VenueDetailsViewModel> {
                 .build();
 
         showErrorAsSnackbar(viewError);
+    }
+
+    private void setAdditionalDataVisibility(int visibility) {
+        additionalDataTitleTextView.setVisibility(visibility);
+        additionalDataValueTextView.setVisibility(visibility);
     }
 
 }

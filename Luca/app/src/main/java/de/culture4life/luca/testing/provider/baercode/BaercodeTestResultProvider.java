@@ -48,8 +48,9 @@ public class BaercodeTestResultProvider extends TestResultProvider<BaercodeTestR
     }
 
     /**
-     * Check if a given byte array can be parsed as a baercode. This does not decrypt the message
-     * or run validity checks.
+     * Check if a given byte array can be parsed as a baercode. This does not decrypt the message or
+     * run validity checks.
+     *
      * @param encodedData encoded data to check
      */
     @Override
@@ -67,7 +68,7 @@ public class BaercodeTestResultProvider extends TestResultProvider<BaercodeTestR
                         Timber.d("Data is not a readable BaercodeTestResult");
                     }
                     return false;
-                });
+                }).onErrorReturnItem(false);
     }
 
     @Override
@@ -119,7 +120,7 @@ public class BaercodeTestResultProvider extends TestResultProvider<BaercodeTestR
     }
 
     protected static ECPublicKey createPublicKey(@NonNull BaercodeKey baercodeKey) throws NoSuchAlgorithmException, InvalidParameterSpecException, InvalidKeySpecException {
-        ECPoint pubPoint = new ECPoint(new BigInteger(baercodeKey.getxCoordinate()),new BigInteger(baercodeKey.getyCoordinate()));
+        ECPoint pubPoint = new ECPoint(new BigInteger(baercodeKey.getxCoordinate()), new BigInteger(baercodeKey.getyCoordinate()));
         AlgorithmParameters parameters = AlgorithmParameters.getInstance("EC");
         parameters.init(new ECGenParameterSpec("secp521r1"));
         ECParameterSpec ecParameters = parameters.getParameterSpec(ECParameterSpec.class);

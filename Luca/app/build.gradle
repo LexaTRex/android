@@ -8,8 +8,8 @@ android {
         applicationId "de.culture4life.luca"
         minSdkVersion 21
         targetSdkVersion 30
-        versionCode 63
-        versionName "1.7.4"
+        versionCode 64
+        versionName "1.7.5"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     signingConfigs {
@@ -27,7 +27,7 @@ android {
         }
     }
     buildTypes {
-        release {
+        production {
             debuggable false
             minifyEnabled true
             shrinkResources true
@@ -40,18 +40,46 @@ android {
         debug {
             debuggable true
             minifyEnabled false
-            versionNameSuffix " Debug"
-            applicationIdSuffix ".debug"
+            versionNameSuffix " Dev"
+            applicationIdSuffix ".dev"
             signingConfig signingConfigs.debug
             buildConfigField "String", "API_BASE_URL", '"https://app-dev.luca-app.de"'
             buildConfigField "String", "STAGING_API_USERNAME", project.getProperties().getOrDefault("STAGING_API_USERNAME", '"<staging username>"')
             buildConfigField "String", "STAGING_API_PASSWORD", project.getProperties().getOrDefault("STAGING_API_PASSWORD", '"<staging password>"')
         }
-        qa {
+        qs {
             initWith debug
-            versionNameSuffix " QA"
-            applicationIdSuffix ".qa"
+            versionNameSuffix " QS"
+            applicationIdSuffix ".qs"
             buildConfigField "String", "API_BASE_URL", '"https://app-qs.luca-app.de"'
+        }
+        aqs {
+            initWith debug
+            versionNameSuffix " AQS"
+            applicationIdSuffix ".aqs"
+            buildConfigField "String", "API_BASE_URL", '"https://app-aqs.luca-app.de"'
+        }
+        hotfix {
+            initWith debug
+            versionNameSuffix " Hotfix"
+            applicationIdSuffix ".hotfix"
+            buildConfigField "String", "API_BASE_URL", '"https://app-hotfix.luca-app.de"'
+        }
+        release {
+            initWith debug
+            versionNameSuffix " Release"
+            applicationIdSuffix ".release"
+            buildConfigField "String", "API_BASE_URL", '"https://app-release.luca-app.de"'
+        }
+        preprod {
+            initWith debug
+            debuggable false
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            versionNameSuffix " Preprod"
+            applicationIdSuffix ".preprod"
+            buildConfigField "String", "API_BASE_URL", '"https://app-preprod.luca-app.de"'
         }
     }
     compileOptions {
@@ -102,6 +130,7 @@ dependencies {
     implementation 'com.google.android.gms:play-services-location:18.0.0'
     implementation 'com.google.android.material:material:1.3.0'
     implementation 'com.google.code.gson:gson:2.8.6'
+    implementation 'com.google.crypto.tink:tink-android:1.4.0!!'  // for androidx.security:security-crypto:1.1.0-alpha03
     implementation 'com.google.mlkit:barcode-scanning:16.1.1'
     implementation 'com.googlecode.libphonenumber:libphonenumber:8.2.0'
 

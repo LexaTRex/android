@@ -181,6 +181,9 @@
     <string name="venue_description">Du bist eingecheckt!\n\nCheck-in:\n<xliff:g example="18.08.2020 – 19:23" id="time">%1$s</xliff:g> Uhr</string>
     <string name="venue_current_stay_timer_heading">Aktueller Aufenthalt</string>
 
+    <string name="venue_property_table">Tisch</string>
+    <string name="venue_property_patient_name">Name des Patienten</string>
+
     <string name="venue_check_in_action">EINCHECKEN</string>
     <string name="venue_check_out_action">AUSCHECKEN</string>
     <string name="venue_check_out_content_description">Check-out Schalter</string>
@@ -260,16 +263,19 @@
     <string name="my_luca_heading">Mein luca</string>
     <string name="my_luca_empty_title">Willkommen bei "Mein luca"</string>
     <string name="my_luca_empty_description">Das ist dein persönlicher Bereich, in dem du Dokumente hinzufügen kannst, die dir den Check-in erleichtern.\n\nWenn du an einem Standort einchecken willst, gehe auf „Einchecken“ unten links.</string>
+    <string name="appointment_action">Termin buchen</string>
     <string name="test_import_action">Hinzufügen</string>
     <string name="test_import_hint">Scanne den QR-Code deines Tests um ihn zur App hinzuzufügen.</string>
     <string name="test_import_success_message">Das Testergebnis wurde importiert</string>
     <string name="test_import_consent">Hiermit erkläre ich mein Einverständnis gemäß Art. 9 (2) a) DSGVO zum Übermitteln einer pseudonymisierten Kennung im Zuge der Hinterlegung meines COVID-19-Tests in der luca App. Dies dient ausschließlich der Vorbeugung von Missbrauch, sodass derselbe Test nicht mehrfach ggf. von unterschiedlichen Personen in der luca App hinterlegt werden kann. Die individuelle Kennung wird nach 72 Stunden ab Hinterlegung automatisch aus dem luca System gelöscht. Es ist nicht möglich die Kennung zuvor zu entfernen.</string>
     <string name="test_import_error_title">Testergebnis konnte nicht importiert werden</string>
-    <string name="test_import_error_verification_description">Es konnte nicht validiert werden, dass dieser Test von dir gemacht wurde. Bitte prüfe, ob dein Name richtig in der App hinterlegt ist.</string>
+    <string name="test_import_error_name_mismatch_description">Es konnte nicht validiert werden, dass dieser Test von dir gemacht wurde. Bitte prüfe, ob dein Name richtig in der App hinterlegt ist.</string>
+    <string name="test_import_error_invalid_signature_description">Die Signatur dieses Tests konnte nicht verifiziert werden. Der Testanbieter wird möglicherweise noh nicht von luca unterstützt.</string>
     <string name="test_import_error_expired_description">Leider kann der Test nicht importiert werden, da er bereits abgelaufen ist.</string>
     <string name="test_import_error_already_imported_description">Dieser Test wurde bereits importiert.</string>
     <string name="test_import_error_positive_description">luca hilft dir beim einfachen Check-in. Da für Check-ins nur negative Testergebnisse relevant sind, kannst du aktuell dein positives Testergebnis nicht hinzufügen.</string>
     <string name="test_import_error_unsupported_description">Der QR-Code konnte nicht gelesen werden. Das kann daran liegen, dass wir aktuell nur bestimmte Testzentren unterstützen. Erkundige dich bei deinem Testzentrum, ob dieses dazugehört.</string>
+    <string name="test_import_error_unsupported_but_url_description">Die Daten sind kein Testergebnis von einem Testcenter das wir unterstützen.\n\nAllerdings verweisen die Daten auf eine Webseite, bei der es möglicherweise mehr Details über das Testergebnis gibt.</string>
     <string name="test_outcome_negative">Negativ</string>
     <string name="test_outcome_positive">Positiv</string>
     <string name="test_outcome_partially_vaccinated">Teilweise Immunisiert</string>

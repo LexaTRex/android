@@ -159,7 +159,7 @@ public class QrCodeViewModel extends BaseViewModel implements ImageAnalysis.Anal
     private Completable observeCheckInDataChanges() {
         return Completable.mergeArray(
                 checkInManager.requestCheckInDataUpdates(CHECK_IN_POLLING_INTERVAL),
-                checkInManager.getCheckInDataChanges()
+                checkInManager.getCheckInDataAndChanges()
                         .flatMapCompletable(updatedCheckInData -> Completable.fromAction(() -> {
                             updateAsSideEffect(checkInData, updatedCheckInData);
                             if (isCurrentDestinationId(R.id.qrCodeFragment)) {

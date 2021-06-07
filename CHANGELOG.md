@@ -1,3 +1,10 @@
+# Release 1.7.5
+
+- Bug fixes and improvements
+- Display table number when checked-in
+
+In this update, the UX is improved with optimized error messages. Further, table numbers are now displayed during check-in.
+
 # Release 1.7.4
 
 - Design update of the "My luca" tab

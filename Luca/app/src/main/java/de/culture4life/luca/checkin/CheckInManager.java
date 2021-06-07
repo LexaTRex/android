@@ -85,6 +85,7 @@ public class CheckInManager extends Manager {
     public static final String KEY_CHECK_IN_TIMESTAMP = "check_in_timestamp";
     public static final String KEY_CHECK_IN_DATA = "check_in_data_2";
     public static final String KEY_ARCHIVED_CHECK_IN_DATA = "archived_check_in_data";
+    public static final String KEY_ADDITIONAL_CHECK_IN_PROPERTIES_DATA = "additional_check_in_properties";
 
     private static final long MINIMUM_CHECK_IN_DURATION = TimeUnit.MINUTES.toMillis(2);
     private static final long LOCATION_REQUEST_TIMEOUT = TimeUnit.SECONDS.toMillis(3);
@@ -105,6 +106,9 @@ public class CheckInManager extends Manager {
 
     @Nullable
     private MeetingAdditionalData meetingAdditionalData;
+
+    @Nullable
+    private JsonObject additionalCheckInProperties;
 
     @Nullable
     private CheckInData checkInData;
@@ -140,7 +144,7 @@ public class CheckInManager extends Manager {
         ).andThen(Completable.mergeArray(
                 deleteOldArchivedCheckInData(),
                 Completable.fromAction(() ->
-                        managerDisposable.add(getCheckInDataChanges()
+                        managerDisposable.add(getCheckInDataAndChanges()
                                 .doOnNext(updatedCheckInData -> {
                                     Timber.d("Check-in data updated: %s", updatedCheckInData);
                                     this.checkInData = updatedCheckInData;
@@ -333,12 +337,34 @@ public class CheckInManager extends Manager {
         Additional check-in properties
      */
 
+    public Maybe<JsonObject> getAdditionalCheckInPropertiesIfAvailable() {
+        return Maybe.fromCallable(() -> additionalCheckInProperties);
+    }
+
+    public Observable<JsonObject> getAdditionalCheckInPropertiesAndChanges() {
+        return preferencesManager.restoreIfAvailableAndGetChanges(KEY_ADDITIONAL_CHECK_IN_PROPERTIES_DATA, JsonObject.class)
+                .doOnNext(properties -> {
+                    Timber.v("Additional check-in properties updated from preferences: %s", properties);
+                    this.additionalCheckInProperties = properties;
+                });
+    }
+
+    public Completable persistAdditionalCheckInProperties(@NonNull JsonObject properties) {
+        return preferencesManager.persist(KEY_ADDITIONAL_CHECK_IN_PROPERTIES_DATA, properties);
+    }
+
+    public Completable removeAdditionalCheckInProperties() {
+        return preferencesManager.delete(KEY_ADDITIONAL_CHECK_IN_PROPERTIES_DATA)
+                .doOnComplete(() -> this.additionalCheckInProperties = null);
+    }
+
     public Completable addAdditionalCheckInProperties(@NonNull JsonObject properties, @NonNull PublicKey locationPublicKey) {
         return assertCheckedIn()
                 .andThen(getCheckedInTraceId())
                 .toSingle()
                 .flatMap(traceId -> generateAdditionalCheckInProperties(properties, traceId, locationPublicKey))
-                .flatMapCompletable(requestData -> networkManager.getLucaEndpoints().addAdditionalCheckInProperties(requestData));
+                .flatMapCompletable(requestData -> networkManager.getLucaEndpoints().addAdditionalCheckInProperties(requestData))
+                .andThen(persistAdditionalCheckInProperties(properties));
     }
 
     private Single<AdditionalCheckInPropertiesRequestData> generateAdditionalCheckInProperties(@NonNull JsonObject properties, @NonNull byte[] traceId, @NonNull PublicKey locationPublicKey) {
@@ -427,6 +453,7 @@ public class CheckInManager extends Manager {
         return getCheckInDataIfAvailable()
                 .flatMapCompletable(historyManager::addCheckOutItem)
                 .andThen(removeCheckInData())
+                .andThen(removeAdditionalCheckInProperties())
                 .andThen(disableAutomaticCheckOut());
     }
 
@@ -646,7 +673,7 @@ public class CheckInManager extends Manager {
         return Maybe.fromCallable(() -> checkInData);
     }
 
-    public Observable<CheckInData> getCheckInDataChanges() {
+    public Observable<CheckInData> getCheckInDataAndChanges() {
         return preferencesManager.restoreIfAvailableAndGetChanges(KEY_CHECK_IN_DATA, CheckInData.class)
                 .doOnNext(checkInData -> Timber.v("Check-in data updated from preferences: %s", checkInData));
     }

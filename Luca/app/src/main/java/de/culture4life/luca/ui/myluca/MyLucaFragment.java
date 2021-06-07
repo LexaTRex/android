@@ -45,7 +45,7 @@ public class MyLucaFragment extends BaseFragment<MyLucaViewModel> implements MyL
     private PreviewView cameraPreviewView;
     private View hintTextScanTestResult;
     private View loadingView;
-    private ImageView importTestImageView;
+    private ImageView bookAppointmentImageView;
     private TextView emptyTitleTextView;
     private TextView emptyDescriptionTextView;
     private ImageView emptyImageView;
@@ -118,8 +118,8 @@ public class MyLucaFragment extends BaseFragment<MyLucaViewModel> implements MyL
         qrCodeCardView = getView().findViewById(R.id.cardView);
         qrCodeCardView.setVisibility(View.GONE);
 
-        importTestImageView = getView().findViewById(R.id.importTestImageView);
-        importTestImageView.setOnClickListener(v -> toggleCameraPreview());
+        bookAppointmentImageView = getView().findViewById(R.id.bookAppointmentImageView);
+        bookAppointmentImageView.setOnClickListener(v -> viewModel.onAppointmentRequested());
 
         importTestButton = getView().findViewById(R.id.primaryActionButton);
         importTestButton.setOnClickListener(v -> toggleCameraPreview());

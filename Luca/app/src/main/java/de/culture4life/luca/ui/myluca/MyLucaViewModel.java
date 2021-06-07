@@ -7,6 +7,7 @@ import com.google.mlkit.vision.common.InputImage;
 
 import android.annotation.SuppressLint;
 import android.app.Application;
+import android.webkit.URLUtil;
 
 import de.culture4life.luca.R;
 import de.culture4life.luca.notification.LucaNotificationManager;
@@ -115,6 +116,10 @@ public class MyLucaViewModel extends BaseViewModel implements ImageAnalysis.Anal
         return testingManager.deleteTestResult(testResultId).andThen(updateList());
     }
 
+    public void onAppointmentRequested() {
+        application.openUrl("https://www.luca-app.de/coronatest");
+    }
+
     /*
         QR code scanning
      */
@@ -198,14 +203,23 @@ public class MyLucaViewModel extends BaseViewModel implements ImageAnalysis.Anal
                             .withTitle(R.string.test_import_error_title);
 
                     if (throwable instanceof TestResultParsingException) {
-                        errorBuilder.withDescription(R.string.test_import_error_unsupported_description);
+                        // check if data is actually an URL that the user may want to open
+                        if (URLUtil.isValidUrl(encodedTestResult) && !TestingManager.isTestResult(encodedTestResult)) {
+                            errorBuilder.withDescription(R.string.test_import_error_unsupported_but_url_description);
+                            errorBuilder.withResolveLabel(R.string.action_continue);
+                            errorBuilder.withResolveAction(Completable.fromAction(() -> application.openUrl(encodedTestResult)));
+                        } else {
+                            errorBuilder.withDescription(R.string.test_import_error_unsupported_description);
+                        }
                     } else if (throwable instanceof TestResultExpiredException) {
                         errorBuilder.withDescription(R.string.test_import_error_expired_description);
                     } else if (throwable instanceof TestResultVerificationException) {
                         switch (((TestResultVerificationException) throwable).getReason()) {
-                            case NAME_MISMATCH: // intended fall-through
+                            case NAME_MISMATCH:
+                                errorBuilder.withDescription(R.string.test_import_error_name_mismatch_description);
+                                break;
                             case INVALID_SIGNATURE:
-                                errorBuilder.withDescription(R.string.test_import_error_verification_description);
+                                errorBuilder.withDescription(R.string.test_import_error_invalid_signature_description);
                                 break;
                         }
                     }

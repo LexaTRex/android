@@ -15,8 +15,13 @@ public abstract class TestResultProvider<TestResultType extends ProvidedTestResu
 
     public abstract Single<TestResultType> parse(@NonNull String encodedData);
 
-    public Single<TestResultType> parseAndValidate(@NonNull String encodedData, @NonNull RegistrationData registrationData) {
-        return parse(encodedData)
+    public Completable verify(@NonNull String encodedData) {
+        return Completable.complete();
+    }
+
+    public Single<TestResultType> verifyParseAndValidate(@NonNull String encodedData, @NonNull RegistrationData registrationData) {
+        return verify(encodedData)
+                .andThen(parse(encodedData))
                 .flatMap(testResult -> validate(testResult, registrationData)
                         .andThen(Single.just(testResult)));
     }

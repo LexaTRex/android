@@ -36,8 +36,6 @@ import io.reactivex.rxjava3.core.Single;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 import timber.log.Timber;
 
-import static de.culture4life.luca.checkin.CheckInManager.KEY_CHECK_IN_DATA;
-
 public class VenueDetailsViewModel extends BaseViewModel {
 
     private final SimpleDateFormat readableDateFormat;
@@ -51,6 +49,9 @@ public class VenueDetailsViewModel extends BaseViewModel {
     private final MutableLiveData<String> title = new MutableLiveData<>();
     private final MutableLiveData<String> subtitle = new MutableLiveData<>();
     private final MutableLiveData<String> description = new MutableLiveData<>();
+    private final MutableLiveData<String> additionalDataTitle = new MutableLiveData<>();
+    private final MutableLiveData<String> additionalDataValue = new MutableLiveData<>();
+    private final MutableLiveData<Boolean> showAdditionalData = new MutableLiveData<>();
     private final MutableLiveData<String> checkInTime = new MutableLiveData<>();
     private final MutableLiveData<String> checkInDuration = new MutableLiveData<>();
     private final MutableLiveData<Boolean> isCheckedIn = new MutableLiveData<>();
@@ -69,9 +70,10 @@ public class VenueDetailsViewModel extends BaseViewModel {
         super(application);
         preferenceManager = this.application.getPreferencesManager();
         checkInManager = this.application.getCheckInManager();
+        isCheckedIn.setValue(false);
+        showAdditionalData.setValue(false);
         geofenceManager = this.application.getGeofenceManager();
         locationManager = this.application.getLocationManager();
-
         readableDateFormat = new SimpleDateFormat(application.getString(R.string.venue_checked_in_time_format), Locale.GERMANY);
         isCheckedIn.setValue(false);
     }
@@ -92,6 +94,7 @@ public class VenueDetailsViewModel extends BaseViewModel {
                         .flatMapCompletable(checkedIn -> update(isCheckedIn, checkedIn)))
                 .andThen(checkInManager.getCheckInDataIfAvailable()
                         .doOnSuccess(checkInData -> {
+                            Timber.d("Check-in data: %s", checkInData);
                             updateAsSideEffect(id, checkInData.getLocationId());
                             updateAsSideEffect(hasLocationRestriction, checkInData.hasLocationRestriction());
                             if (checkInData.getLocationAreaName() != null) {
@@ -131,7 +134,8 @@ public class VenueDetailsViewModel extends BaseViewModel {
         return Completable.mergeArray(
                 super.keepDataUpdated(),
                 keepCheckedInStateUpdated(),
-                keepCheckedInTimerUpdated()
+                keepCheckedInTimerUpdated(),
+                keepAdditionalDataUpdated()
         );
     }
 
@@ -146,13 +150,25 @@ public class VenueDetailsViewModel extends BaseViewModel {
     }
 
     private Completable keepCheckedInTimerUpdated() {
-        return preferenceManager.restoreIfAvailableAndGetChanges(KEY_CHECK_IN_DATA, CheckInData.class)
+        return checkInManager.getCheckInDataAndChanges()
                 .map(CheckInData::getTimestamp)
                 .switchMapCompletable(checkInTimestamp -> Completable.mergeArray(
                         updateDescription(checkInTimestamp),
                         updateReadableCheckInTime(checkInTimestamp),
                         updateReadableCheckInDuration(checkInTimestamp)
                 ));
+    }
+
+    private Completable keepAdditionalDataUpdated() {
+        return checkInManager.getAdditionalCheckInPropertiesAndChanges()
+                .flatMapCompletable(properties -> Completable.fromAction(() -> {
+                    Timber.d("Additional check-in properties: %s", properties);
+                    updateAsSideEffect(showAdditionalData, !properties.keySet().isEmpty());
+                    for (String key : properties.keySet()) {
+                        updateAsSideEffect(additionalDataTitle, getAdditionalDataTitle(key));
+                        updateAsSideEffect(additionalDataValue, properties.get(key).toString());
+                    }
+                }));
     }
 
     private Completable updateReadableCheckInTime(long timestamp) {
@@ -443,6 +459,18 @@ public class VenueDetailsViewModel extends BaseViewModel {
         addPermissionToRequiredPermissions(Manifest.permission.ACCESS_BACKGROUND_LOCATION);
     }
 
+    private String getAdditionalDataTitle(@NonNull String property) {
+        String readableProperty;
+        if (property.equals("table")) {
+            readableProperty = application.getString(R.string.venue_property_table);
+        } else if (property.equals("patient")) {
+            readableProperty = application.getString(R.string.venue_property_patient_name);
+        } else {
+            readableProperty = property.substring(0, 1).toUpperCase() + property.substring(1);
+        }
+        return readableProperty + ":";
+    }
+
     /*
         Getter & Setter
     */
@@ -473,6 +501,18 @@ public class VenueDetailsViewModel extends BaseViewModel {
 
     public LiveData<Boolean> getIsCheckedIn() {
         return isCheckedIn;
+    }
+
+    public LiveData<String> getAdditionalDataTitle() {
+        return additionalDataTitle;
+    }
+
+    public LiveData<String> getAdditionalDataValue() {
+        return additionalDataValue;
+    }
+
+    public LiveData<Boolean> getShowAdditionalData() {
+        return showAdditionalData;
     }
 
     public LiveData<Boolean> getHasLocationRestriction() {

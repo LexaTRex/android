@@ -15,6 +15,10 @@ pipeline {
     parameters {
         booleanParam(name: 'ReleaseToInternalTesting', defaultValue: false,
             description: 'Release the bundle to internal testing track on Google Play Store. This only works on master or release/* branches.')
+        booleanParam(name: 'BuildForAllEnvironments', defaultValue: false,
+            description: 'Builds APKs for all staging environments.')
+        booleanParam(name: 'UploadToAppCenter', defaultValue: false,
+            description: 'Build a QS APK and upload it to MS AppCenter for testing.')
     }
 
     stages {
@@ -29,29 +33,81 @@ pipeline {
             steps {
                 sh '''
                     cd Luca
-                    docker run --rm -u $(id -u):$(id -g) -v `pwd`:/Luca ${CONTAINER} bash -c "cd /Luca/app; ./../gradlew :app:test"
+                    docker run --rm -u $(id -u):$(id -g) -v `pwd`:/Luca ${CONTAINER} bash -c "cd /Luca/app; ./../gradlew :app:testDebug :app:testProduction"
                 '''
             }
         }
-        stage('Build Debug & QA') {
+        stage('Build Dev APK') {
             steps {
                 withCredentials([
                     usernamePassword(credentialsId: "luca-staging-api-basic-auth-user-pw", usernameVariable: 'STAGING_API_USERNAME', passwordVariable: 'STAGING_API_PASSWORD'),
                 ]) {
                     sh '''
                         cd Luca
-                        BUILD_NAME=$(python -c "print('$BUILD_TAG'.split('%2F')[-1].replace(' ', ''))")
                         STAGING_PARAMS="-PSTAGING_API_USERNAME=$QUOTE$STAGING_API_USERNAME$QUOTE -PSTAGING_API_PASSWORD=$QUOTE$STAGING_API_PASSWORD$QUOTE"
-                        CMD="cd /Luca/app; ./../gradlew :app:assembleDebug :app:assembleQa $STAGING_PARAMS"
-                        CMD="$CMD && cd build/outputs/apk/debug && mv app-debug.apk app-debug_${BUILD_NAME}.apk"
-                        CMD="$CMD && cd ../qa/ && mv app-qa.apk app-qa_${BUILD_NAME}.apk"
+                        CMD="cd /Luca/app; ./../gradlew :app:assembleDebug $STAGING_PARAMS"
                         docker run --rm -u $(id -u):$(id -g) -v `pwd`:/Luca ${CONTAINER} bash -c "$CMD"
                     '''
                 }
             }
         }
-        stage('Build Release') {
-            when { anyOf { branch 'release/*'; branch 'master' } }
+        stage('Build Staging APKs') {
+            when {
+                anyOf {
+                    anyOf { branch 'release/*'; branch 'master' }
+                    expression { return params.BuildForAllEnvironments }
+                }
+            }
+            steps {
+                withCredentials([
+                    usernamePassword(credentialsId: "luca-staging-api-basic-auth-user-pw", usernameVariable: 'STAGING_API_USERNAME', passwordVariable: 'STAGING_API_PASSWORD'),
+                ]) {
+                    sh '''
+                        cd Luca
+                        STAGING_PARAMS="-PSTAGING_API_USERNAME=$QUOTE$STAGING_API_USERNAME$QUOTE -PSTAGING_API_PASSWORD=$QUOTE$STAGING_API_PASSWORD$QUOTE"
+                        CMD="cd /Luca/app; ./../gradlew :app:assembleQs :app:assembleAqs :app:assembleHotfix :app:assembleRelease :app:assemblePreprod $STAGING_PARAMS"
+                        docker run --rm -u $(id -u):$(id -g) -v `pwd`:/Luca ${CONTAINER} bash -c "$CMD"
+                    '''
+                }
+            }
+        }
+        stage('Upload to AppCenter') {
+            when {
+                anyOf {
+                    anyOf { branch 'release/*'; branch 'master'; branch 'dev' }
+                    expression { return params.UploadToAppCenter }
+                }
+            }
+            steps {
+                withCredentials([
+                    usernamePassword(credentialsId: "luca-staging-api-basic-auth-user-pw", usernameVariable: 'STAGING_API_USERNAME', passwordVariable: 'STAGING_API_PASSWORD'),
+                    string(credentialsId: 'luca-android-appcenter-token', variable: 'APPCENTER_TOKEN'),
+                ]) {
+                    sh '''#!/bin/bash
+                        cd Luca
+                        if [[ \"$BUILD_TAG\" == *"master"* ]]; then
+                            TASK=":app:assembleRelease"
+                            APP_VARIANT=release
+                        elif [[ \"$BUILD_TAG\" == *"release"* ]]; then
+                            TASK=":app:assemblePreprod"
+                            APP_VARIANT=preprod
+                        else
+                            TASK=":app:assembleQs"
+                            APP_VARIANT=qs
+                        fi
+                        STAGING_PARAMS="-PSTAGING_API_USERNAME=$QUOTE$STAGING_API_USERNAME$QUOTE -PSTAGING_API_PASSWORD=$QUOTE$STAGING_API_PASSWORD$QUOTE"
+                        CMD="cd /Luca/app; ./../gradlew $TASK $STAGING_PARAMS"
+                        docker run --rm -u $(id -u):$(id -g) -v `pwd`:/Luca ${CONTAINER} bash -c "$CMD"
+                        cd .. && ./Luca/scripts/rename_output_files && cd Luca
+                        CMD="cd /Luca/app; npm install -g appcenter-cli"
+                        CMD="$CMD && appcenter distribute release --app culture4life/luca-Android --file build/outputs/apk/$APP_VARIANT/app-$APP_VARIANT_*.apk --group "Testers" --token $APPCENTER_TOKEN"
+                        docker run --rm -v `pwd`:/Luca --entrypoint /bin/sh node:14.16.0-alpine3.13 -c "$CMD"
+                    '''
+                }
+            }
+        }
+        stage('Build Production APK') {
+            when { anyOf { branch 'master' } }
             steps {
                 withCredentials([
                     file(credentialsId: 'luca-android-keystore', variable: 'KEYSTORE_FILE'),
@@ -60,11 +116,9 @@ pipeline {
                 ]) {
                     sh '''
                         cd Luca
-                        BUILD_NAME=$(python -c "print('$BUILD_TAG'.split('%2F')[-1].replace(' ', ''))")
                         LOCAL_KEYSTORE_FILE=$(basename $KEYSTORE_FILE)
                         KEYSTORE_PARAMS="-PC4L_SIGNING_STORE_FILE=$LOCAL_KEYSTORE_FILE -PC4L_SIGNING_KEY_PASSWORD=$C4L_SIGNING_KEY_PASSWORD -PC4L_SIGNING_KEY_ALIAS=$C4L_SIGNING_KEY_ALIAS -PC4L_SIGNING_STORE_PASSWORD=$C4L_SIGNING_STORE_PASSWORD"
-                        CMD="cd /Luca/app; ./../gradlew :app:assembleRelease $KEYSTORE_PARAMS"
-                        CMD="$CMD && cd build/outputs/apk/release && mv app-release.apk app-release_${BUILD_NAME}.apk"
+                        CMD="cd /Luca/app; ./../gradlew :app:assembleProduction $KEYSTORE_PARAMS"
                         docker run --rm -u $(id -u):$(id -g) -v `pwd`:/Luca -v $KEYSTORE_FILE:/Luca/app/$LOCAL_KEYSTORE_FILE ${CONTAINER} bash -c "$CMD"
                     '''
                 }
@@ -88,7 +142,7 @@ pipeline {
                         cd Luca
                         LOCAL_KEYSTORE_FILE=$(basename $KEYSTORE_FILE)
                         KEYSTORE_PARAMS="-PC4L_SIGNING_STORE_FILE=$LOCAL_KEYSTORE_FILE -PC4L_SIGNING_KEY_PASSWORD=$C4L_SIGNING_KEY_PASSWORD -PC4L_SIGNING_KEY_ALIAS=$C4L_SIGNING_KEY_ALIAS -PC4L_SIGNING_STORE_PASSWORD=$C4L_SIGNING_STORE_PASSWORD"
-                        CMD="cd /Luca/app; ./../gradlew publishReleaseBundle $KEYSTORE_PARAMS"
+                        CMD="cd /Luca/app; ./../gradlew publishProductionBundle $KEYSTORE_PARAMS"
                         docker run --rm -u $(id -u):$(id -g) -v `pwd`:/Luca -v $SERVICE_ACCOUNT_FILE:/Luca/app/service-account.json -v $KEYSTORE_FILE:/Luca/app/$LOCAL_KEYSTORE_FILE ${CONTAINER} bash -c "$CMD"
                     '''
                 }
@@ -96,6 +150,7 @@ pipeline {
         }
         stage('Archive') {
             steps {
+                sh "./Luca/scripts/rename_output_files"
                 archiveArtifacts artifacts: 'Luca/app/build/outputs/apk/**/*.apk, Luca/app/build/outputs/bundle/**/*.aab', excludes: 'Luca/app/build/outputs/apk/**/*-androidTest.apk', fingerprint: true
             }
         }

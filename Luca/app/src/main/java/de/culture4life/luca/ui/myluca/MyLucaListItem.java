@@ -24,6 +24,7 @@ import io.reactivex.rxjava3.core.Single;
 public class MyLucaListItem {
 
     public static class Procedure {
+
         private String name;
         private String date;
 
@@ -39,6 +40,7 @@ public class MyLucaListItem {
         public String getDate() {
             return date;
         }
+
     }
 
     private final String testResultId;

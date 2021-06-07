@@ -51,8 +51,8 @@ public class BaercodeTestResult extends ProvidedTestResult {
 
     /**
      * Update user data with the decrypted data that matches the encrypted cypherText.
+     *
      * @param decrypted decrypted cbor message of the user data
-     * @throws IOException
      */
     private void updateUserData(@NonNull byte[] decrypted) throws TestResultParsingException, IOException {
         JsonNode userData = CoseMessage.MAPPER.readTree(decrypted);
@@ -93,7 +93,7 @@ public class BaercodeTestResult extends ProvidedTestResult {
             }
             byte[] decoded = coseMessage.decodeCypherText(baercodeKey);
             updateUserData(decoded);
-        } catch (IOException | GeneralSecurityException |IllegalArgumentException e) {
+        } catch (IOException | GeneralSecurityException | IllegalArgumentException e) {
             throw new TestResultParsingException("Exception while parsing Baercode", e);
         }
     }

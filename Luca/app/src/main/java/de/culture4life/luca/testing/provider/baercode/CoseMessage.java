@@ -1,6 +1,5 @@
 package de.culture4life.luca.testing.provider.baercode;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.cbor.databind.CBORMapper;
@@ -20,6 +19,7 @@ import javax.crypto.spec.SecretKeySpec;
 import androidx.annotation.NonNull;
 
 class CoseMessage {
+
     public static final ObjectMapper MAPPER = new CBORMapper();
     private byte[] plaintext;
     protected byte[] signature;
@@ -61,17 +61,17 @@ class CoseMessage {
     }
 
     /**
-     * Additional data necessary for decryption of user data as defined in the Baercode algorithm
-     * on their verification website scan.baercode.de
+     * Additional data necessary for decryption of user data as defined in the Baercode algorithm on
+     * their verification website scan.baercode.de
+     *
      * @return byte[] to be used as the Authenticated Additional Data for AES decryption
-     * @throws JsonProcessingException
      */
     private byte[] createAAD() throws IOException {
         byte[] eProt = coseEncrypt0.get(0).binaryValue();
         ArrayList<Object> data = new ArrayList<>();
         data.add("Encrypt0");
         data.add(eProt);
-        data.add(new byte[] {});
+        data.add(new byte[]{});
         return MAPPER.writeValueAsBytes(data);
     }
 
@@ -80,9 +80,9 @@ class CoseMessage {
         byte[] signerProt = signer.get(0).binaryValue();
         ArrayList<Object> data = new ArrayList<>();
         data.add("Signature");
-        data.add(new byte[] {});
+        data.add(new byte[]{});
         data.add(signerProt);
-        data.add(new byte[] {});
+        data.add(new byte[]{});
         data.add(plaintext);
         return MAPPER.writeValueAsBytes(data);
     }

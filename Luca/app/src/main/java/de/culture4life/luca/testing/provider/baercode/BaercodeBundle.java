@@ -69,6 +69,7 @@ class BaercodeBundle {
     /**
      * The bundle data is refreshed once every hour. Normally, new keys in the bundle will only
      * affect the following day.
+     *
      * @return true if the bundle is already expired and should be updated
      */
     public boolean isExpired() {

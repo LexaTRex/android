@@ -37,7 +37,6 @@ public class Procedure {
         }
     }
 
-
     private final Type type;
     private final long timestamp;
 

@@ -1,0 +1,14 @@
+#!/bin/bash
+# Add branch name and build number to the output file names
+
+BUILD_NAME=$(python -c "print('$BUILD_TAG'.split('%2F')[-1].replace(' ', ''))")
+cd Luca/app/build/outputs/apk/
+for FILE in **/*.apk; do
+    if [[ $FILE == *$BUILD_NAME* ]]
+    then
+        echo "Don't rename $FILE because it already includes the build name."
+    else
+        echo mv ${FILE} ${FILE/.apk/}_${BUILD_NAME}.apk
+        mv ${FILE} ${FILE/.apk/}_${BUILD_NAME}.apk
+    fi
+done
