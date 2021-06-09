@@ -26,6 +26,7 @@
     <string name="action_confirm">Bestätigen</string>
     <string name="action_update">Update</string>
     <string name="action_enable">Aktivieren</string>
+    <string name="action_add">Hinzufügen</string>
 
     <!-- Errors -->
     <string name="error_generic_title">Etwas lief schief</string>
@@ -193,6 +194,14 @@
     <string name="venue_slider_clicked">Bitte den Pfeil nach links ziehen</string>
     <string name="venue_checked_out">Du hast ausgecheckt</string>
 
+    <string name="venue_children_title">Kinder</string>
+    <string name="venue_children_empty_list_description">Kinder (bis 14&#160;Jahre) kannst du gemeinsam mit dir  einchecken. Gib hier an, wer dich begleitet.</string>
+    <string name="venue_children_list_description">Wähle die Kinder aus, die mit dir eingecheckt werden sollen.</string>
+    <string name="venue_children_add_description">Diese Information wird nicht an ein Gesundheitsamt weitergegeben, sie dient lediglich als Gedankenstütze. Wenn du deine Historie mit dem Gesundheitsamt teilst, kannst du die Namen der Kinder freiwillig dem Gesundheitsamt mitteilen.</string>
+    <string name="venue_children_add">Kind hinzufügen</string>
+    <string name="venue_children_name">Name des Kindes</string>
+    <string name="venue_children_check_in">Kinder einchecken</string>
+
     <string name="venue_check_out_error">Auschecken fehlgeschlagen</string>
     <string name="venue_check_out_error_permission">Eine benötigte Berechtigung wurde nicht erteilt.</string>
     <string name="venue_check_out_error_duration">Du wurdest eben erst eingecheckt. Bitte checke erst aus, wenn du die Location verlassen hast.</string>
@@ -247,6 +256,7 @@
     <string name="history_clear_title">Möchtest du deine Historie wirklich leeren?</string>
     <string name="history_clear_description">Vergangene Einträge werden in deiner App nicht mehr angezeigt, bleiben aber noch bis zu 30&#160;Tage im System und werden bei einer Datenfreigabe mit dem Gesundheitsamt geteilt.</string>
     <string name="history_clear_action">Leeren</string>
+    <string name="history_children_title">Kinder: <xliff:g example="1" id="count">%1$d</xliff:g></string>
 
     <!-- Accessed Data -->
     <string name="accessed_data_heading">Datenanfragen</string>
@@ -255,8 +265,8 @@
     <string name="accessed_data_title"><xliff:g example="Health department Berlin Mitte" id="healthDepartmentName">%1$s</xliff:g></string>
     <string name="accessed_data_description"><xliff:g example="neXenio Office" id="locationName">%1$s</xliff:g></string>
     <string name="accessed_data_dialog_title">Neue Datenanfrage</string>
-    <string name="accessed_data_dialog_description">Ein oder mehrere Gesundheitsämter haben im Rahmen einer Datenanfrage deine Kontaktdaten erhalten.\n\nIm Rahmen einer Kontaktnachverfolgung wurden deine Kontaktdaten von einem oder mehreren Gesundheitsämtern entschlüsselt. Diese werten gerade aus, ob ein Risiko besteht und werden sich möglicherweise bei dir melden. Bis dahin besteht kein Handlungsbedarf.\n\nBitte handle verantwortungsvoll.</string>
-    <string name="accessed_data_dialog_action_show">Alle Datenzugriffe</string>
+    <string name="accessed_data_dialog_description">Ein oder mehrere Gesundheitsämter haben im Rahmen einer Datenanfrage deine Kontaktdaten erhalten.\n\nIm Rahmen einer Kontaktnachverfolgung wurden deine Kontaktdaten von einem oder mehreren Gesundheitsämtern entschlüsselt. Diese werten gerade aus, ob ein Risiko besteht und werden sich möglicherweise bei dir melden.\n\nBitte handle verantwortungsvoll.</string>
+    <string name="accessed_data_dialog_action_show">Alle Datenanfragen</string>
     <string name="accessed_data_dialog_action_dismiss">@string/action_ok</string>
 
     <!-- My Luca -->
@@ -276,6 +286,8 @@
     <string name="test_import_error_positive_description">luca hilft dir beim einfachen Check-in. Da für Check-ins nur negative Testergebnisse relevant sind, kannst du aktuell dein positives Testergebnis nicht hinzufügen.</string>
     <string name="test_import_error_unsupported_description">Der QR-Code konnte nicht gelesen werden. Das kann daran liegen, dass wir aktuell nur bestimmte Testzentren unterstützen. Erkundige dich bei deinem Testzentrum, ob dieses dazugehört.</string>
     <string name="test_import_error_unsupported_but_url_description">Die Daten sind kein Testergebnis von einem Testcenter das wir unterstützen.\n\nAllerdings verweisen die Daten auf eine Webseite, bei der es möglicherweise mehr Details über das Testergebnis gibt.</string>
+    <string name="test_import_error_check_in_scanner_title">Check-in mit diesem Scanner nicht möglich</string>
+    <string name="test_import_error_check_in_scanner_description">Du kannst dich mit diesem Scanner nicht einchecken, weil er nur für das Hinzufügen von Dokumenten gedacht ist. Wechsle für den Check-in in den Tab „Einchecken“ (unten links in der Navigationsleiste). Dort findest du die Funktion „Selbst einchecken“.</string>
     <string name="test_outcome_negative">Negativ</string>
     <string name="test_outcome_positive">Positiv</string>
     <string name="test_outcome_partially_vaccinated">Teilweise Immunisiert</string>
@@ -287,16 +299,18 @@
     <string name="test_type_vaccination">Impfung</string>
     <string name="test_type_unknown">@string/test_outcome_unknown</string>
     <string name="test_issued_by">Ausgestellt von</string>
-    <string name="test_issued_at">Ausstelldatum:</string>
+    <string name="test_issued_at">Datum:</string>
     <string name="test_lab_doctor_name">Durchgeführt von</string>
-    <string name="test_delete_button">Test Löschen</string>
-    <string name="test_delete_alert_dialog_title">Testergebnis löschen</string>
-    <string name="test_delete_alert_dialog_message">Soll das Testergebnis wirklich aus der App gelöscht werden?</string>
+    <string name="test_delete_action">Test Löschen</string>
+    <string name="test_delete_confirmation_title">Testergebnis löschen</string>
+    <string name="test_delete_confirmation_message">Soll das Testergebnis wirklich aus der App gelöscht werden?</string>
     <string name="test_vaccination_procedure">Impfung %1$s - %2$s</string>
     <string name="vaccine_comirnaty">BioNTech/Pfizer</string>
     <string name="vaccine_jannsen">Johnson &amp; Johnson</string>
     <string name="vaccine_moderna">Moderna</string>
     <string name="vaccine_vaxzevria">AstraZeneca</string>
+    <string name="em_green_pass">EM-GREENPASS</string>
+    <string name="appointment_title">Termin</string>
 
     <!-- Phone Number Verification -->
     <string name="verification_request_new_tan_action">TAN anfordern</string>

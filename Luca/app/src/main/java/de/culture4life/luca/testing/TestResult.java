@@ -43,7 +43,7 @@ public class TestResult {
     public static final long TIME_UNTIL_VACCINATION_IS_VALID = TimeUnit.DAYS.toMillis(14);
     public static final long MAXIMUM_VACCINATION_VALIDITY = TimeUnit.DAYS.toMillis(365);
 
-    @IntDef({TYPE_UNKNOWN, TYPE_FAST, TYPE_PCR, TYPE_VACCINATION})
+    @IntDef({TYPE_UNKNOWN, TYPE_FAST, TYPE_PCR, TYPE_VACCINATION, TYPE_APPOINTMENT, TYPE_GREEN_PASS})
     @Retention(SOURCE)
     public @interface Type {
 
@@ -53,6 +53,8 @@ public class TestResult {
     public static final int TYPE_FAST = 1;
     public static final int TYPE_PCR = 2;
     public static final int TYPE_VACCINATION = 3;
+    public static final int TYPE_APPOINTMENT = 4;
+    public static final int TYPE_GREEN_PASS = 5;
 
     @IntDef({OUTCOME_UNKNOWN, OUTCOME_POSITIVE, OUTCOME_NEGATIVE, OUTCOME_PARTIALLY_VACCINATED, OUTCOME_FULLY_VACCINATED})
     @Retention(SOURCE)
@@ -73,12 +75,12 @@ public class TestResult {
     @Type
     @Expose
     @SerializedName("type")
-    private int type;
+    private int type = TYPE_UNKNOWN;
 
     @Outcome
     @Expose
     @SerializedName("outcome")
-    private int outcome;
+    private int outcome = OUTCOME_UNKNOWN;
 
     @Expose
     @SerializedName("testingTimestamp")

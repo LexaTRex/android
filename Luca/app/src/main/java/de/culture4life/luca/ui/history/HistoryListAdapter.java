@@ -70,18 +70,26 @@ public class HistoryListAdapter extends ArrayAdapter<HistoryListItem> {
         descriptionTextView.setText(item.getDescription());
         descriptionTextView.setVisibility(item.getDescription() != null ? View.VISIBLE : View.GONE);
 
-        if (item.getAdditionalDetails() != null) {
-            titleImageView.setImageResource(item.getIconResourceId());
+        if (item.getAdditionalTitleDetails() != null) {
+            titleImageView.setImageResource(item.getTitleIconResourceId());
             titleImageView.setVisibility(View.VISIBLE);
             titleImageView.setOnClickListener(v -> showAdditionalDetails(item));
             titleTextView.setOnClickListener(v -> showAdditionalDetails(item));
         } else {
             titleImageView.setVisibility(View.GONE);
             titleImageView.setOnClickListener(null);
+            titleTextView.setOnClickListener(null);
+        }
+
+        if (item.getAdditionalDescriptionDetails() != null) {
+            titleImageView.setImageResource(item.getDescriptionIconResourceId());
+            descriptionImageView.setVisibility(View.VISIBLE);
+            descriptionImageView.setOnClickListener(v -> showAdditionalDetails(item, true));
+            descriptionTextView.setOnClickListener(v -> showAdditionalDetails(item, true));
+        } else {
             descriptionImageView.setVisibility(View.GONE);
             descriptionImageView.setOnClickListener(null);
             descriptionTextView.setOnClickListener(null);
-            titleTextView.setOnClickListener(null);
         }
 
         timeTextView.setText(item.getTime());
@@ -90,16 +98,26 @@ public class HistoryListAdapter extends ArrayAdapter<HistoryListItem> {
     }
 
     private void showAdditionalDetails(@NonNull HistoryListItem item) {
+        showAdditionalDetails(item, false);
+    }
+
+    private void showAdditionalDetails(@NonNull HistoryListItem item, boolean showDescriptionDetails) {
         if (itemClickHandler == null) {
             Timber.w("No item click handler available for %s", item);
             return;
         }
-        itemClickHandler.showAdditionalDetails(item);
+        if (showDescriptionDetails) {
+            itemClickHandler.showAdditionalDescriptionDetails(item);
+        } else {
+            itemClickHandler.showAdditionalTitleDetails(item);
+        }
     }
 
     public interface ItemClickHandler {
 
-        void showAdditionalDetails(@NonNull HistoryListItem item);
+        void showAdditionalTitleDetails(@NonNull HistoryListItem item);
+
+        void showAdditionalDescriptionDetails(@NonNull HistoryListItem item);
 
     }
 

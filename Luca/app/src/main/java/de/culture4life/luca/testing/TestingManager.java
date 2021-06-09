@@ -15,8 +15,10 @@ import de.culture4life.luca.history.HistoryManager;
 import de.culture4life.luca.network.NetworkManager;
 import de.culture4life.luca.preference.PreferencesManager;
 import de.culture4life.luca.registration.RegistrationManager;
+import de.culture4life.luca.testing.TestResultVerificationException.Reason;
 import de.culture4life.luca.testing.provider.ProvidedTestResult;
 import de.culture4life.luca.testing.provider.TestResultProvider;
+import de.culture4life.luca.testing.provider.appointment.AppointmentProvider;
 import de.culture4life.luca.testing.provider.baercode.BaercodeTestResultProvider;
 import de.culture4life.luca.testing.provider.opentestcheck.OpenTestCheckTestResultProvider;
 import de.culture4life.luca.testing.provider.ubirch.UbirchTestResultProvider;
@@ -32,6 +34,7 @@ import io.reactivex.rxjava3.core.Maybe;
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.core.Single;
 import io.reactivex.rxjava3.functions.Predicate;
+import io.reactivex.rxjava3.schedulers.Schedulers;
 import timber.log.Timber;
 
 public class TestingManager extends Manager {
@@ -46,6 +49,7 @@ public class TestingManager extends Manager {
     private final RegistrationManager registrationManager;
     private final CryptoManager cryptoManager;
 
+    private final AppointmentProvider appointmentProvider;
     private final UbirchTestResultProvider ubirchTestResultProvider;
     private final OpenTestCheckTestResultProvider openTestCheckTestResultProvider;
     private BaercodeTestResultProvider baercodeTestResultProvider;
@@ -58,9 +62,9 @@ public class TestingManager extends Manager {
         this.historyManager = historyManager;
         this.registrationManager = registrationManager;
         this.cryptoManager = cryptoManager;
+        this.appointmentProvider = new AppointmentProvider();
         this.ubirchTestResultProvider = new UbirchTestResultProvider();
         this.openTestCheckTestResultProvider = new OpenTestCheckTestResultProvider();
-        this.baercodeTestResultProvider = new BaercodeTestResultProvider();
     }
 
     @Override
@@ -71,7 +75,14 @@ public class TestingManager extends Manager {
                 historyManager.initialize(context),
                 registrationManager.initialize(context),
                 cryptoManager.initialize(context)
-        ).andThen(deleteOldTests());
+        ).andThen(deleteOldTests())
+                .doOnComplete(() -> {
+                    this.baercodeTestResultProvider = new BaercodeTestResultProvider(context);
+                    Completable.fromAction(() -> this.baercodeTestResultProvider.downloadRequiredFiles())
+                            .subscribeOn(Schedulers.io())
+                            .onErrorComplete()
+                            .subscribe();
+                });
     }
 
     public Single<TestResult> parseAndValidateEncodedTestResult(@NonNull String encodedTestResult) {
@@ -102,8 +113,11 @@ public class TestingManager extends Manager {
                     if (testResult.getExpirationTimestamp() < System.currentTimeMillis() && !BuildConfig.DEBUG) {
                         return Completable.error(new TestResultExpiredException());
                     }
-                    if (testResult.getOutcome() == TestResult.OUTCOME_POSITIVE) {
+                    if (testResult.getOutcome() == TestResult.OUTCOME_POSITIVE && testResult.getType() != TestResult.TYPE_GREEN_PASS) {
                         return Completable.error(new TestResultPositiveException());
+                    }
+                    if (testResult.getOutcome() == TestResult.OUTCOME_UNKNOWN) {
+                        return Completable.error(new TestResultVerificationException(Reason.OUTCOME_UNKNOWN));
                     }
                     return getOrRestoreTestResults()
                             .mergeWith(Observable.just(testResult))
@@ -121,7 +135,7 @@ public class TestingManager extends Manager {
     }
 
     private Observable<? extends TestResultProvider<? extends ProvidedTestResult>> getTestResultProviders() {
-        return Observable.just(openTestCheckTestResultProvider, baercodeTestResultProvider); // TODO: 07.05.21 add ubirchTestResultProvider
+        return Observable.just(appointmentProvider, openTestCheckTestResultProvider, baercodeTestResultProvider); // TODO: 07.05.21 add ubirchTestResultProvider
     }
 
     public Completable redeemTestResult(@NonNull TestResult testResult) {
@@ -239,6 +253,10 @@ public class TestingManager extends Manager {
      */
     public static boolean isTestResult(@NonNull String url) {
         return url.contains("luca-app.de/webapp/testresult/#");
+    }
+
+    public static boolean isAppointment(@NonNull String url) {
+        return url.contains("luca-app.de/webapp/appointment");
     }
 
 }

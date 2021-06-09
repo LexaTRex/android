@@ -11,6 +11,7 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
 import java.io.IOException;
@@ -28,9 +29,9 @@ public class BaercodeTestResultProviderTest {
 
     @Before
     public void setUp() throws IOException, CertificateException {
-        provider = new BaercodeTestResultProvider();
+        provider = new BaercodeTestResultProvider(RuntimeEnvironment.systemContext);
         provider.baercodeBundle = BaercodeBundle.getTestBundle();
-        provider.baercodeCertificate = new BaercodeCertificate(BaercodeCertificateTest.getFileContent("ba.crt"));
+        provider.baercodeCertificate = new BaercodeCertificate(BaercodeCertificateTest.getFileContent("src/test/assets/baercode.crt"));
     }
 
     @Test
@@ -57,6 +58,23 @@ public class BaercodeTestResultProviderTest {
         Assert.assertEquals("Mustermann", result.getLastName());
         Assert.assertEquals(946598400, testResult.getDateOfBirth());
         Assert.assertEquals(1, testResult.getDiseaseType());
+    }
+
+    @Test
+    public void parse_testQrCode_hasHashableEncodedData() {
+        Assume.assumeTrue("Bundle is expired and re-downloaded on release builds", BuildConfig.DEBUG);
+        BaercodeTestResult testResult = provider.parse(TEST_QR_CODE).blockingGet();
+        TestResult result = testResult.getLucaTestResult();
+        Assert.assertNotNull(result.getHashableEncodedData());
+    }
+
+    @Test
+    public void parse_testQrCodeAndVaccination_haveDifferentHashableEncodedData() {
+        Assume.assumeTrue("Bundle is expired and re-downloaded on release builds", BuildConfig.DEBUG);
+        BaercodeTestResult testResult = provider.parse(TEST_QR_CODE).blockingGet();
+        BaercodeTestResult vaccinationResult = provider.parse(VACCINATION_QR_CODE).blockingGet();
+        Assert.assertNotEquals(testResult.getLucaTestResult().getHashableEncodedData(),
+                vaccinationResult.getLucaTestResult().getHashableEncodedData());
     }
 
     @Test(expected = TestResultParsingException.class)

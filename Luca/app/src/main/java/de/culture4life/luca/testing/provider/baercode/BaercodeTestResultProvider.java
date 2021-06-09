@@ -1,5 +1,7 @@
 package de.culture4life.luca.testing.provider.baercode;
 
+import android.content.Context;
+
 import de.culture4life.luca.BuildConfig;
 import de.culture4life.luca.testing.TestResultExpiredException;
 import de.culture4life.luca.testing.TestResultImportException;
@@ -7,11 +9,10 @@ import de.culture4life.luca.testing.TestResultParsingException;
 import de.culture4life.luca.testing.provider.TestResultProvider;
 import de.culture4life.luca.util.SerializationUtil;
 
-import org.jetbrains.annotations.NotNull;
-
 import java.io.IOException;
 import java.math.BigInteger;
 import java.security.AlgorithmParameters;
+import java.security.GeneralSecurityException;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
@@ -30,7 +31,6 @@ import io.reactivex.rxjava3.core.Single;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
-import timber.log.Timber;
 
 public class BaercodeTestResultProvider extends TestResultProvider<BaercodeTestResult> {
 
@@ -39,8 +39,10 @@ public class BaercodeTestResultProvider extends TestResultProvider<BaercodeTestR
     protected static BaercodeBundle baercodeBundle;
     protected static BaercodeCertificate baercodeCertificate;
     private static OkHttpClient client;
+    private final Context context;
 
-    public BaercodeTestResultProvider() {
+    public BaercodeTestResultProvider(@NonNull Context context) {
+        this.context = context;
         client = new OkHttpClient.Builder()
                 .callTimeout(10, TimeUnit.SECONDS)
                 .connectTimeout(10, TimeUnit.SECONDS)
@@ -57,17 +59,13 @@ public class BaercodeTestResultProvider extends TestResultProvider<BaercodeTestR
     public Single<Boolean> canParse(@NonNull String encodedData) {
         return SerializationUtil.deserializeFromBase64(encodedData)
                 .map(data -> {
-                    try {
-                        int version = CoseMessage.MAPPER.readValue(data, Integer.class);
-                        if (version == BaercodeTestResult.PROTOCOL_VERSION) {
-                            byte[] cborEncodedData = Arrays.copyOfRange(data, 2, data.length);
-                            new CoseMessage(cborEncodedData);
-                            return true;
-                        }
-                    } catch (Exception e) {
-                        Timber.d("Data is not a readable BaercodeTestResult");
+                    int version = CoseMessage.MAPPER.readValue(data, Integer.class);
+                    if (version != BaercodeTestResult.PROTOCOL_VERSION) {
+                        return false;
                     }
-                    return false;
+                    byte[] cborEncodedData = Arrays.copyOfRange(data, 2, data.length);
+                    new CoseMessage(cborEncodedData);
+                    return true;
                 }).onErrorReturnItem(false);
     }
 
@@ -94,7 +92,7 @@ public class BaercodeTestResultProvider extends TestResultProvider<BaercodeTestR
         return new BaercodeCertificate(download(CERTIFICATE_ENDPOINT));
     }
 
-    protected static @NotNull byte[] download(String url) throws IOException {
+    protected static @NonNull byte[] download(String url) throws IOException {
         Request request = new Request.Builder()
                 .url(url)
                 .build();
@@ -102,21 +100,26 @@ public class BaercodeTestResultProvider extends TestResultProvider<BaercodeTestR
         if (response.isSuccessful()) {
             return response.body().bytes();
         } else {
-            throw new IOException(String.format("Could not download bundle: %s", response.message()));
+            throw new IOException(String.format("Could not download: %s", response.message()));
         }
     }
 
-    protected void decryptPersonalData(@NonNull BaercodeTestResult testResult) throws IOException, TestResultParsingException, CertificateException, TestResultExpiredException {
-        if (baercodeBundle == null || (baercodeBundle.isExpired() && !BuildConfig.DEBUG)) {
-            baercodeBundle = downloadBundle();
-            baercodeCertificate = downloadCertificate();
-        }
+    protected void decryptPersonalData(@NonNull BaercodeTestResult testResult) throws IOException, TestResultParsingException, TestResultExpiredException, GeneralSecurityException {
+        downloadRequiredFiles();
+        baercodeCertificate.verifySignedByLetsEncrypt(context);
         baercodeBundle.verify(baercodeCertificate.getPublicKey());
         BaercodeKey baercodeKey = baercodeBundle.getKey(testResult.getBase64KeyId());
         if (baercodeKey == null) {
             throw new TestResultExpiredException("No valid key found in bundle");
         }
         testResult.verifyAndDecryptPersonalData(baercodeKey);
+    }
+
+    public synchronized void downloadRequiredFiles() throws IOException, CertificateException {
+        if (baercodeBundle == null || (baercodeBundle.isExpired() && !BuildConfig.DEBUG)) {
+            baercodeBundle = downloadBundle();
+            baercodeCertificate = downloadCertificate();
+        }
     }
 
     protected static ECPublicKey createPublicKey(@NonNull BaercodeKey baercodeKey) throws NoSuchAlgorithmException, InvalidParameterSpecException, InvalidKeySpecException {

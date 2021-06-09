@@ -9,11 +9,14 @@ public class HistoryListItem {
 
     protected String title;
     protected String description;
-    protected String additionalDetails;
+    protected String additionalTitleDetails;
+    protected String additionalDescriptionDetails;
     protected String time;
     protected long timestamp;
     @DrawableRes
-    protected int iconResourceId;
+    protected int titleIconResourceId;
+    @DrawableRes
+    protected int descriptionIconResourceId;
 
     public HistoryListItem(Context context) {
     }
@@ -36,12 +39,21 @@ public class HistoryListItem {
     }
 
     @Nullable
-    public String getAdditionalDetails() {
-        return additionalDetails;
+    public String getAdditionalTitleDetails() {
+        return additionalTitleDetails;
     }
 
-    public void setAdditionalDetails(@Nullable String additionalDetails) {
-        this.additionalDetails = additionalDetails;
+    public void setAdditionalTitleDetails(@Nullable String additionalTitleDetails) {
+        this.additionalTitleDetails = additionalTitleDetails;
+    }
+
+    @Nullable
+    public String getAdditionalDescriptionDetails() {
+        return additionalDescriptionDetails;
+    }
+
+    public void setAdditionalDescriptionDetails(@Nullable String additionalDescriptionDetails) {
+        this.additionalDescriptionDetails = additionalDescriptionDetails;
     }
 
     public String getTime() {
@@ -61,12 +73,21 @@ public class HistoryListItem {
     }
 
     @DrawableRes
-    public int getIconResourceId() {
-        return iconResourceId;
+    public int getTitleIconResourceId() {
+        return titleIconResourceId;
     }
 
-    public void setIconResourceId(@DrawableRes int iconResourceId) {
-        this.iconResourceId = iconResourceId;
+    public void setTitleIconResourceId(@DrawableRes int titleIconResourceId) {
+        this.titleIconResourceId = titleIconResourceId;
+    }
+
+    @DrawableRes
+    public int getDescriptionIconResourceId() {
+        return descriptionIconResourceId;
+    }
+
+    public void setDescriptionIconResourceId(@DrawableRes int descriptionIconResourceId) {
+        this.descriptionIconResourceId = descriptionIconResourceId;
     }
 
 }

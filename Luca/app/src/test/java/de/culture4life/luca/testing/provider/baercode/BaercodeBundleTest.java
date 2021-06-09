@@ -30,14 +30,14 @@ public class BaercodeBundleTest {
     @Test
     public void validateBundle_withBaCert_succeeds() throws Exception {
         BaercodeBundle baercodeBundle = BaercodeBundle.getTestBundle();
-        PublicKey publicKey = new BaercodeCertificate(BaercodeCertificateTest.getFileContent("ba.crt")).getPublicKey();
+        PublicKey publicKey = new BaercodeCertificate(BaercodeCertificateTest.getFileContent("src/test/assets/baercode.crt")).getPublicKey();
         baercodeBundle.verify(publicKey);
     }
 
     @Test(expected = TestResultParsingException.class)
     public void validateBundle_withLetsEncryptCert_fails() throws Exception {
         BaercodeBundle baercodeBundle = BaercodeBundle.getTestBundle();
-        PublicKey publicKey = new BaercodeCertificate(BaercodeCertificateTest.getFileContent("le_root.crt")).getPublicKey();
+        PublicKey publicKey = new BaercodeCertificate(BaercodeCertificateTest.getFileContent("src/main/assets/le_root.crt")).getPublicKey();
         baercodeBundle.verify(publicKey);
     }
 

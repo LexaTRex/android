@@ -122,6 +122,8 @@ public class HistoryItem {
 
         private static Class<? extends HistoryItem> getItemClass(@Type int type) {
             switch (type) {
+                case TYPE_CHECK_OUT:
+                    return CheckOutItem.class;
                 case TYPE_MEETING_ENDED:
                     return MeetingEndedItem.class;
                 case TYPE_TRACE_DATA_ACCESSED:

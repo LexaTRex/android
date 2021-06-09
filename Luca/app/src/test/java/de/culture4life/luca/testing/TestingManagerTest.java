@@ -60,6 +60,7 @@ public class TestingManagerTest extends LucaUnitTest {
         testResult.setId("12345");
         testResult.setType(TestResult.TYPE_FAST);
         testResult.setTestingTimestamp(System.currentTimeMillis());
+        testResult.setOutcome(TestResult.OUTCOME_NEGATIVE);
     }
 
     @Test

@@ -70,7 +70,10 @@ public class MyLucaFragment extends BaseFragment<MyLucaViewModel> implements MyL
     @Override
     public void onResume() {
         super.onResume();
-        viewDisposable.add(viewModel.invokeUpdate().subscribe());
+        viewDisposable.add(Completable.mergeArray(
+                viewModel.updateUserName(),
+                viewModel.invokeListUpdate()
+        ).subscribe());
     }
 
     @Override
@@ -96,7 +99,7 @@ public class MyLucaFragment extends BaseFragment<MyLucaViewModel> implements MyL
         myLucaListAdapter = new MyLucaListAdapter(getContext(), myLucaListView.getId(), this);
         myLucaListView.setAdapter(myLucaListAdapter);
 
-        observe(viewModel.getMyLucaItems(), items -> myLucaListAdapter.setHistoryItems(items));
+        observe(viewModel.getMyLucaItems(), items -> myLucaListAdapter.setItems(items));
     }
 
     private void initializeEmptyStateViews() {
@@ -239,14 +242,14 @@ public class MyLucaFragment extends BaseFragment<MyLucaViewModel> implements MyL
                 .show();
     }
 
-    private void showDeleteTestResultDialog(int position) {
+    private void showDeleteTestResultDialog(@NonNull MyLucaListItem myLucaListItem) {
         MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(getContext())
-                .setTitle(R.string.test_delete_alert_dialog_title)
-                .setMessage(R.string.test_delete_alert_dialog_message)
+                .setTitle(R.string.test_delete_confirmation_title)
+                .setMessage(R.string.test_delete_confirmation_message)
                 .setNegativeButton(R.string.action_cancel, (dialog, which) -> {
                 })
                 .setPositiveButton(R.string.action_confirm, (dialog, which) -> {
-                    viewDisposable.add(viewModel.deleteTestResult(position)
+                    viewDisposable.add(viewModel.deleteListItem(myLucaListItem)
                             .subscribeOn(Schedulers.io())
                             .subscribe());
                 });
@@ -261,8 +264,8 @@ public class MyLucaFragment extends BaseFragment<MyLucaViewModel> implements MyL
     }
 
     @Override
-    public void onDelete(int position) {
-        showDeleteTestResultDialog(position);
+    public void onDelete(@NonNull MyLucaListItem myLucaListItem) {
+        showDeleteTestResultDialog(myLucaListItem);
     }
 
 }

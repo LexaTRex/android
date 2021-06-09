@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
         xmlns:tools="http://schemas.android.com/tools"
@@ -27,6 +26,16 @@
                 android:padding="@dimen/spacing_default"
                 android:animateLayoutChanges="true">
 
+            <ImageView
+                    android:id="@+id/itemTitleImageView"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/ic_information_outline"
+                    android:contentDescription="@string/additional_details_content_description"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent" />
+
             <TextView
                     android:id="@+id/itemTitleTextView"
                     style="@style/TextAppearance.Luca.Body1"
@@ -34,13 +43,13 @@
                     android:textColor="@android:color/black"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginEnd="30dp"
+                    android:layout_marginEnd="60dp"
                     android:ellipsize="end"
                     android:maxLines="2"
-                    tools:text="Negativ"
+                    tools:text="@string/dummy_heading"
                     app:layout_constraintHorizontal_bias="0"
                     app:layout_constrainedWidth="true"
-                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintEnd_toStartOf="@id/itemTitleImageView"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
 
@@ -54,7 +63,7 @@
                     android:layout_marginEnd="30dp"
                     android:ellipsize="end"
                     android:maxLines="1"
-                    tools:text="Roche Antigen Test"
+                    tools:text="@string/dummy_heading"
                     app:layout_constraintHorizontal_bias="0"
                     app:layout_constrainedWidth="true"
                     app:layout_constraintEnd_toEndOf="parent"
@@ -62,7 +71,7 @@
                     app:layout_constraintTop_toBottomOf="@id/itemTitleTextView" />
 
             <TextView
-                    android:id="@+id/itemTimeDescriptionTextView"
+                    android:id="@+id/itemTimeLabelTextView"
                     style="@style/TextAppearance.Luca.Body2"
                     android:textColor="@android:color/black"
                     android:layout_width="wrap_content"
@@ -82,15 +91,15 @@
                     android:textColor="@android:color/black"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
                     android:layout_marginEnd="30dp"
                     android:ellipsize="end"
-                    tools:text="26.03. - 14:13 Uhr"
+                    tools:text="@string/test_result_time"
                     app:layout_constraintHorizontal_bias="0"
                     app:layout_constrainedWidth="true"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toEndOf="@id/itemTimeDescriptionTextView"
+                    app:layout_constraintStart_toEndOf="@id/itemTimeLabelTextView"
                     app:layout_constraintTop_toBottomOf="@id/itemDescriptionTextView" />
-
 
             <androidx.constraintlayout.widget.ConstraintLayout
                     android:id="@+id/collapseLayout"
@@ -101,16 +110,15 @@
                     app:layout_constraintTop_toBottomOf="@id/itemTimeTextView">
 
                 <LinearLayout
-                        android:id="@+id/additional_info"
+                        android:id="@+id/additionalDetailsLayout"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent"
-                        android:layout_marginEnd="30dp"
                         android:orientation="vertical">
 
                     <TextView
-                            android:id="@+id/testLabHeader"
+                            android:id="@+id/firstPropertyLabelTextView"
                             style="@style/TextAppearance.Luca.Body2"
                             android:textColor="@android:color/black"
                             android:layout_width="wrap_content"
@@ -121,7 +129,7 @@
                             android:text="@string/test_issued_by" />
 
                     <TextView
-                            android:id="@+id/testLab"
+                            android:id="@+id/firstPropertyTextView"
                             style="@style/TextAppearance.Luca.Body2"
                             app:fontFamily="@font/montserrat_bold"
                             android:textColor="@android:color/black"
@@ -129,10 +137,10 @@
                             android:layout_height="wrap_content"
                             android:ellipsize="end"
                             android:maxLines="3"
-                            tools:text="Testzentrum Rostock" />
+                            tools:text="@string/dummy_heading" />
 
                     <TextView
-                            android:id="@+id/testTypeHeader"
+                            android:id="@+id/secondPropertyLabelTextView"
                             style="@style/TextAppearance.Luca.Body2"
                             android:textColor="@android:color/black"
                             android:layout_width="wrap_content"
@@ -143,7 +151,7 @@
                             android:text="@string/test_lab_doctor_name" />
 
                     <TextView
-                            android:id="@+id/testLabDoctorName"
+                            android:id="@+id/secondPropertyTextView"
                             style="@style/TextAppearance.Luca.Body2"
                             app:fontFamily="@font/montserrat_bold"
                             android:textColor="@android:color/black"
@@ -151,7 +159,7 @@
                             android:layout_height="wrap_content"
                             android:ellipsize="end"
                             android:maxLines="1"
-                            tools:text="Prof. Dr. Coronafight" />
+                            tools:text="@string/dummy_heading" />
 
                     <LinearLayout
                             android:id="@+id/proceduresContainer"
@@ -165,7 +173,6 @@
 
                 </LinearLayout>
 
-
                 <ImageView
                         android:id="@+id/qrCodeImageView"
                         android:layout_width="match_parent"
@@ -173,11 +180,11 @@
                         android:scaleType="fitCenter"
                         android:padding="@dimen/spacing_default"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@id/additional_info"
+                        app:layout_constraintTop_toBottomOf="@id/additionalDetailsLayout"
                         app:layout_constraintDimensionRatio="1:1" />
 
                 <com.google.android.material.button.MaterialButton
-                        android:id="@+id/deleteTestResultButton"
+                        android:id="@+id/deleteItemButton"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_margin="0dp"
@@ -185,7 +192,7 @@
                         android:textColor="@android:color/black"
                         android:fontFamily="@font/montserrat_bold"
                         android:backgroundTint="@android:color/transparent"
-                        android:text="@string/test_delete_button"
+                        android:text="@string/test_delete_action"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintTop_toBottomOf="@id/qrCodeImageView" />
 

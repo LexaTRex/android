@@ -12,17 +12,19 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import de.culture4life.luca.R;
+import de.culture4life.luca.testing.TestResult;
 
 import java.util.List;
 
 import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
+import timber.log.Timber;
 
 public class MyLucaListAdapter extends ArrayAdapter<MyLucaListItem> {
 
     interface MyLucaListClickListener {
 
-        void onDelete(int position);
+        void onDelete(@NonNull MyLucaListItem myLucaListItem);
 
     }
 
@@ -33,7 +35,8 @@ public class MyLucaListAdapter extends ArrayAdapter<MyLucaListItem> {
         this.clickListener = listener;
     }
 
-    public void setHistoryItems(@NonNull List<MyLucaListItem> items) {
+    public void setItems(@NonNull List<MyLucaListItem> items) {
+        Timber.d("setItems() called with: items = [%s]", items);
         if (shouldUpdateDataSet(items)) {
             clear();
             addAll(items);
@@ -66,46 +69,65 @@ public class MyLucaListAdapter extends ArrayAdapter<MyLucaListItem> {
         TextView titleTextView = convertView.findViewById(R.id.itemTitleTextView);
         TextView descriptionTextView = convertView.findViewById(R.id.itemDescriptionTextView);
         TextView timeTextView = convertView.findViewById(R.id.itemTimeTextView);
+        ImageView itemTitleImageView = convertView.findViewById(R.id.itemTitleImageView);
         ImageView barcodeImageView = convertView.findViewById(R.id.qrCodeImageView);
-        Button deleteTestResultButton = convertView.findViewById(R.id.deleteTestResultButton);
+        Button deleteTestResultButton = convertView.findViewById(R.id.deleteItemButton);
         ViewGroup collapseLayout = convertView.findViewById(R.id.collapseLayout);
-        TextView testLabDoctorTitle = convertView.findViewById(R.id.testTypeHeader);
-        TextView testLabDoctorName = convertView.findViewById(R.id.testLabDoctorName);
-        TextView testLab = convertView.findViewById(R.id.testLab);
+        TextView firstPropertyTextView = convertView.findViewById(R.id.firstPropertyTextView);
+        TextView secondPropertyTextView = convertView.findViewById(R.id.secondPropertyTextView);
+        TextView secondPropertyLabelTextView = convertView.findViewById(R.id.secondPropertyLabelTextView);
 
         cardView.setCardBackgroundColor(item.getColor());
         titleTextView.setText(item.getTitle());
-        descriptionTextView.setText(item.getType());
+        descriptionTextView.setText(item.getDescription());
         timeTextView.setText(item.getTime());
+        itemTitleImageView.setVisibility(View.GONE);
         barcodeImageView.setImageBitmap(item.getBarcode());
         collapseLayout.setVisibility((item.isExpanded()) ? View.VISIBLE : View.GONE);
         convertView.setOnClickListener(v -> {
             item.toggleExpanded();
             notifyDataSetChanged();
         });
-        testLabDoctorName.setText(item.getTestLabDoctorName());
-        testLabDoctorTitle.setVisibility(TextUtils.isEmpty(item.getTestLabDoctorName()) ? View.GONE : View.VISIBLE);
 
-        testLab.setText(item.getDescription());
-        deleteTestResultButton.setOnClickListener(v -> this.clickListener.onDelete(position));
+        deleteTestResultButton.setOnClickListener(v -> clickListener.onDelete(item));
 
-        setupProcedures(convertView, item);
+        if (item instanceof TestResultItem) {
+            TestResultItem testResultItem = (TestResultItem) item;
+            firstPropertyTextView.setText(testResultItem.getTestResult().getLabName());
+            if (testResultItem.testResult.getType() == TestResult.TYPE_APPOINTMENT) {
+                secondPropertyTextView.setText(testResultItem.getTestResult().getFirstName());
+            } else {
+                secondPropertyTextView.setText(testResultItem.getTestResult().getLabDoctorName());
+                secondPropertyLabelTextView.setVisibility(TextUtils.isEmpty(secondPropertyTextView.getText()) ? View.GONE : View.VISIBLE);
+                setupTestResultProcedures(convertView, testResultItem);
+            }
+        } else if (item instanceof GreenPassItem) {
+            GreenPassItem greenPassItem = (GreenPassItem) item;
+            firstPropertyTextView.setText(greenPassItem.getTestResult().getLabName());
+            secondPropertyLabelTextView.setVisibility(View.GONE);
+            secondPropertyTextView.setVisibility(View.GONE);
+            itemTitleImageView.setImageResource(item.getImageResource());
+            itemTitleImageView.setVisibility(View.VISIBLE);
+        }
 
         return convertView;
     }
 
-    private void setupProcedures(View convertView, MyLucaListItem item) {
-        LayoutInflater layoutInflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+    private void setupTestResultProcedures(View convertView, TestResultItem item) {
         LinearLayout proceduresContainer = convertView.findViewById(R.id.proceduresContainer);
         proceduresContainer.removeAllViews();
-        if (item.getProcedures() != null) {
-            for (MyLucaListItem.Procedure procedure : item.getProcedures()) {
-                View procedureView = layoutInflater.inflate(R.layout.my_luca_vaccination_procedure, null);
-                ((TextView) procedureView.findViewById(R.id.vaccination_name)).setText(procedure.getName());
-                ((TextView) procedureView.findViewById(R.id.vaccination_date)).setText(procedure.getDate());
-                proceduresContainer.addView(procedureView);
-            }
+        if (item.getTestProcedures() == null || item.getTestProcedures().isEmpty()) {
+            return;
         }
+
+        LayoutInflater layoutInflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        for (TestResultItem.TestProcedure procedure : item.getTestProcedures()) {
+            View procedureView = layoutInflater.inflate(R.layout.my_luca_vaccination_procedure, null);
+            ((TextView) procedureView.findViewById(R.id.vaccination_name)).setText(procedure.getName());
+            ((TextView) procedureView.findViewById(R.id.vaccination_date)).setText(procedure.getDate());
+            proceduresContainer.addView(procedureView);
+        }
+
     }
 
 }

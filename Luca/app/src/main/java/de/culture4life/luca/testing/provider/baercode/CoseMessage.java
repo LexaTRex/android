@@ -11,6 +11,7 @@ import java.security.GeneralSecurityException;
 import java.security.PublicKey;
 import java.security.Signature;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
@@ -21,11 +22,19 @@ import androidx.annotation.NonNull;
 class CoseMessage {
 
     public static final ObjectMapper MAPPER = new CBORMapper();
+    /**
+     * Algorithms as specified in https://datatracker.ietf.org/doc/html/rfc8152#section-8.1
+     */
+    private static final HashMap<Integer, String> algorithms = new HashMap() {{
+        put(-7, "SHA256withECDSA");
+        put(-36, "SHA512withECDSA");
+        put(-35, "SHA384withECDSA");
+    }};
     private byte[] plaintext;
     protected byte[] signature;
     private JsonNode coseSignMessage;
     private JsonNode coseEncrypt0;
-    private String algorithm;
+    private int algorithm;
 
     public CoseMessage(@NonNull byte[] data) throws IOException {
         parse(data);
@@ -35,16 +44,16 @@ class CoseMessage {
         coseSignMessage = MAPPER.readTree(data);
         plaintext = coseSignMessage.get(2).binaryValue();
         signature = coseSignMessage.get(3).get(0).get(2).binaryValue();
-        algorithm = coseSignMessage.get(3).get(0).get(0).asText();
+        algorithm = MAPPER.readTree(coseSignMessage.get(3).get(0).get(0).binaryValue()).get("1").asInt();
         coseEncrypt0 = MAPPER.readTree(coseSignMessage.get(2).binaryValue());
     }
 
     public boolean verify(@NonNull PublicKey key) throws IOException, GeneralSecurityException {
         byte[] encodedSigStructure = createSignatureStructure();
-        Signature signatureChecker = Signature.getInstance("SHA384withECDSA");
-        if (algorithm.equals("oQE4Iw==")) {  // TODO: improve this check
-            signatureChecker = Signature.getInstance("SHA512withECDSA");
+        if (!algorithms.containsKey(algorithm)) {
+            throw new IllegalArgumentException(String.format("Unknown algorithm %d", algorithm));
         }
+        Signature signatureChecker = Signature.getInstance(algorithms.get(algorithm));
         signatureChecker.initVerify(key);
         signatureChecker.update(encodedSigStructure);
         return signatureChecker.verify(CryptoManager.toDERSignature(signature));

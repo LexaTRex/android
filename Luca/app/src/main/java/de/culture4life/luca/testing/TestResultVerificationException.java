@@ -7,6 +7,7 @@ public class TestResultVerificationException extends TestResultImportException {
         INVALID_SIGNATURE,
         PROCEDURES_EMPTY,
         MIXED_TYPES_IN_PROCEDURES,
+        OUTCOME_UNKNOWN,
         UNKNOWN
     }
 
@@ -46,6 +47,8 @@ public class TestResultVerificationException extends TestResultImportException {
                 return "Procedures size in baercode is empty";
             case MIXED_TYPES_IN_PROCEDURES:
                 return "Vaccination and non-vaccination types are mixed in procedures";
+            case OUTCOME_UNKNOWN:
+                return "The outcome is unknown";
             case UNKNOWN:
             default:
                 return "Unknown verification error";

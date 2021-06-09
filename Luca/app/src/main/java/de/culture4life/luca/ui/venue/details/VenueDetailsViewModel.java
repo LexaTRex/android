@@ -17,9 +17,12 @@ import de.culture4life.luca.location.LocationManager;
 import de.culture4life.luca.preference.PreferencesManager;
 import de.culture4life.luca.ui.BaseViewModel;
 import de.culture4life.luca.ui.ViewError;
+import de.culture4life.luca.ui.venue.children.ChildListItem;
+import de.culture4life.luca.ui.venue.children.ChildListItemContainer;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -31,10 +34,13 @@ import androidx.core.app.ActivityCompat;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import io.reactivex.rxjava3.core.Completable;
+import io.reactivex.rxjava3.core.Flowable;
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.core.Single;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 import timber.log.Timber;
+
+import static de.culture4life.luca.checkin.CheckInManager.KEY_CHILDREN;
 
 public class VenueDetailsViewModel extends BaseViewModel {
 
@@ -59,6 +65,7 @@ public class VenueDetailsViewModel extends BaseViewModel {
     private final MutableLiveData<Boolean> isGeofencingSupported = new MutableLiveData<>();
     private final MutableLiveData<Boolean> shouldEnableAutomaticCheckOut = new MutableLiveData<>();
     private final MutableLiveData<Boolean> shouldEnableLocationServices = new MutableLiveData<>();
+    private final MutableLiveData<Integer> childCounter = new MutableLiveData<>();
 
     private boolean isLocationPermissionGranted = false;
     private boolean isBackgroundLocationPermissionGranted = false;
@@ -105,7 +112,8 @@ public class VenueDetailsViewModel extends BaseViewModel {
                                 updateAsSideEffect(title, checkInData.getLocationGroupName());
                             }
                         })
-                        .ignoreElement());
+                        .ignoreElement())
+                .andThen(updateChildCounter());
     }
 
     private Completable initializeAutomaticCheckout() {
@@ -117,6 +125,15 @@ public class VenueDetailsViewModel extends BaseViewModel {
                         return Completable.complete();
                     }
                 }).andThen(update(shouldEnableAutomaticCheckOut, automaticCheckoutEnabled)));
+    }
+
+    private Completable updateChildCounter() {
+        return preferenceManager.restoreOrDefault(KEY_CHILDREN, new ChildListItemContainer())
+                .flatMapPublisher(Flowable::fromIterable)
+                .filter(ChildListItem::isChecked)
+                .toList()
+                .map(List::size)
+                .flatMapCompletable(currentCount -> update(childCounter, currentCount));
     }
 
     private Completable startObservingAutomaticCheckOutErrors() {
@@ -193,6 +210,12 @@ public class VenueDetailsViewModel extends BaseViewModel {
             onCheckOutRequested();
         } else {
             onCheckInRequested();
+        }
+    }
+
+    void openChildrenView() {
+        if (isCurrentDestinationId(R.id.venueDetailFragment)) {
+            navigationController.navigate(R.id.action_venueDetailsFragment_to_venueChildFragment);
         }
     }
 
@@ -529,6 +552,10 @@ public class VenueDetailsViewModel extends BaseViewModel {
 
     public LiveData<Boolean> getShouldEnableLocationServices() {
         return shouldEnableLocationServices;
+    }
+
+    public MutableLiveData<Integer> getChildCounter() {
+        return childCounter;
     }
 
     public static String getReadableDuration(long duration) {

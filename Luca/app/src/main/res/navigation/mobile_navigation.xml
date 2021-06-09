@@ -54,6 +54,10 @@
                 app:launchSingleTop="true"
                 app:popUpTo="@id/mainNavigation"
                 app:popUpToInclusive="true" />
+
+        <action
+                android:id="@+id/action_venueDetailsFragment_to_venueChildFragment"
+                app:destination="@id/venueChildrenFragment" />
     </fragment>
 
     <fragment
@@ -84,5 +88,16 @@
             android:name="de.culture4life.luca.ui.accesseddata.AccessedDataFragment"
             android:label="@string/navigation_accessed_data"
             tools:layout="@layout/fragment_accessed_data" />
+
+    <fragment
+            android:id="@+id/venueChildrenFragment"
+            android:name="de.culture4life.luca.ui.venue.children.VenueChildrenFragment"
+            android:label="@string/venue_children_title"
+            tools:layout="@layout/fragment_adding_children">
+        <action
+                android:id="@+id/action_venueChildFragment_to_venueDetailsFragment"
+                app:destination="@id/venueDetailFragment" />
+
+    </fragment>
 
 </navigation>

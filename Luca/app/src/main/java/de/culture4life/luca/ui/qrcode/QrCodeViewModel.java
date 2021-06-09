@@ -64,7 +64,7 @@ import static de.culture4life.luca.registration.RegistrationManager.USER_ID_KEY;
 
 public class QrCodeViewModel extends BaseViewModel implements ImageAnalysis.Analyzer {
 
-    private static final UUID DEBUGGING_SCANNER_ID = UUID.fromString("90e93809-2304-4e81-8c18-debf0a031c55");
+    private static final UUID DEBUGGING_SCANNER_ID = UUID.fromString("1444c1a2-1922-4c11-813d-710d9f901227");
     private static final long CHECK_IN_POLLING_INTERVAL = TimeUnit.SECONDS.toMillis(3);
 
     private final RegistrationManager registrationManager;
