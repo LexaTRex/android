@@ -56,6 +56,7 @@ public class BaercodeTestResult extends ProvidedTestResult {
      */
     private void updateUserData(@NonNull byte[] decrypted) throws TestResultParsingException, IOException {
         JsonNode userData = CoseMessage.MAPPER.readTree(decrypted);
+        lucaTestResult.setHashableEncodedData(new String(decrypted));
         lucaTestResult.setId(UUID.nameUUIDFromBytes(decrypted).toString());
         lucaTestResult.setFirstName(userData.get(0).asText());
         lucaTestResult.setLastName(userData.get(1).asText());

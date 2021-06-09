@@ -1,3 +1,17 @@
+# Release 1.7.7
+
+- Bug fix
+
+This update includes a bugfix related to the import of documents.
+
+# Release 1.7.6
+
+- Add children to check-in
+- Import appointments
+
+With this update, it is possible to add the names of your children to check-ins.
+Further, you can now import and display appointments in the app.
+
 # Release 1.7.5
 
 - Bug fixes and improvements

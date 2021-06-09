@@ -5,10 +5,12 @@ import android.app.Application;
 import de.culture4life.luca.R;
 import de.culture4life.luca.dataaccess.AccessedTraceData;
 import de.culture4life.luca.dataaccess.DataAccessManager;
+import de.culture4life.luca.history.CheckOutItem;
 import de.culture4life.luca.history.DataSharedItem;
 import de.culture4life.luca.history.HistoryItem;
 import de.culture4life.luca.history.HistoryManager;
 import de.culture4life.luca.history.MeetingEndedItem;
+import de.culture4life.luca.preference.PreferencesManager;
 import de.culture4life.luca.ui.BaseViewModel;
 import de.culture4life.luca.ui.ViewError;
 import de.culture4life.luca.ui.ViewEvent;
@@ -37,6 +39,7 @@ public class HistoryViewModel extends BaseViewModel {
 
     private final HistoryManager historyManager;
     private final DataAccessManager dataAccessManager;
+    private final PreferencesManager preferencesManager;
 
     private final SimpleDateFormat readableDateFormat;
 
@@ -50,6 +53,7 @@ public class HistoryViewModel extends BaseViewModel {
         super(application);
         historyManager = this.application.getHistoryManager();
         dataAccessManager = this.application.getDataAccessManager();
+        preferencesManager = this.application.getPreferencesManager();
         readableDateFormat = new SimpleDateFormat(application.getString(R.string.venue_checked_in_time_format), Locale.GERMANY);
     }
 
@@ -164,10 +168,12 @@ public class HistoryViewModel extends BaseViewModel {
             HistoryListItem merged = new HistoryListItem(application);
             merged.setTitle(end.getTitle());
             merged.setDescription(end.getDescription());
-            merged.setAdditionalDetails(end.getAdditionalDetails());
+            merged.setAdditionalTitleDetails(end.getAdditionalTitleDetails());
+            merged.setAdditionalDescriptionDetails(end.getAdditionalDescriptionDetails());
             merged.setTime(application.getString(R.string.history_time_merged, start.getTime(), end.getTime()));
             merged.setTimestamp(end.getTimestamp());
-            merged.setIconResourceId(end.getIconResourceId());
+            merged.setTitleIconResourceId(end.getTitleIconResourceId());
+            merged.setDescriptionIconResourceId(end.getDescriptionIconResourceId());
             return merged;
         });
     }
@@ -185,8 +191,25 @@ public class HistoryViewModel extends BaseViewModel {
                     item.setTitle(historyItem.getDisplayName());
                     boolean accessed = dataAccessManager.hasBeenAccessed(historyItem.getRelatedId()).blockingGet();
                     if (accessed) {
-                        item.setAdditionalDetails(application.getString(R.string.history_data_accessed_details));
-                        item.setIconResourceId(R.drawable.ic_eye);
+                        item.setAdditionalTitleDetails(application.getString(R.string.history_data_accessed_details));
+                        item.setTitleIconResourceId(R.drawable.ic_eye);
+                    }
+
+                    if (historyItem instanceof CheckOutItem) {
+                        CheckOutItem checkOutItem = (CheckOutItem) historyItem;
+                        List<String> children = checkOutItem.getChildren();
+                        if (children != null && !children.isEmpty()) {
+                            String currentDescription = item.getDescription();
+                            StringBuilder builder = new StringBuilder();
+                            if (currentDescription != null) {
+                                builder = builder.append(currentDescription)
+                                        .append(System.lineSeparator());
+                            }
+                            builder = builder.append(application.getString(R.string.history_children_title, children.size()));
+                            item.setDescription(builder.toString());
+                            item.setAdditionalDescriptionDetails(application.getString(R.string.history_children_description, createUnorderedList(children)));
+                            item.setDescriptionIconResourceId(R.drawable.ic_information_outline);
+                        }
                     }
                     break;
                 }
@@ -206,16 +229,16 @@ public class HistoryViewModel extends BaseViewModel {
                         if (guestList.isEmpty()) {
                             guestList = getApplication().getString(R.string.history_meeting_empty_description);
                         }
-                        item.setAdditionalDetails(application.getString(R.string.history_meeting_ended_description, guestList));
-                        item.setIconResourceId(R.drawable.ic_information_outline);
+                        item.setAdditionalTitleDetails(application.getString(R.string.history_meeting_ended_description, guestList));
+                        item.setTitleIconResourceId(R.drawable.ic_information_outline);
                     }
                     break;
                 }
                 case HistoryItem.TYPE_CONTACT_DATA_REQUEST: {
                     DataSharedItem dataSharedItem = (DataSharedItem) historyItem;
                     item.setTitle(application.getString(R.string.history_data_shared_title));
-                    item.setAdditionalDetails(application.getString(R.string.history_data_shared_description, dataSharedItem.getDays()));
-                    item.setIconResourceId(R.drawable.ic_information_outline);
+                    item.setAdditionalTitleDetails(application.getString(R.string.history_data_shared_description, dataSharedItem.getDays()));
+                    item.setTitleIconResourceId(R.drawable.ic_information_outline);
                     break;
                 }
                 default: {

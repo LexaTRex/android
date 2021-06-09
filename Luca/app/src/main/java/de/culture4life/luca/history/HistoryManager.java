@@ -11,6 +11,8 @@ import de.culture4life.luca.meeting.MeetingManager;
 import de.culture4life.luca.preference.PreferencesManager;
 import de.culture4life.luca.registration.RegistrationData;
 import de.culture4life.luca.testing.TestResult;
+import de.culture4life.luca.ui.venue.children.ChildListItem;
+import de.culture4life.luca.ui.venue.children.ChildListItemContainer;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -18,10 +20,13 @@ import java.util.concurrent.TimeUnit;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import io.reactivex.rxjava3.core.Completable;
+import io.reactivex.rxjava3.core.Flowable;
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.core.Single;
 import io.reactivex.rxjava3.subjects.PublishSubject;
 import timber.log.Timber;
+
+import static de.culture4life.luca.checkin.CheckInManager.KEY_CHILDREN;
 
 public class HistoryManager extends Manager {
 
@@ -72,12 +77,13 @@ public class HistoryManager extends Manager {
     public Completable addCheckOutItem(@NonNull CheckInData checkInData) {
         return Single.just(checkInData)
                 .map(data -> {
-                    HistoryItem item = new HistoryItem(HistoryItem.TYPE_CHECK_OUT);
+                    CheckOutItem item = new CheckOutItem();
                     item.setRelatedId(checkInData.getTraceId());
                     item.setTimestamp(Math.min(checkInData.getTimestamp() + MAXIMUM_CHECK_IN_DURATION, System.currentTimeMillis()));
                     item.setDisplayName(checkInData.getLocationDisplayName());
                     return item;
                 })
+                .flatMap(this::setChildren)
                 .flatMapCompletable(this::addItem);
     }
 
@@ -201,6 +207,19 @@ public class HistoryManager extends Manager {
         return historyItems.toList()
                 .map(HistoryItemContainer::new)
                 .flatMapCompletable(historyItemContainer -> preferencesManager.persist(KEY_HISTORY_ITEMS, historyItemContainer));
+    }
+
+    private Single<CheckOutItem> setChildren(@NonNull CheckOutItem item) {
+        return preferencesManager.restoreOrDefault(KEY_CHILDREN, new ChildListItemContainer())
+                .flatMapPublisher(Flowable::fromIterable)
+                .filter(ChildListItem::isChecked)
+                .doOnNext(ChildListItem::toggleIsChecked)
+                .toList()
+                .map(ChildListItemContainer::new)
+                .doOnSuccess(childListItems -> preferencesManager.persist(KEY_CHILDREN, childListItems).subscribe())
+                .map(ChildListItemContainer::getNames)
+                .doOnSuccess(item::setChildren)
+                .map(names -> item);
     }
 
     public static String createUnorderedList(@NonNull List<String> items) {

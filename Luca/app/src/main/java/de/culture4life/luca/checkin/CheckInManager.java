@@ -31,6 +31,7 @@ import de.culture4life.luca.notification.LucaNotificationManager;
 import de.culture4life.luca.preference.PreferencesManager;
 import de.culture4life.luca.ui.MainActivity;
 import de.culture4life.luca.ui.qrcode.QrCodeData;
+import de.culture4life.luca.ui.qrcode.QrCodeViewModel;
 import de.culture4life.luca.util.SerializationUtil;
 import de.culture4life.luca.util.TimeUtil;
 
@@ -86,6 +87,7 @@ public class CheckInManager extends Manager {
     public static final String KEY_CHECK_IN_DATA = "check_in_data_2";
     public static final String KEY_ARCHIVED_CHECK_IN_DATA = "archived_check_in_data";
     public static final String KEY_ADDITIONAL_CHECK_IN_PROPERTIES_DATA = "additional_check_in_properties";
+    public static final String KEY_CHILDREN = "children";
 
     private static final long MINIMUM_CHECK_IN_DURATION = TimeUnit.MINUTES.toMillis(2);
     private static final long LOCATION_REQUEST_TIMEOUT = TimeUnit.SECONDS.toMillis(3);
@@ -866,6 +868,13 @@ public class CheckInManager extends Manager {
                 .map(ArchivedCheckInData::new)
                 .flatMapCompletable(archivedCheckInData -> preferencesManager.persist(KEY_ARCHIVED_CHECK_IN_DATA, archivedCheckInData))
                 .doOnComplete(() -> Timber.d("Deleted old archived check-in data"));
+    }
+
+    public static boolean isSelfCheckInUrl(@NonNull String url) {
+        return QrCodeViewModel.getScannerIdFromUrl(url)
+                .map(uuid -> url.contains("luca-app.de/webapp/"))
+                .onErrorReturnItem(false)
+                .blockingGet();
     }
 
     public void setSkipMinimumCheckInDurationAssertion(boolean skipMinimumCheckInDurationAssertion) {

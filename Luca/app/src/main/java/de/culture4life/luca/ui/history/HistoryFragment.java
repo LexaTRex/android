@@ -67,9 +67,18 @@ public class HistoryFragment extends BaseFragment<HistoryViewModel> {
         historyListView.addHeaderView(paddingView);
 
         historyListAdapter = new HistoryListAdapter(getContext(), historyListView.getId());
-        historyListAdapter.setItemClickHandler(this::showHistoryItemDetailsDialog);
-        historyListView.setAdapter(historyListAdapter);
+        historyListAdapter.setItemClickHandler(new HistoryListAdapter.ItemClickHandler() {
+            @Override
+            public void showAdditionalTitleDetails(@NonNull HistoryListItem item) {
+                showHistoryItemDetailsDialog(item, item.getAdditionalTitleDetails());
+            }
 
+            @Override
+            public void showAdditionalDescriptionDetails(@NonNull HistoryListItem item) {
+                showHistoryItemDetailsDialog(item, item.getAdditionalDescriptionDetails());
+            }
+        });
+        historyListView.setAdapter(historyListAdapter);
         observe(viewModel.getHistoryItems(), items -> historyListAdapter.setHistoryItems(items));
     }
 
@@ -113,10 +122,10 @@ public class HistoryFragment extends BaseFragment<HistoryViewModel> {
         });
     }
 
-    private void showHistoryItemDetailsDialog(@NonNull HistoryListItem item) {
+    private void showHistoryItemDetailsDialog(@NonNull HistoryListItem item, String additionalDetails) {
         new BaseDialogFragment(new MaterialAlertDialogBuilder(getContext())
                 .setTitle(item.getTitle())
-                .setMessage(item.getAdditionalDetails())
+                .setMessage(additionalDetails)
                 .setPositiveButton(R.string.action_ok, (dialogInterface, i) -> dialogInterface.cancel()))
                 .show();
     }

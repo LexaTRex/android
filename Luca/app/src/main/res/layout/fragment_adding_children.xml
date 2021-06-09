@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/checked_in_light_green_gradient">
+
+    <LinearLayout
+            android:id="@+id/headingTextViewsLayout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            android:layout_marginTop="@dimen/spacing_default"
+            android:layout_marginStart="@dimen/spacing_default"
+            android:layout_marginEnd="32dp"
+            app:layout_constraintHorizontal_bias="0"
+            app:layout_constrainedWidth="true">
+
+        <ImageView
+                android:id="@+id/back"
+                android:src="@drawable/ic_back"
+                android:layout_marginEnd="@dimen/spacing_default"
+                android:scaleType="fitCenter"
+                android:layout_gravity="center"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:contentDescription="@string/action_finish"/>
+
+        <TextView
+                android:id="@+id/title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                style="@style/TextAppearance.Luca.Headline2"
+                android:textColor="@android:color/black"
+                android:text="@string/venue_children_title" />
+
+    </LinearLayout>
+
+    <View
+            android:id="@+id/headingSeparatorView"
+            style="@style/HeaderSeparatorView"
+            app:layout_constraintTop_toBottomOf="@id/headingTextViewsLayout"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+    <TextView
+            android:id="@+id/childAddingDescriptionTextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/spacing_default"
+            style="@style/TextAppearance.Luca.Headline3"
+            android:textColor="@android:color/black"
+            android:text="@string/venue_children_empty_list_description"
+            app:layout_constraintTop_toBottomOf="@id/headingSeparatorView"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+    <ListView
+            android:id="@+id/childListView"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_margin="@dimen/spacing_default"
+            android:cacheColorHint="@android:color/transparent"
+            android:divider="@null"
+            android:fadingEdgeLength="@dimen/spacing_large"
+            android:listSelector="@android:color/transparent"
+            android:requiresFadingEdge="vertical"
+            android:visibility="gone"
+            app:layout_constraintTop_toBottomOf="@id/childAddingDescriptionTextView"
+            app:layout_constraintBottom_toTopOf="@id/primaryActionButton"
+            tools:listitem="@layout/child_list_item" />
+
+
+    <com.google.android.material.button.MaterialButton
+            android:id="@+id/primaryActionButton"
+            android:layout_margin="@dimen/spacing_large"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/venue_children_add"
+            android:textColor="@android:color/black"
+            android:contentDescription="@string/venue_children_add"
+            app:strokeColor="@android:color/black"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            style="@style/Button.Luca.SecondaryActionButton" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

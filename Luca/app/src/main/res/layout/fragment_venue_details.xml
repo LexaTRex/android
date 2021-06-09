@@ -9,14 +9,17 @@
 
     <LinearLayout
             android:id="@+id/headingTextViewsLayout"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintRight_toLeftOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/childAddingIconImageView"
             android:layout_marginTop="@dimen/spacing_default"
             android:layout_marginStart="@dimen/spacing_default"
-            android:layout_marginEnd="@dimen/spacing_default">
+            android:layout_marginEnd="32dp"
+            app:layout_constraintHorizontal_bias="0"
+            app:layout_constrainedWidth="true">
 
         <TextView
                 android:id="@+id/subtitle"
@@ -36,6 +39,34 @@
                 android:text="@string/venue_heading" />
 
     </LinearLayout>
+
+
+    <TextView
+            android:layout_marginEnd="@dimen/spacing_default"
+            android:id="@+id/childCounterTextView"
+            android:textSize="@dimen/font_size_default"
+            android:textColor="@android:color/black"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textStyle="bold"
+            android:text="1"
+            android:visibility="gone"
+            app:layout_constraintTop_toTopOf="@id/childAddingIconImageView"
+            app:layout_constraintBottom_toBottomOf="@id/childAddingIconImageView"
+            app:layout_constraintEnd_toStartOf="@id/childAddingIconImageView" />
+
+    <ImageView
+            android:layout_marginEnd="@dimen/spacing_large"
+            android:id="@+id/childAddingIconImageView"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:src="@drawable/ic_add_child"
+            android:scaleType="fitCenter"
+            android:contentDescription="@string/venue_children_add"
+            app:layout_constraintTop_toTopOf="@id/headingTextViewsLayout"
+            app:layout_constraintBottom_toBottomOf="@id/headingTextViewsLayout"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="1" />
 
     <View
             android:id="@+id/headingSeparatorView"
@@ -131,10 +162,10 @@
             android:labelFor="@id/automaticCheckoutToggle"
             app:layout_constraintTop_toTopOf="@id/automaticCheckoutToggle"
             app:layout_constraintBottom_toBottomOf="@id/automaticCheckoutToggle"
+            app:layout_constraintStart_toStartOf="@id/slideToActView"
             app:layout_constraintEnd_toStartOf="@id/automaticCheckoutToggle"
             app:layout_constrainedWidth="true"
-            app:layout_constraintHorizontal_bias="0"
-            app:layout_constraintStart_toStartOf="@id/slideToActView" />
+            app:layout_constraintHorizontal_bias="0" />
 
     <ImageView
             android:src="@drawable/ic_information_outline"

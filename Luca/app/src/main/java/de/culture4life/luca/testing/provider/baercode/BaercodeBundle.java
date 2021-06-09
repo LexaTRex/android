@@ -6,8 +6,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 import de.culture4life.luca.testing.TestResultParsingException;
 
-import org.jetbrains.annotations.NotNull;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
@@ -57,7 +55,7 @@ class BaercodeBundle {
     }
 
     @RequiresApi(api = Build.VERSION_CODES.O)
-    @NotNull
+    @NonNull
     private static BaercodeBundle loadBundleFrom(String filePath) throws IOException {
         return new BaercodeBundle(Files.readAllBytes(Paths.get(filePath)));
     }

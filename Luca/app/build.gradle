@@ -8,8 +8,8 @@ android {
         applicationId "de.culture4life.luca"
         minSdkVersion 21
         targetSdkVersion 30
-        versionCode 64
-        versionName "1.7.5"
+        versionCode 67
+        versionName "1.7.7"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     signingConfigs {
@@ -130,7 +130,7 @@ dependencies {
     implementation 'com.google.android.gms:play-services-location:18.0.0'
     implementation 'com.google.android.material:material:1.3.0'
     implementation 'com.google.code.gson:gson:2.8.6'
-    implementation 'com.google.crypto.tink:tink-android:1.4.0!!'  // for androidx.security:security-crypto:1.1.0-alpha03
+    implementation 'com.google.crypto.tink:tink-android:1.4.0!!' // for androidx.security:security-crypto:1.1.0-alpha03
     implementation 'com.google.mlkit:barcode-scanning:16.1.1'
     implementation 'com.googlecode.libphonenumber:libphonenumber:8.2.0'
 

@@ -27,6 +27,7 @@
     <string name="action_confirm">Confirm</string>
     <string name="action_update">Update</string>
     <string name="action_enable">Enable</string>
+    <string name="action_add">Add</string>
 
     <!-- Errors -->
     <string name="error_generic_title">Something went wrong</string>
@@ -194,6 +195,14 @@
     <string name="venue_slider_clicked">Please slide the arrow to the left</string>
     <string name="venue_checked_out">You have checked out</string>
 
+    <string name="venue_children_title">Children</string>
+    <string name="venue_children_empty_list_description">You can check your children (up to&#160;14 years) in with you. Please indicate who is accompanying you.</string>
+    <string name="venue_children_list_description">Choose the children, who will be checked-in together with you.</string>
+    <string name="venue_children_add_description">This information will not be shared with the health department, it is only a reminder for yourself. If you share your history with the health department, you can voluntarily provide this information to them as well.</string>
+    <string name="venue_children_add">Add child</string>
+    <string name="venue_children_name">Child\'s name</string>
+    <string name="venue_children_check_in">Check-In Children</string>
+
     <string name="venue_check_out_error">Checkout failed</string>
     <string name="venue_check_out_error_permission">A required permission has not been granted.</string>
     <string name="venue_check_out_error_duration">You just checked in a moment ago. Please don\'t check out before actually leaving the venue.</string>
@@ -249,6 +258,9 @@
     <string name="history_clear_title">Do you really want to clear your history?</string>
     <string name="history_clear_description">Past entries won\'t be displayed in your app anymore, but will stay in the system for up to 30&#160;days and will be shared with the health authorities if you share your data.</string>
     <string name="history_clear_action">Clear</string>
+    <string name="history_children_title">Children: <xliff:g example="1" id="count">%1$d</xliff:g></string>
+    <string name="history_children_description" translatable="false"><xliff:g example="- John Doe\n- Jane Doe" id="members">%1$s</xliff:g></string>
+
 
     <!-- Accessed Data -->
     <string name="accessed_data_heading">Data requests</string>
@@ -279,6 +291,8 @@
     <string name="test_import_error_positive_description">luca helps you to check in easily. Since positive test results are not relevant for checkin, you can only add negative results right now.</string>
     <string name="test_import_error_unsupported_description">The data couldn\'t be processed. This could have happened because we only support certain test providers at the moment. Check with your test provider to see if it is included.</string>
     <string name="test_import_error_unsupported_but_url_description">The data didn\'t contain a valid test result from a provider that we support.\n\nHowever, it seems to point to a website where you may get more details about your test result.</string>
+    <string name="test_import_error_check_in_scanner_title">You cannot check-in with this scanner</string>
+    <string name="test_import_error_check_in_scanner_description">You can\'t check-in with this scanner because it is only for adding documents. To check in, switch to the \"Check-in\" tab (bottom left in the navigation bar). There you will find the function \"Self Check-in\".</string>
     <string name="test_outcome_negative">Negative</string>
     <string name="test_outcome_positive">Positive</string>
     <string name="test_outcome_partially_vaccinated">Partially Vaccinated</string>
@@ -290,17 +304,19 @@
     <string name="test_type_vaccination">Vaccination</string>
     <string name="test_type_unknown">@string/test_outcome_unknown</string>
     <string name="test_issued_by">Issued by</string>
-    <string name="test_issued_at">Date of issue:</string>
+    <string name="test_issued_at">Date:</string>
     <string name="test_lab_doctor_name">Performed by</string>
-    <string name="test_delete_button">Delete test</string>
-    <string name="test_delete_alert_dialog_title">Delete test result</string>
-    <string name="test_delete_alert_dialog_message">Do you really want to delete the test result?</string>
     <string name="test_result_time" translatable="false"><xliff:g example="18.08.2020 – 19:23" id="time">%1$s</xliff:g></string>
     <string name="test_vaccination_procedure">Vaccination %1$s - %2$s</string>
+    <string name="test_delete_action">Delete test</string>
+    <string name="test_delete_confirmation_title">Delete test result</string>
+    <string name="test_delete_confirmation_message">Do you really want to delete the test result?</string>
     <string name="vaccine_comirnaty">BioNTech/Pfizer</string>
     <string name="vaccine_jannsen">Johnson &amp; Johnson</string>
     <string name="vaccine_moderna">Moderna</string>
     <string name="vaccine_vaxzevria">AstraZeneca</string>
+    <string name="em_green_pass">EM-GREENPASS</string>
+    <string name="appointment_title">Appointment</string>
 
     <!-- Phone Number Verification -->
     <string name="verification_request_new_tan_action">Request new TAN</string>

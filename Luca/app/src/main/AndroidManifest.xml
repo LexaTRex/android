@@ -73,7 +73,7 @@
         <activity
                 android:name="de.culture4life.luca.ui.MainActivity"
                 android:screenOrientation="portrait"
-                android:windowSoftInputMode="stateHidden|adjustResize">
+                android:windowSoftInputMode="stateAlwaysHidden|adjustResize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
             </intent-filter>

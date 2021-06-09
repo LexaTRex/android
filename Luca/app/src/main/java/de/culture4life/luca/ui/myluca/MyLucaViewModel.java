@@ -10,6 +10,8 @@ import android.app.Application;
 import android.webkit.URLUtil;
 
 import de.culture4life.luca.R;
+import de.culture4life.luca.checkin.CheckInManager;
+import de.culture4life.luca.meeting.MeetingManager;
 import de.culture4life.luca.notification.LucaNotificationManager;
 import de.culture4life.luca.registration.RegistrationManager;
 import de.culture4life.luca.testing.TestResult;
@@ -72,19 +74,23 @@ public class MyLucaViewModel extends BaseViewModel implements ImageAnalysis.Anal
                         notificationManager.initialize(application),
                         registrationManager.initialize(application)
                 ))
-                .andThen(invokeUpdate())
+                .andThen(updateUserName())
+                .andThen(invokeListUpdate())
                 .andThen(handleApplicationDeepLinkIfAvailable());
     }
 
-    public Completable invokeUpdate() {
+    public Completable invokeListUpdate() {
         return Completable.fromAction(() -> modelDisposable.add(updateList()
-                .andThen(registrationManager.getOrCreateRegistrationData())
-                .flatMapCompletable(registrationData -> update(userName, registrationData.getFullName()))
                 .subscribeOn(Schedulers.io())
                 .subscribe(
                         () -> Timber.d("Updated my luca list"),
                         throwable -> Timber.w("Unable to update my luca list: %s", throwable.toString())
                 )));
+    }
+
+    public Completable updateUserName() {
+        return registrationManager.getOrCreateRegistrationData()
+                .flatMapCompletable(registrationData -> update(userName, registrationData.getFullName()));
     }
 
     private Completable updateList() {
@@ -96,24 +102,30 @@ public class MyLucaViewModel extends BaseViewModel implements ImageAnalysis.Anal
     private Observable<MyLucaListItem> loadListItems() {
         return testingManager.getOrRestoreTestResults()
                 .flatMapMaybe(this::createListItem)
+                .doOnNext(myLucaListItem -> Timber.d("Created list item: %s", myLucaListItem))
                 .sorted((first, second) -> Long.compare(second.getTimestamp(), first.getTimestamp()));
     }
 
     private Maybe<MyLucaListItem> createListItem(@NonNull TestResult testResult) {
         return Maybe.fromCallable(() -> {
-            MyLucaListItem item = MyLucaListItem.from(application, testResult);
-            return item;
+            if (testResult.getType() == TestResult.TYPE_GREEN_PASS) {
+                return new GreenPassItem(application, testResult);
+            } else if (testResult.getType() == TestResult.TYPE_APPOINTMENT) {
+                return new AppointmentItem(application, testResult);
+            } else {
+                return new TestResultItem(application, testResult);
+            }
         });
     }
 
-    /**
-     * Delete the test result
-     *
-     * @param position position in the list that will be deleted
-     */
-    public Completable deleteTestResult(int position) {
-        String testResultId = myLucaItems.getValue().get(position).getTestResultId();
-        return testingManager.deleteTestResult(testResultId).andThen(updateList());
+    public Completable deleteListItem(@NonNull MyLucaListItem myLucaListItem) {
+        return Completable.defer(() -> {
+            if (myLucaListItem instanceof TestResultItem) {
+                return testingManager.deleteTestResult(((TestResultItem) myLucaListItem).testResult.getId());
+            } else {
+                return Completable.error(new IllegalArgumentException("Unable to delete item, unknown type"));
+            }
+        });
     }
 
     public void onAppointmentRequested() {
@@ -203,8 +215,12 @@ public class MyLucaViewModel extends BaseViewModel implements ImageAnalysis.Anal
                             .withTitle(R.string.test_import_error_title);
 
                     if (throwable instanceof TestResultParsingException) {
-                        // check if data is actually an URL that the user may want to open
-                        if (URLUtil.isValidUrl(encodedTestResult) && !TestingManager.isTestResult(encodedTestResult)) {
+                        if (MeetingManager.isPrivateMeeting(encodedTestResult) || CheckInManager.isSelfCheckInUrl(encodedTestResult)) {
+                            // the user tried to check-in from the wrong tab
+                            errorBuilder.withTitle(R.string.test_import_error_check_in_scanner_title);
+                            errorBuilder.withDescription(R.string.test_import_error_check_in_scanner_description);
+                        } else if (URLUtil.isValidUrl(encodedTestResult) && !TestingManager.isTestResult(encodedTestResult)) {
+                            // data is actually an URL that the user may want to open
                             errorBuilder.withDescription(R.string.test_import_error_unsupported_but_url_description);
                             errorBuilder.withResolveLabel(R.string.action_continue);
                             errorBuilder.withResolveAction(Completable.fromAction(() -> application.openUrl(encodedTestResult)));
@@ -235,7 +251,7 @@ public class MyLucaViewModel extends BaseViewModel implements ImageAnalysis.Anal
         return testingManager.redeemTestResult(testResult)
                 .andThen(testingManager.addTestResult(testResult))
                 .andThen(update(addedTestResult, new ViewEvent<>(testResult)))
-                .andThen(invokeUpdate())
+                .andThen(invokeListUpdate())
                 .doOnSubscribe(disposable -> {
                     removeError(importError);
                     updateAsSideEffect(isLoading, true);
@@ -273,6 +289,9 @@ public class MyLucaViewModel extends BaseViewModel implements ImageAnalysis.Anal
             if (TestingManager.isTestResult(url)) {
                 return getEncodedTestResultFromDeepLink(url)
                         .flatMapCompletable(this::parseAndValidateTestResult)
+                        .doFinally(() -> application.onDeepLinkHandled(url));
+            } else if (TestingManager.isAppointment(url)) {
+                return parseAndValidateTestResult(url)
                         .doFinally(() -> application.onDeepLinkHandled(url));
             }
             return Completable.complete();
