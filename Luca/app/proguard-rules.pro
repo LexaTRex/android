@@ -33,6 +33,10 @@
 -dontnote sun.misc.**
 -keep class sun.misc.Unsafe { *; }
 -keep class com.google.gson.stream.** { *; }
+-keep class com.google.crypto.tink.** { *; }
+
+-keep class com.networknt.schema.** { *; }
+-keep class dgca.verifier.app.decoder.** { *; }
 
 -keep class * implements com.google.gson.TypeAdapterFactory
 -keep class * implements com.google.gson.JsonSerializer
@@ -50,3 +54,7 @@
 -keep class org.bouncycastle.jce.provider.** { *; }
 
 ##---------------End: proguard configuration for Gson  ----------
+
+-keep class io.jsonwebtoken.** { *; }
+-keepnames class io.jsonwebtoken.* { *; }
+-keepnames interface io.jsonwebtoken.* { *; }

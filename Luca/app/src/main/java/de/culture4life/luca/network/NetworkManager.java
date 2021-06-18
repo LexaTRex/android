@@ -9,6 +9,7 @@ import android.net.NetworkInfo;
 import android.os.Build;
 
 import de.culture4life.luca.BuildConfig;
+import de.culture4life.luca.LucaApplication;
 import de.culture4life.luca.Manager;
 import de.culture4life.luca.network.endpoints.LucaEndpointsV3;
 
@@ -98,6 +99,9 @@ public class NetworkManager extends Manager {
             HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor();
             loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
             builder.addInterceptor(loggingInterceptor);
+        }
+
+        if (LucaApplication.IS_USING_STAGING_ENVIRONMENT) {
             builder.authenticator((route, response) -> {
                 String credential = Credentials.basic(BuildConfig.STAGING_API_USERNAME, BuildConfig.STAGING_API_PASSWORD);
                 return response.request().newBuilder()

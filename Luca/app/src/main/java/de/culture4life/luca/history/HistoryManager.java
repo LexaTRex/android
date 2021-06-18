@@ -20,7 +20,6 @@ import java.util.concurrent.TimeUnit;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import io.reactivex.rxjava3.core.Completable;
-import io.reactivex.rxjava3.core.Flowable;
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.core.Single;
 import io.reactivex.rxjava3.subjects.PublishSubject;
@@ -211,12 +210,17 @@ public class HistoryManager extends Manager {
 
     private Single<CheckOutItem> setChildren(@NonNull CheckOutItem item) {
         return preferencesManager.restoreOrDefault(KEY_CHILDREN, new ChildListItemContainer())
-                .flatMapPublisher(Flowable::fromIterable)
-                .filter(ChildListItem::isChecked)
-                .doOnNext(ChildListItem::toggleIsChecked)
-                .toList()
-                .map(ChildListItemContainer::new)
-                .doOnSuccess(childListItems -> preferencesManager.persist(KEY_CHILDREN, childListItems).subscribe())
+                .flatMap(childListItems -> {
+                    ChildListItemContainer checkedInChildren = new ChildListItemContainer();
+                    for (ChildListItem childListItem : childListItems) {
+                        if (childListItem.isChecked()) {
+                            checkedInChildren.add(childListItem);
+                            childListItem.toggleIsChecked();
+                        }
+                    }
+                    return preferencesManager.persist(KEY_CHILDREN, childListItems)
+                            .andThen(Single.just(checkedInChildren));
+                })
                 .map(ChildListItemContainer::getNames)
                 .doOnSuccess(item::setChildren)
                 .map(names -> item);

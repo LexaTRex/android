@@ -6,7 +6,7 @@ import com.google.i18n.phonenumbers.Phonenumber;
 
 import android.app.Application;
 
-import de.culture4life.luca.BuildConfig;
+import de.culture4life.luca.LucaApplication;
 import de.culture4life.luca.R;
 import de.culture4life.luca.network.NetworkManager;
 import de.culture4life.luca.preference.PreferencesManager;
@@ -47,7 +47,7 @@ public class RegistrationViewModel extends BaseViewModel {
     public static final String GERMAN_REGION_CODE = "DE";
     public static final long DEBOUNCE_DURATION = 100;
 
-    public static final boolean SKIP_PHONE_NUMBER_VERIFICATION = BuildConfig.DEBUG;
+    public static final boolean SKIP_PHONE_NUMBER_VERIFICATION = LucaApplication.IS_USING_STAGING_ENVIRONMENT;
     private static final int MAXIMUM_TAN_CHALLENGE_IDS = 10;
     private static final long INITIAL_TAN_REQUESTS_TIMEOUT = TimeUnit.SECONDS.toMillis(15);
     public static final String LAST_VERIFIED_PHONE_NUMBER_KEY = "last_verified_phone_number";
@@ -274,7 +274,7 @@ public class RegistrationViewModel extends BaseViewModel {
         ).andThen(Completable.fromAction(() -> {
             registrationData.setFirstName(firstName.getValue());
             registrationData.setLastName(lastName.getValue());
-            if (!isInEditMode) {
+            if (!isInEditMode || SKIP_PHONE_NUMBER_VERIFICATION) {
                 registrationData.setPhoneNumber(phoneNumber.getValue());
             }
             registrationData.setEmail(email.getValue());

@@ -206,8 +206,16 @@ public abstract class BaseFragment<ViewModelType extends BaseViewModel> extends 
                 application.openUrl(getString(R.string.url_terms_and_conditions));
                 break;
             }
+            case R.id.frequentlyAskedQuestionsMenuItem: {
+                application.openUrl(getString(R.string.url_faq));
+                break;
+            }
             case R.id.imprintMenuItem: {
                 application.openUrl(getString(R.string.url_imprint));
+                break;
+            }
+            case R.id.supportMenuItem: {
+                viewModel.requestSupportMail();
                 break;
             }
             case R.id.appDataMenuItem: {

@@ -81,7 +81,7 @@ public class VenueDetailsViewModel extends BaseViewModel {
         showAdditionalData.setValue(false);
         geofenceManager = this.application.getGeofenceManager();
         locationManager = this.application.getLocationManager();
-        readableDateFormat = new SimpleDateFormat(application.getString(R.string.venue_checked_in_time_format), Locale.GERMANY);
+        readableDateFormat = new SimpleDateFormat(application.getString(R.string.time_format), Locale.GERMANY);
         isCheckedIn.setValue(false);
     }
 

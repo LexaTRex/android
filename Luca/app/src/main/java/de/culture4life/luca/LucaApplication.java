@@ -5,6 +5,7 @@ import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import android.app.Activity;
+import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -41,6 +42,7 @@ import androidx.annotation.CallSuper;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatDelegate;
+import androidx.core.app.ShareCompat;
 import androidx.multidex.MultiDexApplication;
 import hu.akarnokd.rxjava3.debug.RxJavaAssemblyTracking;
 import io.reactivex.rxjava3.core.Completable;
@@ -57,6 +59,7 @@ import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 
 public class LucaApplication extends MultiDexApplication {
 
+    public static final boolean IS_USING_STAGING_ENVIRONMENT = !BuildConfig.BUILD_TYPE.equals("production");
     private static final long MAXIMUM_TIMESTAMP_OFFSET = TimeUnit.MINUTES.toMillis(1);
 
     private final PreferencesManager preferencesManager;
@@ -328,6 +331,23 @@ public class LucaApplication extends MultiDexApplication {
         intent.setData(uri);
         intent.setFlags(FLAG_ACTIVITY_NEW_TASK);
         startActivity(intent);
+    }
+
+    public void openSupportMailIntent() throws ActivityNotFoundException {
+        String subject = getString(R.string.app_name) + " " + getString(R.string.menu_support_subject);
+
+        String appVersionName = BuildConfig.VERSION_NAME;
+        int appVersionCode = BuildConfig.VERSION_CODE;
+        String deviceName = Build.MANUFACTURER + " " + Build.MODEL;
+        String androidVersionName = Build.VERSION.RELEASE;
+        String body = getString(R.string.menu_support_body, appVersionName, appVersionCode, deviceName, androidVersionName);
+
+        ShareCompat.IntentBuilder.from(getActivityContext())
+                .setType("text/plain")
+                .addEmailTo(getString(R.string.mail_support))
+                .setSubject(subject)
+                .setText(body)
+                .startChooser();
     }
 
     public Completable handleDeepLink(Uri uri) {

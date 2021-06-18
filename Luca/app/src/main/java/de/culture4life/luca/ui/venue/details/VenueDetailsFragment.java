@@ -58,6 +58,17 @@ public class VenueDetailsFragment extends BaseFragment<VenueDetailsViewModel> {
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+        if (!viewModel.getIsCheckedIn().getValue()) {
+            // navigation can be skipped if app is not open and user gets checked out by server or
+            // via the notification
+            safeNavigateFromNavController(R.id.action_venueDetailFragment_to_qrCodeFragment);
+            AccessibilityServiceUtil.speak(getContext(), getString(R.string.venue_checked_out));
+        }
+    }
+
+    @Override
     protected Completable initializeViews() {
         return super.initializeViews()
                 .andThen(Completable.fromAction(() -> {

@@ -54,7 +54,7 @@ public class HistoryViewModel extends BaseViewModel {
         historyManager = this.application.getHistoryManager();
         dataAccessManager = this.application.getDataAccessManager();
         preferencesManager = this.application.getPreferencesManager();
-        readableDateFormat = new SimpleDateFormat(application.getString(R.string.venue_checked_in_time_format), Locale.GERMANY);
+        readableDateFormat = new SimpleDateFormat(application.getString(R.string.time_format), Locale.GERMANY);
     }
 
     @Override

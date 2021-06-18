@@ -1,12 +1,15 @@
 package de.culture4life.luca.ui;
 
 import android.app.Application;
+import android.content.ActivityNotFoundException;
 import android.content.Intent;
 
 import com.tbruyelle.rxpermissions3.Permission;
 
 import de.culture4life.luca.LucaApplication;
 import de.culture4life.luca.R;
+import de.culture4life.luca.checkin.CheckInManager;
+import de.culture4life.luca.meeting.MeetingManager;
 import de.culture4life.luca.notification.LucaNotificationManager;
 import de.culture4life.luca.testing.TestingManager;
 import de.culture4life.luca.ui.splash.SplashActivity;
@@ -28,6 +31,7 @@ import androidx.navigation.NavController;
 import androidx.navigation.NavDestination;
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.core.Completable;
+import io.reactivex.rxjava3.core.Maybe;
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
@@ -202,15 +206,33 @@ public abstract class BaseViewModel extends AndroidViewModel {
     }
 
     private Completable navigateForDeepLinkIfAvailable() {
-        return application.getTestingManager().initialize(application)
-                .andThen(application.getDeepLink())
-                .doOnSuccess(url -> {
-                    if (!TestingManager.isTestResult(url)) {
-                        if (!isCurrentDestinationId(R.id.qrCodeFragment)) {
-                            navigationController.navigate(R.id.qrCodeFragment);
-                        }
+        return application.getDeepLink()
+                .flatMap(url -> {
+                    if (CheckInManager.isSelfCheckInUrl(url) || MeetingManager.isPrivateMeeting(url)) {
+                        return Maybe.just(R.id.qrCodeFragment);
+                    } else if (TestingManager.isTestResult(url) || TestingManager.isAppointment(url)) {
+                        return Maybe.just(R.id.myLucaFragment);
+                    } else {
+                        return Maybe.empty();
                     }
-                }).ignoreElement();
+                })
+                .flatMapCompletable(destinationId -> Completable.fromAction(() -> {
+                    if (!isCurrentDestinationId(destinationId)) {
+                        navigationController.navigate(destinationId);
+                    }
+                }));
+    }
+
+    public void requestSupportMail() {
+        try {
+            this.application.openSupportMailIntent();
+        } catch (ActivityNotFoundException exception) {
+            addError(createErrorBuilder(exception)
+                    .withTitle(R.string.menu_support_error_title)
+                    .withDescription(R.string.menu_support_error_description)
+                    .removeWhenShown()
+                    .build());
+        }
     }
 
     protected boolean isCurrentDestinationId(@IdRes int destinationId) {

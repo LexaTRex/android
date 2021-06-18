@@ -62,7 +62,7 @@ public class BaercodeTestResultTest {
     public void getOutcome_forJannsenVaccination_isFullyVaccinated() {
         ArrayList<Procedure> procedures = new ArrayList<>();
         procedures.add(new Procedure(Procedure.Type.VACCINATION_JANNSEN, 1621589912));
-        Assert.assertEquals(TestResult.OUTCOME_FULLY_VACCINATED, BaercodeTestResult.getOutcome(procedures, true));
+        Assert.assertEquals(TestResult.OUTCOME_FULLY_IMMUNE, BaercodeTestResult.getOutcome(procedures, true));
     }
 
     @Test
@@ -75,7 +75,7 @@ public class BaercodeTestResultTest {
     public void getOutcome_forComirnatyVaccination_isPartiallyVaccinated() {
         ArrayList<Procedure> procedures = new ArrayList<>();
         procedures.add(new Procedure(Procedure.Type.VACCINATION_COMIRNATY, 1621589912));
-        Assert.assertEquals(TestResult.OUTCOME_PARTIALLY_VACCINATED, BaercodeTestResult.getOutcome(procedures, true));
+        Assert.assertEquals(TestResult.OUTCOME_PARTIALLY_IMMUNE, BaercodeTestResult.getOutcome(procedures, true));
     }
 
     @Test
@@ -83,7 +83,7 @@ public class BaercodeTestResultTest {
         ArrayList<Procedure> procedures = new ArrayList<>();
         procedures.add(new Procedure(Procedure.Type.VACCINATION_COMIRNATY, 1621589912));
         procedures.add(new Procedure(Procedure.Type.VACCINATION_COMIRNATY, 1619861912));
-        Assert.assertEquals(TestResult.OUTCOME_FULLY_VACCINATED, BaercodeTestResult.getOutcome(procedures, true));
+        Assert.assertEquals(TestResult.OUTCOME_FULLY_IMMUNE, BaercodeTestResult.getOutcome(procedures, true));
     }
 
     @Test
@@ -92,7 +92,7 @@ public class BaercodeTestResultTest {
         procedures.add(new Procedure(Procedure.Type.VACCINATION_COMIRNATY, 1631589912));
         procedures.add(new Procedure(Procedure.Type.VACCINATION_COMIRNATY, 1621589912));
         procedures.add(new Procedure(Procedure.Type.VACCINATION_COMIRNATY, 1619861912));
-        Assert.assertEquals(TestResult.OUTCOME_FULLY_VACCINATED, BaercodeTestResult.getOutcome(procedures, true));
+        Assert.assertEquals(TestResult.OUTCOME_FULLY_IMMUNE, BaercodeTestResult.getOutcome(procedures, true));
     }
 
     @Test
@@ -100,7 +100,7 @@ public class BaercodeTestResultTest {
         ArrayList<Procedure> procedures = new ArrayList<>();
         procedures.add(new Procedure(Procedure.Type.VACCINATION_COMIRNATY, 1621589912));
         procedures.add(new Procedure(Procedure.Type.VACCINATION_VAXZEVRIA, 1619861912));
-        Assert.assertEquals(TestResult.OUTCOME_FULLY_VACCINATED, BaercodeTestResult.getOutcome(procedures, true));
+        Assert.assertEquals(TestResult.OUTCOME_FULLY_IMMUNE, BaercodeTestResult.getOutcome(procedures, true));
     }
 
 }

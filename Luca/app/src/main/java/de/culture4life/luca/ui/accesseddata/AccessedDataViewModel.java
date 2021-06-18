@@ -36,7 +36,7 @@ public class AccessedDataViewModel extends BaseViewModel {
         super(application);
         historyManager = this.application.getHistoryManager();
         dataAccessManager = this.application.getDataAccessManager();
-        readableDateFormat = new SimpleDateFormat(application.getString(R.string.venue_checked_in_time_format), Locale.GERMANY);
+        readableDateFormat = new SimpleDateFormat(application.getString(R.string.time_format), Locale.GERMANY);
     }
 
     @Override

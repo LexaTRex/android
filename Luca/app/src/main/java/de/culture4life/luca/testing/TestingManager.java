@@ -20,8 +20,10 @@ import de.culture4life.luca.testing.provider.ProvidedTestResult;
 import de.culture4life.luca.testing.provider.TestResultProvider;
 import de.culture4life.luca.testing.provider.appointment.AppointmentProvider;
 import de.culture4life.luca.testing.provider.baercode.BaercodeTestResultProvider;
+import de.culture4life.luca.testing.provider.eudcc.EudccResultProvider;
 import de.culture4life.luca.testing.provider.opentestcheck.OpenTestCheckTestResultProvider;
 import de.culture4life.luca.testing.provider.ubirch.UbirchTestResultProvider;
+import de.culture4life.luca.util.TimeUtil;
 
 import java.net.HttpURLConnection;
 import java.nio.charset.StandardCharsets;
@@ -53,6 +55,7 @@ public class TestingManager extends Manager {
     private final UbirchTestResultProvider ubirchTestResultProvider;
     private final OpenTestCheckTestResultProvider openTestCheckTestResultProvider;
     private BaercodeTestResultProvider baercodeTestResultProvider;
+    private final EudccResultProvider eudccResultProvider;
 
     private TestResults testResults;
 
@@ -65,6 +68,7 @@ public class TestingManager extends Manager {
         this.appointmentProvider = new AppointmentProvider();
         this.ubirchTestResultProvider = new UbirchTestResultProvider();
         this.openTestCheckTestResultProvider = new OpenTestCheckTestResultProvider();
+        this.eudccResultProvider = new EudccResultProvider();
     }
 
     @Override
@@ -113,10 +117,13 @@ public class TestingManager extends Manager {
                     if (testResult.getExpirationTimestamp() < System.currentTimeMillis() && !BuildConfig.DEBUG) {
                         return Completable.error(new TestResultExpiredException());
                     }
-                    if (testResult.getOutcome() == TestResult.OUTCOME_POSITIVE && testResult.getType() != TestResult.TYPE_GREEN_PASS) {
+                    if (testResult.getOutcome() == TestResult.OUTCOME_POSITIVE
+                            && testResult.getType() != TestResult.TYPE_GREEN_PASS) {
                         return Completable.error(new TestResultPositiveException());
                     }
-                    if (testResult.getOutcome() == TestResult.OUTCOME_UNKNOWN) {
+                    if (testResult.getOutcome() == TestResult.OUTCOME_UNKNOWN
+                            && testResult.getType() != TestResult.TYPE_GREEN_PASS
+                            && testResult.getType() != TestResult.TYPE_APPOINTMENT) {
                         return Completable.error(new TestResultVerificationException(Reason.OUTCOME_UNKNOWN));
                     }
                     return getOrRestoreTestResults()
@@ -135,7 +142,12 @@ public class TestingManager extends Manager {
     }
 
     private Observable<? extends TestResultProvider<? extends ProvidedTestResult>> getTestResultProviders() {
-        return Observable.just(appointmentProvider, openTestCheckTestResultProvider, baercodeTestResultProvider); // TODO: 07.05.21 add ubirchTestResultProvider
+        return Observable.just(
+                appointmentProvider,
+                openTestCheckTestResultProvider,
+                baercodeTestResultProvider,
+                eudccResultProvider
+        ); // TODO: 07.05.21 add ubirchTestResultProvider
     }
 
     public Completable redeemTestResult(@NonNull TestResult testResult) {
@@ -147,6 +159,7 @@ public class TestingManager extends Manager {
                     JsonObject jsonObject = new JsonObject();
                     jsonObject.addProperty("hash", hash);
                     jsonObject.addProperty("tag", tag);
+                    jsonObject.addProperty("expireAt", TimeUtil.convertToUnixTimestamp(testResult.getExpirationTimestamp()).blockingGet());
                     return jsonObject;
                 }).flatMapCompletable(lucaEndpointsV3::redeemTest))
                 .onErrorResumeNext(throwable -> {
@@ -213,10 +226,10 @@ public class TestingManager extends Manager {
                 .doOnSuccess(encodedTestResults -> Timber.i("Re-importing %d test results", encodedTestResults.size()))
                 .flatMapCompletable(encodedTestResults -> clearTestResults()
                         .andThen(Observable.fromIterable(encodedTestResults)
-                                .flatMapMaybe(encodedTestResult -> parseAndValidateEncodedTestResult(encodedTestResult)
+                                .flatMapCompletable(encodedTestResult -> parseAndValidateEncodedTestResult(encodedTestResult)
+                                        .flatMapCompletable(this::addTestResult)
                                         .doOnError(throwable -> Timber.w("Unable to re-import test result: %s", throwable.toString()))
-                                        .onErrorComplete())
-                                .flatMapCompletable(this::addTestResult)));
+                                        .onErrorComplete())));
     }
 
     public Completable clearTestResults() {

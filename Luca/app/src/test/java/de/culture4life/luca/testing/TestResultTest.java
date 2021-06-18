@@ -42,7 +42,7 @@ public class TestResultTest {
     @Test
     public void validFrom_vaccination_isLaterThanTestValidFrom() {
         testResult.setType(TestResult.TYPE_VACCINATION);
-        testResult.setOutcome(TestResult.OUTCOME_FULLY_VACCINATED);
+        testResult.setOutcome(TestResult.OUTCOME_FULLY_IMMUNE);
         long vaccinationValidFrom = testResult.getValidityStartTimestamp();
 
         testResult.setType(TestResult.TYPE_PCR);

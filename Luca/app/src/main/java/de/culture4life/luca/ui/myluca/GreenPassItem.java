@@ -17,12 +17,17 @@ public class GreenPassItem extends MyLucaListItem {
         this.testResult = testResult;
 
         this.title = context.getString(R.string.em_green_pass);
-        this.description = testResult.getLabDoctorName();
-        this.time = context.getString(R.string.test_result_time, getReadableTime(context, testResult.getResultTimestamp()));
         this.timestamp = testResult.getImportTimestamp();
         this.barcode = generateQrCode(testResult.getEncodedData()).blockingGet();
         this.color = ContextCompat.getColor(context, R.color.green_pass);
         this.imageResource = R.drawable.ic_dfb;
+        this.deleteButtonText = context.getString(R.string.item_delete_action);
+
+        String time = context.getString(R.string.test_result_time, getReadableDate(context, testResult.getResultTimestamp()));
+        addTopContent(testResult.getLabDoctorName(), "");
+        addTopContent(context.getString(R.string.em_green_pass_valid), time);
+
+        addCollapsedContent(context.getString(R.string.test_issued_by), testResult.getLabName());
     }
 
     public TestResult getTestResult() {

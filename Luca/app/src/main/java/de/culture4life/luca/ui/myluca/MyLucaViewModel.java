@@ -112,6 +112,10 @@ public class MyLucaViewModel extends BaseViewModel implements ImageAnalysis.Anal
                 return new GreenPassItem(application, testResult);
             } else if (testResult.getType() == TestResult.TYPE_APPOINTMENT) {
                 return new AppointmentItem(application, testResult);
+            } else if (testResult.getType() == TestResult.TYPE_VACCINATION) {
+                return new VaccinationItem(application, testResult);
+            } else if (testResult.getType() == TestResult.TYPE_RECOVERY) {
+                return new RecoveryItem(application, testResult);
             } else {
                 return new TestResultItem(application, testResult);
             }
@@ -121,7 +125,11 @@ public class MyLucaViewModel extends BaseViewModel implements ImageAnalysis.Anal
     public Completable deleteListItem(@NonNull MyLucaListItem myLucaListItem) {
         return Completable.defer(() -> {
             if (myLucaListItem instanceof TestResultItem) {
-                return testingManager.deleteTestResult(((TestResultItem) myLucaListItem).testResult.getId());
+                return testingManager.deleteTestResult(((TestResultItem) myLucaListItem).getTestResult().getId())
+                        .andThen(invokeListUpdate());
+            } else if (myLucaListItem instanceof GreenPassItem) {
+                return testingManager.deleteTestResult(((GreenPassItem) myLucaListItem).getTestResult().getId())
+                        .andThen(invokeListUpdate());
             } else {
                 return Completable.error(new IllegalArgumentException("Unable to delete item, unknown type"));
             }
@@ -260,8 +268,14 @@ public class MyLucaViewModel extends BaseViewModel implements ImageAnalysis.Anal
                     ViewError.Builder errorBuilder = createErrorBuilder(throwable)
                             .withTitle(R.string.test_import_error_title);
 
-                    if (throwable instanceof TestResultPositiveException) {
-                        errorBuilder.withDescription(R.string.test_import_error_positive_description);
+                    boolean outcomeUnknown = false;
+                    if (throwable instanceof TestResultVerificationException) {
+                        outcomeUnknown = ((TestResultVerificationException) throwable).getReason() == TestResultVerificationException.Reason.OUTCOME_UNKNOWN;
+                    }
+                    if (throwable instanceof TestResultPositiveException || outcomeUnknown) {
+                        errorBuilder
+                                .withTitle(R.string.test_import_error_not_negative_title)
+                                .withDescription(R.string.test_import_error_not_negative_description);
                     } else if (throwable instanceof TestResultAlreadyImportedException) {
                         errorBuilder.withDescription(R.string.test_import_error_already_imported_description);
                     } else if (throwable instanceof TestResultExpiredException) {

@@ -4,12 +4,14 @@ import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
 import de.culture4life.luca.network.pojo.ContactData;
+import de.culture4life.luca.util.StringSanitizeUtil;
 
 import java.util.UUID;
 
 /**
  * Model of user-provided contact data, entered during registration. Will be transferred into {@link
- * ContactData} and encrypted before leaving the device.
+ * ContactData} and encrypted before leaving the device. Special characters set are
+ * automatically removed to keep the dataset cleaner.
  *
  * @see <a href="https://www.luca-app.de/securityoverview/processes/guest_registration.html">Security
  *         Overview: Guest Registration</a>
@@ -84,7 +86,7 @@ public class RegistrationData {
     }
 
     public void setFirstName(String firstName) {
-        this.firstName = firstName;
+        this.firstName = StringSanitizeUtil.sanitize(firstName);
     }
 
     public String getLastName() {
@@ -92,7 +94,7 @@ public class RegistrationData {
     }
 
     public void setLastName(String lastName) {
-        this.lastName = lastName;
+        this.lastName = StringSanitizeUtil.sanitize(lastName);
     }
 
     public String getPhoneNumber() {
@@ -100,7 +102,7 @@ public class RegistrationData {
     }
 
     public void setPhoneNumber(String phoneNumber) {
-        this.phoneNumber = phoneNumber;
+        this.phoneNumber = StringSanitizeUtil.sanitize(phoneNumber);
     }
 
     public String getEmail() {
@@ -108,7 +110,7 @@ public class RegistrationData {
     }
 
     public void setEmail(String email) {
-        this.email = email;
+        this.email = StringSanitizeUtil.sanitize(email);
     }
 
     public String getStreet() {
@@ -116,7 +118,7 @@ public class RegistrationData {
     }
 
     public void setStreet(String street) {
-        this.street = street;
+        this.street = StringSanitizeUtil.sanitize(street);
     }
 
     public String getHouseNumber() {
@@ -124,7 +126,7 @@ public class RegistrationData {
     }
 
     public void setHouseNumber(String houseNumber) {
-        this.houseNumber = houseNumber;
+        this.houseNumber = StringSanitizeUtil.sanitize(houseNumber);
     }
 
     public String getCity() {
@@ -132,7 +134,7 @@ public class RegistrationData {
     }
 
     public void setCity(String city) {
-        this.city = city;
+        this.city = StringSanitizeUtil.sanitize(city);
     }
 
     public String getPostalCode() {
@@ -140,7 +142,7 @@ public class RegistrationData {
     }
 
     public void setPostalCode(String postalCode) {
-        this.postalCode = postalCode;
+        this.postalCode = StringSanitizeUtil.sanitize(postalCode);
     }
 
     /**

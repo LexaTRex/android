@@ -372,6 +372,7 @@ public class QrCodeViewModel extends BaseViewModel implements ImageAnalysis.Anal
         modelDisposable.add(application.getDeepLink()
                 .flatMapCompletable(url -> handleDeepLink(url)
                         .doOnComplete(() -> application.onDeepLinkHandled(url)))
+                .onErrorComplete()
                 .subscribe(
                         () -> Timber.d("Handled application deep link"),
                         throwable -> Timber.w("Unable handle application deep link: %s", throwable.toString())
@@ -382,8 +383,10 @@ public class QrCodeViewModel extends BaseViewModel implements ImageAnalysis.Anal
         return Completable.defer(() -> {
             if (MeetingManager.isPrivateMeeting(url)) {
                 return handleMeetingCheckInDeepLink(url);
-            } else {
+            } else if (CheckInManager.isSelfCheckInUrl(url)) {
                 return handleSelfCheckInDeepLink(url);
+            } else {
+                return Completable.complete();
             }
         })
                 .doOnSubscribe(disposable -> {
@@ -399,9 +402,7 @@ public class QrCodeViewModel extends BaseViewModel implements ImageAnalysis.Anal
                             .build();
                     addError(deepLinkError);
                 })
-                .doFinally(() -> {
-                    updateAsSideEffect(isLoading, false);
-                });
+                .doFinally(() -> updateAsSideEffect(isLoading, false));
     }
 
     private Completable handleMeetingCheckInDeepLink(@NonNull String url) {

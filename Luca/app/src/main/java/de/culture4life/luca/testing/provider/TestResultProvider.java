@@ -28,9 +28,9 @@ public abstract class TestResultProvider<TestResultType extends ProvidedTestResu
 
     public Completable validate(@NonNull TestResultType testResult, @NonNull RegistrationData registrationData) {
         return Completable.fromAction(() -> {
-            if (!registrationData.getFirstName().equals(testResult.getLucaTestResult().getFirstName())) {
+            if (!registrationData.getFirstName().equalsIgnoreCase(testResult.getLucaTestResult().getFirstName())) {
                 throw new TestResultVerificationException(NAME_MISMATCH);
-            } else if (!registrationData.getLastName().equals(testResult.getLucaTestResult().getLastName())) {
+            } else if (!registrationData.getLastName().equalsIgnoreCase(testResult.getLucaTestResult().getLastName())) {
                 throw new TestResultVerificationException(NAME_MISMATCH);
             }
         });

@@ -23,8 +23,18 @@
             app:showAsAction="never" />
 
     <item
+            android:id="@+id/frequentlyAskedQuestionsMenuItem"
+            android:title="@string/menu_faq"
+            app:showAsAction="never" />
+
+    <item
             android:id="@+id/imprintMenuItem"
             android:title="@string/menu_imprint"
+            app:showAsAction="never" />
+
+    <item
+            android:id="@+id/supportMenuItem"
+            android:title="@string/menu_support"
             app:showAsAction="never" />
 
     <item

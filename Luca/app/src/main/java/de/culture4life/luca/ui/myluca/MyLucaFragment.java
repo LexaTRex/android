@@ -244,15 +244,14 @@ public class MyLucaFragment extends BaseFragment<MyLucaViewModel> implements MyL
 
     private void showDeleteTestResultDialog(@NonNull MyLucaListItem myLucaListItem) {
         MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(getContext())
-                .setTitle(R.string.test_delete_confirmation_title)
+                .setTitle(myLucaListItem.getDeleteButtonText())
                 .setMessage(R.string.test_delete_confirmation_message)
                 .setNegativeButton(R.string.action_cancel, (dialog, which) -> {
                 })
-                .setPositiveButton(R.string.action_confirm, (dialog, which) -> {
-                    viewDisposable.add(viewModel.deleteListItem(myLucaListItem)
-                            .subscribeOn(Schedulers.io())
-                            .subscribe());
-                });
+                .setPositiveButton(R.string.action_confirm, (dialog, which) ->
+                        viewDisposable.add(viewModel.deleteListItem(myLucaListItem)
+                                .subscribeOn(Schedulers.io())
+                                .subscribe()));
         new BaseDialogFragment(builder).show();
     }
 

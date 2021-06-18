@@ -15,35 +15,67 @@ public class TestResult {
 
     public static class Procedure {
 
+        public enum Type {
+            RAPID_ANTIGEN_TEST,
+            PCR_TEST,
+            VACCINATION_COMIRNATY,
+            VACCINATION_JANNSEN,
+            VACCINATION_MODERNA,
+            VACCINATION_VAXZEVRIA,
+            VACCINATION_SPUTNIK_V,
+            RECOVERY,
+            UNKNOWN;
+        }
+
         @Expose
         @SerializedName("name")
-        private de.culture4life.luca.testing.provider.baercode.Procedure.Type name;
+        private Type type;
 
         @Expose
         @SerializedName("timestamp")
         private long timestamp;
 
-        public Procedure(de.culture4life.luca.testing.provider.baercode.Procedure.Type name, long timestamp) {
-            this.name = name;
+        @Expose
+        @SerializedName("totalSeriesOfDoses")
+        private int totalSeriesOfDoses;
+
+        @Expose
+        @SerializedName("doseNumber")
+        private int doseNumber;
+
+        public Procedure(Type type, long timestamp, int doseNumber, int totalSeriesOfDoses) {
+            this.type = type;
             this.timestamp = timestamp;
+            this.doseNumber = doseNumber;
+            this.totalSeriesOfDoses = totalSeriesOfDoses;
         }
 
-        public de.culture4life.luca.testing.provider.baercode.Procedure.Type getName() {
-            return name;
+        public Type getType() {
+            return type;
         }
 
         public long getTimestamp() {
             return timestamp;
         }
 
+        public int getTotalSeriesOfDoses() {
+            return totalSeriesOfDoses;
+        }
+
+        public int getDoseNumber() {
+            return doseNumber;
+        }
+
     }
 
     public static final long MAXIMUM_FAST_TEST_VALIDITY = TimeUnit.DAYS.toMillis(2);
     public static final long MAXIMUM_PCR_TEST_VALIDITY = TimeUnit.DAYS.toMillis(3);
-    public static final long TIME_UNTIL_VACCINATION_IS_VALID = TimeUnit.DAYS.toMillis(14);
+    public static final long TIME_UNTIL_VACCINATION_IS_VALID = TimeUnit.DAYS.toMillis(15);
     public static final long MAXIMUM_VACCINATION_VALIDITY = TimeUnit.DAYS.toMillis(365);
+    public static final long TIME_UNTIL_RECOVERY_IS_VALID = TimeUnit.DAYS.toMillis(15);
+    public static final long MAXIMUM_RECOVERY_VALIDITY = TimeUnit.DAYS.toMillis(30 * 6);
 
-    @IntDef({TYPE_UNKNOWN, TYPE_FAST, TYPE_PCR, TYPE_VACCINATION, TYPE_APPOINTMENT, TYPE_GREEN_PASS})
+    @IntDef({TYPE_UNKNOWN, TYPE_FAST, TYPE_PCR, TYPE_VACCINATION, TYPE_APPOINTMENT, TYPE_GREEN_PASS, TYPE_RECOVERY})
     @Retention(SOURCE)
     public @interface Type {
 
@@ -55,8 +87,9 @@ public class TestResult {
     public static final int TYPE_VACCINATION = 3;
     public static final int TYPE_APPOINTMENT = 4;
     public static final int TYPE_GREEN_PASS = 5;
+    public static final int TYPE_RECOVERY = 6;
 
-    @IntDef({OUTCOME_UNKNOWN, OUTCOME_POSITIVE, OUTCOME_NEGATIVE, OUTCOME_PARTIALLY_VACCINATED, OUTCOME_FULLY_VACCINATED})
+    @IntDef({OUTCOME_UNKNOWN, OUTCOME_POSITIVE, OUTCOME_NEGATIVE, OUTCOME_PARTIALLY_IMMUNE, OUTCOME_FULLY_IMMUNE})
     @Retention(SOURCE)
     public @interface Outcome {
 
@@ -65,8 +98,8 @@ public class TestResult {
     public static final int OUTCOME_UNKNOWN = 0;
     public static final int OUTCOME_POSITIVE = 1;
     public static final int OUTCOME_NEGATIVE = 2;
-    public static final int OUTCOME_PARTIALLY_VACCINATED = 3;
-    public static final int OUTCOME_FULLY_VACCINATED = 4;
+    public static final int OUTCOME_PARTIALLY_IMMUNE = 3;
+    public static final int OUTCOME_FULLY_IMMUNE = 4;
 
     @Expose
     @SerializedName("id")
@@ -95,6 +128,14 @@ public class TestResult {
     private long importTimestamp;
 
     @Expose
+    @SerializedName("validityStartTimestamp")
+    private long validityStartTimestamp;
+
+    @Expose
+    @SerializedName("expirationTimestamp")
+    private long expirationTimestamp;
+
+    @Expose
     @SerializedName("labName")
     private String labName;
 
@@ -109,6 +150,10 @@ public class TestResult {
     @Expose
     @SerializedName("lastName")
     private String lastName;
+
+    @Expose
+    @SerializedName("dateOfBirth")
+    private long dateOfBirth;
 
     @Expose
     @SerializedName("encodedData")
@@ -204,6 +249,14 @@ public class TestResult {
         this.lastName = lastName;
     }
 
+    public long getDateOfBirth() {
+        return dateOfBirth;
+    }
+
+    public void setDateOfBirth(long dateOfBirth) {
+        this.dateOfBirth = dateOfBirth;
+    }
+
     public String getEncodedData() {
         return encodedData;
     }
@@ -220,6 +273,14 @@ public class TestResult {
         this.hashableEncodedData = hashableEncodedData;
     }
 
+    public void setValidityStartTimestamp(long validityStartTimestamp) {
+        this.validityStartTimestamp = validityStartTimestamp;
+    }
+
+    public void setExpirationTimestamp(long expirationTimestamp) {
+        this.expirationTimestamp = expirationTimestamp;
+    }
+
     public ArrayList<Procedure> getProcedures() {
         return procedures;
     }
@@ -233,8 +294,12 @@ public class TestResult {
      *         after two weeks for vaccinations.
      */
     public long getValidityStartTimestamp() {
-        if (type == TYPE_VACCINATION && outcome == OUTCOME_FULLY_VACCINATED) {
+        if (validityStartTimestamp != 0) {
+            return validityStartTimestamp;
+        } else if (type == TYPE_VACCINATION && outcome == OUTCOME_FULLY_IMMUNE) {
             return getTestingTimestamp() + TIME_UNTIL_VACCINATION_IS_VALID;
+        } else if (type == TYPE_RECOVERY && outcome == OUTCOME_FULLY_IMMUNE) {
+            return getTestingTimestamp() + TIME_UNTIL_RECOVERY_IS_VALID;
         } else {
             return getTestingTimestamp();
         }
@@ -242,9 +307,12 @@ public class TestResult {
 
     /**
      * The timestamp after which the test result should be treated as invalid. Depends on {@link
-     * #type} and {@link #testingTimestamp}.
+     * #type} and {@link #testingTimestamp} or the values set directly from a certificate.
      */
     public long getExpirationTimestamp() {
+        if (expirationTimestamp != 0) {
+            return expirationTimestamp;
+        }
         return getTestingTimestamp() + getExpirationDuration(type);
     }
 
@@ -260,6 +328,8 @@ public class TestResult {
                 return MAXIMUM_PCR_TEST_VALIDITY;
             case TYPE_VACCINATION:
                 return MAXIMUM_VACCINATION_VALIDITY;
+            case TYPE_RECOVERY:
+                return MAXIMUM_RECOVERY_VALIDITY;
             default:
                 return -1;
         }

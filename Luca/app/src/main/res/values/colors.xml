@@ -14,11 +14,12 @@
 
     <color name="test_outcome_positive">#fed7bb</color>
     <color name="test_outcome_negative">#d3dec3</color>
-    <color name="test_outcome_partially_vaccinated">#e8e7e5</color>
-    <color name="test_outcome_fully_vaccinated">#fff4aa</color>
+    <color name="test_outcome_partially_vaccinated">#f5f5f4</color>
+    <color name="test_outcome_fully_vaccinated">#b2c596</color>
     <color name="test_outcome_fully_vaccinated_but_not_yet_valid">@color/test_outcome_partially_vaccinated</color>
+    <color name="test_outcome_fully_recovered">@color/test_outcome_fully_vaccinated</color>
     <color name="test_outcome_unknown">#f3f5f7</color>
-    <color name="green_pass">#b2c596</color>
+    <color name="green_pass">@color/test_outcome_fully_vaccinated</color>
     <color name="appointment">#9badbf</color>
 
     <color name="primaryColor">@color/luca_light_blue</color>

@@ -1,3 +1,11 @@
+# Release 1.8.0
+
+- Vaccination proofs and recovery certificate
+- Text and UI improvements
+
+This update enables you to import the "EU Digital COVID Certificate" (EUDCC). With the EUDCC, vaccination proofs as well as recovery certificates can be imported and displayed in the app. Further, with this update we support more test providers.
+We also included some text and UI improvements.
+
 # Release 1.7.7
 
 - Bug fix
@@ -133,7 +141,7 @@ We also improved accessibility when increasing system font sizes and removed an 
 
 In this update, we've cleaned up the main screen of the app.  
 
-Additionally, we've worked on a smoother registration process. Other small improvements affect check-ins and private meetings. 
+Additionally, we've worked on a smoother registration process. Other small improvements affect check-ins and private meetings.
 
 # Release 1.3.0
 
@@ -142,13 +150,13 @@ Additionally, we've worked on a smoother registration process. Other small impro
 - Other small improvements
 
 We noticed that for some of you, the phone number verification was not working smoothly. Therefore, we've greatly improved this process.  
-For everyone else, we've worked on other minor changes. For example, your history will not show check-ins that are older than 14 days anymore. 
+For everyone else, we've worked on other minor changes. For example, your history will not show check-ins that are older than 14 days anymore.
 
 # Release 1.2.5
 
 - UX improvements
 
-This update includes various small improvements ensuring better content readability, especially when displayed on smaller screens. 
+This update includes various small improvements ensuring better content readability, especially when displayed on smaller screens.
 
 # Release 1.2.2
 

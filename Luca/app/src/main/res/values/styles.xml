@@ -55,7 +55,7 @@
         <item name="android:textSize">48sp</item>
         <item name="android:textStyle">bold</item>
         <item name="android:textColor">?attr/colorOnSurface</item>
-        <item name="android:accessibilityHeading">true</item>
+        <item name="android:accessibilityHeading" tools:ignore="NewApi">true</item>
     </style>
 
     <style name="TextAppearance.Luca.Headline2" parent="TextAppearance.MaterialComponents.Headline4">
@@ -67,14 +67,14 @@
         <item name="android:layout_height">wrap_content</item>
         <item name="android:ellipsize">end</item>
         <item name="android:maxLines">2</item>
-        <item name="android:accessibilityHeading">true</item>
+        <item name="android:accessibilityHeading" tools:ignore="NewApi">true</item>
     </style>
 
     <style name="TextAppearance.Luca.Headline3" parent="TextAppearance.Luca.Body1">
         <item name="android:layout_width">0dp</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:layout_margin">@dimen/spacing_default</item>
-        <item name="android:accessibilityHeading">true</item>
+        <item name="android:accessibilityHeading" tools:ignore="NewApi">true</item>
     </style>
 
     <style name="TextAppearance.Luca.Body1" parent="TextAppearance.MaterialComponents.Body1">

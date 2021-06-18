@@ -17,6 +17,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import de.culture4life.luca.BuildConfig;
+import de.culture4life.luca.LucaApplication;
 import de.culture4life.luca.R;
 import de.culture4life.luca.network.NetworkManager;
 import de.culture4life.luca.ui.BaseFragment;
@@ -138,7 +139,7 @@ public class RegistrationFragment extends BaseFragment<RegistrationViewModel> {
 
     private void initializeSharedViewsInRegistrationMode() {
         headingTextView.setText(getString(R.string.registration_heading_name));
-        if (BuildConfig.DEBUG) {
+        if (LucaApplication.IS_USING_STAGING_ENVIRONMENT || BuildConfig.DEBUG) {
             headingTextView.setOnClickListener(v -> viewModel.useDebugRegistrationData().subscribe());
         }
         confirmationButton.setOnClickListener(v -> viewDisposable.add(Completable.fromAction(
@@ -163,21 +164,19 @@ public class RegistrationFragment extends BaseFragment<RegistrationViewModel> {
                 .doOnSubscribe(disposable -> hideKeyboard())
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(
-                        numberVerified -> {
-                            if (!numberVerified && !shouldSkipVerification()) {
-                                showCurrentPhoneNumberVerificationStep();
-                            } else if (areAllStepsCompleted()) {
-                                if (viewModel.getShouldReImportTestData()) {
-                                    showWillDeleteTestResultsDialog();
-                                } else {
-                                    viewModel.onUserDataUpdateRequested();
-                                }
-                            } else {
-                                showMissingInfoDialog();
-                            }
+                .subscribe(numberVerified -> {
+                    if (!numberVerified && !shouldSkipVerification()) {
+                        showCurrentPhoneNumberVerificationStep();
+                    } else if (areAllStepsCompleted()) {
+                        if (viewModel.getShouldReImportTestData()) {
+                            showWillDeleteTestResultsDialog();
+                        } else {
+                            viewModel.onUserDataUpdateRequested();
                         }
-                )));
+                    } else {
+                        showMissingInfoDialog();
+                    }
+                })));
 
         completionObserver = completed -> {
             if (completed) {

@@ -4,6 +4,7 @@ import com.google.zxing.EncodeHintType;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.util.Pair;
 
 import de.culture4life.luca.R;
 
@@ -11,7 +12,9 @@ import net.glxn.qrgen.android.QRCode;
 
 import java.lang.annotation.Retention;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 
 import androidx.annotation.ColorInt;
@@ -38,11 +41,13 @@ public abstract class MyLucaListItem {
     @Type
     protected final int type;
 
+    protected final List<Pair<String, String>> topContent = new ArrayList<>();
+    protected final List<Pair<String, String>> collapsedContent = new ArrayList<>();
+
     protected String title;
-    protected String description;
-    protected String time;
     protected Bitmap barcode;
     protected long timestamp;
+    protected String deleteButtonText;
     @ColorInt
     protected int color;
     @DrawableRes
@@ -60,16 +65,18 @@ public abstract class MyLucaListItem {
                 .bitmap());
     }
 
+    protected static String getReadableDate(@NonNull Context context, long timestamp) {
+        SimpleDateFormat dateFormat = new SimpleDateFormat(context.getString(R.string.date_format), Locale.GERMANY);
+        return getReadableTime(dateFormat, timestamp);
+    }
+
     protected static String getReadableTime(@NonNull Context context, long timestamp) {
-        return getReadableTime(getDateFormat(context), timestamp);
+        SimpleDateFormat timeFormat = new SimpleDateFormat(context.getString(R.string.time_format), Locale.GERMANY);
+        return getReadableTime(timeFormat, timestamp);
     }
 
     protected static String getReadableTime(@NonNull SimpleDateFormat readableDateFormat, long timestamp) {
         return readableDateFormat.format(new Date(timestamp));
-    }
-
-    protected static SimpleDateFormat getDateFormat(@NonNull Context context) {
-        return new SimpleDateFormat(context.getString(R.string.venue_checked_in_time_format), Locale.GERMANY);
     }
 
     public void toggleExpanded() {
@@ -84,20 +91,32 @@ public abstract class MyLucaListItem {
         return title;
     }
 
-    public String getDescription() {
-        return description;
-    }
-
-    public String getTime() {
-        return time;
-    }
-
     public Bitmap getBarcode() {
         return barcode;
     }
 
     public long getTimestamp() {
         return timestamp;
+    }
+
+    public String getDeleteButtonText() {
+        return deleteButtonText;
+    }
+
+    public List<Pair<String, String>> getTopContent() {
+        return topContent;
+    }
+
+    public List<Pair<String, String>> getCollapsedContent() {
+        return collapsedContent;
+    }
+
+    protected void addTopContent(@NonNull String label, @NonNull String text) {
+        topContent.add(new Pair(label, text));
+    }
+
+    protected void addCollapsedContent(@NonNull String label, @NonNull String text) {
+        collapsedContent.add(new Pair(label, text));
     }
 
     @ColorInt

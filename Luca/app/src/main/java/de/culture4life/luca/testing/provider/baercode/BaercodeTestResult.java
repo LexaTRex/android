@@ -72,8 +72,10 @@ public class BaercodeTestResult extends ProvidedTestResult {
         Collections.sort(procedures, (o1, o2) -> (int) (o1.getTimestamp() - o2.getTimestamp()));
         check(procedures);
         ArrayList<TestResult.Procedure> testResultProcedures = new ArrayList<>();
-        for (Procedure procedure : procedures) {
-            testResultProcedures.add(new TestResult.Procedure(procedure.getType(), procedure.getTimestamp()));
+        for (int i = 0; i < procedures.size(); i++) {
+            Procedure procedure = procedures.get(i);
+            testResultProcedures.add(new TestResult.Procedure(procedure.getType().toTestResultType(), procedure.getTimestamp(),
+                    procedures.size() - i, procedures.size()));
         }
         lucaTestResult.setProcedures(testResultProcedures);
 
@@ -132,9 +134,9 @@ public class BaercodeTestResult extends ProvidedTestResult {
         if (procedure.isVaccination()) {
             if (result) {
                 if (procedures.size() >= procedure.getRequiredCount()) {
-                    return TestResult.OUTCOME_FULLY_VACCINATED;
+                    return TestResult.OUTCOME_FULLY_IMMUNE;
                 } else {
-                    return TestResult.OUTCOME_PARTIALLY_VACCINATED;
+                    return TestResult.OUTCOME_PARTIALLY_IMMUNE;
                 }
             } else {
                 return TestResult.OUTCOME_UNKNOWN;

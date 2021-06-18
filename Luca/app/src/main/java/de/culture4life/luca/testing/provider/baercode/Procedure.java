@@ -2,6 +2,8 @@ package de.culture4life.luca.testing.provider.baercode;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
+import de.culture4life.luca.testing.TestResult;
+
 import androidx.annotation.NonNull;
 
 /**
@@ -25,6 +27,28 @@ public class Procedure {
 
         public int getValue() {
             return value;
+        }
+
+        /**
+         * Convert from Baercode to TestResult.Procedure.Type
+         */
+        public TestResult.Procedure.Type toTestResultType() {
+            switch (this) {
+                case ANTIGEN_FAST_TEST:
+                    return TestResult.Procedure.Type.RAPID_ANTIGEN_TEST;
+                case PCR_TEST:
+                    return TestResult.Procedure.Type.PCR_TEST;
+                case VACCINATION_COMIRNATY:
+                    return TestResult.Procedure.Type.VACCINATION_COMIRNATY;
+                case VACCINATION_JANNSEN:
+                    return TestResult.Procedure.Type.VACCINATION_JANNSEN;
+                case VACCINATION_MODERNA:
+                    return TestResult.Procedure.Type.VACCINATION_MODERNA;
+                case VACCINATION_VAXZEVRIA:
+                    return TestResult.Procedure.Type.VACCINATION_VAXZEVRIA;
+                default:
+                    return TestResult.Procedure.Type.UNKNOWN;
+            }
         }
 
         public static Type from(int typeId) {

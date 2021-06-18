@@ -84,10 +84,16 @@ public class MeetingViewModel extends BaseViewModel {
     public Completable keepDataUpdated() {
         return Completable.mergeArray(
                 super.keepDataUpdated(),
+                keepUpdatingMeetingHostState(),
                 keepUpdatingMeetingData(),
                 keepUpdatingMeetingDuration(),
                 keepUpdatingQrCodes().delaySubscription(100, TimeUnit.MILLISECONDS)
         );
+    }
+
+    private Completable keepUpdatingMeetingHostState() {
+        return meetingManager.getMeetingHostStateChanges()
+                .flatMapCompletable(hostingMeeting -> update(isHostingMeeting, hostingMeeting));
     }
 
     private Completable keepUpdatingMeetingDuration() {

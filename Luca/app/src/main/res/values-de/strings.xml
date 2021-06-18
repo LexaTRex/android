@@ -5,6 +5,8 @@
     <string name="url_terms_and_conditions">https://luca-app.de/app-terms-and-conditions</string>
     <string name="url_privacy_policy">https://luca-app.de/app-privacy-policy</string>
     <string name="url_imprint">https://luca-app.de/imprint</string>
+    <string name="url_faq">https://www.luca-app.de/faq/</string>
+    <string name="mail_support">hello@luca-app.de</string>
     <string name="qr_code">QR Code</string>
     <string name="qr_code_scanner">QR Code Scanner</string>
     <string name="additional_details_content_description">Mehr Details</string>
@@ -75,8 +77,8 @@
     <string name="welcome_app_slogan">Gemeinsam erleben.</string>
     <string name="welcome_heading">Hallo</string>
     <string name="welcome_description">luca hilft dir bei der sicheren und verschlüsselten Angabe deiner Kontaktdaten. Du musst dir keine Sorgen um deine Daten mehr machen, wenn du Veranstaltungen, Kulturstätten, Restaurants, Cafés oder Bars besuchst.</string>
-    <string name="welcome_terms_description"><a href="https://luca-app.de/app-terms-and-conditions">AGB</a> zustimmen</string>
-    <string name="welcome_terms_checkbox_content_description">AGB</string>
+    <string name="welcome_terms_description"><a href="https://luca-app.de/app-terms-and-conditions">Nutzungsbedingungen</a> zustimmen</string>
+    <string name="welcome_terms_checkbox_content_description">Nutzungsbedingungen</string>
     <string name="welcome_privacy_description"><a href="https://luca-app.de/app-privacy-policy">Datenschutzbestimmungen</a> zustimmen</string>
     <string name="welcome_privacy_checkbox_content_description">Datenschutzerklärung</string>
     <string name="welcome_action">Los geht\'s!</string>
@@ -106,7 +108,7 @@
     <string name="registration_missing_fields_error_text">Bitte gib deinen Namen, deine Telefonnummer und deine Adresse an. </string>
     <string name="registration_invalid_value_field_error">Dieses Feld ist ungültig</string>
     <string name="registration_will_delete_tests_title">Änderungen speichern?</string>
-    <string name="registration_will_delete_tests_text">Durch die Namensänderung werden bereits importierte Testergebnisse gelöscht. Möchtest du deine Änderungen speichern?</string>
+    <string name="registration_will_delete_tests_text">Durch die Namensänderung werden bereits importierte Dokumente gelöscht. Möchtest du deine Änderungen speichern?</string>
     <string name="registration_empty_but_required_field_error">Dieses Feld wird benötigt</string>
     <string name="registration_missing_first_name_hint">Bitte gib deinen Vornamen ein, um fortzufahren.</string>
     <string name="registration_missing_last_name_hint">Bitte gib deinen Nachnamen ein, um fortzufahren.</string>
@@ -142,8 +144,14 @@
     <string name="menu_contact_data">Kontaktdaten</string>
     <string name="menu_clear_history">Historie löschen</string>
     <string name="menu_privacy_policy">Datenschutzbestimmungen</string>
-    <string name="menu_terms_and_conditions">AGB</string>
+    <string name="menu_terms_and_conditions">Nutzungsbedingungen</string>
+    <string name="menu_faq">FAQ</string>
     <string name="menu_imprint">Impressum</string>
+    <string name="menu_support">Support</string>
+    <string name="menu_support_error_title">E-Mail kann nicht gesendet werden</string>
+    <string name="menu_support_error_description">Es können keine E-Mails von diesem Gerät gesendet werden, da aktuell kein E-Mail-Account eingerichtet ist.</string>
+    <string name="menu_support_subject">Support Anfrage</string>
+    <string name="menu_support_body">Ich benutze Version <xliff:g example="1.0.0" id="version_name">%1$s</xliff:g> (Release <xliff:g example="42" id="version_code">%2$d</xliff:g>) auf meinem <xliff:g example="Google Pixel" id="device_model">%3$s</xliff:g> (Android <xliff:g example="10" id="android_version_number">%4$s</xliff:g>) und brauche Hilfe. Mein Problem ist:\n\n</string>
     <string name="menu_app_data">App Details</string>
     <string name="menu_delete_account">Account löschen</string>
 
@@ -152,7 +160,7 @@
     <string name="scan_qr_code_description">Scanne den QR-Code eines luca-Standorts oder eines privaten Treffens, um dich einzuchecken.</string>
     <string name="scan_qr_code">Selbst einchecken</string>
     <string name="camera_access_title">Kamera aktivieren</string>
-    <string name="camera_access_description">luca benötigt Zugriff auf deine Kamera, um QR-Codes von Testergebnisse, Locations oder Privaten Meetings scannen zu können. Nur die Daten im QR-Code werden verarbeitet und keine anderen Daten werden gespeichert.</string>
+    <string name="camera_access_description">luca benötigt Zugriff auf deine Kamera, um QR-Codes von Testergebnissen, Locations oder Privaten Meetings scannen zu können. Nur die Daten im QR-Code werden verarbeitet und keine anderen Daten werden gespeichert.</string>
     <string name="close_qr_code_scanner">QR-Code-Scanner schließen</string>
     <string name="edit_contact_data">Kontaktdaten bearbeiten</string>
 
@@ -188,7 +196,6 @@
     <string name="venue_check_in_action">EINCHECKEN</string>
     <string name="venue_check_out_action">AUSCHECKEN</string>
     <string name="venue_check_out_content_description">Check-out Schalter</string>
-    <string name="venue_checked_in_time_format">dd.MM.yyyy HH:mm</string>
     <string name="venue_checked_in_time">Eingecheckt seit:\n<xliff:g example="18.08.2020 – 19:23" id="time">%1$s</xliff:g> Uhr</string>
     <string name="venue_automatic_check_out">Automatisch auschecken</string>
     <string name="venue_slider_clicked">Bitte den Pfeil nach links ziehen</string>
@@ -272,45 +279,60 @@
     <!-- My Luca -->
     <string name="my_luca_heading">Mein luca</string>
     <string name="my_luca_empty_title">Willkommen bei "Mein luca"</string>
-    <string name="my_luca_empty_description">Das ist dein persönlicher Bereich, in dem du Dokumente hinzufügen kannst, die dir den Check-in erleichtern.\n\nWenn du an einem Standort einchecken willst, gehe auf „Einchecken“ unten links.</string>
+    <string name="my_luca_empty_description">Das ist dein persönlicher Bereich. Hier kannst du Dokumente <b>hinzufügen</b>, die dir den <b>Check-in</b> erleichtern.\n\nNEU: über das Kalender-Icon oben rechts kannst du Termine für Tests buchen.</string>
     <string name="appointment_action">Termin buchen</string>
     <string name="test_import_action">Hinzufügen</string>
     <string name="test_import_hint">Scanne den QR-Code deines Tests um ihn zur App hinzuzufügen.</string>
-    <string name="test_import_success_message">Das Testergebnis wurde importiert</string>
-    <string name="test_import_consent">Hiermit erkläre ich mein Einverständnis gemäß Art. 9 (2) a) DSGVO zum Übermitteln einer pseudonymisierten Kennung im Zuge der Hinterlegung meines COVID-19-Tests in der luca App. Dies dient ausschließlich der Vorbeugung von Missbrauch, sodass derselbe Test nicht mehrfach ggf. von unterschiedlichen Personen in der luca App hinterlegt werden kann. Die individuelle Kennung wird nach 72 Stunden ab Hinterlegung automatisch aus dem luca System gelöscht. Es ist nicht möglich die Kennung zuvor zu entfernen.</string>
-    <string name="test_import_error_title">Testergebnis konnte nicht importiert werden</string>
-    <string name="test_import_error_name_mismatch_description">Es konnte nicht validiert werden, dass dieser Test von dir gemacht wurde. Bitte prüfe, ob dein Name richtig in der App hinterlegt ist.</string>
-    <string name="test_import_error_invalid_signature_description">Die Signatur dieses Tests konnte nicht verifiziert werden. Der Testanbieter wird möglicherweise noh nicht von luca unterstützt.</string>
-    <string name="test_import_error_expired_description">Leider kann der Test nicht importiert werden, da er bereits abgelaufen ist.</string>
-    <string name="test_import_error_already_imported_description">Dieser Test wurde bereits importiert.</string>
-    <string name="test_import_error_positive_description">luca hilft dir beim einfachen Check-in. Da für Check-ins nur negative Testergebnisse relevant sind, kannst du aktuell dein positives Testergebnis nicht hinzufügen.</string>
+    <string name="test_import_success_message">Das Dokument wurde importiert</string>
+    <string name="test_import_consent">Hiermit erkläre ich mein Einverständnis gemäß Art. 9 (2) a) in Verbindung mit Art. 6 (1) 1 a) DSGVO zum Übermitteln einer pseudonymisierten Kennung im Zuge der lokalen Hinterlegung meines COVID-Tests, meines Genesen- oder Impfausweises in der luca App. Dies dient ausschließlich der Vorbeugung von Missbrauch, indem ein Dokument durch unterschiedliche Personen genutzt wird. Daher ist ein mehrfaches Hochladen nicht möglich. Die individuelle Kennung eines Test-Ergebnisses wird nach 72 Stunden ab Hinterlegung automatisch aus dem luca System gelöscht.</string>
+    <string name="test_import_error_title">Das Dokument konnte nicht importiert werden</string>
+    <string name="test_import_error_name_mismatch_description">Es konnte nicht validiert werden, ob dieses Dokument für dich ausgestellt wurde. Bitte prüfe, ob dein Name richtig in der App hinterlegt ist.</string>
+    <string name="test_import_error_invalid_signature_description">Die Signatur dieses Dokuments konnte nicht verifiziert werden. Der Aussteller wird möglicherweise noch nicht von luca unterstützt.</string>
+    <string name="test_import_error_expired_description">Leider kann das Dokument nicht importiert werden, da es bereits abgelaufen ist.</string>
+    <string name="test_import_error_already_imported_description">Dieses Dokument wurde bereits importiert.</string>
+    <string name="test_import_error_not_negative_title">Hinzufügen nicht möglich</string>
+    <string name="test_import_error_not_negative_description">luca hilft dir beim einfachen Check-in. Da für Check-ins nur negative Testergebnisse relevant sind, kannst du aktuell nur negative Testergebnisse hinzufügen.</string>
     <string name="test_import_error_unsupported_description">Der QR-Code konnte nicht gelesen werden. Das kann daran liegen, dass wir aktuell nur bestimmte Testzentren unterstützen. Erkundige dich bei deinem Testzentrum, ob dieses dazugehört.</string>
-    <string name="test_import_error_unsupported_but_url_description">Die Daten sind kein Testergebnis von einem Testcenter das wir unterstützen.\n\nAllerdings verweisen die Daten auf eine Webseite, bei der es möglicherweise mehr Details über das Testergebnis gibt.</string>
-    <string name="test_import_error_check_in_scanner_title">Check-in mit diesem Scanner nicht möglich</string>
-    <string name="test_import_error_check_in_scanner_description">Du kannst dich mit diesem Scanner nicht einchecken, weil er nur für das Hinzufügen von Dokumenten gedacht ist. Wechsle für den Check-in in den Tab „Einchecken“ (unten links in der Navigationsleiste). Dort findest du die Funktion „Selbst einchecken“.</string>
-    <string name="test_outcome_negative">Negativ</string>
-    <string name="test_outcome_positive">Positiv</string>
-    <string name="test_outcome_partially_vaccinated">Teilweise Immunisiert</string>
-    <string name="test_outcome_fully_vaccinated">Vollständig Immunisiert</string>
+    <string name="test_import_error_unsupported_but_url_description">Die Daten sind kein Dokument von einem Testcenter das wir unterstützen.\n\nAllerdings verweisen die Daten auf eine Webseite, bei der es möglicherweise mehr Details gibt.</string>
+    <string name="test_import_error_check_in_scanner_title">Check-in hier nicht möglich</string>
+    <string name="test_import_error_check_in_scanner_description">Dieser Scanner ist nur für das Hinzufügen von Dokumenten gedacht. Wenn du an einem Standort einchecken möchtest, wechsle in den Tab „Einchecken“ (unten links in der Navigationsleiste). Dort findest du die Funktion „Selbst einchecken“.</string>
+    <string name="test_outcome_negative">Testergebnis: NEGATIV</string>
+    <string name="test_outcome_positive">Testergebnis: POSITIV</string>
+    <string name="test_outcome_partially_immune">Teilweise Immunisiert %1$s</string>
+    <string name="test_outcome_fully_vaccinated">Vollständig Immunisiert %1$s</string>
     <string name="test_outcome_fully_vaccinated_in">Vollständig Immunisiert in %1$s</string>
+    <string name="test_outcome_fully_recovered">Genesenennachweis</string>
+    <string name="test_outcome_fully_recovered_in">Genesen in %1$s</string>
     <string name="test_outcome_unknown">Unbekannt</string>
     <string name="test_type_fast">Schnelltest</string>
     <string name="test_type_pcr">PCR Test</string>
-    <string name="test_type_vaccination">Impfung</string>
+    <string name="test_type_vaccination">IMPFNACHWEIS</string>
     <string name="test_type_unknown">@string/test_outcome_unknown</string>
-    <string name="test_issued_by">Ausgestellt von</string>
+    <string name="test_type_of_test_label">Testart:</string>
+    <string name="test_issued_by">Ausgestellt:</string>
+    <string name="vaccination_date_label">Impfdatum:</string>
     <string name="test_issued_at">Datum:</string>
-    <string name="test_lab_doctor_name">Durchgeführt von</string>
-    <string name="test_delete_action">Test Löschen</string>
-    <string name="test_delete_confirmation_title">Testergebnis löschen</string>
-    <string name="test_delete_confirmation_message">Soll das Testergebnis wirklich aus der App gelöscht werden?</string>
-    <string name="test_vaccination_procedure">Impfung %1$s - %2$s</string>
+    <string name="test_valid_until">Gültig bis:</string>
+    <string name="test_lab_doctor_name">Tester:</string>
+    <string name="item_delete_action">Löschen</string>
+    <string name="test_delete_action">Test löschen</string>
+    <string name="appointment_delete_action">Termin löschen</string>
+    <string name="certificate_delete_action">Nachweis löschen</string>
+    <string name="test_delete_confirmation_message">Soll das Dokument wirklich aus der App gelöscht werden?</string>
+    <string name="test_vaccination_procedure">%1$s. Impfung:</string>
+    <string name="test_recovery_procedure">Infektion %1$s - %2$s</string>
     <string name="vaccine_comirnaty">BioNTech/Pfizer</string>
     <string name="vaccine_jannsen">Johnson &amp; Johnson</string>
     <string name="vaccine_moderna">Moderna</string>
     <string name="vaccine_vaxzevria">AstraZeneca</string>
+    <string name="vaccine_sputnik">Sputnik V</string>
+    <string name="procedure_recovery">Genesung</string>
     <string name="em_green_pass">EM-GREENPASS</string>
+    <string name="em_green_pass_valid">Gültig am:</string>
+    <string name="em_green_pass_status">Status:</string>
     <string name="appointment_title">Termin</string>
+    <string name="appointment_address">Adresse:</string>
+    <string name="birthday_label">Geburtsdatum:</string>
 
     <!-- Phone Number Verification -->
     <string name="verification_request_new_tan_action">TAN anfordern</string>
@@ -336,6 +358,8 @@
     <string name="update_required_description">Deine luca App ist veraltet, bitte installiere die aktuelle Version.</string>
 
     <!-- Time -->
+    <string name="time_format">dd.MM.yyyy HH:mm</string>
+    <string name="date_format">dd.MM.yyyy</string>
     <string name="time_seconds">Sekunden</string>
     <string name="time_minutes">Minuten</string>
     <string name="time_hours">Stunden</string>

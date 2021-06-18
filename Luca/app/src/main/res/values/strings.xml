@@ -6,6 +6,8 @@
     <string name="url_terms_and_conditions">https://luca-app.de/app-terms-and-conditions</string>
     <string name="url_privacy_policy">https://luca-app.de/app-privacy-policy</string>
     <string name="url_imprint">https://luca-app.de/imprint</string>
+    <string name="url_faq">https://www.luca-app.de/faq/</string>
+    <string name="mail_support">hello@luca-app.de</string>
     <string name="qr_code">QR Code</string>
     <string name="qr_code_scanner">QR Code Scanner</string>
     <string name="additional_details_content_description">Additional Details</string>
@@ -77,7 +79,7 @@
     <string name="welcome_heading">Hello</string>
     <string name="welcome_description">luca helps you encrypt and securely submit your contact data. With luca, you don\'t have to worry about your data when visiting events, restaurants, cafés or bars anymore.</string>
     <string name="welcome_terms_description">Accept <a href="https://luca-app.de/app-terms-and-conditions">terms of use</a></string>
-    <string name="welcome_terms_checkbox_content_description">Terms of Use</string>
+    <string name="welcome_terms_checkbox_content_description">Terms of use</string>
     <string name="welcome_privacy_description">Accept <a href="https://luca-app.de/app-privacy-policy">privacy policy</a></string>
     <string name="welcome_privacy_checkbox_content_description">Privacy Policy</string>
     <string name="welcome_action">Get started!</string>
@@ -106,7 +108,7 @@
     <string name="registration_missing_info">Info missing</string>
     <string name="registration_missing_fields_error_text">Please provide your name, phone number and address.</string>
     <string name="registration_will_delete_tests_title">Save changes?</string>
-    <string name="registration_will_delete_tests_text">"By changing your name, imported test results will be deleted. Apply all changes?"</string>
+    <string name="registration_will_delete_tests_text">"By changing your name, imported documents will be deleted. Apply all changes?"</string>
     <string name="registration_invalid_value_field_error">This value is not valid</string>
     <string name="registration_empty_but_required_field_error">This field is required</string>
     <string name="registration_missing_first_name_hint">Please enter your first name to continue.</string>
@@ -143,8 +145,14 @@
     <string name="menu_contact_data">Edit Contact Data</string>
     <string name="menu_clear_history">Clear History</string>
     <string name="menu_privacy_policy">Privacy Policy</string>
-    <string name="menu_terms_and_conditions">Terms &amp; Conditions</string>
+    <string name="menu_terms_and_conditions">Terms of Use</string>
+    <string name="menu_faq">FAQ</string>
     <string name="menu_imprint">Imprint</string>
+    <string name="menu_support">Support</string>
+    <string name="menu_support_error_title">Unable to send Email</string>
+    <string name="menu_support_error_description">It is not possible to send an email from this device because no email account is connected.</string>
+    <string name="menu_support_subject">Support Request</string>
+    <string name="menu_support_body">I\'m using version <xliff:g example="1.0.0" id="version_name">%1$s</xliff:g> (release <xliff:g example="42" id="version_code">%2$d</xliff:g>) on my <xliff:g example="Google Pixel" id="device_model">%3$s</xliff:g> (Android <xliff:g example="10" id="android_version_number">%4$s</xliff:g>) and need some support. My problem is:\n\n</string>
     <string name="menu_app_data">Show App Data</string>
     <string name="menu_delete_account">Delete Account</string>
 
@@ -189,7 +197,6 @@
     <string name="venue_check_in_action">CHECK IN</string>
     <string name="venue_check_out_action">CHECK OUT</string>
     <string name="venue_check_out_content_description">Check-out button</string>
-    <string name="venue_checked_in_time_format">dd.MM.yyyy h:mm a</string>
     <string name="venue_checked_in_time">Check in:\n<xliff:g example="18.08.2020 – 7:23 PM" id="time">%1$s</xliff:g></string>
     <string name="venue_automatic_check_out">Automatic Check-Out</string>
     <string name="venue_slider_clicked">Please slide the arrow to the left</string>
@@ -277,46 +284,61 @@
     <!-- My Luca -->
     <string name="my_luca_heading">My luca</string>
     <string name="my_luca_empty_title">Welcome at "My luca"</string>
-    <string name="my_luca_empty_description">This is your personal space, where you can add documents to make your check in easier.\n\nIf you want to check in at a location, go to the Check-in tab at the bottom left.</string>
+    <string name="my_luca_empty_description">This is your personal space, where you can <b>add</b> documents to make your <b>check-in</b> easier.\n\nNEW: via the calendar icon in the upper right corner you can book test appointments.</string>
     <string name="appointment_action">Book appointment</string>
     <string name="test_import_action">Add</string>
     <string name="test_import_hint">Scan the QR code of your test to store it in the app.</string>
-    <string name="test_import_success_message">The test result was imported</string>
-    <string name="test_import_consent">I hereby give my consent in accordance with Art. 9 (2) a) GDPR to the transmission of a pseudonymized identifier in the course of storing my COVID-19 test in the luca app. This serves exclusively to prevent misuse, so that the same test cannot be stored multiple times in the luca app, possibly by different people. The individual identifier is automatically deleted from the luca system after 72 hours. It is not possible to remove the identifier beforehand.</string>
-    <string name="test_import_error_title">The test result could not be imported</string>
-    <string name="test_import_error_name_mismatch_description">It was not possible to validate that this test belongs to you. Please check if your name is entered correctly in the app.</string>
-    <string name="test_import_error_invalid_signature_description">It was not possible to validate the signature of this test. The test provider may not be supported by luca yet.</string>
-    <string name="test_import_error_expired_description">Unfortunately, the test cannot be imported because it already expired.</string>
-    <string name="test_import_error_already_imported_description">This test was already imported.</string>
-    <string name="test_import_error_positive_description">luca helps you to check in easily. Since positive test results are not relevant for checkin, you can only add negative results right now.</string>
-    <string name="test_import_error_unsupported_description">The data couldn\'t be processed. This could have happened because we only support certain test providers at the moment. Check with your test provider to see if it is included.</string>
-    <string name="test_import_error_unsupported_but_url_description">The data didn\'t contain a valid test result from a provider that we support.\n\nHowever, it seems to point to a website where you may get more details about your test result.</string>
-    <string name="test_import_error_check_in_scanner_title">You cannot check-in with this scanner</string>
-    <string name="test_import_error_check_in_scanner_description">You can\'t check-in with this scanner because it is only for adding documents. To check in, switch to the \"Check-in\" tab (bottom left in the navigation bar). There you will find the function \"Self Check-in\".</string>
-    <string name="test_outcome_negative">Negative</string>
-    <string name="test_outcome_positive">Positive</string>
-    <string name="test_outcome_partially_vaccinated">Partially Vaccinated</string>
-    <string name="test_outcome_fully_vaccinated">Fully Vaccinated</string>
+    <string name="test_import_success_message">The document was imported</string>
+    <string name="test_import_consent">I hereby declare my consent in accordance with Art. 9 (2) a) in conjunction with Art. 6 (1) 1 a) DSGVO to the transmission of a pseudonymized identifier in the course of the local storage of my COVID test, recovery or vaccination card in the luca app. This is solely to prevent misuse by having one document used by different people. Therefore, importing multiple times is not possible. The individual identifier of the test document is automatically deleted from the luca system after 72 hours of storage.</string>
+    <string name="test_import_error_title">The document could not be imported</string>
+    <string name="test_import_error_name_mismatch_description">It was not possible to validate that this document belongs to you. Please check if your name is entered correctly in the app.</string>
+    <string name="test_import_error_invalid_signature_description">It was not possible to validate the signature of this document. The document provider may not be supported by luca yet.</string>
+    <string name="test_import_error_expired_description">Unfortunately, the document cannot be imported because it already expired.</string>
+    <string name="test_import_error_already_imported_description">This document was already imported.</string>
+    <string name="test_import_error_not_negative_title">Adding not possible</string>
+    <string name="test_import_error_not_negative_description">luca helps you to easily check in. As only negative test results are relevant for checking in, you can only add negative results right now.</string>
+    <string name="test_import_error_unsupported_description">The data couldn\'t be processed. This could have happened because we only support certain document providers at the moment. Check with your document provider to see if it is included.</string>
+    <string name="test_import_error_unsupported_but_url_description">The data didn\'t contain a valid document from a provider that we support.\n\nHowever, it seems to point to a website where you may get more details.</string>
+    <string name="test_import_error_check_in_scanner_title">You cannot check in here</string>
+    <string name="test_import_error_check_in_scanner_description">This scanner is only for adding documents. If you want to check in at a location, switch to the \"Check-In\" tab (bottom left of the navigation bar). There you will find the \"Self Check-In\" button.</string>
+    <string name="test_outcome_negative">Test result: NEGATIVE</string>
+    <string name="test_outcome_positive">Test result: POSITIVE</string>
+    <string name="test_outcome_partially_immune">Partially Vaccinated %1$s</string>
+    <string name="test_outcome_fully_vaccinated">Fully Vaccinated %1$s</string>
     <string name="test_outcome_fully_vaccinated_in">Fully Vaccinated in %1$s</string>
+    <string name="test_outcome_fully_recovered">Recovery Proof</string>
+    <string name="test_outcome_fully_recovered_in">Recovered in %1$s</string>
     <string name="test_outcome_unknown">Unknown</string>
     <string name="test_type_fast">Rapid Test</string>
     <string name="test_type_pcr">PCR Test</string>
-    <string name="test_type_vaccination">Vaccination</string>
+    <string name="test_type_vaccination">VACCINATION</string>
     <string name="test_type_unknown">@string/test_outcome_unknown</string>
-    <string name="test_issued_by">Issued by</string>
+    <string name="test_type_of_test_label">Test type:</string>
+    <string name="test_issued_by">Issued:</string>
+    <string name="vaccination_date_label">Vaccination date:</string>
     <string name="test_issued_at">Date:</string>
-    <string name="test_lab_doctor_name">Performed by</string>
+    <string name="test_valid_until">Valid until:</string>
+    <string name="test_lab_doctor_name">Tester:</string>
     <string name="test_result_time" translatable="false"><xliff:g example="18.08.2020 – 19:23" id="time">%1$s</xliff:g></string>
-    <string name="test_vaccination_procedure">Vaccination %1$s - %2$s</string>
+    <string name="test_vaccination_procedure">%1$s. Vaccination:</string>
+    <string name="test_recovery_procedure">Infection %1$s - %2$s</string>
+    <string name="item_delete_action">Delete</string>
     <string name="test_delete_action">Delete test</string>
-    <string name="test_delete_confirmation_title">Delete test result</string>
-    <string name="test_delete_confirmation_message">Do you really want to delete the test result?</string>
+    <string name="appointment_delete_action">Delete appointment</string>
+    <string name="certificate_delete_action">Delete certificate</string>
+    <string name="test_delete_confirmation_message">Do you really want to delete the document?</string>
     <string name="vaccine_comirnaty">BioNTech/Pfizer</string>
     <string name="vaccine_jannsen">Johnson &amp; Johnson</string>
     <string name="vaccine_moderna">Moderna</string>
     <string name="vaccine_vaxzevria">AstraZeneca</string>
+    <string name="vaccine_sputnik">Sputnik V</string>
+    <string name="procedure_recovery">Recovery</string>
     <string name="em_green_pass">EM-GREENPASS</string>
+    <string name="em_green_pass_valid">Valid:</string>
+    <string name="em_green_pass_status">Status:</string>
     <string name="appointment_title">Appointment</string>
+    <string name="appointment_address">Address:</string>
+    <string name="birthday_label">Date of birth:</string>
 
     <!-- Phone Number Verification -->
     <string name="verification_request_new_tan_action">Request new TAN</string>
@@ -342,6 +364,8 @@
     <string name="update_required_description">The luca app that you are currently using is outdated, please install the latest version.</string>
 
     <!-- Time -->
+    <string name="time_format">dd.MM.yyyy h:mm a</string>
+    <string name="date_format">dd.MM.yyyy</string>
     <string name="time_seconds">seconds</string>
     <string name="time_minutes">minutes</string>
     <string name="time_hours">hours</string>

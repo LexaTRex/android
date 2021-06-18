@@ -2,12 +2,12 @@ package de.culture4life.luca.preference;
 
 import android.content.Context;
 
-import com.nexenio.rxpreferences.serializer.GsonSerializer;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.io.IOException;
+import java.security.GeneralSecurityException;
 import java.util.HashMap;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -22,9 +22,9 @@ public class EncryptedSharedPreferencesProviderTest {
     private EncryptedSharedPreferencesProvider provider;
 
     @Before
-    public void setUp() {
+    public void setUp() throws GeneralSecurityException, IOException {
         Context context = InstrumentationRegistry.getInstrumentation().getTargetContext();
-        provider = new EncryptedSharedPreferencesProvider(context, new GsonSerializer());
+        provider = new EncryptedSharedPreferencesProvider(context);
         TEST_DATA.put("a", "b");
     }
 
