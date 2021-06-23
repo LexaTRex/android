@@ -9,9 +9,10 @@ import com.tbruyelle.rxpermissions3.Permission;
 import de.culture4life.luca.LucaApplication;
 import de.culture4life.luca.R;
 import de.culture4life.luca.checkin.CheckInManager;
+import de.culture4life.luca.document.DocumentManager;
 import de.culture4life.luca.meeting.MeetingManager;
 import de.culture4life.luca.notification.LucaNotificationManager;
-import de.culture4life.luca.testing.TestingManager;
+import de.culture4life.luca.preference.PreferencesManager;
 import de.culture4life.luca.ui.splash.SplashActivity;
 
 import java.util.Arrays;
@@ -33,6 +34,7 @@ import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Maybe;
 import io.reactivex.rxjava3.core.Observable;
+import io.reactivex.rxjava3.core.Single;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 import timber.log.Timber;
@@ -40,6 +42,8 @@ import timber.log.Timber;
 import static de.culture4life.luca.notification.LucaNotificationManager.NOTIFICATION_ID_EVENT;
 
 public abstract class BaseViewModel extends AndroidViewModel {
+
+    public static final String KEY_CAMERA_CONSENT_GIVEN = "camera_consent_given";
 
     protected final LucaApplication application;
     protected final CompositeDisposable modelDisposable = new CompositeDisposable();
@@ -49,10 +53,12 @@ public abstract class BaseViewModel extends AndroidViewModel {
     protected final MutableLiveData<Boolean> showCameraPreview = new MutableLiveData<>();
     protected NavController navigationController;
     private ViewError deleteAccountError;
+    private PreferencesManager preferencesManager;
 
     public BaseViewModel(@NonNull Application application) {
         super(application);
         this.application = (LucaApplication) application;
+        this.preferencesManager = this.application.getPreferencesManager();
         this.isLoading.setValue(false);
         this.errors.setValue(new HashSet<>());
         Timber.d("Created %s", this);
@@ -67,6 +73,7 @@ public abstract class BaseViewModel extends AndroidViewModel {
     @CallSuper
     public Completable initialize() {
         return updateRequiredPermissions()
+                .andThen(preferencesManager.initialize(application))
                 .andThen(update(showCameraPreview, false))
                 .andThen(navigateForDeepLinkIfAvailable())
                 .doOnSubscribe(disposable -> Timber.d("Initializing %s", this));
@@ -210,7 +217,7 @@ public abstract class BaseViewModel extends AndroidViewModel {
                 .flatMap(url -> {
                     if (CheckInManager.isSelfCheckInUrl(url) || MeetingManager.isPrivateMeeting(url)) {
                         return Maybe.just(R.id.qrCodeFragment);
-                    } else if (TestingManager.isTestResult(url) || TestingManager.isAppointment(url)) {
+                    } else if (DocumentManager.isTestResult(url) || DocumentManager.isAppointment(url)) {
                         return Maybe.just(R.id.myLucaFragment);
                     } else {
                         return Maybe.empty();
@@ -254,6 +261,17 @@ public abstract class BaseViewModel extends AndroidViewModel {
 
     public void setNavigationController(NavController navigationController) {
         this.navigationController = navigationController;
+    }
+
+    public Single<Boolean> isCameraConsentGiven() {
+        return preferencesManager.restoreOrDefault(KEY_CAMERA_CONSENT_GIVEN, false);
+    }
+
+    public void setCameraConsentAccepted() {
+        modelDisposable.add(preferencesManager.persist(KEY_CAMERA_CONSENT_GIVEN, true)
+                .subscribeOn(Schedulers.io())
+                .subscribe()
+        );
     }
 
     @Override

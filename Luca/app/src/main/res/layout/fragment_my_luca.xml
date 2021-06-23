@@ -80,7 +80,7 @@
             tools:listitem="@layout/my_luca_list_item" />
 
     <TextView
-            android:id="@+id/hintTextScanTestResult"
+            android:id="@+id/scanDocumentHintTextView"
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:background="@android:color/black"
@@ -90,7 +90,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/headingSeparatorView"
             style="@style/EmptyStateDescriptionTextView"
-            android:text="@string/test_import_hint" />
+            android:text="@string/document_import_hint" />
 
     <com.google.android.material.card.MaterialCardView
             android:id="@+id/cardView"
@@ -154,7 +154,7 @@
     <com.google.android.material.button.MaterialButton
             android:id="@+id/primaryActionButton"
             style="@style/Button.Luca.PrimaryActionButton"
-            android:text="@string/test_import_action"
+            android:text="@string/document_import_action"
             android:layout_margin="@dimen/spacing_default"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"

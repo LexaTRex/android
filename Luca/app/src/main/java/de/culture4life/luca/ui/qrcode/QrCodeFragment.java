@@ -208,7 +208,14 @@ public class QrCodeFragment extends BaseFragment<QrCodeViewModel> {
 
     private void toggleCameraPreview() {
         if (cameraPreviewDisposable == null) {
-            showCameraDialog(false);
+            viewModel.isCameraConsentGiven()
+                    .subscribe(isCameraConsentGiven -> {
+                        if (isCameraConsentGiven) {
+                            showCameraPreview();
+                        } else {
+                            showCameraDialog(false);
+                        }
+                    });
         } else {
             hideCameraPreview();
         }

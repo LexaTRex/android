@@ -398,6 +398,7 @@ public abstract class BaseFragment<ViewModelType extends BaseViewModel> extends 
             });
         } else {
             builder = builder.setPositiveButton(R.string.action_enable, (dialog, which) -> {
+                viewModel.setCameraConsentAccepted();
                 viewModel.showCameraPreview(true);
                 dialog.dismiss();
             });

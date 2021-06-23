@@ -26,7 +26,7 @@ import de.culture4life.luca.notification.LucaNotificationManager;
 import de.culture4life.luca.preference.PreferencesManager;
 import de.culture4life.luca.registration.RegistrationManager;
 import de.culture4life.luca.service.LucaService;
-import de.culture4life.luca.testing.TestingManager;
+import de.culture4life.luca.document.DocumentManager;
 import de.culture4life.luca.ui.ViewError;
 import de.culture4life.luca.ui.dialog.BaseDialogFragment;
 import de.culture4life.luca.util.TimeUtil;
@@ -72,7 +72,7 @@ public class LucaApplication extends MultiDexApplication {
     private final MeetingManager meetingManager;
     private final HistoryManager historyManager;
     private final DataAccessManager dataAccessManager;
-    private final TestingManager testingManager;
+    private final DocumentManager documentManager;
     private final GeofenceManager geofenceManager;
 
     private final CompositeDisposable applicationDisposable;
@@ -99,7 +99,7 @@ public class LucaApplication extends MultiDexApplication {
         meetingManager = new MeetingManager(preferencesManager, networkManager, locationManager, historyManager, cryptoManager);
         checkInManager = new CheckInManager(preferencesManager, networkManager, geofenceManager, locationManager, historyManager, cryptoManager, notificationManager);
         dataAccessManager = new DataAccessManager(preferencesManager, networkManager, notificationManager, checkInManager, historyManager, cryptoManager);
-        testingManager = new TestingManager(preferencesManager, networkManager, historyManager, registrationManager, cryptoManager);
+        documentManager = new DocumentManager(preferencesManager, networkManager, historyManager, registrationManager, cryptoManager);
 
         applicationDisposable = new CompositeDisposable();
 
@@ -163,7 +163,7 @@ public class LucaApplication extends MultiDexApplication {
                 checkInManager.initialize(this).subscribeOn(Schedulers.io()),
                 historyManager.initialize(this).subscribeOn(Schedulers.io()),
                 dataAccessManager.initialize(this).subscribeOn(Schedulers.io()),
-                testingManager.initialize(this).subscribeOn(Schedulers.io()),
+                documentManager.initialize(this).subscribeOn(Schedulers.io()),
                 geofenceManager.initialize(this).subscribeOn(Schedulers.io())
         ).andThen(Completable.mergeArray(
                 invokeServerTimeCheck(),
@@ -304,7 +304,7 @@ public class LucaApplication extends MultiDexApplication {
         preferencesManager.dispose();
         geofenceManager.dispose();
         dataAccessManager.dispose();
-        testingManager.dispose();
+        documentManager.dispose();
         stopService();
         Timber.i("Stopping application");
         System.exit(0);
@@ -468,8 +468,8 @@ public class LucaApplication extends MultiDexApplication {
         return dataAccessManager;
     }
 
-    public TestingManager getTestingManager() {
-        return testingManager;
+    public DocumentManager getTestingManager() {
+        return documentManager;
     }
 
     public GeofenceManager getGeofenceManager() {

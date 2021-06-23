@@ -13,7 +13,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import de.culture4life.luca.R;
-import de.culture4life.luca.testing.TestResult;
+import de.culture4life.luca.document.Document;
 import de.culture4life.luca.ui.BaseFragment;
 import de.culture4life.luca.ui.UiUtil;
 import de.culture4life.luca.ui.dialog.BaseDialogFragment;
@@ -43,7 +43,7 @@ public class MyLucaFragment extends BaseFragment<MyLucaViewModel> implements MyL
 
     private MaterialCardView qrCodeCardView;
     private PreviewView cameraPreviewView;
-    private View hintTextScanTestResult;
+    private View scanDocumentHintTextView;
     private View loadingView;
     private ImageView bookAppointmentImageView;
     private TextView emptyTitleTextView;
@@ -128,22 +128,22 @@ public class MyLucaFragment extends BaseFragment<MyLucaViewModel> implements MyL
         importTestButton.setOnClickListener(v -> toggleCameraPreview());
 
         cameraPreviewView = getView().findViewById(R.id.cameraPreviewView);
-        hintTextScanTestResult = getView().findViewById(R.id.hintTextScanTestResult);
+        scanDocumentHintTextView = getView().findViewById(R.id.scanDocumentHintTextView);
         loadingView = getView().findViewById(R.id.loadingLayout);
         observe(viewModel.getIsLoading(), loading -> loadingView.setVisibility(loading ? View.VISIBLE : View.GONE));
 
-        observe(viewModel.getParsedTestResult(), testResultViewEvent -> {
-            if (!testResultViewEvent.hasBeenHandled()) {
-                TestResult testResult = testResultViewEvent.getValueAndMarkAsHandled();
-                showTestImportConsentDialog(testResult);
+        observe(viewModel.getParsedDocument(), documentViewEvent -> {
+            if (!documentViewEvent.hasBeenHandled()) {
+                Document document = documentViewEvent.getValueAndMarkAsHandled();
+                showDocumentImportConsentDialog(document);
                 hideCameraPreview();
             }
         });
 
-        observe(viewModel.getAddedTestResult(), testResultViewEvent -> {
-            if (!testResultViewEvent.hasBeenHandled()) {
-                testResultViewEvent.setHandled(true);
-                Toast.makeText(getContext(), R.string.test_import_success_message, Toast.LENGTH_SHORT).show();
+        observe(viewModel.getAddedDocument(), documentViewEvent -> {
+            if (!documentViewEvent.hasBeenHandled()) {
+                documentViewEvent.setHandled(true);
+                Toast.makeText(getContext(), R.string.document_import_success_message, Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -158,7 +158,16 @@ public class MyLucaFragment extends BaseFragment<MyLucaViewModel> implements MyL
 
     private void toggleCameraPreview() {
         if (cameraPreviewDisposable == null) {
-            showCameraDialog(false);
+            viewModel.isCameraConsentGiven()
+                    .flatMapCompletable(isCameraConsentGiven -> {
+                        if (isCameraConsentGiven) {
+                            showCameraPreview();
+                        } else {
+                            showCameraDialog(false);
+                        }
+                        return Completable.complete();
+                    })
+                    .subscribe();
         } else {
             hideCameraPreview();
         }
@@ -168,7 +177,7 @@ public class MyLucaFragment extends BaseFragment<MyLucaViewModel> implements MyL
         cameraPreviewDisposable = getCameraPermission()
                 .doOnComplete(() -> {
                     cameraPreviewView.setVisibility(View.VISIBLE);
-                    hintTextScanTestResult.setVisibility(View.VISIBLE);
+                    scanDocumentHintTextView.setVisibility(View.VISIBLE);
                     qrCodeCardView.setVisibility(View.VISIBLE);
                     importTestButton.setText(R.string.action_cancel);
                 })
@@ -186,10 +195,10 @@ public class MyLucaFragment extends BaseFragment<MyLucaViewModel> implements MyL
             cameraPreviewDisposable.dispose();
             cameraPreviewDisposable = null;
         }
-        hintTextScanTestResult.setVisibility(View.GONE);
+        scanDocumentHintTextView.setVisibility(View.GONE);
         qrCodeCardView.setVisibility(View.GONE);
         myLucaListView.setVisibility(View.VISIBLE);
-        importTestButton.setText(R.string.test_import_action);
+        importTestButton.setText(R.string.document_import_action);
     }
 
     public Completable startCameraPreview() {
@@ -226,26 +235,26 @@ public class MyLucaFragment extends BaseFragment<MyLucaViewModel> implements MyL
         Camera camera = cameraProvider.bindToLifecycle((LifecycleOwner) getContext(), cameraSelector, imageAnalysis, preview);
     }
 
-    private void showTestImportConsentDialog(@NonNull TestResult testResult) {
+    private void showDocumentImportConsentDialog(@NonNull Document document) {
         new BaseDialogFragment(new MaterialAlertDialogBuilder(getContext())
-                .setTitle(R.string.test_import_action)
-                .setMessage(R.string.test_import_consent)
+                .setTitle(R.string.document_import_action)
+                .setMessage(R.string.document_import_consent)
                 .setPositiveButton(R.string.action_ok, (dialog, which) -> {
-                    viewDisposable.add(viewModel.addTestResult(testResult)
+                    viewDisposable.add(viewModel.addDocument(document)
                             .subscribeOn(Schedulers.io())
                             .subscribe(
-                                    () -> Timber.i("Test added: %s", testResult),
-                                    throwable -> Timber.w("Unable to add test: %s", throwable.toString())
+                                    () -> Timber.i("Document added: %s", document),
+                                    throwable -> Timber.w("Unable to add document: %s", throwable.toString())
                             ));
                 })
                 .setNegativeButton(R.string.action_cancel, (dialog, which) -> dialog.cancel()))
                 .show();
     }
 
-    private void showDeleteTestResultDialog(@NonNull MyLucaListItem myLucaListItem) {
+    private void showDeleteDocumentDialog(@NonNull MyLucaListItem myLucaListItem) {
         MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(getContext())
                 .setTitle(myLucaListItem.getDeleteButtonText())
-                .setMessage(R.string.test_delete_confirmation_message)
+                .setMessage(R.string.document_delete_confirmation_message)
                 .setNegativeButton(R.string.action_cancel, (dialog, which) -> {
                 })
                 .setPositiveButton(R.string.action_confirm, (dialog, which) ->
@@ -264,7 +273,7 @@ public class MyLucaFragment extends BaseFragment<MyLucaViewModel> implements MyL
 
     @Override
     public void onDelete(@NonNull MyLucaListItem myLucaListItem) {
-        showDeleteTestResultDialog(myLucaListItem);
+        showDeleteDocumentDialog(myLucaListItem);
     }
 
 }

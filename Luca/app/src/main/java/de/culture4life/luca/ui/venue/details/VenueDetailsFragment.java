@@ -26,6 +26,7 @@ import de.culture4life.luca.util.AccessibilityServiceUtil;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import io.reactivex.rxjava3.core.Completable;
+import io.reactivex.rxjava3.schedulers.Schedulers;
 import timber.log.Timber;
 
 public class VenueDetailsFragment extends BaseFragment<VenueDetailsViewModel> {
@@ -124,7 +125,17 @@ public class VenueDetailsFragment extends BaseFragment<VenueDetailsViewModel> {
 
         automaticCheckoutSwitch.setOnCheckedChangeListener((compoundButton, isChecked) -> {
             if (automaticCheckoutSwitch.isEnabled() && isChecked) {
-                showGrantLocationAccessDialog();
+                viewModel.isLocationConsentGiven()
+                        .flatMapCompletable(isConsentGiven -> {
+                            if (isConsentGiven) {
+                                viewModel.enableAutomaticCheckout();
+                            } else {
+                                showGrantLocationAccessDialog();
+                            }
+                            return Completable.complete();
+                        })
+                        .subscribeOn(Schedulers.io())
+                        .subscribe();
             } else {
                 viewModel.disableAutomaticCheckout();
             }
@@ -262,7 +273,10 @@ public class VenueDetailsFragment extends BaseFragment<VenueDetailsViewModel> {
         MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(getContext())
                 .setTitle(R.string.auto_checkout_location_access_title)
                 .setMessage(R.string.auto_checkout_location_access_description)
-                .setPositiveButton(R.string.action_enable, (dialog, which) -> viewModel.enableAutomaticCheckout())
+                .setPositiveButton(R.string.action_enable, (dialog, which) -> {
+                    viewModel.setLocationConsentGiven();
+                    viewModel.enableAutomaticCheckout();
+                })
                 .setNegativeButton(R.string.action_cancel, (dialog, which) -> {
                     automaticCheckoutSwitch.setChecked(false);
                     dialog.cancel();

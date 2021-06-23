@@ -12,7 +12,7 @@ import de.culture4life.luca.network.NetworkManager;
 import de.culture4life.luca.preference.PreferencesManager;
 import de.culture4life.luca.registration.RegistrationData;
 import de.culture4life.luca.registration.RegistrationManager;
-import de.culture4life.luca.testing.TestingManager;
+import de.culture4life.luca.document.DocumentManager;
 import de.culture4life.luca.ui.BaseViewModel;
 import de.culture4life.luca.ui.ViewError;
 import de.culture4life.luca.util.TimeUtil;
@@ -58,7 +58,7 @@ public class RegistrationViewModel extends BaseViewModel {
 
     private final RegistrationManager registrationManager;
     private final PreferencesManager preferencesManager;
-    private final TestingManager testingManager;
+    private final DocumentManager documentManager;
     private final PhoneNumberUtil phoneNumberUtil;
 
     private final MutableLiveData<Double> progress = new MutableLiveData<>();
@@ -88,7 +88,7 @@ public class RegistrationViewModel extends BaseViewModel {
         super(application);
         preferencesManager = this.application.getPreferencesManager();
         registrationManager = this.application.getRegistrationManager();
-        testingManager = this.application.getTestingManager();
+        documentManager = this.application.getTestingManager();
         phoneNumberUtil = PhoneNumberUtil.getInstance();
 
         progress.setValue(0D);
@@ -205,7 +205,7 @@ public class RegistrationViewModel extends BaseViewModel {
                 .andThen(persistUserDataUpdateInHistory())
                 .andThen(Completable.defer(() -> {
                     if (shouldReImportTestData) {
-                        return testingManager.reImportTestResults();
+                        return documentManager.reImportDocuments();
                     } else {
                         return Completable.complete();
                     }
@@ -332,7 +332,7 @@ public class RegistrationViewModel extends BaseViewModel {
     }
 
     public Completable updateShouldReImportingTestData() {
-        Single<Boolean> hasTestResults = testingManager.getOrRestoreTestResults()
+        Single<Boolean> hasDocuments = documentManager.getOrRestoreDocuments()
                 .isEmpty()
                 .map(isEmpty -> !isEmpty);
 
@@ -346,7 +346,7 @@ public class RegistrationViewModel extends BaseViewModel {
 
         Single<Boolean> hasRelevantDataChanged = Single.zip(isSameFirstName, isSameLastName, (sameFirstName, sameLastName) -> !sameFirstName || !sameLastName);
 
-        return Single.zip(hasTestResults, hasRelevantDataChanged, (testResults, relevantDataChanged) -> testResults && relevantDataChanged)
+        return Single.zip(hasDocuments, hasRelevantDataChanged, (testResults, relevantDataChanged) -> testResults && relevantDataChanged)
                 .doOnSuccess(reImportTestData -> {
                     Timber.d("Should re-import test data: %b", reImportTestData);
                     this.shouldReImportTestData = reImportTestData;

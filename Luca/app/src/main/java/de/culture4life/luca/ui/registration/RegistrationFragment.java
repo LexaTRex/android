@@ -169,7 +169,7 @@ public class RegistrationFragment extends BaseFragment<RegistrationViewModel> {
                         showCurrentPhoneNumberVerificationStep();
                     } else if (areAllStepsCompleted()) {
                         if (viewModel.getShouldReImportTestData()) {
-                            showWillDeleteTestResultsDialog();
+                            showWillDeleteDocumentsDialog();
                         } else {
                             viewModel.onUserDataUpdateRequested();
                         }
@@ -402,7 +402,7 @@ public class RegistrationFragment extends BaseFragment<RegistrationViewModel> {
         alertDialog.show();
     }
 
-    private void showWillDeleteTestResultsDialog() {
+    private void showWillDeleteDocumentsDialog() {
         MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(getContext())
                 .setTitle(R.string.registration_will_delete_tests_title)
                 .setMessage(R.string.registration_will_delete_tests_text)

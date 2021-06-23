@@ -97,7 +97,7 @@
                         android:textColor="@android:color/black"
                         android:fontFamily="@font/montserrat_bold"
                         app:strokeColor="@android:color/black"
-                        android:text="@string/test_delete_action" />
+                        android:text="@string/document_delete_action" />
 
             </LinearLayout>
 
