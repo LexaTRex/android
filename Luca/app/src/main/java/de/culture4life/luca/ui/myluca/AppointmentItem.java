@@ -3,27 +3,27 @@ package de.culture4life.luca.ui.myluca;
 import android.content.Context;
 
 import de.culture4life.luca.R;
-import de.culture4life.luca.testing.TestResult;
+import de.culture4life.luca.document.Document;
 
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 
 public class AppointmentItem extends TestResultItem {
 
-    public AppointmentItem(@NonNull Context context, @NonNull TestResult testResult) {
-        super(context, testResult);
+    public AppointmentItem(@NonNull Context context, @NonNull Document document) {
+        super(context, document);
 
         this.title = context.getString(R.string.appointment_title);
         this.color = ContextCompat.getColor(context, R.color.appointment);
         this.deleteButtonText = context.getString(R.string.appointment_delete_action);
-        String time = context.getString(R.string.test_result_time, getReadableTime(getDateFormatFor(context, testResult), testResult.getResultTimestamp()));
+        String time = context.getString(R.string.document_result_time, getReadableTime(getDateFormatFor(context, document), document.getResultTimestamp()));
 
         topContent.clear();
-        addTopContent(testResult.getFirstName(), "");
-        addTopContent(context.getString(R.string.test_issued_at), time);
+        addTopContent(document.getFirstName(), "");
+        addTopContent(context.getString(R.string.document_issued_at), time);
 
         collapsedContent.clear();
-        addCollapsedContent(context.getString(R.string.appointment_address), testResult.getLastName());
+        addCollapsedContent(context.getString(R.string.appointment_address), document.getLastName());
     }
 
 }

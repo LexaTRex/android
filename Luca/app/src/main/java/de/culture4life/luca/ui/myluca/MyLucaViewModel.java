@@ -11,16 +11,16 @@ import android.webkit.URLUtil;
 
 import de.culture4life.luca.R;
 import de.culture4life.luca.checkin.CheckInManager;
+import de.culture4life.luca.document.Document;
+import de.culture4life.luca.document.DocumentAlreadyImportedException;
+import de.culture4life.luca.document.DocumentExpiredException;
+import de.culture4life.luca.document.DocumentManager;
+import de.culture4life.luca.document.DocumentParsingException;
+import de.culture4life.luca.document.DocumentVerificationException;
+import de.culture4life.luca.document.TestResultPositiveException;
 import de.culture4life.luca.meeting.MeetingManager;
 import de.culture4life.luca.notification.LucaNotificationManager;
 import de.culture4life.luca.registration.RegistrationManager;
-import de.culture4life.luca.testing.TestResult;
-import de.culture4life.luca.testing.TestResultAlreadyImportedException;
-import de.culture4life.luca.testing.TestResultExpiredException;
-import de.culture4life.luca.testing.TestResultParsingException;
-import de.culture4life.luca.testing.TestResultPositiveException;
-import de.culture4life.luca.testing.TestResultVerificationException;
-import de.culture4life.luca.testing.TestingManager;
 import de.culture4life.luca.ui.BaseViewModel;
 import de.culture4life.luca.ui.ViewError;
 import de.culture4life.luca.ui.ViewEvent;
@@ -43,14 +43,14 @@ import timber.log.Timber;
 
 public class MyLucaViewModel extends BaseViewModel implements ImageAnalysis.Analyzer {
 
-    private final TestingManager testingManager;
+    private final DocumentManager documentManager;
     private final LucaNotificationManager notificationManager;
     private final RegistrationManager registrationManager;
 
     private final MutableLiveData<String> userName = new MutableLiveData<>();
     private final MutableLiveData<List<MyLucaListItem>> myLucaItems = new MutableLiveData<>();
-    private final MutableLiveData<ViewEvent<TestResult>> parsedTestResult = new MutableLiveData<>();
-    private final MutableLiveData<ViewEvent<TestResult>> addedTestResult = new MutableLiveData<>();
+    private final MutableLiveData<ViewEvent<Document>> parsedDocument = new MutableLiveData<>();
+    private final MutableLiveData<ViewEvent<Document>> addedDocument = new MutableLiveData<>();
 
     private final BarcodeScanner scanner;
 
@@ -59,7 +59,7 @@ public class MyLucaViewModel extends BaseViewModel implements ImageAnalysis.Anal
 
     public MyLucaViewModel(@NonNull Application application) {
         super(application);
-        this.testingManager = this.application.getTestingManager();
+        this.documentManager = this.application.getTestingManager();
         this.notificationManager = this.application.getNotificationManager();
         this.registrationManager = this.application.getRegistrationManager();
         this.scanner = BarcodeScanning.getClient();
@@ -70,7 +70,7 @@ public class MyLucaViewModel extends BaseViewModel implements ImageAnalysis.Anal
     public Completable initialize() {
         return super.initialize()
                 .andThen(Completable.mergeArray(
-                        testingManager.initialize(application),
+                        documentManager.initialize(application),
                         notificationManager.initialize(application),
                         registrationManager.initialize(application)
                 ))
@@ -100,24 +100,24 @@ public class MyLucaViewModel extends BaseViewModel implements ImageAnalysis.Anal
     }
 
     private Observable<MyLucaListItem> loadListItems() {
-        return testingManager.getOrRestoreTestResults()
+        return documentManager.getOrRestoreDocuments()
                 .flatMapMaybe(this::createListItem)
                 .doOnNext(myLucaListItem -> Timber.d("Created list item: %s", myLucaListItem))
                 .sorted((first, second) -> Long.compare(second.getTimestamp(), first.getTimestamp()));
     }
 
-    private Maybe<MyLucaListItem> createListItem(@NonNull TestResult testResult) {
+    private Maybe<MyLucaListItem> createListItem(@NonNull Document document) {
         return Maybe.fromCallable(() -> {
-            if (testResult.getType() == TestResult.TYPE_GREEN_PASS) {
-                return new GreenPassItem(application, testResult);
-            } else if (testResult.getType() == TestResult.TYPE_APPOINTMENT) {
-                return new AppointmentItem(application, testResult);
-            } else if (testResult.getType() == TestResult.TYPE_VACCINATION) {
-                return new VaccinationItem(application, testResult);
-            } else if (testResult.getType() == TestResult.TYPE_RECOVERY) {
-                return new RecoveryItem(application, testResult);
+            if (document.getType() == Document.TYPE_GREEN_PASS) {
+                return new GreenPassItem(application, document);
+            } else if (document.getType() == Document.TYPE_APPOINTMENT) {
+                return new AppointmentItem(application, document);
+            } else if (document.getType() == Document.TYPE_VACCINATION) {
+                return new VaccinationItem(application, document);
+            } else if (document.getType() == Document.TYPE_RECOVERY) {
+                return new RecoveryItem(application, document);
             } else {
-                return new TestResultItem(application, testResult);
+                return new TestResultItem(application, document);
             }
         });
     }
@@ -125,10 +125,10 @@ public class MyLucaViewModel extends BaseViewModel implements ImageAnalysis.Anal
     public Completable deleteListItem(@NonNull MyLucaListItem myLucaListItem) {
         return Completable.defer(() -> {
             if (myLucaListItem instanceof TestResultItem) {
-                return testingManager.deleteTestResult(((TestResultItem) myLucaListItem).getTestResult().getId())
+                return documentManager.deleteDocument(((TestResultItem) myLucaListItem).getDocument().getId())
                         .andThen(invokeListUpdate());
             } else if (myLucaListItem instanceof GreenPassItem) {
-                return testingManager.deleteTestResult(((GreenPassItem) myLucaListItem).getTestResult().getId())
+                return documentManager.deleteDocument(((GreenPassItem) myLucaListItem).getDocument().getId())
                         .andThen(invokeListUpdate());
             } else {
                 return Completable.error(new IllegalArgumentException("Unable to delete item, unknown type"));
@@ -198,52 +198,52 @@ public class MyLucaViewModel extends BaseViewModel implements ImageAnalysis.Anal
                     notificationManager.vibrate().subscribe();
                 })
                 .flatMapSingle(barcodeData -> {
-                    if (TestingManager.isTestResult(barcodeData)) {
-                        return getEncodedTestResultFromDeepLink(barcodeData);
+                    if (DocumentManager.isTestResult(barcodeData)) {
+                        return getEncodedDocumentFromDeepLink(barcodeData);
                     } else {
                         return Single.just(barcodeData);
                     }
                 })
-                .flatMapCompletable(this::parseAndValidateTestResult);
+                .flatMapCompletable(this::parseAndValidateDocument);
     }
 
-    private Completable parseAndValidateTestResult(@NonNull String encodedTestResult) {
-        return testingManager.parseAndValidateEncodedTestResult(encodedTestResult)
-                .doOnSubscribe(disposable -> Timber.d("Attempting to parse encoded test result: %s", encodedTestResult))
-                .doOnSuccess(testResult -> Timber.d("Parsed test result: %s", testResult))
-                .flatMapCompletable(testResult -> update(parsedTestResult, new ViewEvent<>(testResult)))
+    private Completable parseAndValidateDocument(@NonNull String encodedDocument) {
+        return documentManager.parseAndValidateEncodedDocument(encodedDocument)
+                .doOnSubscribe(disposable -> Timber.d("Attempting to parse encoded document: %s", encodedDocument))
+                .doOnSuccess(testResult -> Timber.d("Parsed document: %s", testResult))
+                .flatMapCompletable(testResult -> update(parsedDocument, new ViewEvent<>(testResult)))
                 .doOnSubscribe(disposable -> {
                     removeError(importError);
                     updateAsSideEffect(showCameraPreview, false);
                     updateAsSideEffect(isLoading, true);
                 })
                 .doOnError(throwable -> {
-                    Timber.w("Unable to parse test result: %s", throwable.toString());
+                    Timber.w("Unable to parse document: %s", throwable.toString());
                     ViewError.Builder errorBuilder = createErrorBuilder(throwable)
-                            .withTitle(R.string.test_import_error_title);
+                            .withTitle(R.string.document_import_error_title);
 
-                    if (throwable instanceof TestResultParsingException) {
-                        if (MeetingManager.isPrivateMeeting(encodedTestResult) || CheckInManager.isSelfCheckInUrl(encodedTestResult)) {
+                    if (throwable instanceof DocumentParsingException) {
+                        if (MeetingManager.isPrivateMeeting(encodedDocument) || CheckInManager.isSelfCheckInUrl(encodedDocument)) {
                             // the user tried to check-in from the wrong tab
-                            errorBuilder.withTitle(R.string.test_import_error_check_in_scanner_title);
-                            errorBuilder.withDescription(R.string.test_import_error_check_in_scanner_description);
-                        } else if (URLUtil.isValidUrl(encodedTestResult) && !TestingManager.isTestResult(encodedTestResult)) {
+                            errorBuilder.withTitle(R.string.document_import_error_check_in_scanner_title);
+                            errorBuilder.withDescription(R.string.document_import_error_check_in_scanner_description);
+                        } else if (URLUtil.isValidUrl(encodedDocument) && !DocumentManager.isTestResult(encodedDocument)) {
                             // data is actually an URL that the user may want to open
-                            errorBuilder.withDescription(R.string.test_import_error_unsupported_but_url_description);
+                            errorBuilder.withDescription(R.string.document_import_error_unsupported_but_url_description);
                             errorBuilder.withResolveLabel(R.string.action_continue);
-                            errorBuilder.withResolveAction(Completable.fromAction(() -> application.openUrl(encodedTestResult)));
+                            errorBuilder.withResolveAction(Completable.fromAction(() -> application.openUrl(encodedDocument)));
                         } else {
-                            errorBuilder.withDescription(R.string.test_import_error_unsupported_description);
+                            errorBuilder.withDescription(R.string.document_import_error_unsupported_description);
                         }
-                    } else if (throwable instanceof TestResultExpiredException) {
-                        errorBuilder.withDescription(R.string.test_import_error_expired_description);
-                    } else if (throwable instanceof TestResultVerificationException) {
-                        switch (((TestResultVerificationException) throwable).getReason()) {
+                    } else if (throwable instanceof DocumentExpiredException) {
+                        errorBuilder.withDescription(R.string.document_import_error_expired_description);
+                    } else if (throwable instanceof DocumentVerificationException) {
+                        switch (((DocumentVerificationException) throwable).getReason()) {
                             case NAME_MISMATCH:
-                                errorBuilder.withDescription(R.string.test_import_error_name_mismatch_description);
+                                errorBuilder.withDescription(R.string.document_import_error_name_mismatch_description);
                                 break;
                             case INVALID_SIGNATURE:
-                                errorBuilder.withDescription(R.string.test_import_error_invalid_signature_description);
+                                errorBuilder.withDescription(R.string.document_import_error_invalid_signature_description);
                                 break;
                         }
                     }
@@ -255,10 +255,10 @@ public class MyLucaViewModel extends BaseViewModel implements ImageAnalysis.Anal
                 .subscribeOn(Schedulers.io());
     }
 
-    public Completable addTestResult(@NonNull TestResult testResult) {
-        return testingManager.redeemTestResult(testResult)
-                .andThen(testingManager.addTestResult(testResult))
-                .andThen(update(addedTestResult, new ViewEvent<>(testResult)))
+    public Completable addDocument(@NonNull Document document) {
+        return documentManager.redeemDocument(document)
+                .andThen(documentManager.addDocument(document))
+                .andThen(update(addedDocument, new ViewEvent<>(document)))
                 .andThen(invokeListUpdate())
                 .doOnSubscribe(disposable -> {
                     removeError(importError);
@@ -266,20 +266,20 @@ public class MyLucaViewModel extends BaseViewModel implements ImageAnalysis.Anal
                 })
                 .doOnError(throwable -> {
                     ViewError.Builder errorBuilder = createErrorBuilder(throwable)
-                            .withTitle(R.string.test_import_error_title);
+                            .withTitle(R.string.document_import_error_title);
 
                     boolean outcomeUnknown = false;
-                    if (throwable instanceof TestResultVerificationException) {
-                        outcomeUnknown = ((TestResultVerificationException) throwable).getReason() == TestResultVerificationException.Reason.OUTCOME_UNKNOWN;
+                    if (throwable instanceof DocumentVerificationException) {
+                        outcomeUnknown = ((DocumentVerificationException) throwable).getReason() == DocumentVerificationException.Reason.OUTCOME_UNKNOWN;
                     }
                     if (throwable instanceof TestResultPositiveException || outcomeUnknown) {
                         errorBuilder
-                                .withTitle(R.string.test_import_error_not_negative_title)
-                                .withDescription(R.string.test_import_error_not_negative_description);
-                    } else if (throwable instanceof TestResultAlreadyImportedException) {
-                        errorBuilder.withDescription(R.string.test_import_error_already_imported_description);
-                    } else if (throwable instanceof TestResultExpiredException) {
-                        errorBuilder.withDescription(R.string.test_import_error_expired_description);
+                                .withTitle(R.string.document_import_error_not_negative_title)
+                                .withDescription(R.string.document_import_error_not_negative_description);
+                    } else if (throwable instanceof DocumentAlreadyImportedException) {
+                        errorBuilder.withDescription(R.string.document_import_error_already_imported_description);
+                    } else if (throwable instanceof DocumentExpiredException) {
+                        errorBuilder.withDescription(R.string.document_import_error_expired_description);
                     }
 
                     importError = errorBuilder.build();
@@ -300,26 +300,26 @@ public class MyLucaViewModel extends BaseViewModel implements ImageAnalysis.Anal
 
     private Completable handleDeepLink(@NonNull String url) {
         return Completable.defer(() -> {
-            if (TestingManager.isTestResult(url)) {
-                return getEncodedTestResultFromDeepLink(url)
-                        .flatMapCompletable(this::parseAndValidateTestResult)
+            if (DocumentManager.isTestResult(url)) {
+                return getEncodedDocumentFromDeepLink(url)
+                        .flatMapCompletable(this::parseAndValidateDocument)
                         .doFinally(() -> application.onDeepLinkHandled(url));
-            } else if (TestingManager.isAppointment(url)) {
-                return parseAndValidateTestResult(url)
+            } else if (DocumentManager.isAppointment(url)) {
+                return parseAndValidateDocument(url)
                         .doFinally(() -> application.onDeepLinkHandled(url));
             }
             return Completable.complete();
         }).doOnComplete(() -> Timber.d("Handled application deep link: %s", url));
     }
 
-    private Single<String> getEncodedTestResultFromDeepLink(@NonNull String url) {
+    private Single<String> getEncodedDocumentFromDeepLink(@NonNull String url) {
         return Single.fromCallable(() -> {
-            if (!TestingManager.isTestResult(url)) {
-                throw new IllegalArgumentException("Unable to get encoded test result from URL");
+            if (!DocumentManager.isTestResult(url)) {
+                throw new IllegalArgumentException("Unable to get encoded document from URL");
             }
             String[] parts = url.split("#", 2);
             if (parts.length != 2) {
-                throw new IllegalArgumentException("Unable to get encoded test result from URL");
+                throw new IllegalArgumentException("Unable to get encoded document from URL");
             }
             return parts[1];
         });
@@ -329,12 +329,12 @@ public class MyLucaViewModel extends BaseViewModel implements ImageAnalysis.Anal
         return myLucaItems;
     }
 
-    public LiveData<ViewEvent<TestResult>> getParsedTestResult() {
-        return parsedTestResult;
+    public LiveData<ViewEvent<Document>> getParsedDocument() {
+        return parsedDocument;
     }
 
-    public LiveData<ViewEvent<TestResult>> getAddedTestResult() {
-        return addedTestResult;
+    public LiveData<ViewEvent<Document>> getAddedDocument() {
+        return addedDocument;
     }
 
     public LiveData<String> getUserName() {

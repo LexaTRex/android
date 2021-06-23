@@ -1,3 +1,9 @@
+# Release 1.8.4
+
+- Bug fix
+
+This update includes a bugfix related to the import of documents.
+
 # Release 1.8.0
 
 - Vaccination proofs and recovery certificate

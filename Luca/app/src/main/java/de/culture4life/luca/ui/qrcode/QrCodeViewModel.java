@@ -160,12 +160,14 @@ public class QrCodeViewModel extends BaseViewModel implements ImageAnalysis.Anal
         return Completable.mergeArray(
                 checkInManager.requestCheckInDataUpdates(CHECK_IN_POLLING_INTERVAL),
                 checkInManager.getCheckInDataAndChanges()
+                        .observeOn(AndroidSchedulers.mainThread())
                         .flatMapCompletable(updatedCheckInData -> Completable.fromAction(() -> {
                             updateAsSideEffect(checkInData, updatedCheckInData);
                             if (isCurrentDestinationId(R.id.qrCodeFragment)) {
                                 navigationController.navigate(R.id.action_qrCodeFragment_to_venueDetailFragmentCheckedIn);
                             }
-                        })));
+                        }))
+        );
     }
 
     public void checkIfContactDataMissing() {

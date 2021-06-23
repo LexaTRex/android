@@ -71,7 +71,7 @@ public class MyLucaListAdapter extends ArrayAdapter<MyLucaListItem> {
         TextView titleTextView = convertView.findViewById(R.id.itemTitleTextView);
         ImageView itemTitleImageView = convertView.findViewById(R.id.itemTitleImageView);
         ImageView barcodeImageView = convertView.findViewById(R.id.qrCodeImageView);
-        Button deleteTestResultButton = convertView.findViewById(R.id.deleteItemButton);
+        Button deleteItemButton = convertView.findViewById(R.id.deleteItemButton);
         ViewGroup collapseLayout = convertView.findViewById(R.id.collapseLayout);
         ViewGroup collapsedContent = convertView.findViewById(R.id.collapsedContent);
 
@@ -80,7 +80,7 @@ public class MyLucaListAdapter extends ArrayAdapter<MyLucaListItem> {
         itemTitleImageView.setImageResource(item.getImageResource());
         barcodeImageView.setImageBitmap(item.getBarcode());
         collapseLayout.setVisibility((item.isExpanded()) ? View.VISIBLE : View.GONE);
-        deleteTestResultButton.setText(item.getDeleteButtonText());
+        deleteItemButton.setText(item.getDeleteButtonText());
 
         setupDynamicContent(item.getTopContent(), topContent);
         setupDynamicContent(item.getCollapsedContent(), collapsedContent);
@@ -89,7 +89,7 @@ public class MyLucaListAdapter extends ArrayAdapter<MyLucaListItem> {
             item.toggleExpanded();
             notifyDataSetChanged();
         });
-        deleteTestResultButton.setOnClickListener(v -> clickListener.onDelete(item));
+        deleteItemButton.setOnClickListener(v -> clickListener.onDelete(item));
 
         return convertView;
     }

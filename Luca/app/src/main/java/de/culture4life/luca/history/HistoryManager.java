@@ -5,12 +5,12 @@ import android.content.Context;
 import de.culture4life.luca.Manager;
 import de.culture4life.luca.checkin.CheckInData;
 import de.culture4life.luca.dataaccess.AccessedTraceData;
+import de.culture4life.luca.document.Document;
 import de.culture4life.luca.meeting.MeetingData;
 import de.culture4life.luca.meeting.MeetingGuestData;
 import de.culture4life.luca.meeting.MeetingManager;
 import de.culture4life.luca.preference.PreferencesManager;
 import de.culture4life.luca.registration.RegistrationData;
-import de.culture4life.luca.testing.TestResult;
 import de.culture4life.luca.ui.venue.children.ChildListItem;
 import de.culture4life.luca.ui.venue.children.ChildListItemContainer;
 
@@ -144,8 +144,8 @@ public class HistoryManager extends Manager {
                 .flatMapCompletable(this::addItem);
     }
 
-    public Completable addTestResultImportedItem(@NonNull TestResult testResult) {
-        return Single.fromCallable(() -> new TestImportedItem(testResult))
+    public Completable addDocumentImportedItem(@NonNull Document document) {
+        return Single.fromCallable(() -> new DocumentImportedItem(document))
                 .flatMapCompletable(this::addItem);
     }
 

@@ -44,6 +44,7 @@ import static de.culture4life.luca.checkin.CheckInManager.KEY_CHILDREN;
 
 public class VenueDetailsViewModel extends BaseViewModel {
 
+    public static final String KEY_LOCATION_CONSENT_GIVEN = "location_consent_given";
     private final SimpleDateFormat readableDateFormat;
 
     private final PreferencesManager preferenceManager;
@@ -286,15 +287,16 @@ public class VenueDetailsViewModel extends BaseViewModel {
         return true;
     }
 
-    private boolean canEnableAutomaticCheckoutActivation() {
-        if (ActivityCompat.checkSelfPermission(application, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            return false;
-        }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q
-                && ActivityCompat.checkSelfPermission(application, Manifest.permission.ACCESS_BACKGROUND_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            return false;
-        }
-        return isLocationServiceEnabled();
+    public Single<Boolean> isLocationConsentGiven() {
+        return preferenceManager.restoreOrDefault(KEY_LOCATION_CONSENT_GIVEN, false);
+    }
+
+    public void setLocationConsentGiven() {
+        modelDisposable.add(
+                preferenceManager.persist(KEY_LOCATION_CONSENT_GIVEN, true)
+                .subscribeOn(Schedulers.io())
+                .subscribe()
+        );
     }
 
     /**
@@ -305,6 +307,7 @@ public class VenueDetailsViewModel extends BaseViewModel {
         if (checkInManager.isAutomaticCheckoutEnabled().blockingGet() || !enableAutomaticCheckoutActivation()) {
             return;
         }
+
         modelDisposable.add(checkInManager.enableAutomaticCheckOut()
                 .andThen(update(shouldEnableAutomaticCheckOut, true))
                 .andThen(startObservingAutomaticCheckOutErrors())
