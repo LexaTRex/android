@@ -3,6 +3,8 @@ package de.culture4life.luca.document.provider;
 import de.culture4life.luca.document.DocumentVerificationException;
 import de.culture4life.luca.registration.RegistrationData;
 
+import javax.annotation.Nonnull;
+
 import androidx.annotation.NonNull;
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Single;
@@ -28,12 +30,15 @@ public abstract class DocumentProvider<DocumentType extends ProvidedDocument> {
 
     public Completable validate(@NonNull DocumentType document, @NonNull RegistrationData registrationData) {
         return Completable.fromAction(() -> {
-            if (!registrationData.getFirstName().equalsIgnoreCase(document.getDocument().getFirstName())) {
-                throw new DocumentVerificationException(NAME_MISMATCH);
-            } else if (!registrationData.getLastName().equalsIgnoreCase(document.getDocument().getLastName())) {
-                throw new DocumentVerificationException(NAME_MISMATCH);
-            }
+            compareTrimmedAndIgnoreCase(registrationData.getFirstName(), document.getDocument().getFirstName());
+            compareTrimmedAndIgnoreCase(registrationData.getLastName(), document.getDocument().getLastName());
         });
+    }
+
+    private void compareTrimmedAndIgnoreCase(@NonNull String s1, @Nonnull String s2) throws DocumentVerificationException {
+        if (!s1.trim().equalsIgnoreCase(s2.trim())) {
+            throw new DocumentVerificationException(NAME_MISMATCH);
+        }
     }
 
 }
