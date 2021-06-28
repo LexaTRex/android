@@ -1,3 +1,9 @@
+# Release 1.8.5
+
+- Bug fix
+
+This update includes a bugfix related to the import of vaccination certificates.
+
 # Release 1.8.4
 
 - Bug fix
