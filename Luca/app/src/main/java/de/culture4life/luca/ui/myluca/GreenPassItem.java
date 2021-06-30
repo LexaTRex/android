@@ -17,6 +17,7 @@ public class GreenPassItem extends MyLucaListItem {
         this.document = document;
 
         this.title = context.getString(R.string.em_green_pass);
+        this.provider = getReadableProvider(context, document.getProvider());
         this.timestamp = document.getImportTimestamp();
         this.barcode = generateQrCode(document.getEncodedData()).blockingGet();
         this.color = ContextCompat.getColor(context, R.color.green_pass);

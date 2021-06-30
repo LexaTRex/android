@@ -11,10 +11,11 @@ import java.text.SimpleDateFormat
  * Item shown on UI for a vaccination certificate
  */
 open class VaccinationItem(context: Context, document: Document) :
-    TestResultItem(context, document) {
+        TestResultItem(context, document) {
 
     init {
         title = context.getString(R.string.document_type_vaccination)
+        provider = getReadableProvider(context, document.provider)
         deleteButtonText = context.getString(R.string.certificate_delete_action)
         topContent.clear()
         setDescriptionAndColor(context, document)
@@ -74,15 +75,15 @@ open class VaccinationItem(context: Context, document: Document) :
 
     private fun getProcedureDescription(context: Context, procedure: Document.Procedure, dateFormat: SimpleDateFormat): String {
         val procedureName = context.getString(
-            when (procedure.type) {
-                Document.Procedure.Type.VACCINATION_COMIRNATY -> R.string.vaccine_comirnaty
-                Document.Procedure.Type.VACCINATION_JANNSEN -> R.string.vaccine_jannsen
-                Document.Procedure.Type.VACCINATION_MODERNA -> R.string.vaccine_moderna
-                Document.Procedure.Type.VACCINATION_VAXZEVRIA -> R.string.vaccine_vaxzevria
-                Document.Procedure.Type.VACCINATION_SPUTNIK_V -> R.string.vaccine_sputnik
-                Document.Procedure.Type.RECOVERY -> R.string.procedure_recovery
-                else -> R.string.unknown
-            }
+                when (procedure.type) {
+                    Document.Procedure.Type.VACCINATION_COMIRNATY -> R.string.vaccine_comirnaty
+                    Document.Procedure.Type.VACCINATION_JANNSEN -> R.string.vaccine_jannsen
+                    Document.Procedure.Type.VACCINATION_MODERNA -> R.string.vaccine_moderna
+                    Document.Procedure.Type.VACCINATION_VAXZEVRIA -> R.string.vaccine_vaxzevria
+                    Document.Procedure.Type.VACCINATION_SPUTNIK_V -> R.string.vaccine_sputnik
+                    Document.Procedure.Type.RECOVERY -> R.string.procedure_recovery
+                    else -> R.string.unknown
+                }
         )
         val time = context.getString(R.string.document_result_time, getReadableTime(dateFormat, procedure.timestamp))
         return time + "\n" + procedureName

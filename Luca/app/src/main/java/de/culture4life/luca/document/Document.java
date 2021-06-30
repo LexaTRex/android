@@ -156,6 +156,10 @@ public class Document {
     private long dateOfBirth;
 
     @Expose
+    @SerializedName("provider")
+    private String provider;
+
+    @Expose
     @SerializedName("encodedData")
     private String encodedData;
 
@@ -257,6 +261,14 @@ public class Document {
         this.dateOfBirth = dateOfBirth;
     }
 
+    public String getProvider() {
+        return provider;
+    }
+
+    public void setProvider(String provider) {
+        this.provider = provider;
+    }
+
     public String getEncodedData() {
         return encodedData;
     }
@@ -306,8 +318,8 @@ public class Document {
     }
 
     /**
-     * The timestamp after which the document should be treated as invalid. Depends on {@link
-     * #type} and {@link #testingTimestamp} or the values set directly from a certificate.
+     * The timestamp after which the document should be treated as invalid. Depends on {@link #type}
+     * and {@link #testingTimestamp} or the values set directly from a certificate.
      */
     public long getExpirationTimestamp() {
         if (expirationTimestamp != 0) {
@@ -317,8 +329,8 @@ public class Document {
     }
 
     /**
-     * The duration in milliseconds after which a document with the specified {@link Type} should
-     * be treated as invalid.
+     * The duration in milliseconds after which a document with the specified {@link Type} should be
+     * treated as invalid.
      */
     public static long getExpirationDuration(@Type int type) {
         switch (type) {
@@ -351,6 +363,7 @@ public class Document {
                 ", firstName='" + firstName + '\'' +
                 ", lastName='" + lastName + '\'' +
                 ", dateOfBirth=" + dateOfBirth +
+                ", provider=" + provider +
                 ", encodedData='" + encodedData + '\'' +
                 ", hashableEncodedData='" + hashableEncodedData + '\'' +
                 ", procedures=" + procedures +

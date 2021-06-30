@@ -23,6 +23,7 @@
 package dgca.verifier.app.decoder
 
 import COSE.HeaderKeys
+import android.text.TextUtils
 import com.fasterxml.jackson.dataformat.cbor.databind.CBORMapper
 import com.upokecenter.cbor.CBORObject
 import dgca.verifier.app.decoder.base45.Base45Decoder
@@ -93,6 +94,9 @@ class DefaultCertificateDecoder(private val base45Decoder: Base45Decoder) :
 
     private fun ByteArray.decodeGreenCertificate(): GreenCertificate? {
         val map = CBORObject.DecodeFromBytes(this)
+
+        val keyIssuer = map[CwtHeaderKeys.KEY_ISSUER.asCBOR()].AsString()
+        if (TextUtils.isEmpty(keyIssuer)) throw IllegalArgumentException("Key issuer is empty: $keyIssuer")
 
         val issuedAt = Instant.ofEpochSecond(map[CwtHeaderKeys.ISSUED_AT.asCBOR()].AsInt64())
         if (issuedAt.isAfter(Instant.now())) throw IllegalArgumentException("IssuedAt not correct: $issuedAt")

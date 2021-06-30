@@ -3,12 +3,14 @@ package de.culture4life.luca.document;
 import de.culture4life.luca.BuildConfig;
 import de.culture4life.luca.LucaUnitTest;
 import de.culture4life.luca.crypto.CryptoManager;
+import de.culture4life.luca.document.provider.appointment.Appointment;
 import de.culture4life.luca.document.provider.opentestcheck.OpenTestCheckDocument;
 import de.culture4life.luca.history.HistoryManager;
 import de.culture4life.luca.location.LocationManager;
 import de.culture4life.luca.network.NetworkManager;
+import de.culture4life.luca.network.pojo.DocumentProviderData;
+import de.culture4life.luca.network.pojo.DocumentProviderDataList;
 import de.culture4life.luca.preference.PreferencesManager;
-import de.culture4life.luca.registration.RegistrationData;
 import de.culture4life.luca.registration.RegistrationManager;
 
 import org.junit.Before;
@@ -16,19 +18,24 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.annotation.Config;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import androidx.test.runner.AndroidJUnit4;
+import io.reactivex.rxjava3.core.Maybe;
+import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.core.Single;
 
+import static de.culture4life.luca.document.provider.appointment.AppointmentProviderTest.VALID_APPOINTMENT;
 import static de.culture4life.luca.document.provider.opentestcheck.OpenTestCheckDocumentProviderTest.EXPIRED_TEST_RESULT_TICKET_IO;
 import static de.culture4life.luca.document.provider.opentestcheck.OpenTestCheckDocumentProviderTest.UNVERIFIED_TEST_RESULT;
 import static de.culture4life.luca.document.provider.opentestcheck.OpenTestCheckDocumentProviderTest.VALID_TEST_RESULT_TICKET_IO;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeTrue;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.when;
 
 @Config(sdk = 28)
 @RunWith(AndroidJUnit4.class)
@@ -53,7 +60,7 @@ public class DocumentManagerTest extends LucaUnitTest {
         cryptoManager = spy(new CryptoManager(preferencesManager, networkManager));
         registrationManager = spy(new RegistrationManager(preferencesManager, networkManager, cryptoManager));
 
-        documentManager = spy(new DocumentManager(preferencesManager, networkManager, historyManager, registrationManager, cryptoManager));
+        documentManager = spy(new DocumentManager(preferencesManager, networkManager, historyManager, cryptoManager, registrationManager));
         documentManager.initialize(application).blockingAwait();
 
         document = new Document();
@@ -111,13 +118,8 @@ public class DocumentManagerTest extends LucaUnitTest {
     public void reimportDocuments_validDocuments_reImportsDocuments() {
         assumeTrue("Only run on debug where we ignore the expiry time", BuildConfig.DEBUG);
 
-        Document validDocument = new OpenTestCheckDocument(VALID_TEST_RESULT_TICKET_IO).getDocument();
+        Document validDocument = new Appointment(VALID_APPOINTMENT).getDocument();
         Document invalidDocument = new OpenTestCheckDocument(UNVERIFIED_TEST_RESULT).getDocument();
-
-        RegistrationData registrationData = new RegistrationData();
-        registrationData.setFirstName("Gianluca");
-        registrationData.setLastName("Frontzek");
-        when(registrationManager.getOrCreateRegistrationData()).thenReturn(Single.just(registrationData));
 
         documentManager.addDocument(validDocument)
                 .andThen(documentManager.addDocument(invalidDocument))
@@ -125,6 +127,7 @@ public class DocumentManagerTest extends LucaUnitTest {
                 .andThen(documentManager.getOrRestoreDocuments())
                 .map(Document::getId)
                 .test()
+                .awaitDone(5, TimeUnit.SECONDS)
                 .assertValue(validDocument.getId());
     }
 
@@ -184,6 +187,54 @@ public class DocumentManagerTest extends LucaUnitTest {
                 .andThen(documentManager.getOrRestoreDocuments())
                 .test()
                 .assertValueCount(1);
+    }
+
+    @Test
+    public void getDocumentProviderData_cachedFingerprint_emitsMatchingCachedData() {
+        String cachedFingerprint = "1";
+        DocumentProviderDataList cachedDataList = new DocumentProviderDataList(Collections.singletonList(
+                new DocumentProviderData("", "", cachedFingerprint)
+        ));
+        doReturn(Maybe.just(cachedDataList)).when(documentManager).restoreDocumentProviderDataListIfAvailable();
+        doReturn(Single.error(new IllegalStateException("Should not be subscribed"))).when(documentManager).fetchDocumentProviderDataList();
+
+        documentManager.getDocumentProviderData(cachedFingerprint)
+                .test()
+                .assertValue(documentProviderData -> documentProviderData.getFingerprint().equals(cachedFingerprint));
+    }
+
+    @Test
+    public void getDocumentProviderData_newFingerprint_emitsMatchingFetchedDataAndCachesData() {
+        String fetchedFingerprint = "2";
+        DocumentProviderDataList fetchedDataList = new DocumentProviderDataList(Collections.singletonList(
+                new DocumentProviderData("", "", fetchedFingerprint)
+        ));
+        doReturn(Single.just(fetchedDataList)).when(documentManager).fetchDocumentProviderDataList();
+
+        documentManager.getDocumentProviderData(fetchedFingerprint)
+                .test()
+                .assertValue(documentProviderData -> documentProviderData.getFingerprint().equals(fetchedFingerprint));
+
+        documentManager.restoreDocumentProviderDataListIfAvailable()
+                .flatMapObservable(Observable::fromIterable)
+                .test()
+                .assertValue(documentProviderData -> fetchedFingerprint.equals(documentProviderData.getFingerprint()));
+    }
+
+    @Test
+    public void getDocumentProviderData_unknownFingerprint_emitsAllFetchedData() {
+        String fetchedFingerprint = "2";
+        String unknownFingerprint = "";
+        DocumentProviderDataList fetchedDataList = new DocumentProviderDataList(Collections.singletonList(
+                new DocumentProviderData("", "", fetchedFingerprint)
+        ));
+        doReturn(Single.just(fetchedDataList)).when(documentManager).fetchDocumentProviderDataList();
+
+        documentManager.getDocumentProviderData(unknownFingerprint)
+                .toList()
+                .map(List::size)
+                .test()
+                .assertValue(fetchedDataList.size());
     }
 
     @Test

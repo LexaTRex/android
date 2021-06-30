@@ -7,6 +7,7 @@ import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.StrictMode;
 import android.text.SpannedString;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
@@ -93,8 +94,15 @@ public abstract class BaseFragment<ViewModelType extends BaseViewModel> extends 
         } catch (Exception e) {
             Timber.w("No navigation controller available");
         }
-        // TODO: 08.01.21 java.lang.IllegalStateException: Cannot invoke observe on a background thread
-        //  happened on emulator twice
+
+        // temporarily allow disk reads and writes
+        StrictMode.ThreadPolicy previousThreadPolicy = StrictMode.getThreadPolicy();
+        StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder(previousThreadPolicy)
+                .permitDiskReads()
+                .permitDiskWrites()
+                .build());
+
+        // TODO: 08.01.21 java.lang.IllegalStateException: Cannot invoke observe on a background thread; happened on emulator twice
         initializeViewModel()
                 .observeOn(AndroidSchedulers.mainThread())
                 .andThen(initializeViews())
@@ -103,6 +111,9 @@ public abstract class BaseFragment<ViewModelType extends BaseViewModel> extends 
                         () -> Timber.d("Initialized %s with %s", this, viewModel),
                         throwable -> Timber.e("Unable to initialize %s with %s: %s", this, viewModel, throwable.toString())
                 );
+
+        // re-enable previous thread policy
+        StrictMode.setThreadPolicy(previousThreadPolicy);
     }
 
     @CallSuper

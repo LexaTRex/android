@@ -78,8 +78,6 @@ public class VenueChildrenFragment extends BaseFragment<VenueChildrenViewModel> 
         View dialogView = LayoutInflater.from(getContext()).inflate(R.layout.child_name_dialog, viewGroup, false);
 
         new BaseDialogFragment(new MaterialAlertDialogBuilder(getContext())
-                .setTitle(R.string.venue_children_title)
-                .setMessage(R.string.venue_children_add_description)
                 .setView(dialogView)
                 .setPositiveButton(R.string.action_add, (dialog, i) -> {
                     TextInputLayout childNameTextInputLayout = dialogView.findViewById(R.id.childNameTextInputLayout);

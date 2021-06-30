@@ -144,50 +144,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="24dp" />
 
-                <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:baselineAligned="false">
-
-                    <de.culture4life.luca.ui.registration.RegistrationTextInputLayout
-                            android:id="@+id/streetLayout"
-                            style="@style/TextInputLayout.Luca.RegistrationTextBox"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_marginEnd="@dimen/spacing_default"
-                            android:layout_weight="2"
-                            android:hint="@string/registration_street"
-                            tools:ignore="MissingConstraints">
-
-                        <com.google.android.material.textfield.TextInputEditText
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:imeOptions="actionNext"
-                                android:inputType="text"
-                                android:singleLine="true" />
-
-                    </de.culture4life.luca.ui.registration.RegistrationTextInputLayout>
-
-                    <de.culture4life.luca.ui.registration.RegistrationTextInputLayout
-                            android:id="@+id/houseNumberLayout"
-                            style="@style/TextInputLayout.Luca.RegistrationTextBox"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:hint="@string/registration_house_number"
-                            tools:ignore="MissingConstraints">
-
-                        <com.google.android.material.textfield.TextInputEditText
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:imeOptions="actionNext"
-                                android:inputType="text"
-                                android:singleLine="true" />
-
-                    </de.culture4life.luca.ui.registration.RegistrationTextInputLayout>
-
-                </LinearLayout>
+                <include layout="@layout/fragment_street_house_number" />
 
                 <de.culture4life.luca.ui.registration.RegistrationTextInputLayout
                         android:id="@+id/postalCodeLayout"

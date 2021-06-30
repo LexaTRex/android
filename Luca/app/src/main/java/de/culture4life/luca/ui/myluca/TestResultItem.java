@@ -41,6 +41,7 @@ public class TestResultItem extends MyLucaListItem {
         this.document = document;
 
         this.title = getReadableOutcome(context, document);
+        this.provider = getReadableProvider(context, document.getProvider());
         this.barcode = generateQrCode(document.getEncodedData()).blockingGet();
         this.color = getColor(context, document);
         this.deleteButtonText = context.getString(R.string.document_delete_action);

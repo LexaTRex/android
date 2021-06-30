@@ -2,7 +2,6 @@ package de.culture4life.luca.ui;
 
 import android.app.Application;
 import android.content.ActivityNotFoundException;
-import android.content.Intent;
 
 import com.tbruyelle.rxpermissions3.Permission;
 
@@ -13,7 +12,6 @@ import de.culture4life.luca.document.DocumentManager;
 import de.culture4life.luca.meeting.MeetingManager;
 import de.culture4life.luca.notification.LucaNotificationManager;
 import de.culture4life.luca.preference.PreferencesManager;
-import de.culture4life.luca.ui.splash.SplashActivity;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -297,9 +295,7 @@ public abstract class BaseViewModel extends AndroidViewModel {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(() -> {
                     Timber.i("Account deleted");
-                    Intent intent = new Intent(application, SplashActivity.class);
-                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                    application.startActivity(intent);
+                    application.restart();
                 }, throwable -> {
                     Timber.w("Unable to delete account: %s", throwable);
                     deleteAccountError = createErrorBuilder(throwable)

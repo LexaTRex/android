@@ -70,6 +70,7 @@ public class UbirchDocument extends ProvidedDocument {
         document.setResultTimestamp(document.getTestingTimestamp());
         document.setImportTimestamp(System.currentTimeMillis());
         document.setId(UUID.nameUUIDFromBytes(toCompactJson().getBytes()).toString());
+        document.setProvider("Ubirch");
         document.setEncodedData(url);
         document.setHashableEncodedData(toCompactJson());
     }

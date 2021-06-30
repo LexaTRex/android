@@ -339,6 +339,7 @@
     <string name="appointment_title">Appointment</string>
     <string name="appointment_address">Address:</string>
     <string name="birthday_label">Date of birth:</string>
+    <string name="provider_name_eu_dcc">EU Digital COVID Certificate</string>
 
     <!-- Phone Number Verification -->
     <string name="verification_request_new_tan_action">Request new TAN</string>

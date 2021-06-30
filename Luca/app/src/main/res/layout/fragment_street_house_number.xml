@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+    <de.culture4life.luca.ui.registration.RegistrationTextInputLayout
+            android:id="@+id/streetLayout"
+            style="@style/TextInputLayout.Luca.RegistrationTextBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/registration_street">
+
+        <com.google.android.material.textfield.TextInputEditText
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:imeOptions="actionNext"
+                android:inputType="text"
+                android:singleLine="true" />
+
+    </de.culture4life.luca.ui.registration.RegistrationTextInputLayout>
+
+    <de.culture4life.luca.ui.registration.RegistrationTextInputLayout
+            android:id="@+id/houseNumberLayout"
+            style="@style/TextInputLayout.Luca.RegistrationTextBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/registration_house_number">
+
+        <com.google.android.material.textfield.TextInputEditText
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:imeOptions="actionNext"
+                android:inputType="text"
+                android:singleLine="true" />
+
+    </de.culture4life.luca.ui.registration.RegistrationTextInputLayout>
+
+</LinearLayout>

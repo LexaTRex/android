@@ -52,8 +52,6 @@ public class MeetingViewModel extends BaseViewModel {
     private final MutableLiveData<String> checkedInMemberNames = new MutableLiveData<>();
     private final MutableLiveData<String> checkedOutMemberNames = new MutableLiveData<>();
 
-    private long meetingCreationTimestamp;
-
     @Nullable
     private ViewError meetingError;
 
@@ -65,7 +63,6 @@ public class MeetingViewModel extends BaseViewModel {
         membersCount.setValue("0/0");
         checkedInMemberNames.setValue("");
         checkedOutMemberNames.setValue("");
-        meetingCreationTimestamp = System.currentTimeMillis();
     }
 
     @Override
@@ -98,7 +95,9 @@ public class MeetingViewModel extends BaseViewModel {
 
     private Completable keepUpdatingMeetingDuration() {
         return Observable.interval(0, 1, TimeUnit.SECONDS)
-                .map(tick -> System.currentTimeMillis() - meetingCreationTimestamp)
+                .flatMapMaybe(tick -> meetingManager.getCurrentMeetingDataIfAvailable())
+                .map(meetingData -> System.currentTimeMillis() - meetingData.getCreationTimestamp())
+                .defaultIfEmpty(0L)
                 .map(VenueDetailsViewModel::getReadableDuration)
                 .flatMapCompletable(readableDuration -> update(duration, readableDuration));
     }
@@ -130,7 +129,6 @@ public class MeetingViewModel extends BaseViewModel {
                     updateAsSideEffect(checkedInMemberNames, HistoryManager.createUnorderedList(checkedInList));
                     updateAsSideEffect(checkedOutMemberNames, HistoryManager.createUnorderedList(checkedOutList));
                     updateAsSideEffect(membersCount, checkedInList.size() + "/" + meetingData.getGuestData().size());
-                    meetingCreationTimestamp = meetingData.getCreationTimestamp();
                 }));
     }
 

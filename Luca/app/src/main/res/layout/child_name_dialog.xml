@@ -6,26 +6,48 @@
         android:layout_height="wrap_content"
         android:padding="?dialogPreferredPadding">
 
-    <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/childNameTextInputLayout"
-            style="@style/TextInputLayout.Luca.RegistrationTextBox"
+    <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textColorHint="@color/secondaryColor"
-            android:hint="@string/venue_children_name"
-            android:focusedByDefault="true"
-            app:hintTextColor="@color/secondaryColor"
-            app:boxStrokeColor="@color/secondaryColor"
-            tools:targetApi="o">
+            android:orientation="vertical">
 
-        <com.google.android.material.textfield.TextInputEditText
+        <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textColor="@android:color/black"
-                android:singleLine="true"
-                android:maxLines="1"
-                android:maxLength="32" />
+                android:layout_marginBottom="@dimen/spacing_small"
+                android:text="@string/venue_children_title"
+                android:textColor="@color/secondaryColor"
+                style="@style/TextAppearance.Luca.Headline2" />
 
-    </com.google.android.material.textfield.TextInputLayout>
+        <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/spacing_default"
+                android:text="@string/venue_children_add_description"
+                style="@style/MaterialAlertDialog.Luca.Body.Text" />
+
+        <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/childNameTextInputLayout"
+                style="@style/TextInputLayout.Luca.RegistrationTextBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColorHint="@color/secondaryColor"
+                android:hint="@string/venue_children_name"
+                android:focusedByDefault="true"
+                app:hintTextColor="@color/secondaryColor"
+                app:boxStrokeColor="@color/secondaryColor"
+                tools:targetApi="o">
+
+            <com.google.android.material.textfield.TextInputEditText
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textColor="@android:color/black"
+                    android:singleLine="true"
+                    android:maxLines="1"
+                    android:maxLength="32" />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+    </LinearLayout>
 
 </ScrollView>

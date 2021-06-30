@@ -21,6 +21,9 @@ import de.culture4life.luca.document.provider.opentestcheck.OpenTestCheckDocumen
 import de.culture4life.luca.document.provider.ubirch.UbirchDocumentProvider;
 import de.culture4life.luca.history.HistoryManager;
 import de.culture4life.luca.network.NetworkManager;
+import de.culture4life.luca.network.endpoints.LucaEndpointsV3;
+import de.culture4life.luca.network.pojo.DocumentProviderData;
+import de.culture4life.luca.network.pojo.DocumentProviderDataList;
 import de.culture4life.luca.preference.PreferencesManager;
 import de.culture4life.luca.registration.RegistrationManager;
 import de.culture4life.luca.util.TimeUtil;
@@ -43,32 +46,32 @@ public class DocumentManager extends Manager {
 
     public static final String KEY_DOCUMENTS = "test_results";
     public static final String KEY_DOCUMENT_TAG = "test_result_tag_";
+    public static final String KEY_PROVIDER_DATA = "document_provider_data";
     private static final byte[] DOCUMENT_REDEEM_HASH_SUFFIX = "testRedeemCheck".getBytes(StandardCharsets.UTF_8);
 
     private final PreferencesManager preferencesManager;
     private final NetworkManager networkManager;
     private final HistoryManager historyManager;
-    private final RegistrationManager registrationManager;
     private final CryptoManager cryptoManager;
+    private final RegistrationManager registrationManager;
 
     private final AppointmentProvider appointmentProvider;
     private final UbirchDocumentProvider ubirchDocumentProvider;
     private final OpenTestCheckDocumentProvider openTestCheckDocumentProvider;
-    private final EudccDocumentProvider eudccDocumentProvider;
+    private EudccDocumentProvider eudccDocumentProvider;
     private BaercodeDocumentProvider baercodeDocumentProvider;
 
     private Documents documents;
 
-    public DocumentManager(@NonNull PreferencesManager preferencesManager, @NonNull NetworkManager networkManager, @NonNull HistoryManager historyManager, @NonNull RegistrationManager registrationManager, @NonNull CryptoManager cryptoManager) {
+    public DocumentManager(@NonNull PreferencesManager preferencesManager, @NonNull NetworkManager networkManager, @NonNull HistoryManager historyManager, @NonNull CryptoManager cryptoManager, @NonNull RegistrationManager registrationManager) {
         this.preferencesManager = preferencesManager;
         this.networkManager = networkManager;
         this.historyManager = historyManager;
-        this.registrationManager = registrationManager;
         this.cryptoManager = cryptoManager;
+        this.registrationManager = registrationManager;
         this.appointmentProvider = new AppointmentProvider();
         this.ubirchDocumentProvider = new UbirchDocumentProvider();
-        this.openTestCheckDocumentProvider = new OpenTestCheckDocumentProvider();
-        this.eudccDocumentProvider = new EudccDocumentProvider();
+        this.openTestCheckDocumentProvider = new OpenTestCheckDocumentProvider(this);
     }
 
     @Override
@@ -81,6 +84,7 @@ public class DocumentManager extends Manager {
                 cryptoManager.initialize(context)
         ).andThen(deleteExpiredDocuments())
                 .doOnComplete(() -> {
+                    this.eudccDocumentProvider = new EudccDocumentProvider(context);
                     this.baercodeDocumentProvider = new BaercodeDocumentProvider(context);
                     Completable.fromAction(() -> this.baercodeDocumentProvider.downloadRequiredFiles())
                             .subscribeOn(Schedulers.io())
@@ -227,6 +231,7 @@ public class DocumentManager extends Manager {
                 .flatMapCompletable(encodedDocuments -> clearDocuments()
                         .andThen(Observable.fromIterable(encodedDocuments)
                                 .flatMapCompletable(encodedDocument -> parseAndValidateEncodedDocument(encodedDocument)
+                                        .doOnSuccess(document -> Timber.d("Re-importing document: %s", document))
                                         .flatMapCompletable(this::addDocument)
                                         .doOnError(throwable -> Timber.w("Unable to re-import document: %s", throwable.toString()))
                                         .onErrorComplete())));
@@ -258,6 +263,42 @@ public class DocumentManager extends Manager {
                 .toList()
                 .map(Documents::new)
                 .flatMapCompletable(this::persistDocument);
+    }
+
+    /**
+     * Will emit the {@link DocumentProviderData} with a matching fingerprint or all available data
+     * if no fingerprint matches.
+     */
+    public Observable<DocumentProviderData> getDocumentProviderData(@NonNull String fingerprint) {
+        Observable<DocumentProviderData> restoredData = restoreDocumentProviderDataListIfAvailable()
+                .flatMapObservable(Observable::fromIterable);
+
+        Observable<DocumentProviderData> fetchedData = fetchDocumentProviderDataList()
+                .flatMap(documentProviderData -> persistDocumentProviderDataList(documentProviderData)
+                        .andThen(Single.just(documentProviderData)))
+                .flatMapObservable(Observable::fromIterable)
+                .cache();
+
+        return getDocumentProviderData(restoredData, fingerprint) // find fingerprint in previously persisted data
+                .switchIfEmpty(getDocumentProviderData(fetchedData, fingerprint)) // find fingerprint in fetched data
+                .switchIfEmpty(fetchedData); // fingerprint not found, emit all fetched data
+    }
+
+    public Observable<DocumentProviderData> getDocumentProviderData(Observable<DocumentProviderData> providerData, @NonNull String fingerprint) {
+        return providerData.filter(documentProviderData -> fingerprint.equals(documentProviderData.getFingerprint()));
+    }
+
+    protected Single<DocumentProviderDataList> fetchDocumentProviderDataList() {
+        return networkManager.getLucaEndpointsV3()
+                .flatMap(LucaEndpointsV3::getDocumentProviders);
+    }
+
+    public Maybe<DocumentProviderDataList> restoreDocumentProviderDataListIfAvailable() {
+        return preferencesManager.restoreIfAvailable(KEY_PROVIDER_DATA, DocumentProviderDataList.class);
+    }
+
+    protected Completable persistDocumentProviderDataList(@NonNull DocumentProviderDataList documentProviderData) {
+        return preferencesManager.persist(KEY_PROVIDER_DATA, documentProviderData);
     }
 
     /**

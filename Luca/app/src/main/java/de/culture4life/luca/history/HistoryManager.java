@@ -198,6 +198,7 @@ public class HistoryManager extends Manager {
     private Observable<HistoryItem> restoreItemsFromPreferences() {
         return preferencesManager.restoreOrDefault(KEY_HISTORY_ITEMS, new HistoryItemContainer())
                 .flatMapObservable(Observable::fromIterable)
+                .distinct(historyItem -> historyItem.getRelatedId() + historyItem.getType())
                 .sorted((first, second) -> Long.compare(second.getTimestamp(), first.getTimestamp()))
                 .doOnSubscribe(disposable -> Timber.d("Restoring items from preferences"));
     }

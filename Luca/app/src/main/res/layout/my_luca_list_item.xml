@@ -24,8 +24,7 @@
                 android:id="@+id/constraintLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:padding="@dimen/spacing_default"
-                android:animateLayoutChanges="true">
+                android:padding="@dimen/spacing_default">
 
             <ImageView
                     android:id="@+id/itemTitleImageView"
@@ -86,6 +85,19 @@
                         android:adjustViewBounds="true"
                         android:scaleType="fitCenter"
                         android:padding="@dimen/spacing_default" />
+
+                <TextView
+                        android:id="@+id/providerTextView"
+                        style="@style/TextAppearance.Luca.Body2"
+                        android:layout_marginBottom="8dp"
+                        android:textColor="@android:color/black"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:ellipsize="end"
+                        android:maxLines="2"
+                        tools:text="@string/unknown"
+                        android:gravity="center" />
+
 
                 <com.google.android.material.button.MaterialButton
                         android:id="@+id/deleteItemButton"
