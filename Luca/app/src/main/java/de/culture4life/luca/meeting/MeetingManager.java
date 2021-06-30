@@ -144,7 +144,8 @@ public class MeetingManager extends Manager {
                             return Completable.error(throwable);
                         })
                         .andThen(addMeetingToHistory(meetingData))
-                        .andThen(addCurrentMeetingDataToArchive()));
+                        .andThen(addCurrentMeetingDataToArchive())
+                        .andThen(cryptoManager.deleteMeetingEphemeralKeyPair(meetingData.getLocationId())));
     }
 
     private Completable addMeetingToHistory(@NonNull MeetingData meetingData) {

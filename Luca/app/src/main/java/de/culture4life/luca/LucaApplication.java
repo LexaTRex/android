@@ -6,16 +6,20 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Build;
+import android.os.StrictMode;
 import android.provider.Settings;
 
 import de.culture4life.luca.checkin.CheckInManager;
 import de.culture4life.luca.crypto.CryptoManager;
 import de.culture4life.luca.dataaccess.DataAccessManager;
+import de.culture4life.luca.document.DocumentManager;
 import de.culture4life.luca.history.HistoryManager;
 import de.culture4life.luca.location.GeofenceManager;
 import de.culture4life.luca.location.LocationManager;
@@ -26,7 +30,6 @@ import de.culture4life.luca.notification.LucaNotificationManager;
 import de.culture4life.luca.preference.PreferencesManager;
 import de.culture4life.luca.registration.RegistrationManager;
 import de.culture4life.luca.service.LucaService;
-import de.culture4life.luca.document.DocumentManager;
 import de.culture4life.luca.ui.ViewError;
 import de.culture4life.luca.ui.dialog.BaseDialogFragment;
 import de.culture4life.luca.util.TimeUtil;
@@ -86,6 +89,13 @@ public class LucaApplication extends MultiDexApplication {
         if (BuildConfig.DEBUG) {
             Timber.plant(new Timber.DebugTree());
             RxJavaAssemblyTracking.enable();
+
+            StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder()
+                    .detectDiskReads()
+                    .detectDiskWrites()
+                    .detectNetwork()
+                    .penaltyLog()
+                    .build());
         }
 
         preferencesManager = new PreferencesManager();
@@ -99,7 +109,7 @@ public class LucaApplication extends MultiDexApplication {
         meetingManager = new MeetingManager(preferencesManager, networkManager, locationManager, historyManager, cryptoManager);
         checkInManager = new CheckInManager(preferencesManager, networkManager, geofenceManager, locationManager, historyManager, cryptoManager, notificationManager);
         dataAccessManager = new DataAccessManager(preferencesManager, networkManager, notificationManager, checkInManager, historyManager, cryptoManager);
-        documentManager = new DocumentManager(preferencesManager, networkManager, historyManager, registrationManager, cryptoManager);
+        documentManager = new DocumentManager(preferencesManager, networkManager, historyManager, cryptoManager, registrationManager);
 
         applicationDisposable = new CompositeDisposable();
 
@@ -130,11 +140,17 @@ public class LucaApplication extends MultiDexApplication {
         super.onCreate();
         Timber.d("Creating application");
         if (!isRunningUnitTests()) {
-            long t = System.currentTimeMillis();
-            initializeBlocking().blockingAwait(10, TimeUnit.SECONDS);
-            initializeAsync().subscribeOn(Schedulers.io()).doFinally(() -> {
-                Timber.d("initialization took %d ms", (System.currentTimeMillis() - t));
-            }).subscribe();
+            long initializationStartTimestamp = System.currentTimeMillis();
+            initializeBlocking()
+                    .subscribeOn(Schedulers.io())
+                    .doOnComplete(() -> Timber.d("Blocking initialization completed after %d ms", (System.currentTimeMillis() - initializationStartTimestamp)))
+                    .blockingAwait(10, TimeUnit.SECONDS);
+
+            initializeAsync()
+                    .subscribeOn(Schedulers.io())
+                    .doOnComplete(() -> Timber.d("Async initialization completed after %d ms", (System.currentTimeMillis() - initializationStartTimestamp)))
+                    .subscribe();
+
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
         }
         Timber.d("Application created");
@@ -182,7 +198,7 @@ public class LucaApplication extends MultiDexApplication {
                 .subscribeOn(Schedulers.io())
                 .subscribe(
                         timestampOffset -> {
-                            Timber.d("Timestamp offset: %d", timestampOffset);
+                            Timber.d("Timestamp offset: %d ms", timestampOffset);
                             if (timestampOffset > MAXIMUM_TIMESTAMP_OFFSET) {
                                 showErrorAsDialog(new ViewError.Builder(this)
                                         .withTitle(R.string.error_timestamp_offset_title)
@@ -308,6 +324,15 @@ public class LucaApplication extends MultiDexApplication {
         stopService();
         Timber.i("Stopping application");
         System.exit(0);
+    }
+
+    public void restart() {
+        PackageManager packageManager = getPackageManager();
+        Intent intent = packageManager.getLaunchIntentForPackage(getPackageName());
+        ComponentName componentName = intent.getComponent();
+        Intent mainIntent = Intent.makeRestartActivityTask(componentName);
+        startActivity(mainIntent);
+        stop();
     }
 
     public void openUrl(@NonNull String url) {

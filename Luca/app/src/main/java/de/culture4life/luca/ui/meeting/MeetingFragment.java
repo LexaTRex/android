@@ -90,16 +90,6 @@ public class MeetingFragment extends BaseFragment<MeetingViewModel> {
                 }));
     }
 
-    private void showEndMeetingConfirmationDialog() {
-        new BaseDialogFragment(new MaterialAlertDialogBuilder(getActivity())
-                .setTitle(R.string.meeting_end_confirmation_heading)
-                .setMessage(R.string.meeting_end_confirmation_description)
-                .setPositiveButton(R.string.action_ok, (dialog, which) -> viewModel.onMeetingEndRequested())
-                .setNegativeButton(R.string.action_cancel, (dialog, which) -> {
-                    // do nothing
-                })).show();
-    }
-
     private void showMeetingDescriptionInfo() {
         new BaseDialogFragment(new MaterialAlertDialogBuilder(getActivity())
                 .setTitle(R.string.meeting_heading)

@@ -8,14 +8,12 @@ import com.google.common.util.concurrent.ListenableFuture;
 import android.util.Size;
 import android.view.View;
 import android.widget.ImageView;
-import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import de.culture4life.luca.R;
 import de.culture4life.luca.document.Document;
 import de.culture4life.luca.ui.BaseFragment;
-import de.culture4life.luca.ui.UiUtil;
 import de.culture4life.luca.ui.dialog.BaseDialogFragment;
 
 import java.util.concurrent.ExecutionException;
@@ -30,14 +28,14 @@ import androidx.camera.lifecycle.ProcessCameraProvider;
 import androidx.camera.view.PreviewView;
 import androidx.core.content.ContextCompat;
 import androidx.lifecycle.LifecycleOwner;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Maybe;
 import io.reactivex.rxjava3.core.Single;
 import io.reactivex.rxjava3.disposables.Disposable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 import timber.log.Timber;
-
-import static androidx.core.view.ViewCompat.IMPORTANT_FOR_ACCESSIBILITY_NO;
 
 public class MyLucaFragment extends BaseFragment<MyLucaViewModel> implements MyLucaListAdapter.MyLucaListClickListener {
 
@@ -49,7 +47,7 @@ public class MyLucaFragment extends BaseFragment<MyLucaViewModel> implements MyL
     private TextView emptyTitleTextView;
     private TextView emptyDescriptionTextView;
     private ImageView emptyImageView;
-    private ListView myLucaListView;
+    private RecyclerView myLucaRecyclerView;
     private MyLucaListAdapter myLucaListAdapter;
     private MaterialButton importTestButton;
 
@@ -90,14 +88,10 @@ public class MyLucaFragment extends BaseFragment<MyLucaViewModel> implements MyL
         TextView headingTextView = getView().findViewById(R.id.headingTextView);
         observe(viewModel.getUserName(), headingTextView::setText);
 
-        myLucaListView = getView().findViewById(R.id.myLucaListView);
-        View paddingView = new View(getContext());
-        paddingView.setMinimumHeight((int) UiUtil.convertDpToPixel(16, getContext()));
-        paddingView.setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);
-        myLucaListView.addHeaderView(paddingView);
-
-        myLucaListAdapter = new MyLucaListAdapter(getContext(), myLucaListView.getId(), this);
-        myLucaListView.setAdapter(myLucaListAdapter);
+        myLucaRecyclerView = getView().findViewById(R.id.myLucaRecyclerView);
+        myLucaListAdapter = new MyLucaListAdapter(this);
+        myLucaRecyclerView.setAdapter(myLucaListAdapter);
+        myLucaRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
         observe(viewModel.getMyLucaItems(), items -> myLucaListAdapter.setItems(items));
     }
@@ -113,7 +107,7 @@ public class MyLucaFragment extends BaseFragment<MyLucaViewModel> implements MyL
             emptyTitleTextView.setVisibility(emptyStateVisibility);
             emptyDescriptionTextView.setVisibility(emptyStateVisibility);
             emptyImageView.setVisibility(emptyStateVisibility);
-            myLucaListView.setVisibility(contentVisibility);
+            myLucaRecyclerView.setVisibility(contentVisibility);
         });
     }
 
@@ -197,7 +191,7 @@ public class MyLucaFragment extends BaseFragment<MyLucaViewModel> implements MyL
         }
         scanDocumentHintTextView.setVisibility(View.GONE);
         qrCodeCardView.setVisibility(View.GONE);
-        myLucaListView.setVisibility(View.VISIBLE);
+        myLucaRecyclerView.setVisibility(View.VISIBLE);
         importTestButton.setText(R.string.document_import_action);
     }
 

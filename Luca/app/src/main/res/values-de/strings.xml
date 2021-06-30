@@ -333,6 +333,7 @@
     <string name="appointment_title">Termin</string>
     <string name="appointment_address">Adresse:</string>
     <string name="birthday_label">Geburtsdatum:</string>
+    <string name="provider_name_eu_dcc">Digitales COVID-Zertifikat der EU</string>
 
     <!-- Phone Number Verification -->
     <string name="verification_request_new_tan_action">TAN anfordern</string>

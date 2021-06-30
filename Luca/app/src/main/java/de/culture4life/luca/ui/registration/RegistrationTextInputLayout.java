@@ -19,10 +19,12 @@ public class RegistrationTextInputLayout extends TextInputLayout {
 
     public RegistrationTextInputLayout(@NonNull Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
+        setErrorIconDrawable(0);
     }
 
     public RegistrationTextInputLayout(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
+        setErrorIconDrawable(0);
     }
 
     public void hideError() {

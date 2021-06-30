@@ -1,3 +1,11 @@
+# Release 1.9.0
+
+- Bug fixes and improvement
+- Text and UI adjustments
+- In-App rating
+
+This update includes bug fixes and UI improvements that optimize usage. Additionally, it is now possible to give in-app ratings.
+
 # Release 1.8.5
 
 - Bug fix

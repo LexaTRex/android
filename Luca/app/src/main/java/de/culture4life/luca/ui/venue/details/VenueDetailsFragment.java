@@ -25,6 +25,7 @@ import de.culture4life.luca.util.AccessibilityServiceUtil;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import five.star.me.FiveStarMe;
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 import timber.log.Timber;
@@ -178,6 +179,7 @@ public class VenueDetailsFragment extends BaseFragment<VenueDetailsViewModel> {
             if (!isCheckedIn) {
                 safeNavigateFromNavController(R.id.action_venueDetailFragment_to_qrCodeFragment);
                 AccessibilityServiceUtil.speak(getContext(), getString(R.string.venue_checked_out));
+                FiveStarMe.showRateDialogIfMeetsConditions(getActivity());
             }
         });
 

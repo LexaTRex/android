@@ -65,13 +65,12 @@
             app:layout_constraintStart_toStartOf="@id/emptyDescriptionTextView"
             app:layout_constraintEnd_toEndOf="@id/emptyDescriptionTextView" />
 
-    <ListView
-            android:id="@+id/myLucaListView"
+    <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/myLucaRecyclerView"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_marginTop="@dimen/spacing_small"
+            android:layout_marginTop="@dimen/spacing_default"
             android:cacheColorHint="@android:color/transparent"
-            android:divider="@null"
             android:fadingEdgeLength="@dimen/spacing_large"
             android:listSelector="@android:color/transparent"
             android:requiresFadingEdge="vertical"

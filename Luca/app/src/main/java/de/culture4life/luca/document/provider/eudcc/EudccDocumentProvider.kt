@@ -1,5 +1,7 @@
 package de.culture4life.luca.document.provider.eudcc
 
+import android.content.Context
+import de.culture4life.luca.R
 import de.culture4life.luca.document.DocumentParsingException
 import de.culture4life.luca.document.provider.DocumentProvider
 import dgca.verifier.app.decoder.DefaultCertificateDecoder
@@ -12,7 +14,7 @@ import io.reactivex.rxjava3.core.Single
 /**
  * Provider for the EU Digital COVID Certificate (EUDCC)
  */
-class EudccDocumentProvider : DocumentProvider<EudccResult>() {
+class EudccDocumentProvider(val context: Context) : DocumentProvider<EudccResult>() {
     private val base45Decoder = Base45Decoder()
     private val decoder = DefaultCertificateDecoder(base45Decoder)
 
@@ -31,6 +33,7 @@ class EudccDocumentProvider : DocumentProvider<EudccResult>() {
 
     override fun parse(encodedData: String): Single<EudccResult> {
         return Single.just(EudccResult(encodedData, decoder.decodeCertificate(encodedData)))
+            .map { it.document.provider = context.getString(R.string.provider_name_eu_dcc); it }
             .onErrorResumeNext { throwable ->
                 if (throwable is DocumentParsingException) {
                     Single.error<DocumentParsingException>(throwable)

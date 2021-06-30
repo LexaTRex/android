@@ -51,9 +51,10 @@ public class Appointment extends ProvidedDocument {
         document.setTestingTimestamp(Long.parseLong(timestamp));
         document.setResultTimestamp(document.getTestingTimestamp());
         document.setImportTimestamp(System.currentTimeMillis());
+        document.setId(UUID.nameUUIDFromBytes(qrCode.getBytes()).toString());
+        document.setProvider(lab);
         document.setEncodedData(url);
         document.setHashableEncodedData(qrCode);
-        document.setId(UUID.nameUUIDFromBytes(qrCode.getBytes()).toString());
     }
 
 }

@@ -6,7 +6,6 @@ import com.google.gson.GsonBuilder;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.os.Build;
 
 import de.culture4life.luca.BuildConfig;
 import de.culture4life.luca.LucaApplication;
@@ -145,9 +144,7 @@ public class NetworkManager extends Manager {
 
     private static String createUserAgent() {
         String appVersionName = BuildConfig.VERSION_NAME;
-        String deviceName = Build.MANUFACTURER + " " + Build.MODEL;
-        String androidVersionName = Build.VERSION.RELEASE;
-        return "luca/" + appVersionName + " (Android " + androidVersionName + ";" + deviceName + ")";
+        return "luca/Android " + appVersionName;
     }
 
     private static long getRequestTimeout(@NonNull Request request) {

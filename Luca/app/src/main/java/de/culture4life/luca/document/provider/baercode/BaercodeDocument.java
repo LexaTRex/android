@@ -32,6 +32,7 @@ public class BaercodeDocument extends ProvidedDocument {
     public BaercodeDocument(@NonNull byte[] data) throws DocumentParsingException {
         try {
             parse(data);
+            document.setProvider("BärCode");
         } catch (IOException e) {
             throw new DocumentParsingException("Error while parsing Baercode data", e);
         }

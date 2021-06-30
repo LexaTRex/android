@@ -4,6 +4,7 @@ import com.google.zxing.EncodeHintType;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.text.TextUtils;
 import android.util.Pair;
 
 import de.culture4life.luca.R;
@@ -21,6 +22,7 @@ import androidx.annotation.ColorInt;
 import androidx.annotation.DrawableRes;
 import androidx.annotation.IntDef;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import io.reactivex.rxjava3.core.Single;
 
 import static java.lang.annotation.RetentionPolicy.SOURCE;
@@ -45,6 +47,7 @@ public abstract class MyLucaListItem {
     protected final List<Pair<String, String>> collapsedContent = new ArrayList<>();
 
     protected String title;
+    protected String provider;
     protected Bitmap barcode;
     protected long timestamp;
     protected String deleteButtonText;
@@ -79,6 +82,14 @@ public abstract class MyLucaListItem {
         return readableDateFormat.format(new Date(timestamp));
     }
 
+    protected static String getReadableProvider(@NonNull Context context, @Nullable String provider) {
+        if (TextUtils.isEmpty(provider)) {
+            return context.getString(R.string.unknown);
+        } else {
+            return provider;
+        }
+    }
+
     public void toggleExpanded() {
         isExpanded = !isExpanded;
     }
@@ -89,6 +100,10 @@ public abstract class MyLucaListItem {
 
     public String getTitle() {
         return title;
+    }
+
+    public String getProvider() {
+        return provider;
     }
 
     public Bitmap getBarcode() {

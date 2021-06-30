@@ -8,6 +8,7 @@ import de.culture4life.luca.network.pojo.AdditionalCheckInPropertiesRequestData;
 import de.culture4life.luca.network.pojo.CheckInRequestData;
 import de.culture4life.luca.network.pojo.CheckOutRequestData;
 import de.culture4life.luca.network.pojo.DataTransferRequestData;
+import de.culture4life.luca.network.pojo.DocumentProviderDataList;
 import de.culture4life.luca.network.pojo.LocationResponseData;
 import de.culture4life.luca.network.pojo.TraceData;
 import de.culture4life.luca.network.pojo.TracesResponseData;
@@ -152,6 +153,9 @@ public interface LucaEndpointsV3 {
 
     @POST("tests/redeem")
     Completable redeemDocument(@Body JsonObject message);
+
+    @GET("testProviders")
+    Single<DocumentProviderDataList> getDocumentProviders();
 
     /*
         Time

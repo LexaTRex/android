@@ -4,22 +4,27 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
 
 import de.culture4life.luca.R;
 import de.culture4life.luca.notification.LucaNotificationManager;
 import de.culture4life.luca.ui.registration.RegistrationActivity;
+
+import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent;
 
 import androidx.annotation.Nullable;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
+import five.star.me.FiveStarMe;
 import io.reactivex.rxjava3.core.Completable;
 import timber.log.Timber;
 
 public class MainActivity extends BaseActivity {
 
     private NavController navigationController;
+    private BottomNavigationView bottomNavigationView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,7 +32,13 @@ public class MainActivity extends BaseActivity {
         setContentView(R.layout.activity_main);
         initializeNavigation();
         hideActionBar();
+        setupKeyboardListener();
         processIntent(getIntent());
+
+        FiveStarMe.with(this)
+                .setInstallDays(2)
+                .setLaunchTimes(7)
+                .monitor();
     }
 
     private void initializeNavigation() {
@@ -36,14 +47,20 @@ public class MainActivity extends BaseActivity {
         ).build();
         navigationController = Navigation.findNavController(this, R.id.navigationHostFragment);
         NavigationUI.setupActionBarWithNavController(this, navigationController, appBarConfiguration);
-        BottomNavigationView navigationView = findViewById(R.id.bottomNavigationView);
-        NavigationUI.setupWithNavController(navigationView, navigationController);
+        bottomNavigationView = findViewById(R.id.bottomNavigationView);
+        NavigationUI.setupWithNavController(bottomNavigationView, navigationController);
 
         if (application.isInDarkMode()) {
             // workaround for removing the elevation color overlay
             // https://github.com/material-components/material-components-android/issues/1148
-            navigationView.setElevation(0);
+            bottomNavigationView.setElevation(0);
         }
+    }
+
+    private void setupKeyboardListener() {
+        KeyboardVisibilityEvent.setEventListener(this, isOpen -> {
+            bottomNavigationView.setVisibility(isOpen ? View.GONE : View.VISIBLE);
+        });
     }
 
     @Override

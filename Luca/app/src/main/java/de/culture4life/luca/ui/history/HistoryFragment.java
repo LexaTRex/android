@@ -166,11 +166,12 @@ public class HistoryFragment extends BaseFragment<HistoryViewModel> {
     }
 
     private void showShareHistoryTanDialog(@NonNull String tracingTan) {
-        new BaseDialogFragment(new MaterialAlertDialogBuilder(getContext())
+        BaseDialogFragment dialogFragment = new BaseDialogFragment(new MaterialAlertDialogBuilder(getContext())
                 .setTitle(getString(R.string.history_share_tan_title))
                 .setMessage(getString(R.string.history_share_tan_description, tracingTan))
-                .setPositiveButton(R.string.action_ok, (dialogInterface, i) -> dialogInterface.dismiss()))
-                .show();
+                .setPositiveButton(R.string.action_ok, (dialogInterface, i) -> dialogInterface.dismiss()));
+        dialogFragment.setCancelable(false);
+        dialogFragment.show();
     }
 
     private void showAccessedDataDialog(@NonNull List<AccessedTraceData> accessedTraceDataList) {
