@@ -300,10 +300,10 @@ public class RegistrationViewModel extends BaseViewModel {
 
     public Completable useDebugRegistrationData() {
         return Completable.fromAction(() -> {
-            registrationData.setFirstName("John");
-            registrationData.setLastName("Doe");
-            registrationData.setPhoneNumber("+4900000000000");
-            registrationData.setEmail("john.doe@gmail.com");
+            registrationData.setFirstName("Erika");
+            registrationData.setLastName("Mustermann");
+            registrationData.setPhoneNumber("+491711234567");
+            registrationData.setEmail("erika.mustermann@example.de");
             registrationData.setStreet("Street");
             registrationData.setHouseNumber("123");
             registrationData.setPostalCode("12345");

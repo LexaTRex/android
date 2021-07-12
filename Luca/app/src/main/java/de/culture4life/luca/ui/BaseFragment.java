@@ -21,6 +21,7 @@ import android.widget.Toast;
 import com.tbruyelle.rxpermissions3.Permission;
 import com.tbruyelle.rxpermissions3.RxPermissions;
 
+import de.culture4life.luca.BuildConfig;
 import de.culture4life.luca.LucaApplication;
 import de.culture4life.luca.R;
 import de.culture4life.luca.ui.dialog.BaseDialogFragment;
@@ -187,12 +188,6 @@ public abstract class BaseFragment<ViewModelType extends BaseViewModel> extends 
     @SuppressWarnings("SameReturnValue")
     protected boolean onMenuItemClick(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.contactDataMenuItem: {
-                Intent intent = new Intent(getActivity(), RegistrationActivity.class);
-                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-                startActivity(intent);
-                break;
-            }
             case R.id.clearHistoryMenuItem: {
                 new BaseDialogFragment(new MaterialAlertDialogBuilder(getContext())
                         .setTitle(R.string.history_clear_title)
@@ -209,34 +204,7 @@ public abstract class BaseFragment<ViewModelType extends BaseViewModel> extends 
                         .show();
                 break;
             }
-            case R.id.privacyPolicyMenuItem: {
-                application.openUrl(getString(R.string.url_privacy_policy));
-                break;
-            }
-            case R.id.termsAndConditionsMenuItem: {
-                application.openUrl(getString(R.string.url_terms_and_conditions));
-                break;
-            }
-            case R.id.frequentlyAskedQuestionsMenuItem: {
-                application.openUrl(getString(R.string.url_faq));
-                break;
-            }
-            case R.id.imprintMenuItem: {
-                application.openUrl(getString(R.string.url_imprint));
-                break;
-            }
-            case R.id.supportMenuItem: {
-                viewModel.requestSupportMail();
-                break;
-            }
-            case R.id.appDataMenuItem: {
-                application.openAppSettings();
-                break;
-            }
-            case R.id.deleteAccountMenuItem: {
-                showDeleteAccountDialog();
-                break;
-            }
+
             default: {
                 Timber.w("Unknown menu item selected: %s", item.getTitle());
                 return false;
@@ -373,6 +341,24 @@ public abstract class BaseFragment<ViewModelType extends BaseViewModel> extends 
         }
         InputMethodManager imm = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.hideSoftInputFromWindow(view.getRootView().getWindowToken(), 0);
+    }
+
+    private void showVersionDetailsDialog() {
+        String commitHash = BuildConfig.COMMIT_HASH;
+        if (commitHash.length() > 8 && !commitHash.startsWith("<")) {
+            commitHash = commitHash.substring(0, 8);
+        }
+        String message = getString(
+                R.string.version_details_dialog_message,
+                BuildConfig.VERSION_NAME,
+                BuildConfig.VERSION_CODE,
+                commitHash
+        );
+        new BaseDialogFragment(new MaterialAlertDialogBuilder(getContext())
+                .setTitle(R.string.version_details_dialog_title)
+                .setMessage(message)
+                .setPositiveButton(R.string.version_details_dialog_action, (dialog, which) -> dialog.dismiss()))
+                .show();
     }
 
     private void showDeleteAccountDialog() {

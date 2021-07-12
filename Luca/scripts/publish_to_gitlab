@@ -1,0 +1,22 @@
+#!/bin/bash
+# Publish the master branch to our public GitLab repository. Commits are squashed into a single
+# one. The commit message includes the current app version, taken from build.gradle.
+# Final push still has to be triggered manually.
+
+GITLAB_REPO=git@gitlab.com:lucaapp/android.git
+VERSION=$(cat app/build.gradle | grep "versionName " | xargs -n1 | grep -v "versionName")
+DEPLOYMENT_BRANCH=deployment
+CURRENT_BRANCH=$(git branch --show-current)
+
+echo "Pushing version $VERSION from branch $CURRENT_BRANCH to Gitlab master"
+sleep 3
+
+git remote remove public-origin
+git remote add public-origin $GITLAB_REPO
+git pull public-origin master:$DEPLOYMENT_BRANCH
+git checkout $DEPLOYMENT_BRANCH
+git diff $DEPLOYMENT_BRANCH release/$VERSION | git apply
+git add -A && git commit -m "Release $VERSION"
+
+echo "Check your git status and apply the following line if everything looks good:"
+echo git push -u public-origin $DEPLOYMENT_BRANCH:master

@@ -16,7 +16,8 @@ open class VaccinationItem(context: Context, document: Document) :
     init {
         title = context.getString(R.string.document_type_vaccination)
         provider = getReadableProvider(context, document.provider)
-        deleteButtonText = context.getString(R.string.certificate_delete_action)
+        deleteButtonText = context.getString(R.string.delete_certificate_action)
+        resultTimestamp = document.resultTimestamp
         topContent.clear()
         setDescriptionAndColor(context, document)
         val time = context.getString(R.string.document_result_time, getReadableTime(getDateFormatFor(context, document), document.resultTimestamp))
@@ -27,10 +28,8 @@ open class VaccinationItem(context: Context, document: Document) :
         for (testProcedure in getTestProcedures(context, document)) {
             addCollapsedContent(testProcedure.name, testProcedure.date)
         }
-        document.dateOfBirth?.let {
-            val date = MyLucaListItem.getReadableDate(context, it)
-            addCollapsedContent(context.getString(R.string.birthday_label), date)
-        }
+        val date = MyLucaListItem.getReadableDate(context, document.dateOfBirth)
+        addCollapsedContent(context.getString(R.string.birthday_label), date)
     }
 
     private fun setDescriptionAndColor(context: Context, document: Document) {

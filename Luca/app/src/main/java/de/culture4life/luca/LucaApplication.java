@@ -64,6 +64,7 @@ public class LucaApplication extends MultiDexApplication {
 
     public static final boolean IS_USING_STAGING_ENVIRONMENT = !BuildConfig.BUILD_TYPE.equals("production");
     private static final long MAXIMUM_TIMESTAMP_OFFSET = TimeUnit.MINUTES.toMillis(1);
+    private static final String INTENT_TYPE_MAIL = "message/rfc822";
 
     private final PreferencesManager preferencesManager;
     private final CryptoManager cryptoManager;
@@ -365,13 +366,14 @@ public class LucaApplication extends MultiDexApplication {
         int appVersionCode = BuildConfig.VERSION_CODE;
         String deviceName = Build.MANUFACTURER + " " + Build.MODEL;
         String androidVersionName = Build.VERSION.RELEASE;
-        String body = getString(R.string.menu_support_body, appVersionName, appVersionCode, deviceName, androidVersionName);
+        String deviceInfo = getString(R.string.menu_support_device_info, deviceName, androidVersionName, appVersionName, appVersionCode);
+        String supportText = getString(R.string.menu_support_body, deviceInfo);
 
         ShareCompat.IntentBuilder.from(getActivityContext())
-                .setType("text/plain")
+                .setType(INTENT_TYPE_MAIL)
                 .addEmailTo(getString(R.string.mail_support))
                 .setSubject(subject)
-                .setText(body)
+                .setText(supportText)
                 .startChooser();
     }
 

@@ -74,6 +74,7 @@ public class Document {
     public static final long MAXIMUM_VACCINATION_VALIDITY = TimeUnit.DAYS.toMillis(365);
     public static final long TIME_UNTIL_RECOVERY_IS_VALID = TimeUnit.DAYS.toMillis(15);
     public static final long MAXIMUM_RECOVERY_VALIDITY = TimeUnit.DAYS.toMillis(30 * 6);
+    public static final long MAXIMUM_APPOINTMENT_VALIDITY = TimeUnit.HOURS.toMillis(2);
 
     @IntDef({TYPE_UNKNOWN, TYPE_FAST, TYPE_PCR, TYPE_VACCINATION, TYPE_APPOINTMENT, TYPE_GREEN_PASS, TYPE_RECOVERY})
     @Retention(SOURCE)
@@ -342,6 +343,8 @@ public class Document {
                 return MAXIMUM_VACCINATION_VALIDITY;
             case TYPE_RECOVERY:
                 return MAXIMUM_RECOVERY_VALIDITY;
+            case TYPE_APPOINTMENT:
+                return MAXIMUM_APPOINTMENT_VALIDITY;
             default:
                 return -1;
         }

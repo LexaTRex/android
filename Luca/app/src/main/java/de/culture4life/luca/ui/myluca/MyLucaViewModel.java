@@ -32,6 +32,7 @@ import androidx.camera.core.ImageAnalysis;
 import androidx.camera.core.ImageProxy;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
+import dgca.verifier.app.decoder.BuildConfig;
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Maybe;
@@ -100,7 +101,8 @@ public class MyLucaViewModel extends BaseViewModel implements ImageAnalysis.Anal
     }
 
     private Observable<MyLucaListItem> loadListItems() {
-        return documentManager.getOrRestoreDocuments()
+        return Completable.defer(() -> BuildConfig.DEBUG ? Completable.complete() : documentManager.deleteExpiredDocuments())
+                .andThen(documentManager.getOrRestoreDocuments())
                 .flatMapMaybe(this::createListItem)
                 .doOnNext(myLucaListItem -> Timber.d("Created list item: %s", myLucaListItem))
                 .sorted((first, second) -> Long.compare(second.getTimestamp(), first.getTimestamp()));

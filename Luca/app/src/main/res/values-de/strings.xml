@@ -138,6 +138,7 @@
     <string name="navigation_meeting">@string/meeting_heading</string>
     <string name="navigation_accessed_data">Datenzugriffe</string>
     <string name="navigation_my_luca">@string/my_luca_heading</string>
+    <string name="navigation_account">Account</string>
 
     <!-- Menu -->
     <string name="menu_more_content_description">Mehr Menu</string>
@@ -147,12 +148,15 @@
     <string name="menu_terms_and_conditions">Nutzungsbedingungen</string>
     <string name="menu_faq">FAQ</string>
     <string name="menu_imprint">Impressum</string>
+    <string name="menu_gitlab">GitLab</string>
     <string name="menu_support">Support</string>
     <string name="menu_support_error_title">E-Mail kann nicht gesendet werden</string>
     <string name="menu_support_error_description">Es können keine E-Mails von diesem Gerät gesendet werden, da aktuell kein E-Mail-Account eingerichtet ist.</string>
     <string name="menu_support_subject">Support Anfrage</string>
-    <string name="menu_support_body">Ich benutze Version <xliff:g example="1.0.0" id="version_name">%1$s</xliff:g> (Release <xliff:g example="42" id="version_code">%2$d</xliff:g>) auf meinem <xliff:g example="Google Pixel" id="device_model">%3$s</xliff:g> (Android <xliff:g example="10" id="android_version_number">%4$s</xliff:g>) und brauche Hilfe. Mein Problem ist:\n\n</string>
+    <string name="menu_support_body">Lieber luca-Support,\nbei der Nutzung der App tritt folgendes Problem auf:\n\nBitte beschreibe hier so genau wie möglich dein Problem und an welcher Stelle es auftritt. Es wäre sehr hilfreich, wenn du auch einen Screenshot oder eine Bildschirmaufnahme der Fehlermeldung oder des Problems anhängen könntest.\n\n<xliff:g example="Google Pixel" id="device_info">%1$s</xliff:g></string>
+    <string name="menu_support_device_info">Gerät: <xliff:g example="Google Pixel" id="device_model">%1$s</xliff:g>\nBetriebssystem: Android <xliff:g example="10" id="android_version_number">%2$s</xliff:g>\nApp Version: <xliff:g example="1.0.0" id="version_name">%3$s</xliff:g> (Release <xliff:g example="42" id="version_code">%4$d</xliff:g>)</string>
     <string name="menu_app_data">App Details</string>
+    <string name="menu_version_details">Versions Details</string>
     <string name="menu_delete_account">Account löschen</string>
 
     <!-- Contact Data -->
@@ -278,11 +282,11 @@
 
     <!-- My Luca -->
     <string name="my_luca_heading">Mein luca</string>
-    <string name="my_luca_empty_title">Willkommen bei "Mein luca"</string>
+    <string name="my_luca_empty_title">Willkommen bei \"Mein luca\"</string>
     <string name="my_luca_empty_description">Das ist dein persönlicher Bereich. Hier kannst du Dokumente <b>hinzufügen</b>, die dir den <b>Check-in</b> erleichtern.\n\nNEU: über das Kalender-Icon oben rechts kannst du Termine für Tests buchen.</string>
     <string name="appointment_action">Termin buchen</string>
     <string name="document_import_action">Hinzufügen</string>
-    <string name="document_import_hint">Scanne den QR-Code deines Tests um ihn zur App hinzuzufügen.</string>
+    <string name="document_import_hint">Scanne den QR-Code deines Dokuments, um dieses zur App hinzuzufügen.</string>
     <string name="document_import_success_message">Das Dokument wurde importiert</string>
     <string name="document_import_consent">Hiermit erkläre ich mein Einverständnis gemäß Art. 9 (2) a) in Verbindung mit Art. 6 (1) 1 a) DSGVO zum Übermitteln einer pseudonymisierten Kennung im Zuge der lokalen Hinterlegung meines COVID-Tests, meines Genesen- oder Impfausweises in der luca App. Dies dient ausschließlich der Vorbeugung von Missbrauch, indem ein Dokument durch unterschiedliche Personen genutzt wird. Daher ist ein mehrfaches Hochladen nicht möglich. Die individuelle Kennung eines Test-Ergebnisses wird nach 72 Stunden ab Hinterlegung automatisch aus dem luca System gelöscht.</string>
     <string name="document_import_error_title">Das Dokument konnte nicht importiert werden</string>
@@ -315,9 +319,9 @@
     <string name="document_valid_until">Gültig bis:</string>
     <string name="document_lab_doctor_name">Tester:</string>
     <string name="item_delete_action">Löschen</string>
-    <string name="document_delete_action">Test löschen</string>
-    <string name="appointment_delete_action">Termin löschen</string>
-    <string name="certificate_delete_action">Nachweis löschen</string>
+    <string name="delete_test_action">Test löschen</string>
+    <string name="delete_appointment_action">Termin löschen</string>
+    <string name="delete_certificate_action">Nachweis löschen</string>
     <string name="document_delete_confirmation_message">Soll das Dokument wirklich aus der App gelöscht werden?</string>
     <string name="document_vaccination_procedure">%1$s. Impfung:</string>
     <string name="document_recovery_procedure">Infektion %1$s - %2$s</string>
@@ -381,6 +385,11 @@
         <item quantity="one" formatted="true">%d Tag</item>
         <item quantity="other" formatted="true">%d Tagen</item>
     </plurals>
+
+    <!-- Version details -->
+    <string name="version_details_dialog_title">App Version</string>
+    <string name="version_details_dialog_message">Du benutzt aktuell die Android App Version <xliff:g example="1.0.0" id="version_name">%1$s</xliff:g> (Release <xliff:g example="42" id="version_code">%2$d</xliff:g>).\n\nDen Quellcode findest du auf GitLab mit dem Commit Hash <xliff:g example="843cbaf2d9840624defe303c0c854385ee69d23f" id="commit_hash">%3$s</xliff:g>.</string>
+    <string name="version_details_dialog_action">@string/action_ok</string>
 
     <!-- Account deletion -->
     <string name="delete_account_dialog_title">Möchtest du deinen Account wirklich löschen?</string>

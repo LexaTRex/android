@@ -7,6 +7,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.annotation.Config;
 
+import java.util.concurrent.TimeUnit;
+
 import androidx.test.runner.AndroidJUnit4;
 
 import static junit.framework.TestCase.assertEquals;
@@ -59,6 +61,7 @@ public class AppointmentProviderTest {
                     assertEquals("TerminID_1353d9b0-60f2-4f56-a816-1282b7faa04f", appointment.qrCode);
                     assertEquals(Document.TYPE_APPOINTMENT, appointment.getDocument().getType());
                     assertEquals(1622559373000L, appointment.getDocument().getTestingTimestamp());
+                    assertEquals(1622559373000L + TimeUnit.HOURS.toMillis(2), appointment.getDocument().getExpirationTimestamp());
                     return true;
                 });
     }
