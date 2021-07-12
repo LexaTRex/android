@@ -131,7 +131,7 @@ public class DataAccessManagerTest extends LucaUnitTest {
 
         dataAccessManager.getNextRecommendedUpdateDelay()
                 .test()
-                .assertValue(0l);
+                .assertValue(0L);
     }
 
     @Test

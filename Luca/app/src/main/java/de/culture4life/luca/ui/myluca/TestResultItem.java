@@ -44,7 +44,7 @@ public class TestResultItem extends MyLucaListItem {
         this.provider = getReadableProvider(context, document.getProvider());
         this.barcode = generateQrCode(document.getEncodedData()).blockingGet();
         this.color = getColor(context, document);
-        this.deleteButtonText = context.getString(R.string.document_delete_action);
+        this.deleteButtonText = context.getString(R.string.delete_test_action);
         String time = context.getString(R.string.document_result_time, getReadableTime(getDateFormatFor(context, document), document.getResultTimestamp()));
 
         addTopContent(context.getString(R.string.document_type_of_document_label), getReadableTestType(context, document));

@@ -16,4 +16,9 @@
             android:icon="@drawable/ic_navigation_history"
             android:title="@string/navigation_history" />
 
+    <item
+            android:id="@+id/accountFragment"
+            android:icon="@drawable/ic_account"
+            android:title="@string/navigation_account" />
+
 </menu>

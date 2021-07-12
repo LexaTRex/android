@@ -18,6 +18,7 @@
     <ImageView
             android:id="@+id/menuImageView"
             style="@style/MenuImageView"
+            android:visibility="gone"
             android:contentDescription="@string/menu_more_content_description"
             app:layout_constraintBottom_toBottomOf="@id/headingTextView"
             app:layout_constraintEnd_toEndOf="parent"

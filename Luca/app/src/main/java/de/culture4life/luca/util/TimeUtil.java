@@ -91,7 +91,7 @@ public final class TimeUtil {
                 amount = TimeUnit.MILLISECONDS.toDays(duration);
                 unit = R.plurals.time_plural_days;
             }
-            return context.getResources().getQuantityString(unit, (int) amount, (int) amount);
+            return context.getResources().getQuantityString(unit, (int) amount + 1, (int) amount + 1);
         });
     }
 

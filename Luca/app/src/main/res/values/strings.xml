@@ -6,6 +6,7 @@
     <string name="url_terms_and_conditions">https://luca-app.de/app-terms-and-conditions</string>
     <string name="url_privacy_policy">https://luca-app.de/app-privacy-policy</string>
     <string name="url_imprint">https://luca-app.de/imprint</string>
+    <string name="url_gitlab" translatable="false">https://gitlab.com/lucaapp/android</string>
     <string name="url_faq">https://www.luca-app.de/faq/</string>
     <string name="mail_support">hello@luca-app.de</string>
     <string name="qr_code">QR Code</string>
@@ -139,6 +140,7 @@
     <string name="navigation_meeting">@string/meeting_heading</string>
     <string name="navigation_accessed_data">@string/accessed_data_heading</string>
     <string name="navigation_my_luca">@string/my_luca_heading</string>
+    <string name="navigation_account">Account</string>
 
     <!-- Menu -->
     <string name="menu_more_content_description">More Menu</string>
@@ -148,12 +150,15 @@
     <string name="menu_terms_and_conditions">Terms of Use</string>
     <string name="menu_faq">FAQ</string>
     <string name="menu_imprint">Imprint</string>
+    <string name="menu_gitlab">GitLab</string>
     <string name="menu_support">Support</string>
     <string name="menu_support_error_title">Unable to send Email</string>
     <string name="menu_support_error_description">It is not possible to send an email from this device because no email account is connected.</string>
     <string name="menu_support_subject">Support Request</string>
-    <string name="menu_support_body">I\'m using version <xliff:g example="1.0.0" id="version_name">%1$s</xliff:g> (release <xliff:g example="42" id="version_code">%2$d</xliff:g>) on my <xliff:g example="Google Pixel" id="device_model">%3$s</xliff:g> (Android <xliff:g example="10" id="android_version_number">%4$s</xliff:g>) and need some support. My problem is:\n\n</string>
+    <string name="menu_support_body">Dear luca support,\nThe following problem occurred while using the app:\n\nPlease describe here as precisely as possible your problem and where it occurs. It would be very helpful if you could also attach a screenshot or screen capture of the error message or problem.\n\n<xliff:g example="Google Pixel" id="device_info">%1$s</xliff:g></string>
+    <string name="menu_support_device_info">Device: <xliff:g example="Google Pixel" id="device_model">%1$s</xliff:g>\nOperating system: Android <xliff:g example="10" id="android_version_number">%2$s</xliff:g>\nApp version: <xliff:g example="1.0.0" id="version_name">%3$s</xliff:g> (release <xliff:g example="42" id="version_code">%4$d</xliff:g>)</string>
     <string name="menu_app_data">Show App Data</string>
+    <string name="menu_version_details">Version Details</string>
     <string name="menu_delete_account">Delete Account</string>
 
     <!-- Contact Data -->
@@ -283,11 +288,11 @@
 
     <!-- My Luca -->
     <string name="my_luca_heading">My luca</string>
-    <string name="my_luca_empty_title">Welcome at "My luca"</string>
+    <string name="my_luca_empty_title">Welcome at \"My luca\"</string>
     <string name="my_luca_empty_description">This is your personal space, where you can <b>add</b> documents to make your <b>check-in</b> easier.\n\nNEW: via the calendar icon in the upper right corner you can book test appointments.</string>
     <string name="appointment_action">Book appointment</string>
     <string name="document_import_action">Add</string>
-    <string name="document_import_hint">Scan the QR code of your test to store it in the app.</string>
+    <string name="document_import_hint">Scan the QR code of your document to add it to the app</string>
     <string name="document_import_success_message">The document was imported</string>
     <string name="document_import_consent">I hereby declare my consent in accordance with Art. 9 (2) a) in conjunction with Art. 6 (1) 1 a) DSGVO to the transmission of a pseudonymized identifier in the course of the local storage of my COVID test, recovery or vaccination card in the luca app. This is solely to prevent misuse by having one document used by different people. Therefore, importing multiple times is not possible. The individual identifier of the test document is automatically deleted from the luca system after 72 hours of storage.</string>
     <string name="document_import_error_title">The document could not be imported</string>
@@ -323,9 +328,9 @@
     <string name="document_vaccination_procedure">%1$s. Vaccination:</string>
     <string name="document_recovery_procedure">Infection %1$s - %2$s</string>
     <string name="item_delete_action">Delete</string>
-    <string name="document_delete_action">Delete test</string>
-    <string name="appointment_delete_action">Delete appointment</string>
-    <string name="certificate_delete_action">Delete certificate</string>
+    <string name="delete_test_action">Delete test</string>
+    <string name="delete_appointment_action">Delete appointment</string>
+    <string name="delete_certificate_action">Delete certificate</string>
     <string name="document_delete_confirmation_message">Do you really want to delete the document?</string>
     <string name="vaccine_comirnaty">BioNTech/Pfizer</string>
     <string name="vaccine_jannsen">Johnson &amp; Johnson</string>
@@ -388,6 +393,10 @@
         <item quantity="other" formatted="true">%d days</item>
     </plurals>
 
+    <!-- Version details -->
+    <string name="version_details_dialog_title">App Version</string>
+    <string name="version_details_dialog_message">You are currently using the Android app version <xliff:g example="1.0.0" id="version_name">%1$s</xliff:g> (release <xliff:g example="42" id="version_code">%2$d</xliff:g>).\n\nThe source code can be found on GitLab using the commit hash <xliff:g example="843cbaf2d9840624defe303c0c854385ee69d23f" id="commit_hash">%3$s</xliff:g>.</string>
+    <string name="version_details_dialog_action">@string/action_ok</string>
 
     <!-- Account deletion -->
     <string name="delete_account_dialog_title">Do you really want to delete your account?</string>

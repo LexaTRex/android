@@ -14,7 +14,7 @@ class RecoveryItem(context: Context, document: Document) :
 
     init {
         setTitleAndColor(context, document)
-        deleteButtonText = context.getString(R.string.certificate_delete_action)
+        deleteButtonText = context.getString(R.string.delete_certificate_action)
         val time = getReadableTime(context, document.expirationTimestamp)
 
         topContent.clear()
@@ -22,10 +22,8 @@ class RecoveryItem(context: Context, document: Document) :
 
         collapsedContent.clear()
         addCollapsedContent(context.getString(R.string.document_issued_by), document.labName)
-        document.dateOfBirth?.let {
-            val date = MyLucaListItem.getReadableDate(context, it)
-            addCollapsedContent(context.getString(R.string.birthday_label), date)
-        }
+        val date = MyLucaListItem.getReadableDate(context, document.dateOfBirth)
+        addCollapsedContent(context.getString(R.string.birthday_label), date)
     }
 
     private fun setTitleAndColor(context: Context, document: Document) {

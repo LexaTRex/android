@@ -15,6 +15,8 @@ import de.culture4life.luca.R;
 import de.culture4life.luca.ui.BaseActivity;
 import de.culture4life.luca.ui.registration.RegistrationActivity;
 
+import androidx.core.content.ContextCompat;
+
 public class OnboardingActivity extends BaseActivity {
 
     public static final String WELCOME_SCREEN_SEEN_KEY = "welcome_screen_seen";
@@ -73,7 +75,7 @@ public class OnboardingActivity extends BaseActivity {
 
         errorTint = getResources().getColor(R.color.material_red_300);
         normalTint = termsCheckBox.getButtonTintList().getDefaultColor();
-        errorDrawable = getDrawable(R.drawable.ic_error_outline);
+        errorDrawable = ContextCompat.getDrawable(this, R.drawable.ic_error_outline);
         errorDrawable.setTint(errorTint);
     }
 

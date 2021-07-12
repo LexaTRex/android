@@ -4,12 +4,21 @@ pipeline {
     }
     options {
         timeout(time: 30, unit: 'MINUTES')
+        buildDiscarder(
+            logRotator(
+                daysToKeepStr: '7',
+                numToKeepStr:'5',
+                artifactDaysToKeepStr: '7',
+                artifactNumToKeepStr: '5'
+            )
+        )
     }
 
     environment {
         CONTAINER = 'harbor.seamlessme.local/seamlessme/android:build'
         QUOTE = '\\"'
         C4L_SIGNING_KEY_ALIAS = 'upload'
+        COMMIT_HASH = sh(script: 'git rev-parse HEAD', returnStdout: true).trim()
     }
 
     parameters {
@@ -44,8 +53,9 @@ pipeline {
                 ]) {
                     sh '''
                         cd Luca
+                        GENERAL_PARAMS="-PCOMMIT_HASH=$QUOTE$COMMIT_HASH$QUOTE"
                         STAGING_PARAMS="-PSTAGING_API_USERNAME=$QUOTE$STAGING_API_USERNAME$QUOTE -PSTAGING_API_PASSWORD=$QUOTE$STAGING_API_PASSWORD$QUOTE"
-                        CMD="cd /Luca/app; ./../gradlew :app:assembleDebug $STAGING_PARAMS"
+                        CMD="cd /Luca/app; ./../gradlew :app:assembleDebug $GENERAL_PARAMS $STAGING_PARAMS"
                         docker run --rm -u $(id -u):$(id -g) -v `pwd`:/Luca ${CONTAINER} bash -c "$CMD"
                     '''
                 }
@@ -64,8 +74,9 @@ pipeline {
                 ]) {
                     sh '''
                         cd Luca
+                        GENERAL_PARAMS="-PCOMMIT_HASH=$QUOTE$COMMIT_HASH$QUOTE"
                         STAGING_PARAMS="-PSTAGING_API_USERNAME=$QUOTE$STAGING_API_USERNAME$QUOTE -PSTAGING_API_PASSWORD=$QUOTE$STAGING_API_PASSWORD$QUOTE"
-                        CMD="cd /Luca/app; ./../gradlew :app:assembleQs :app:assembleAqs :app:assembleHotfix :app:assemblePentest :app:assembleRelease :app:assemblePreprod $STAGING_PARAMS"
+                        CMD="cd /Luca/app; ./../gradlew :app:assembleQs :app:assembleAqs :app:assembleHotfix :app:assemblePentest :app:assembleRelease :app:assemblePreprod $GENERAL_PARAMS $STAGING_PARAMS"
                         docker run --rm -u $(id -u):$(id -g) -v `pwd`:/Luca ${CONTAINER} bash -c "$CMD"
                     '''
                 }
@@ -95,8 +106,9 @@ pipeline {
                             TASK=":app:assembleQs"
                             APP_VARIANT=qs
                         fi
+                        GENERAL_PARAMS="-PCOMMIT_HASH=$QUOTE$COMMIT_HASH$QUOTE"
                         STAGING_PARAMS="-PSTAGING_API_USERNAME=$QUOTE$STAGING_API_USERNAME$QUOTE -PSTAGING_API_PASSWORD=$QUOTE$STAGING_API_PASSWORD$QUOTE"
-                        CMD="cd /Luca/app; ./../gradlew $TASK $STAGING_PARAMS"
+                        CMD="cd /Luca/app; ./../gradlew $TASK $GENERAL_PARAMS $STAGING_PARAMS"
                         docker run --rm -u $(id -u):$(id -g) -v `pwd`:/Luca ${CONTAINER} bash -c "$CMD"
                         cd .. && ./Luca/scripts/rename_output_files && cd Luca
                         CMD="cd /Luca/app; npm install -g appcenter-cli"
@@ -116,9 +128,10 @@ pipeline {
                 ]) {
                     sh '''
                         cd Luca
+                        GENERAL_PARAMS="-PCOMMIT_HASH=$QUOTE$COMMIT_HASH$QUOTE"
                         LOCAL_KEYSTORE_FILE=$(basename $KEYSTORE_FILE)
                         KEYSTORE_PARAMS="-PC4L_SIGNING_STORE_FILE=$LOCAL_KEYSTORE_FILE -PC4L_SIGNING_KEY_PASSWORD=$C4L_SIGNING_KEY_PASSWORD -PC4L_SIGNING_KEY_ALIAS=$C4L_SIGNING_KEY_ALIAS -PC4L_SIGNING_STORE_PASSWORD=$C4L_SIGNING_STORE_PASSWORD"
-                        CMD="cd /Luca/app; ./../gradlew :app:assembleProduction $KEYSTORE_PARAMS"
+                        CMD="cd /Luca/app; ./../gradlew :app:assembleProduction $GENERAL_PARAMS $KEYSTORE_PARAMS"
                         docker run --rm -u $(id -u):$(id -g) -v `pwd`:/Luca -v $KEYSTORE_FILE:/Luca/app/$LOCAL_KEYSTORE_FILE ${CONTAINER} bash -c "$CMD"
                     '''
                 }
@@ -140,9 +153,10 @@ pipeline {
                 ]) {
                     sh '''
                         cd Luca
+                        GENERAL_PARAMS="-PCOMMIT_HASH=$QUOTE$COMMIT_HASH$QUOTE"
                         LOCAL_KEYSTORE_FILE=$(basename $KEYSTORE_FILE)
                         KEYSTORE_PARAMS="-PC4L_SIGNING_STORE_FILE=$LOCAL_KEYSTORE_FILE -PC4L_SIGNING_KEY_PASSWORD=$C4L_SIGNING_KEY_PASSWORD -PC4L_SIGNING_KEY_ALIAS=$C4L_SIGNING_KEY_ALIAS -PC4L_SIGNING_STORE_PASSWORD=$C4L_SIGNING_STORE_PASSWORD"
-                        CMD="cd /Luca/app; ./../gradlew publishProductionBundle $KEYSTORE_PARAMS"
+                        CMD="cd /Luca/app; ./../gradlew publishProductionBundle $GENERAL_PARAMS $KEYSTORE_PARAMS"
                         docker run --rm -u $(id -u):$(id -g) -v `pwd`:/Luca -v $SERVICE_ACCOUNT_FILE:/Luca/app/service-account.json -v $KEYSTORE_FILE:/Luca/app/$LOCAL_KEYSTORE_FILE ${CONTAINER} bash -c "$CMD"
                     '''
                 }

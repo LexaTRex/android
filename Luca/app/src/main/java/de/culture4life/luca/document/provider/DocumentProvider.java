@@ -30,15 +30,29 @@ public abstract class DocumentProvider<DocumentType extends ProvidedDocument> {
 
     public Completable validate(@NonNull DocumentType document, @NonNull RegistrationData registrationData) {
         return Completable.fromAction(() -> {
-            compareTrimmedAndIgnoreCase(registrationData.getFirstName(), document.getDocument().getFirstName());
-            compareTrimmedAndIgnoreCase(registrationData.getLastName(), document.getDocument().getLastName());
+            compare(registrationData.getFirstName(), document.getDocument().getFirstName());
+            compare(registrationData.getLastName(), document.getDocument().getLastName());
         });
     }
 
-    private void compareTrimmedAndIgnoreCase(@NonNull String s1, @Nonnull String s2) throws DocumentVerificationException {
-        if (!s1.trim().equalsIgnoreCase(s2.trim())) {
+    private void compare(@NonNull String s1, @Nonnull String s2) throws DocumentVerificationException {
+        s1 = removeAcademicTitles(s1);
+        s2 = removeAcademicTitles(s2);
+        if (!simplify(s1).equalsIgnoreCase(simplify(s2))) {
             throw new DocumentVerificationException(NAME_MISMATCH);
         }
+    }
+
+    protected String removeAcademicTitles(String name) {
+        name = name.replaceAll("(?i)Prof\\. ", "");
+        name = name.replaceAll("(?i)Dr\\. ", "");
+        return name;
+    }
+
+    protected String simplify(String name) {
+        name = name.toUpperCase();
+        name = name.replaceAll("[^\\x41-\\x5A]", "");
+        return name;
     }
 
 }

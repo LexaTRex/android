@@ -125,6 +125,21 @@
         </item>
     </style>
 
+    <style name="AccountTabButton">
+        <item name="android:textSize">16sp</item>
+        <item name="android:textColor">?attr/colorOnSurface</item>
+        <item name="fontFamily">@font/montserrat_bold</item>
+        <item name="android:background">@color/account_button_background</item>
+        <item name="android:foreground">?attr/selectableItemBackground</item>
+        <item name="android:padding">16dp</item>
+        <item name="android:clickable">true</item>
+        <item name="android:focusable">true</item>
+    </style>
+
+    <style name="AccountTabButton.BottomStroke" parent="AccountTabButton">
+        <item name="android:background">@drawable/account_tab_button_bottom_stroke</item>
+    </style>
+
     <!--  AlertDialog  -->
 
     <style name="ThemeOverlay.Luca.AlertDialog" parent="ThemeOverlay.MaterialComponents.MaterialAlertDialog">
@@ -238,22 +253,20 @@
     <!-- Empty States-->
 
     <style name="EmptyStateTitleTextView" parent="TextAppearance.Luca.Headline3">
-        <item name="android:visibility">gone</item>
         <item name="fontFamily">@font/montserrat_bold</item>
         <item name="android:lineSpacingExtra">4dp</item>
         <item name="android:textSize">@dimen/font_size_default</item>
     </style>
 
     <style name="EmptyStateDescriptionTextView" parent="TextAppearance.Luca.Body2">
-        <item name="android:visibility">gone</item>
         <item name="android:layout_width">0dp</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:layout_marginTop">8dp</item>
     </style>
 
     <style name="EmptyStateImageView">
-        <item name="android:visibility">gone</item>
         <item name="android:src">@drawable/g_no_entries</item>
+        <item name="android:padding">@dimen/spacing_small</item>
         <item name="android:layout_width">0dp</item>
         <item name="android:layout_height">200dp</item>
         <item name="android:layout_margin">@dimen/spacing_default</item>

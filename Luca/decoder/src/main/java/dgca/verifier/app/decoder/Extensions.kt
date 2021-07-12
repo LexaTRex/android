@@ -29,7 +29,6 @@ import java.security.KeyPairGenerator
 import java.security.MessageDigest
 import java.security.cert.CertificateFactory
 import java.security.cert.X509Certificate
-import java.util.Base64
 
 const val ECDSA_256 = -7
 const val RSA_PSS_256 = -37

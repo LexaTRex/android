@@ -242,7 +242,7 @@ public class DocumentManager extends Manager {
                 .doOnComplete(() -> documents = null);
     }
 
-    protected Completable deleteExpiredDocuments() {
+    public Completable deleteExpiredDocuments() {
         return Single.fromCallable(System::currentTimeMillis)
                 .flatMapCompletable(this::deleteDocumentsExpiredBefore);
     }

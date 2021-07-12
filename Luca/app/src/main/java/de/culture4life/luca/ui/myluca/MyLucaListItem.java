@@ -1,16 +1,21 @@
 package de.culture4life.luca.ui.myluca;
 
-import com.google.zxing.EncodeHintType;
-
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.text.TextUtils;
 import android.util.Pair;
 
-import de.culture4life.luca.R;
+import androidx.annotation.ColorInt;
+import androidx.annotation.DrawableRes;
+import androidx.annotation.IntDef;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
+import com.google.zxing.EncodeHintType;
 
 import net.glxn.qrgen.android.QRCode;
 
+import java.io.Serializable;
 import java.lang.annotation.Retention;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -18,11 +23,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-import androidx.annotation.ColorInt;
-import androidx.annotation.DrawableRes;
-import androidx.annotation.IntDef;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
+import de.culture4life.luca.R;
 import io.reactivex.rxjava3.core.Single;
 
 import static java.lang.annotation.RetentionPolicy.SOURCE;
@@ -50,6 +51,7 @@ public abstract class MyLucaListItem {
     protected String provider;
     protected Bitmap barcode;
     protected long timestamp;
+    protected long resultTimestamp;
     protected String deleteButtonText;
     @ColorInt
     protected int color;
@@ -112,6 +114,10 @@ public abstract class MyLucaListItem {
 
     public long getTimestamp() {
         return timestamp;
+    }
+
+    public long getResultTimestamp() {
+        return resultTimestamp;
     }
 
     public String getDeleteButtonText() {

@@ -1,103 +1,117 @@
 package de.culture4life.luca.ui.myluca;
 
-import android.text.TextUtils;
-import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.ImageView;
-import android.widget.TextView;
-
-import de.culture4life.luca.R;
-import de.culture4life.luca.ui.UiUtil;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import androidx.annotation.NonNull;
-import androidx.cardview.widget.CardView;
-import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.constraintlayout.widget.ConstraintSet;
+import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.viewpager2.widget.ViewPager2;
 
-public class MyLucaListAdapter extends RecyclerView.Adapter<MyLucaListAdapter.MyLucaViewHolder> {
+import org.jetbrains.annotations.NotNull;
 
-    interface MyLucaListClickListener {
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import de.culture4life.luca.R;
+import de.culture4life.luca.ui.myluca.viewholders.MultipleMyLucaItemViewHolder;
+import de.culture4life.luca.ui.myluca.viewholders.SingleMyLucaItemViewHolder;
+
+public class MyLucaListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+
+    public interface MyLucaListClickListener {
 
         void onDelete(@NonNull MyLucaListItem myLucaListItem);
 
     }
 
-    class MyLucaViewHolder extends RecyclerView.ViewHolder {
+    public interface MyLucaListItemExpandListener {
 
-        ViewGroup topContent;
-        CardView cardView;
-        TextView titleTextView;
-        ImageView itemTitleImageView;
-        ImageView barcodeImageView;
-        TextView providerTextView;
-        Button deleteItemButton;
-        ViewGroup collapseLayout;
-        ViewGroup collapsedContent;
-
-        public MyLucaViewHolder(@NonNull ViewGroup itemView) {
-            super(itemView);
-            topContent = itemView.findViewById(R.id.topContent);
-            cardView = itemView.findViewById(R.id.cardView);
-            titleTextView = itemView.findViewById(R.id.itemTitleTextView);
-            itemTitleImageView = itemView.findViewById(R.id.itemTitleImageView);
-            barcodeImageView = itemView.findViewById(R.id.qrCodeImageView);
-            providerTextView = itemView.findViewById(R.id.providerTextView);
-            deleteItemButton = itemView.findViewById(R.id.deleteItemButton);
-            collapseLayout = itemView.findViewById(R.id.collapseLayout);
-            collapsedContent = itemView.findViewById(R.id.collapsedContent);
-        }
+        void onExpand();
 
     }
+
+    public static final int SINGLE_ITEM_VIEW_HOLDER = 0;
+    public static final int MULTIPLE_ITEM_VIEW_HOLDER = 1;
 
     private final MyLucaListClickListener clickListener;
+    private final Fragment fragment;
 
-    private List<MyLucaListItem> items = new ArrayList<>();
+    private final List<MyLucaListItemsWrapper> items = new ArrayList<>();
+    private final Map<Integer, Integer> viewPagerPositionMap = new HashMap<Integer, Integer>();
 
-
-    public MyLucaListAdapter(MyLucaListClickListener listener) {
+    public MyLucaListAdapter(MyLucaListClickListener listener, Fragment fragment) {
         this.clickListener = listener;
+        this.fragment = fragment;
     }
 
     @Override
-    public MyLucaListAdapter.MyLucaViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        ViewGroup view = (ViewGroup) LayoutInflater.from(parent.getContext()).inflate(R.layout.my_luca_list_item, parent, false);
-        return new MyLucaViewHolder(view);
+    public RecyclerView.@NotNull ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        if (viewType == SINGLE_ITEM_VIEW_HOLDER) {
+            ViewGroup view = (ViewGroup) LayoutInflater.from(parent.getContext()).inflate(R.layout.my_luca_list_item_container, parent, false);
+            return new SingleMyLucaItemViewHolder(view);
+        } else {
+            ViewGroup view = (ViewGroup) LayoutInflater.from(parent.getContext()).inflate(R.layout.my_luca_list_items_viewpager, parent, false);
+            return new MultipleMyLucaItemViewHolder(view);
+        }
     }
 
     @Override
-    public void onBindViewHolder(@NonNull MyLucaListAdapter.MyLucaViewHolder holder, int position) {
-        MyLucaListItem item = getItem(position);
+    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder viewHolder, int position) {
+        List<MyLucaListItem> items = getItem(position).getItems();
+        if (items.isEmpty()) return;
 
-        int topPadding = position == 0 ? (int) UiUtil.convertDpToPixel(8, holder.itemView.getContext()) : 0;
-        holder.itemView.setPadding(holder.itemView.getPaddingLeft(), topPadding, holder.itemView.getPaddingRight(), holder.itemView.getPaddingBottom());
+        if (viewHolder.getItemViewType() == SINGLE_ITEM_VIEW_HOLDER) {
+            SingleMyLucaItemViewHolder holder = (SingleMyLucaItemViewHolder) viewHolder;
+            MyLucaListItem item = items.get(0);
 
-        holder.cardView.setCardBackgroundColor(item.getColor());
-        holder.titleTextView.setText(item.getTitle());
-        holder.itemTitleImageView.setImageResource(item.getImageResource());
-        holder.barcodeImageView.setImageBitmap(item.getBarcode());
-        holder.providerTextView.setText(item.getProvider());
-        holder.providerTextView.setVisibility(TextUtils.isEmpty(item.getProvider()) ? View.GONE : View.VISIBLE);
-        holder.collapseLayout.setVisibility((item.isExpanded()) ? View.VISIBLE : View.GONE);
-        holder.deleteItemButton.setText(item.getDeleteButtonText());
+            holder.getConstraintLayoutContainer().removeAllViews();
+            View.OnClickListener expandClickListener = (v -> {
+                item.toggleExpanded();
+                notifyItemChanged(position);
+            });
+            View.OnClickListener deleteClickListener = (v -> clickListener.onDelete(item));
 
-        setupDynamicContent(item.getTopContent(), holder.topContent);
-        setupDynamicContent(item.getCollapsedContent(), holder.collapsedContent);
+            SingleLucaItemView singleLucaItemView = new SingleLucaItemView(holder.itemView.getContext(), null, 0, item);
+            holder.getConstraintLayoutContainer().addView(singleLucaItemView);
+            singleLucaItemView.setListeners(expandClickListener, deleteClickListener);
+        } else {
+            MyLucaListItemExpandListener expandClickListener = new MyLucaListItemExpandListener() {
+                @Override
+                public void onExpand() {
+                    for (int i = 0; i < items.size(); i++) {
+                        MyLucaListItem item = items.get(i);
+                        item.toggleExpanded();
+                    }
+                    notifyItemChanged(position);
+                }
 
-        holder.itemView.setOnClickListener(v -> {
-            item.toggleExpanded();
-            notifyItemChanged(position);
-        });
-        holder.deleteItemButton.setOnClickListener(v -> clickListener.onDelete(item));
+            };
+            Integer hashCode = items.hashCode();
+            MyLucaItemViewPager viewPagerAdapter = new MyLucaItemViewPager(this.fragment, items, expandClickListener, clickListener, position);
+            MultipleMyLucaItemViewHolder multipleHolder = (MultipleMyLucaItemViewHolder) viewHolder;
+            multipleHolder.getViewPager().setAdapter(viewPagerAdapter);
+            ViewPager2.OnPageChangeCallback pageChangeCallback = new ViewPager2.OnPageChangeCallback() {
+                @Override
+                public void onPageSelected(int positionInViewPager) {
+                    multipleHolder.getPageIndicator().setSelected(positionInViewPager);
+                    viewPagerPositionMap.put(hashCode, positionInViewPager);
+                    super.onPageSelected(position);
+                }
+            };
+            multipleHolder.getViewPager().unregisterOnPageChangeCallback(pageChangeCallback);
+            multipleHolder.getViewPager().registerOnPageChangeCallback(pageChangeCallback);
+            int viewPagerStarPos = viewPagerPositionMap.containsKey(hashCode) ? viewPagerPositionMap.get(hashCode) : items.size() - 1;
+            multipleHolder.getViewPager().setCurrentItem(viewPagerStarPos, false);
+            multipleHolder.getPageIndicator().setCount(items.size());
+        }
     }
 
-    private MyLucaListItem getItem(int position) {
+    private MyLucaListItemsWrapper getItem(int position) {
         return items.get(position);
     }
 
@@ -108,40 +122,36 @@ public class MyLucaListAdapter extends RecyclerView.Adapter<MyLucaListAdapter.My
 
     public void setItems(@NonNull List<MyLucaListItem> items) {
         this.items.clear();
-        this.items.addAll(items);
+        List<MyLucaListItemsWrapper> sortedList = sortAndPairItems(items);
+        this.items.addAll(sortedList);
         notifyDataSetChanged();
     }
 
-    private void setupDynamicContent(List<Pair<String, String>> content, ViewGroup topContent) {
-        for (int i = 0; i < Math.max(topContent.getChildCount(), content.size()); i++) {
-            ConstraintLayout labelAndTextView = (ConstraintLayout) topContent.getChildAt(i);
-            if (content.size() > i) {
-                Pair<String, String> labelAndText = content.get(i);
-                addLabelAndText(topContent, labelAndTextView, labelAndText.first, labelAndText.second);
+    @Override
+    public int getItemViewType(int position) {
+        MyLucaListItemsWrapper item = this.items.get(position);
+        if (item.hasMultipleItems()) {
+            return MULTIPLE_ITEM_VIEW_HOLDER;
+        } else {
+            return SINGLE_ITEM_VIEW_HOLDER;
+        }
+    }
+
+    private static List<MyLucaListItemsWrapper> sortAndPairItems(List<MyLucaListItem> list) {
+        List<MyLucaListItem> vaccinationItems = new ArrayList<>();
+        List<MyLucaListItemsWrapper> sortedList = new ArrayList<MyLucaListItemsWrapper>();
+        for (int i = 0; i < list.size(); i++) {
+            MyLucaListItem currentListItem = list.get(i);
+            if (currentListItem.getClass().equals(VaccinationItem.class)) {
+                vaccinationItems.add(currentListItem);
             } else {
-                topContent.removeView(labelAndTextView);
+                sortedList.add(new MyLucaListItemsWrapper(currentListItem));
             }
         }
-    }
+        if (!vaccinationItems.isEmpty())
+            sortedList.add(new MyLucaListItemsWrapper(vaccinationItems));
 
-    private void addLabelAndText(ViewGroup container, ConstraintLayout labelAndTextView, String label, String text) {
-        if (labelAndTextView == null) {
-            LayoutInflater layoutInflater = LayoutInflater.from(container.getContext());
-            labelAndTextView = (ConstraintLayout) layoutInflater.inflate(R.layout.my_luca_vaccination_procedure, container, false);
-            container.addView(labelAndTextView);
-        }
-        TextView labelView = labelAndTextView.findViewById(R.id.vaccination_name);
-        TextView textView = labelAndTextView.findViewById(R.id.vaccination_date);
-        labelView.setText(label);
-        textView.setText(text);
-        setConstrainWidth(labelAndTextView, R.id.vaccination_name, !TextUtils.isEmpty(text));
+        Collections.sort(sortedList, (first, second) -> Long.compare(second.getTimeStamp(), first.getTimeStamp()));
+        return sortedList;
     }
-
-    private void setConstrainWidth(ConstraintLayout constraintLayout, int viewId, boolean isConstrained) {
-        ConstraintSet set = new ConstraintSet();
-        set.clone(constraintLayout);
-        set.constrainedWidth(viewId, isConstrained);
-        set.applyTo(constraintLayout);
-    }
-
 }

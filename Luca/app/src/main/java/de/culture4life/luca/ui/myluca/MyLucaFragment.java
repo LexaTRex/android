@@ -1,23 +1,11 @@
 package de.culture4life.luca.ui.myluca;
 
-import com.google.android.material.button.MaterialButton;
-import com.google.android.material.card.MaterialCardView;
-import com.google.android.material.dialog.MaterialAlertDialogBuilder;
-import com.google.common.util.concurrent.ListenableFuture;
-
 import android.util.Size;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import de.culture4life.luca.R;
-import de.culture4life.luca.document.Document;
-import de.culture4life.luca.ui.BaseFragment;
-import de.culture4life.luca.ui.dialog.BaseDialogFragment;
-
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executors;
 
 import androidx.annotation.NonNull;
 import androidx.camera.core.Camera;
@@ -30,6 +18,19 @@ import androidx.core.content.ContextCompat;
 import androidx.lifecycle.LifecycleOwner;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.google.android.material.button.MaterialButton;
+import com.google.android.material.card.MaterialCardView;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.google.common.util.concurrent.ListenableFuture;
+
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
+
+import de.culture4life.luca.R;
+import de.culture4life.luca.document.Document;
+import de.culture4life.luca.ui.BaseFragment;
+import de.culture4life.luca.ui.dialog.BaseDialogFragment;
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Maybe;
 import io.reactivex.rxjava3.core.Single;
@@ -44,15 +45,14 @@ public class MyLucaFragment extends BaseFragment<MyLucaViewModel> implements MyL
     private View scanDocumentHintTextView;
     private View loadingView;
     private ImageView bookAppointmentImageView;
-    private TextView emptyTitleTextView;
+    private ScrollView emptyStateScrollView;
     private TextView emptyDescriptionTextView;
     private ImageView emptyImageView;
     private RecyclerView myLucaRecyclerView;
     private MyLucaListAdapter myLucaListAdapter;
     private MaterialButton importTestButton;
-
+    private View blackBackgroundView;
     private ProcessCameraProvider cameraProvider;
-
     private Disposable cameraPreviewDisposable;
 
     @Override
@@ -89,7 +89,7 @@ public class MyLucaFragment extends BaseFragment<MyLucaViewModel> implements MyL
         observe(viewModel.getUserName(), headingTextView::setText);
 
         myLucaRecyclerView = getView().findViewById(R.id.myLucaRecyclerView);
-        myLucaListAdapter = new MyLucaListAdapter(this);
+        myLucaListAdapter = new MyLucaListAdapter(this, this);
         myLucaRecyclerView.setAdapter(myLucaListAdapter);
         myLucaRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
@@ -97,16 +97,14 @@ public class MyLucaFragment extends BaseFragment<MyLucaViewModel> implements MyL
     }
 
     private void initializeEmptyStateViews() {
-        emptyTitleTextView = getView().findViewById(R.id.emptyTitleTextView);
+        emptyStateScrollView = getView().findViewById(R.id.emptyStateScrollView);
         emptyDescriptionTextView = getView().findViewById(R.id.emptyDescriptionTextView);
         emptyImageView = getView().findViewById(R.id.emptyImageView);
 
         observe(viewModel.getMyLucaItems(), items -> {
             int emptyStateVisibility = items.isEmpty() ? View.VISIBLE : View.GONE;
             int contentVisibility = !items.isEmpty() ? View.VISIBLE : View.GONE;
-            emptyTitleTextView.setVisibility(emptyStateVisibility);
-            emptyDescriptionTextView.setVisibility(emptyStateVisibility);
-            emptyImageView.setVisibility(emptyStateVisibility);
+            emptyStateScrollView.setVisibility(emptyStateVisibility);
             myLucaRecyclerView.setVisibility(contentVisibility);
         });
     }
@@ -123,6 +121,7 @@ public class MyLucaFragment extends BaseFragment<MyLucaViewModel> implements MyL
 
         cameraPreviewView = getView().findViewById(R.id.cameraPreviewView);
         scanDocumentHintTextView = getView().findViewById(R.id.scanDocumentHintTextView);
+        blackBackgroundView = getView().findViewById(R.id.blackBackground);
         loadingView = getView().findViewById(R.id.loadingLayout);
         observe(viewModel.getIsLoading(), loading -> loadingView.setVisibility(loading ? View.VISIBLE : View.GONE));
 
@@ -173,6 +172,10 @@ public class MyLucaFragment extends BaseFragment<MyLucaViewModel> implements MyL
                     cameraPreviewView.setVisibility(View.VISIBLE);
                     scanDocumentHintTextView.setVisibility(View.VISIBLE);
                     qrCodeCardView.setVisibility(View.VISIBLE);
+                    blackBackgroundView.setVisibility(View.VISIBLE);
+                    myLucaRecyclerView.setVisibility(View.GONE);
+                    emptyDescriptionTextView.setVisibility(View.GONE);
+                    emptyImageView.setVisibility(View.GONE);
                     importTestButton.setText(R.string.action_cancel);
                 })
                 .andThen(startCameraPreview())
@@ -192,6 +195,10 @@ public class MyLucaFragment extends BaseFragment<MyLucaViewModel> implements MyL
         scanDocumentHintTextView.setVisibility(View.GONE);
         qrCodeCardView.setVisibility(View.GONE);
         myLucaRecyclerView.setVisibility(View.VISIBLE);
+        blackBackgroundView.setVisibility(View.GONE);
+        int emptyStateVisibility = myLucaListAdapter.getItemCount() == 0 ? View.VISIBLE : View.GONE;
+        emptyDescriptionTextView.setVisibility(emptyStateVisibility);
+        emptyImageView.setVisibility(emptyStateVisibility);
         importTestButton.setText(R.string.document_import_action);
     }
 
