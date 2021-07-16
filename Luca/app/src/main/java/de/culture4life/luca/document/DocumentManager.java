@@ -123,7 +123,9 @@ public class DocumentManager extends Manager {
                     }
                     if (document.getOutcome() == Document.OUTCOME_POSITIVE
                             && document.getType() != Document.TYPE_GREEN_PASS) {
-                        return Completable.error(new TestResultPositiveException());
+                        if (!document.isValidRecovery()) {
+                            return Completable.error(new TestResultPositiveException());
+                        }
                     }
                     if (document.getOutcome() == Document.OUTCOME_UNKNOWN
                             && document.getType() != Document.TYPE_GREEN_PASS
@@ -154,15 +156,18 @@ public class DocumentManager extends Manager {
         ); // TODO: 07.05.21 add ubirch
     }
 
+    /**
+     * Redeem a document so that it can not be imported on another device
+     *
+     * @param document document object to redeem
+     */
     public Completable redeemDocument(@NonNull Document document) {
         if (BuildConfig.DEBUG) {
             return Completable.complete();
         }
         return networkManager.getLucaEndpointsV3()
                 .flatMapCompletable(lucaEndpointsV3 -> Single.zip(generateEncodedDocumentHash(document), generateOrRestoreDocumentTag(document), (hash, tag) -> {
-                    JsonObject jsonObject = new JsonObject();
-                    jsonObject.addProperty("hash", hash);
-                    jsonObject.addProperty("tag", tag);
+                    JsonObject jsonObject = jsonObjectWith(hash, tag);
                     jsonObject.addProperty("expireAt", TimeUtil.convertToUnixTimestamp(document.getExpirationTimestamp()).blockingGet());
                     return jsonObject;
                 }).flatMapCompletable(lucaEndpointsV3::redeemDocument))
@@ -173,6 +178,43 @@ public class DocumentManager extends Manager {
                         return Completable.error(throwable);
                     }
                 });
+    }
+
+    /**
+     * Unredeem the given document so it can be imported again on another device
+     *
+     * @param document document object to unredeem
+     */
+    public Completable unredeemDocument(@NonNull Document document) {
+        return networkManager.getLucaEndpointsV3()
+                .flatMapCompletable(lucaEndpointsV3 ->
+                        Single.zip(generateEncodedDocumentHash(document), generateOrRestoreDocumentTag(document), (hash, tag) ->
+                                jsonObjectWith(hash, tag)
+                        ).flatMapCompletable(body -> lucaEndpointsV3.unredeemDocument(body)
+                                .onErrorResumeNext(throwable -> {
+                                    if (NetworkManager.isHttpException(throwable, HttpURLConnection.HTTP_NOT_FOUND)) {
+                                        // The route is not yet available on backend or the document was already unredeemed
+                                        return Completable.complete();
+                                    }
+                                    return Completable.error(throwable);
+                                })
+                        ));
+    }
+
+    /**
+     * Unredeem and delete all documents stored so they can be imported again on another device
+     */
+    public Completable unredeemAndDeleteAllDocuments() {
+        return getOrRestoreDocuments()
+                .flatMapCompletable(document -> unredeemDocument(document)
+                    .andThen(deleteDocument(document.getId())));
+    }
+
+    private JsonObject jsonObjectWith(String hash, String tag) {
+        JsonObject jsonObject = new JsonObject();
+        jsonObject.addProperty("hash", hash);
+        jsonObject.addProperty("tag", tag);
+        return jsonObject;
     }
 
     protected Single<String> generateEncodedDocumentHash(@NonNull Document document) {

@@ -204,7 +204,6 @@ public class RegistrationManager extends Manager {
                                 .doOnSuccess(registrationData -> registrationData.setId(userId))
                                 .flatMapCompletable(this::persistRegistrationData)
                 ));
-
     }
 
     /**

@@ -160,7 +160,7 @@ public class DataAccessManager extends Manager {
                 .map(durationSinceLastUpdate -> UPDATE_INTERVAL - durationSinceLastUpdate)
                 .map(recommendedDelay -> Math.max(0, recommendedDelay))
                 .doOnSuccess(recommendedDelay -> {
-                    String readableDelay = TimeUtil.getReadableApproximateDuration(recommendedDelay, context).blockingGet();
+                    String readableDelay = TimeUtil.getReadableDurationWithPlural(recommendedDelay, context).blockingGet();
                     Timber.v("Recommended update delay: %s", readableDelay);
                 });
     }

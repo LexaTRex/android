@@ -15,6 +15,7 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import de.culture4life.luca.R
 import de.culture4life.luca.ui.UiUtil
+import kotlin.math.max
 
 class SingleLucaItemView @JvmOverloads constructor(
         context: Context,
@@ -22,19 +23,21 @@ class SingleLucaItemView @JvmOverloads constructor(
         defStyleAttr: Int = 0,
         item: MyLucaListItem? = null,
         position: Int = 0,
-) : ConstraintLayout(context, attrs) {
+) : ConstraintLayout(context, attrs, defStyleAttr) {
     val layout: ConstraintLayout = LayoutInflater.from(context).inflate(R.layout.my_luca_list_item,
             this,
             true) as ConstraintLayout
-    lateinit var cardView: CardView
-    lateinit var topContent: ViewGroup
-    lateinit var titleTextView: TextView
-    lateinit var itemTitleImageView: ImageView
-    lateinit var barcodeImageView: ImageView
-    lateinit var providerTextView: TextView
-    lateinit var deleteItemButton: Button
-    lateinit var collapseLayout: ViewGroup
-    lateinit var collapsedContent: ViewGroup
+
+    val cardView: CardView
+    val topContent: ViewGroup
+    val collapseLayout: ViewGroup
+    val collapsedContent: ViewGroup
+    private val titleTextView: TextView
+    private val itemTitleImageView: ImageView
+    private val barcodeImageView: ImageView
+    private val providerTextView: TextView
+    private val deleteItemButton: Button
+    private val collapseIndicator: ImageView
 
     init {
         val params = LayoutParams(LayoutParams.MATCH_PARENT,
@@ -58,6 +61,7 @@ class SingleLucaItemView @JvmOverloads constructor(
         deleteItemButton = layout.findViewById(R.id.deleteItemButton)
         collapseLayout = layout.findViewById(R.id.collapseLayout)
         collapsedContent = layout.findViewById(R.id.collapsedContent)
+        collapseIndicator = layout.findViewById(R.id.collapseIndicator)
 
 
         item?.let {
@@ -65,12 +69,12 @@ class SingleLucaItemView @JvmOverloads constructor(
             titleTextView.text = it.title
             itemTitleImageView.setImageResource(it.imageResource)
             barcodeImageView.setImageBitmap(it.barcode)
-            providerTextView.setText(it.provider)
-            collapseLayout.visibility = if (it.isExpanded) View.VISIBLE else View.GONE
+            providerTextView.text = it.provider
             deleteItemButton.text = it.deleteButtonText
+            collapseLayout.visibility = if (it.isExpanded) View.VISIBLE else View.GONE
+            collapseIndicator.rotationX = if (it.isExpanded) 180F else 0F
             setupDynamicContent(it.getTopContent(), topContent)
             setupDynamicContent(it.getCollapsedContent(), collapsedContent)
-
         }
     }
 
@@ -95,16 +99,16 @@ class SingleLucaItemView @JvmOverloads constructor(
         var labelAndTextView: ConstraintLayout? = labelTextView
         if (labelAndTextView == null) {
             val layoutInflater = LayoutInflater.from(container.context)
-            labelAndTextView = layoutInflater.inflate(R.layout.my_luca_vaccination_procedure,
+            labelAndTextView = layoutInflater.inflate(R.layout.my_luca_label_and_text,
                     container,
                     false) as ConstraintLayout
             container.addView(labelAndTextView)
         }
-        val labelView = labelAndTextView.findViewById<TextView>(R.id.vaccination_name)
-        val textView = labelAndTextView.findViewById<TextView>(R.id.vaccination_date)
+        val labelView = labelAndTextView.findViewById<TextView>(R.id.labelTextView)
+        val textView = labelAndTextView.findViewById<TextView>(R.id.valueTextView)
         label?.let { labelView.text = it }
         text?.let { textView.text = text }
-        setConstrainWidth(labelAndTextView, R.id.vaccination_name, !TextUtils.isEmpty(text))
+        setConstrainWidth(labelAndTextView, R.id.labelTextView, !TextUtils.isEmpty(text))
     }
 
     private fun setConstrainWidth(
@@ -119,7 +123,7 @@ class SingleLucaItemView @JvmOverloads constructor(
     }
 
     private fun setupDynamicContent(content: List<Pair<String, String>>, topContent: ViewGroup) {
-        for (i in 0 until Math.max(topContent.childCount, content.size)) {
+        for (i in 0 until max(topContent.childCount, content.size)) {
             val labelAndTextView = if (topContent.getChildAt(i) != null) topContent.getChildAt(i) as ConstraintLayout else null
             if (content.size > i) {
                 val labelAndText = content[i]

@@ -5,7 +5,6 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.progressindicator.LinearProgressIndicator;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
-import com.google.i18n.phonenumbers.PhoneNumberUtil;
 
 import android.animation.ObjectAnimator;
 import android.text.Editable;
@@ -335,7 +334,7 @@ public class RegistrationFragment extends BaseFragment<RegistrationViewModel> {
     }
 
     private void showPhoneNumberVerificationConfirmationDialog() {
-        String number = viewModel.getFormattedPhoneNumber(PhoneNumberUtil.PhoneNumberFormat.NATIONAL);
+        String number = viewModel.getFormattedPhoneNumber();
         boolean isMobileNumber = viewModel.isMobilePhoneNumber(number);
         int messageResource = isMobileNumber ? R.string.verification_explanation_sms_description : R.string.verification_explanation_landline_description;
         new BaseDialogFragment(new MaterialAlertDialogBuilder(getContext())
@@ -465,7 +464,7 @@ public class RegistrationFragment extends BaseFragment<RegistrationViewModel> {
 
     private void showPhoneNumberRequestTimeoutDialog(long nextPossibleTanRequestTimestamp) {
         long duration = nextPossibleTanRequestTimestamp - System.currentTimeMillis();
-        String readableDuration = TimeUtil.getReadableApproximateDuration(duration, getContext()).blockingGet();
+        String readableDuration = TimeUtil.getReadableDurationWithPlural(duration, getContext()).blockingGet();
         new BaseDialogFragment(new MaterialAlertDialogBuilder(getContext())
                 .setTitle(R.string.verification_timeout_error_title)
                 .setMessage(getString(R.string.verification_timeout_error_description, readableDuration))

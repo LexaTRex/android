@@ -52,7 +52,7 @@ class EudccResult(encodedData: String, result: CertificateDecodingResult) : Prov
                     }
                 }
             }
-            throw DocumentParsingException("Could not parse EUDCC: ${error.error}")
+            throw DocumentParsingException("Could not parse EUDCC: ${error.error}", error.error.error)
         }
     }
 

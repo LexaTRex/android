@@ -57,10 +57,11 @@ public class MyLucaViewModel extends BaseViewModel implements ImageAnalysis.Anal
 
     private Disposable imageProcessingDisposable;
     private ViewError importError;
+    private ViewError deleteError;
 
     public MyLucaViewModel(@NonNull Application application) {
         super(application);
-        this.documentManager = this.application.getTestingManager();
+        this.documentManager = this.application.getDocumentManager();
         this.notificationManager = this.application.getNotificationManager();
         this.registrationManager = this.application.getRegistrationManager();
         this.scanner = BarcodeScanning.getClient();
@@ -110,9 +111,7 @@ public class MyLucaViewModel extends BaseViewModel implements ImageAnalysis.Anal
 
     private Maybe<MyLucaListItem> createListItem(@NonNull Document document) {
         return Maybe.fromCallable(() -> {
-            if (document.getType() == Document.TYPE_GREEN_PASS) {
-                return new GreenPassItem(application, document);
-            } else if (document.getType() == Document.TYPE_APPOINTMENT) {
+            if (document.getType() == Document.TYPE_APPOINTMENT) {
                 return new AppointmentItem(application, document);
             } else if (document.getType() == Document.TYPE_VACCINATION) {
                 return new VaccinationItem(application, document);
@@ -126,15 +125,27 @@ public class MyLucaViewModel extends BaseViewModel implements ImageAnalysis.Anal
 
     public Completable deleteListItem(@NonNull MyLucaListItem myLucaListItem) {
         return Completable.defer(() -> {
+            Document document;
             if (myLucaListItem instanceof TestResultItem) {
-                return documentManager.deleteDocument(((TestResultItem) myLucaListItem).getDocument().getId())
-                        .andThen(invokeListUpdate());
-            } else if (myLucaListItem instanceof GreenPassItem) {
-                return documentManager.deleteDocument(((GreenPassItem) myLucaListItem).getDocument().getId())
-                        .andThen(invokeListUpdate());
+                document = ((TestResultItem) myLucaListItem).getDocument();
             } else {
                 return Completable.error(new IllegalArgumentException("Unable to delete item, unknown type"));
             }
+            return documentManager.unredeemDocument(document)
+                    .andThen(documentManager.deleteDocument(document.getId()))
+                    .andThen(invokeListUpdate())
+                    .doOnSubscribe(disposable -> {
+                        removeError(deleteError);
+                        updateAsSideEffect(isLoading, true);
+                    })
+                    .doOnError(throwable -> {
+                        deleteError = new ViewError.Builder(application)
+                                .withCause(throwable)
+                                .removeWhenShown()
+                                .build();
+                        addError(deleteError);
+                    })
+                    .doFinally(() -> updateAsSideEffect(isLoading, false));
         });
     }
 

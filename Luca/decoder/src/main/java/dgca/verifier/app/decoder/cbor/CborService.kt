@@ -24,6 +24,15 @@ package dgca.verifier.app.decoder.cbor
 
 import dgca.verifier.app.decoder.model.GreenCertificate
 import dgca.verifier.app.decoder.model.VerificationResult
+import java.time.ZonedDateTime
+
+data class GreenCertificateData(
+    val issuingCountry: String?,
+    val hcertJson: String,
+    val greenCertificate: GreenCertificate,
+    val issuedAt: ZonedDateTime,
+    val expirationTime: ZonedDateTime
+)
 
 /**
  * Decodes input as a CBOR structure
@@ -31,4 +40,9 @@ import dgca.verifier.app.decoder.model.VerificationResult
 interface CborService {
 
     fun decode(input: ByteArray, verificationResult: VerificationResult): GreenCertificate?
+
+    fun decodeData(
+        input: ByteArray,
+        verificationResult: VerificationResult
+    ): GreenCertificateData?
 }

@@ -1,13 +1,17 @@
 package de.culture4life.luca.ui.registration;
 
+import com.google.i18n.phonenumbers.PhoneNumberUtil;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
+import androidx.test.core.app.ApplicationProvider;
 import androidx.test.runner.AndroidJUnit4;
+
+import static org.junit.Assert.assertEquals;
 
 @Config(sdk = 28)
 @RunWith(AndroidJUnit4.class)
@@ -17,7 +21,17 @@ public class RegistrationViewModelTest {
 
     @Before
     public void setUp() {
-        viewModel = new RegistrationViewModel(RuntimeEnvironment.application);
+        viewModel = new RegistrationViewModel(ApplicationProvider.getApplicationContext());
+    }
+
+    @Test
+    public void getFormattedPhoneNumber_withoutCountryCode_addsGermanCountryCode() {
+        assertEquals("+4915112345678", viewModel.getFormattedPhoneNumber("0151 12345678", PhoneNumberUtil.PhoneNumberFormat.E164));
+    }
+
+    @Test
+    public void getFormattedPhoneNumber_withCountryCode_keepsCountryCode() {
+        assertEquals("+4915112345678", viewModel.getFormattedPhoneNumber("+49 151 12345678", PhoneNumberUtil.PhoneNumberFormat.E164));
     }
 
     @Test

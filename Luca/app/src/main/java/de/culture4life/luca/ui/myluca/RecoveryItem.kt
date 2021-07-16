@@ -15,13 +15,16 @@ class RecoveryItem(context: Context, document: Document) :
     init {
         setTitleAndColor(context, document)
         deleteButtonText = context.getString(R.string.delete_certificate_action)
-        val time = getReadableTime(context, document.expirationTimestamp)
 
         topContent.clear()
-        addTopContent(context.getString(R.string.document_valid_until), time)
+        val createdBefore = TimeUtil.getReadableDurationWithPlural(System.currentTimeMillis() - document.testingTimestamp, context).blockingGet()
+        addTopContent(context.getString(R.string.document_created_before), createdBefore)
 
         collapsedContent.clear()
-        addCollapsedContent(context.getString(R.string.document_issued_by), document.labName)
+        val time = MyLucaListItem.getReadableDate(context, document.testingTimestamp)
+        addCollapsedContent(context.getString(R.string.document_issued_by), "$time\n${document.labName}")
+        val validUntil = MyLucaListItem.getReadableDate(context, document.expirationTimestamp)
+        addCollapsedContent(context.getString(R.string.document_valid_until), validUntil)
         val date = MyLucaListItem.getReadableDate(context, document.dateOfBirth)
         addCollapsedContent(context.getString(R.string.birthday_label), date)
     }
@@ -29,7 +32,9 @@ class RecoveryItem(context: Context, document: Document) :
     private fun setTitleAndColor(context: Context, document: Document) {
         when (document.outcome) {
             Document.OUTCOME_PARTIALLY_IMMUNE -> {
-                title = context.getString(R.string.document_outcome_partially_immune)
+                val firstProcedure = document.procedures.first()
+                val procedureNumber = String.format("%d/%d", firstProcedure.doseNumber, firstProcedure.totalSeriesOfDoses)
+                title = context.getString(R.string.document_outcome_partially_immune, procedureNumber)
                 color = ContextCompat.getColor(context, R.color.document_outcome_partially_vaccinated)
             }
             Document.OUTCOME_FULLY_IMMUNE -> {

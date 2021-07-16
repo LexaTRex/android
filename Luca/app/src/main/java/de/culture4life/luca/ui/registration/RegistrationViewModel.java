@@ -8,11 +8,11 @@ import android.app.Application;
 
 import de.culture4life.luca.LucaApplication;
 import de.culture4life.luca.R;
+import de.culture4life.luca.document.DocumentManager;
 import de.culture4life.luca.network.NetworkManager;
 import de.culture4life.luca.preference.PreferencesManager;
 import de.culture4life.luca.registration.RegistrationData;
 import de.culture4life.luca.registration.RegistrationManager;
-import de.culture4life.luca.document.DocumentManager;
 import de.culture4life.luca.ui.BaseViewModel;
 import de.culture4life.luca.ui.ViewError;
 import de.culture4life.luca.util.TimeUtil;
@@ -83,12 +83,13 @@ public class RegistrationViewModel extends BaseViewModel {
 
     private boolean isInEditMode;
     private boolean shouldReImportTestData;
+    private boolean isRegisteringUser;
 
     public RegistrationViewModel(@NonNull Application application) {
         super(application);
         preferencesManager = this.application.getPreferencesManager();
         registrationManager = this.application.getRegistrationManager();
-        documentManager = this.application.getTestingManager();
+        documentManager = this.application.getDocumentManager();
         phoneNumberUtil = PhoneNumberUtil.getInstance();
 
         progress.setValue(0D);
@@ -232,6 +233,11 @@ public class RegistrationViewModel extends BaseViewModel {
     }
 
     public void onRegistrationRequested() {
+        if (isRegisteringUser) {
+            // prevent multiple calls due to double click
+            return;
+        }
+        isRegisteringUser = true;
         modelDisposable.add(updateRegistrationDataWithFormValues()
                 .andThen(registrationManager.registerUser())
                 .andThen(persistUserDataUpdateInHistory())
@@ -246,9 +252,14 @@ public class RegistrationViewModel extends BaseViewModel {
                             .withResolveAction(Completable.fromAction(this::onRegistrationRequested))
                             .withResolveLabel(R.string.action_retry)
                             .build();
-                    addError(registrationError);
+                    if (isCurrentDestinationId(R.id.registrationFragment)) {
+                        addError(registrationError);
+                    }
                 })
-                .doFinally(() -> updateAsSideEffect(isLoading, false))
+                .doFinally(() -> {
+                    updateAsSideEffect(isLoading, false);
+                    isRegisteringUser = false;
+                })
                 .subscribeOn(Schedulers.io())
                 .subscribe(
                         () -> Timber.i("User registered"),
@@ -434,7 +445,7 @@ public class RegistrationViewModel extends BaseViewModel {
                     if (remainingTimeoutDuration <= 0) {
                         return Completable.complete();
                     } else {
-                        String readableDuration = TimeUtil.getReadableApproximateDuration(remainingTimeoutDuration, getApplication()).blockingGet();
+                        String readableDuration = TimeUtil.getReadableDurationWithPlural(remainingTimeoutDuration, getApplication()).blockingGet();
                         return Completable.error(new VerificationException(application.getString(R.string.verification_timeout_error_description, readableDuration)));
                     }
                 });
@@ -541,12 +552,12 @@ public class RegistrationViewModel extends BaseViewModel {
     }
 
     public String getFormattedPhoneNumber() {
-        return getFormattedPhoneNumber(PhoneNumberUtil.PhoneNumberFormat.E164);
+        return getFormattedPhoneNumber(getPhoneNumber().getValue(), PhoneNumberUtil.PhoneNumberFormat.E164);
     }
 
-    public String getFormattedPhoneNumber(PhoneNumberUtil.PhoneNumberFormat format) {
+    public String getFormattedPhoneNumber(@NonNull String phoneNumberString, @NonNull PhoneNumberUtil.PhoneNumberFormat format) {
         try {
-            Phonenumber.PhoneNumber phoneNumber = phoneNumberUtil.parse(getPhoneNumber().getValue(), "DE");
+            Phonenumber.PhoneNumber phoneNumber = phoneNumberUtil.parse(phoneNumberString, "DE");
             return phoneNumberUtil.format(phoneNumber, format);
         } catch (NumberParseException e) {
             return getPhoneNumber().getValue();

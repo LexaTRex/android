@@ -21,7 +21,6 @@
     <color name="document_outcome_fully_vaccinated_but_not_yet_valid">@color/document_outcome_partially_vaccinated</color>
     <color name="document_outcome_fully_recovered">@color/document_outcome_fully_vaccinated</color>
     <color name="document_outcome_unknown">#f3f5f7</color>
-    <color name="green_pass">@color/document_outcome_fully_vaccinated</color>
     <color name="appointment">#9badbf</color>
 
     <color name="primaryColor">@color/luca_light_blue</color>

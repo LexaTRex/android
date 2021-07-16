@@ -1,11 +1,24 @@
 package de.culture4life.luca.ui.myluca;
 
+import com.google.android.material.button.MaterialButton;
+import com.google.android.material.card.MaterialCardView;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.google.common.util.concurrent.ListenableFuture;
+
 import android.util.Size;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import de.culture4life.luca.R;
+import de.culture4life.luca.document.Document;
+import de.culture4life.luca.ui.BaseFragment;
+import de.culture4life.luca.ui.dialog.BaseDialogFragment;
+
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
 
 import androidx.annotation.NonNull;
 import androidx.camera.core.Camera;
@@ -18,19 +31,6 @@ import androidx.core.content.ContextCompat;
 import androidx.lifecycle.LifecycleOwner;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
-import com.google.android.material.button.MaterialButton;
-import com.google.android.material.card.MaterialCardView;
-import com.google.android.material.dialog.MaterialAlertDialogBuilder;
-import com.google.common.util.concurrent.ListenableFuture;
-
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executors;
-
-import de.culture4life.luca.R;
-import de.culture4life.luca.document.Document;
-import de.culture4life.luca.ui.BaseFragment;
-import de.culture4life.luca.ui.dialog.BaseDialogFragment;
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Maybe;
 import io.reactivex.rxjava3.core.Single;
@@ -260,6 +260,7 @@ public class MyLucaFragment extends BaseFragment<MyLucaViewModel> implements MyL
                 })
                 .setPositiveButton(R.string.action_confirm, (dialog, which) ->
                         viewDisposable.add(viewModel.deleteListItem(myLucaListItem)
+                                .onErrorComplete()
                                 .subscribeOn(Schedulers.io())
                                 .subscribe()));
         new BaseDialogFragment(builder).show();

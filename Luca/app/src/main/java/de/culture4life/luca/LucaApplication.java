@@ -495,7 +495,7 @@ public class LucaApplication extends MultiDexApplication {
         return dataAccessManager;
     }
 
-    public DocumentManager getTestingManager() {
+    public DocumentManager getDocumentManager() {
         return documentManager;
     }
 

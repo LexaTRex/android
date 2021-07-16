@@ -35,18 +35,18 @@ import java.util.zip.InflaterInputStream
 
 @ExperimentalUnsignedTypes
 class DefaultCertificateDecoder(private val base45Decoder: Base45Decoder) :
-    CertificateDecoder {
+        CertificateDecoder {
     companion object {
         const val PREFIX = "HC1:"
 
         fun ByteArray.decompressBase45DecodedData(): ByteArray {
             // ZLIB magic headers
             return if (this.size >= 2 && this[0] == 0x78.toByte() && (
-                        this[1] == 0x01.toByte() || // Level 1
-                                this[1] == 0x5E.toByte() || // Level 2 - 5
-                                this[1] == 0x9C.toByte() || // Level 6
-                                this[1] == 0xDA.toByte()
-                        )
+                            this[1] == 0x01.toByte() || // Level 1
+                                    this[1] == 0x5E.toByte() || // Level 2 - 5
+                                    this[1] == 0x9C.toByte() || // Level 6
+                                    this[1] == 0xDA.toByte()
+                            )
             ) {
                 InflaterInputStream(this.inputStream()).readBytes()
             } else this
@@ -56,10 +56,17 @@ class DefaultCertificateDecoder(private val base45Decoder: Base45Decoder) :
             val messageObject = CBORObject.DecodeFromBytes(this)
             val content = messageObject[2].GetByteString()
             val rgbProtected = messageObject[0].GetByteString()
+            var rgbUnprotected = messageObject[1];
             val key = HeaderKeys.KID.AsCBOR()
-            val objProtected = CBORObject.DecodeFromBytes(rgbProtected).get(key)?.GetByteString()
+
+            if (!CBORObject.DecodeFromBytes(rgbProtected).keys.contains(key)) {
+                val objunprotected = rgbUnprotected.get(key).GetByteString()
+                return CoseData(content, objunprotected)
+            }
+            val objProtected = CBORObject.DecodeFromBytes(rgbProtected).get(key).GetByteString()
             return CoseData(content, objProtected)
         }
+
     }
 
     override fun decodeCertificate(qrCodeText: String): CertificateDecodingResult {
@@ -92,11 +99,39 @@ class DefaultCertificateDecoder(private val base45Decoder: Base45Decoder) :
         return CertificateDecodingResult.Success(greenCertificate)
     }
 
+    fun ByteArray.decompressBase45DecodedData(): ByteArray {
+        // ZLIB magic headers
+        return if (this.size >= 2 && this[0] == 0x78.toByte() && (
+                        this[1] == 0x01.toByte() || // Level 1
+                                this[1] == 0x5E.toByte() || // Level 2 - 5
+                                this[1] == 0x9C.toByte() || // Level 6
+                                this[1] == 0xDA.toByte()
+                        )
+        ) {
+            InflaterInputStream(this.inputStream()).readBytes()
+        } else this
+    }
+
+    fun ByteArray.decodeCose(): CoseData {
+        val messageObject = CBORObject.DecodeFromBytes(this)
+        val content = messageObject[2].GetByteString()
+        val rgbProtected = messageObject[0].GetByteString()
+        var rgbUnprotected = messageObject[1];
+        val key = HeaderKeys.KID.AsCBOR()
+
+        if (!CBORObject.DecodeFromBytes(rgbProtected).keys.contains(key)) {
+            val objunprotected = rgbUnprotected.get(key).GetByteString()
+            return CoseData(content, objunprotected)
+        }
+        val objProtected = CBORObject.DecodeFromBytes(rgbProtected).get(key).GetByteString()
+        return CoseData(content, objProtected)
+    }
+
     private fun ByteArray.decodeGreenCertificate(): GreenCertificate? {
         val map = CBORObject.DecodeFromBytes(this)
 
-        val keyIssuer = map[CwtHeaderKeys.KEY_ISSUER.asCBOR()].AsString()
-        if (TextUtils.isEmpty(keyIssuer)) throw IllegalArgumentException("Key issuer is empty: $keyIssuer")
+        val issuingCountry = map[CwtHeaderKeys.ISSUING_COUNTRY.asCBOR()].AsString()
+        if (TextUtils.isEmpty(issuingCountry)) throw IllegalArgumentException("Issuing country not correct: $issuingCountry")
 
         val issuedAt = Instant.ofEpochSecond(map[CwtHeaderKeys.ISSUED_AT.asCBOR()].AsInt64())
         if (issuedAt.isAfter(Instant.now())) throw IllegalArgumentException("IssuedAt not correct: $issuedAt")
@@ -108,6 +143,6 @@ class DefaultCertificateDecoder(private val base45Decoder: Base45Decoder) :
         val hcertv1 = hcert[CBORObject.FromObject(1)].EncodeToBytes()
 
         return CBORMapper()
-            .readValue(hcertv1, GreenCertificate::class.java)
+                .readValue(hcertv1, GreenCertificate::class.java)
     }
 }

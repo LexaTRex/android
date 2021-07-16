@@ -23,7 +23,7 @@
 package dgca.verifier.app.decoder
 
 const val JSON_SCHEMA_V1 = "{\n" +
-//        "  \"\$schema\": \"https://json-schema.org/draft/2020-12/schema\",\n" +
+        //"  \"\$schema\": \"https://json-schema.org/draft/2020-12/schema\",\n" +
         "  \"\$id\": \"https://id.uvci.eu/DGC.combined-schema.json\",\n" +
         "  \"title\": \"EU DGC\",\n" +
         "  \"description\": \"EU Digital Green Certificate\",\n" +
@@ -51,7 +51,6 @@ const val JSON_SCHEMA_V1 = "{\n" +
         "      \"title\": \"Date of birth\",\n" +
         "      \"description\": \"Date of Birth of the person addressed in the DGC. ISO 8601 date format restricted to range 1900-2099\",\n" +
         "      \"type\": \"string\",\n" +
-        "      \"format\": \"date\",\n" +
         "      \"examples\": [\n" +
         "        \"1979-04-14\"\n" +
         "      ]\n" +
@@ -61,32 +60,27 @@ const val JSON_SCHEMA_V1 = "{\n" +
         "      \"type\": [\"null\", \"array\"],\n" +
         "      \"items\": {\n" +
         "        \"\$ref\": \"#/\$defs/vaccination_entry\"\n" +
-        "      },\n" +
-        "      \"minItems\": 1\n" +
+        "      }\n" +
         "    },\n" +
         "    \"t\": {\n" +
         "      \"description\": \"Test Group\",\n" +
         "      \"type\": [\"null\", \"array\"],\n" +
         "      \"items\": {\n" +
         "        \"\$ref\": \"#/\$defs/test_entry\"\n" +
-        "      },\n" +
-        "      \"minItems\": 1\n" +
+        "      }\n" +
         "    },\n" +
         "    \"r\": {\n" +
         "      \"description\": \"Recovery Group\",\n" +
         "      \"type\": [\"null\", \"array\"],\n" +
         "      \"items\": {\n" +
         "        \"\$ref\": \"#/\$defs/recovery_entry\"\n" +
-        "      },\n" +
-        "      \"minItems\": 1\n" +
+        "      }\n" +
         "    }\n" +
         "  },\n" +
         "  \"\$defs\": {\n" +
         "    \"dose_posint\": {\n" +
         "      \"description\": \"Dose Number / Total doses in Series: positive integer, range: [1,9]\",\n" +
-        "      \"type\": [\"null\", \"integer\"],\n" +
-        "      \"minimum\": 1,\n" +
-        "      \"maximum\": 9\n" +
+        "      \"type\": [\"null\", \"integer\"]\n" +
         "    },\n" +
         "    \"country_vt\": {\n" +
         "      \"description\": \"Country of Vaccination / Test, ISO 3166 where possible\",\n" +
@@ -94,8 +88,7 @@ const val JSON_SCHEMA_V1 = "{\n" +
         "    },\n" +
         "    \"issuer\": {\n" +
         "      \"description\": \"Certificate Issuer\",\n" +
-        "      \"type\": [\"null\", \"string\"],\n" +
-        "      \"maxLength\": 50\n" +
+        "      \"type\": [\"null\", \"string\"]\n" +
         "    },\n" +
         "    \"person_name\": {\n" +
         "      \"description\": \"Person name: Surname(s), given name(s) - in that order\",\n" +
@@ -108,7 +101,6 @@ const val JSON_SCHEMA_V1 = "{\n" +
         "          \"title\": \"Family name\",\n" +
         "          \"description\": \"The family or primary name(s) of the person addressed in the certificate\",\n" +
         "          \"type\": [\"null\", \"string\"],\n" +
-        "          \"maxLength\": 50,\n" +
         "          \"examples\": [\n" +
         "            \"d'Červenková Panklová\"\n" +
         "          ]\n" +
@@ -117,7 +109,6 @@ const val JSON_SCHEMA_V1 = "{\n" +
         "          \"title\": \"Standardised family name\",\n" +
         "          \"description\": \"The family name(s) of the person transliterated\",\n" +
         "          \"type\": \"string\",\n" +
-        "          \"maxLength\": 50,\n" +
         "          \"examples\": [\n" +
         "            \"DCERVENKOVA<PANKLOVA\"\n" +
         "          ]\n" +
@@ -126,7 +117,6 @@ const val JSON_SCHEMA_V1 = "{\n" +
         "          \"title\": \"Given name\",\n" +
         "          \"description\": \"The given name(s) of the person addressed in the certificate\",\n" +
         "          \"type\": [\"null\", \"string\"],\n" +
-        "          \"maxLength\": 50,\n" +
         "          \"examples\": [\n" +
         "            \"Jiřina-Maria Alena\"\n" +
         "          ]\n" +
@@ -135,7 +125,6 @@ const val JSON_SCHEMA_V1 = "{\n" +
         "          \"title\": \"Standardised given name\",\n" +
         "          \"description\": \"The given name(s) of the person transliterated\",\n" +
         "          \"type\": [\"null\", \"string\"],\n" +
-        "          \"maxLength\": 50,\n" +
         "          \"examples\": [\n" +
         "            \"JIRINA<MARIA<ALENA\"\n" +
         "          ]\n" +
@@ -144,8 +133,7 @@ const val JSON_SCHEMA_V1 = "{\n" +
         "    },\n" +
         "    \"certificate_id\": {\n" +
         "      \"description\": \"Certificate Identifier, format as per UVCI: Annex 2 in  https://ec.europa.eu/health/sites/health/files/ehealth/docs/vaccination-proof_interoperability-guidelines_en.pdf\",\n" +
-        "      \"type\": [\"null\", \"string\"],\n" +
-        "      \"maxLength\": 50\n" +
+        "      \"type\": [\"null\", \"string\"]\n" +
         "    },\n" +
         "    \"vaccination_entry\": {\n" +
         "      \"description\": \"Vaccination Entry\",\n" +
@@ -190,7 +178,6 @@ const val JSON_SCHEMA_V1 = "{\n" +
         "        \"dt\": {\n" +
         "          \"description\": \"Date of Vaccination\",\n" +
         "          \"type\": \"string\",\n" +
-        "          \"format\": \"date\",\n" +
         "          \"\$comment\": \"SemanticSG: constrain to specific date range?\"\n" +
         "        },\n" +
         "        \"co\": {\n" +
@@ -214,7 +201,6 @@ const val JSON_SCHEMA_V1 = "{\n" +
         "        \"tt\",\n" +
         "        \"sc\",\n" +
         "        \"tr\",\n" +
-        "        \"tc\",\n" +
         "        \"co\",\n" +
         "        \"is\",\n" +
         "        \"ci\"\n" +
@@ -238,13 +224,11 @@ const val JSON_SCHEMA_V1 = "{\n" +
         "        },\n" +
         "        \"sc\": {\n" +
         "          \"description\": \"Date/Time of Sample Collection\",\n" +
-        "          \"type\": \"string\",\n" +
-        "          \"format\": \"date-time\"\n" +
+        "          \"type\": \"string\"\n" +
         "        },\n" +
         "        \"dr\": {\n" +
         "          \"description\": \"Date/Time of Test Result\",\n" +
-        "          \"type\": [\"null\", \"string\"],\n" +
-        "          \"format\": \"date-time\"\n" +
+        "          \"type\": [\"null\", \"string\"]\n" +
         "        },\n" +
         "        \"tr\": {\n" +
         "          \"description\": \"Test Result\",\n" +
@@ -252,8 +236,7 @@ const val JSON_SCHEMA_V1 = "{\n" +
         "        },\n" +
         "        \"tc\": {\n" +
         "          \"description\": \"Testing Centre\",\n" +
-        "          \"type\": [\"null\", \"string\"],\n" +
-        "          \"maxLength\": 50\n" +
+        "          \"type\": [\"null\", \"string\"]\n" +
         "        },\n" +
         "        \"co\": {\n" +
         "          \"description\": \"Country of Test\",\n" +
@@ -287,8 +270,7 @@ const val JSON_SCHEMA_V1 = "{\n" +
         "        },\n" +
         "        \"fr\": {\n" +
         "          \"description\": \"ISO 8601 Date of First Positive Test Result\",\n" +
-        "          \"type\": \"string\",\n" +
-        "          \"format\": \"date\"\n" +
+        "          \"type\": \"string\"\n" +
         "        },\n" +
         "        \"co\": {\n" +
         "          \"description\": \"Country of Test\",\n" +
@@ -300,13 +282,11 @@ const val JSON_SCHEMA_V1 = "{\n" +
         "        },\n" +
         "        \"df\": {\n" +
         "          \"description\": \"ISO 8601 Date: Certificate Valid From\",\n" +
-        "          \"type\": \"string\",\n" +
-        "          \"format\": \"date\"\n" +
+        "          \"type\": \"string\"\n" +
         "        },\n" +
         "        \"du\": {\n" +
         "          \"description\": \"Certificate Valid Until\",\n" +
-        "          \"type\": \"string\",\n" +
-        "          \"format\": \"date\"\n" +
+        "          \"type\": \"string\"\n" +
         "        },\n" +
         "        \"ci\": {\n" +
         "          \"description\": \"Unique Certificate Identifier, UVCI\",\n" +
