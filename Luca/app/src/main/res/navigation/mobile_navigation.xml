@@ -106,8 +106,8 @@
             tools:layout="@layout/fragment_registration_all" />
 
     <fragment
-        android:id="@+id/accountFragment"
-        android:name="de.culture4life.luca.ui.account.AccountFragment"
-        android:label="AccountFragment" />
+            android:id="@+id/accountFragment"
+            android:name="de.culture4life.luca.ui.account.AccountFragment"
+            android:label="AccountFragment" />
 
 </navigation>

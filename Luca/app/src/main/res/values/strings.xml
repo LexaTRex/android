@@ -3,8 +3,8 @@
     <string name="app_name" translatable="false">luca</string>
     <string name="unknown">Unknown</string>
     <string name="feature_unavailable">Available soon</string>
-    <string name="url_terms_and_conditions">https://luca-app.de/app-terms-and-conditions</string>
-    <string name="url_privacy_policy">https://luca-app.de/app-privacy-policy</string>
+    <string name="url_terms_and_conditions">https://www.luca-app.de/app-terms-and-conditions-2/</string>
+    <string name="url_privacy_policy">https://www.luca-app.de/app-privacy-policy/</string>
     <string name="url_imprint">https://luca-app.de/imprint</string>
     <string name="url_gitlab" translatable="false">https://gitlab.com/lucaapp/android</string>
     <string name="url_faq">https://www.luca-app.de/faq/</string>
@@ -79,9 +79,9 @@
     <string name="welcome_app_slogan">Experience life together.</string>
     <string name="welcome_heading">Hello</string>
     <string name="welcome_description">luca helps you encrypt and securely submit your contact data. With luca, you don\'t have to worry about your data when visiting events, restaurants, cafés or bars anymore.</string>
-    <string name="welcome_terms_description">Accept <a href="https://luca-app.de/app-terms-and-conditions">terms of use</a></string>
+    <string name="welcome_terms_description">Accept <a href="https://www.luca-app.de/app-terms-and-conditions-2/">terms of use</a></string>
     <string name="welcome_terms_checkbox_content_description">Terms of use</string>
-    <string name="welcome_privacy_description">Accept <a href="https://luca-app.de/app-privacy-policy">privacy policy</a></string>
+    <string name="welcome_privacy_description">Accept <a href="https://www.luca-app.de/app-privacy-policy/">privacy policy</a></string>
     <string name="welcome_privacy_checkbox_content_description">Privacy Policy</string>
     <string name="welcome_action">Get started!</string>
 
@@ -200,6 +200,7 @@
     <string name="venue_property_patient_name">Patient name</string>
 
     <string name="venue_check_in_action">CHECK IN</string>
+    <string name="venue_check_in_content_description">Check-in button</string>
     <string name="venue_check_out_action">CHECK OUT</string>
     <string name="venue_check_out_content_description">Check-out button</string>
     <string name="venue_checked_in_time">Check in:\n<xliff:g example="18.08.2020 – 7:23 PM" id="time">%1$s</xliff:g></string>
@@ -212,6 +213,9 @@
     <string name="venue_children_list_description">Choose the children, who will be checked-in together with you.</string>
     <string name="venue_children_add_description">This information will not be shared with the health department, it is only a reminder for yourself. If you share your history with the health department, you can voluntarily provide this information to them as well.</string>
     <string name="venue_children_add">Add child</string>
+    <string name="venue_children_add_validation_error">Please enter a valid name</string>
+    <string name="venue_children_add_error_title">Unable to add child</string>
+    <string name="venue_children_remove_error_title">Unable to remove child</string>
     <string name="venue_children_name">Child\'s name</string>
     <string name="venue_children_check_in">Check-In Children</string>
 
@@ -290,9 +294,11 @@
     <string name="my_luca_heading">My luca</string>
     <string name="my_luca_empty_title">Welcome at \"My luca\"</string>
     <string name="my_luca_empty_description">This is your personal space, where you can <b>add</b> documents to make your <b>check-in</b> easier.\n\nVia the calendar icon in the upper right corner you can book test appointments.</string>
+    <string name="time_error_description">The time you set in your phone doesn\'t match the current time.</string>
+    <string name="time_error_action">Go to settings</string>
     <string name="appointment_action">Book appointment</string>
     <string name="document_import_action">Add Document</string>
-    <string name="document_import_hint">Scan the QR code of your document to add it to the app</string>
+    <string name="document_import_hint">Scan the QR code of your document to add it to the app.</string>
     <string name="document_import_success_message">The document was imported</string>
     <string name="document_import_consent">I hereby declare my consent in accordance with Art. 9 (2) a) in conjunction with Art. 6 (1) 1 a) DSGVO to the transmission of a pseudonymized identifier during the local storage of my COVID test, recovery or vaccination certificate in the luca app. This is solely to prevent misuse so that multiple people cannot import and use the same document. The document\’s individual identifier is automatically deleted from the luca system after 72 hours of storage.</string>
     <string name="document_import_error_title">The document could not be imported</string>
@@ -404,6 +410,13 @@
     <string name="delete_account_dialog_title">Do you really want to delete your account?</string>
     <string name="delete_account_dialog_message">If you delete your account, you will not be able to check in or access your history.\n\nIn accordance with the Corona/COVID-19 infection control regulations, all encrypted check-in data will be deleted after 4 weeks.\n\nOnce your account is deleted, you can still be notified by a health department up to 4 weeks after your last check-in.</string>
     <string name="delete_account_dialog_action">Delete</string>
+
+    <!-- Updated Terms -->
+    <string name="updated_terms_description">We are updating our terms of use and privacy policy.</string>
+    <string name="updated_terms_info">Tap "AGREE" to accept the updated <b><a href="https://www.luca-app.de/app-terms-and-conditions-2/">terms of use</a></b> and <b><a href="https://www.luca-app.de/app-privacy-policy/">privacy policy</a></b>.</string>
+    <string name="updated_terms_button_agree">AGREE</string>
+    <string name="updated_terms_changes_action">Changes</string>
+    <string name="updated_terms_changes_url" translatable="false">https://www.luca-app.de/changes-terms-of-use-app/</string>
 
     <!-- Dummy Data -->
     <string name="dummy_heading" translatable="false">Lorem Ipsum</string>

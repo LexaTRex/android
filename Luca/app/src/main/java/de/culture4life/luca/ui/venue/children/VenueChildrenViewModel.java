@@ -6,6 +6,8 @@ import de.culture4life.luca.R;
 import de.culture4life.luca.checkin.CheckInManager;
 import de.culture4life.luca.preference.PreferencesManager;
 import de.culture4life.luca.ui.BaseViewModel;
+import de.culture4life.luca.ui.ViewError;
+import de.culture4life.luca.util.StringSanitizeUtil;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.LiveData;
@@ -45,12 +47,26 @@ public class VenueChildrenViewModel extends BaseViewModel {
         return Single.just(child)
                 .doOnSuccess(childListItem -> childListItem.setChecked(true))
                 .flatMapCompletable(childListItem -> updateChildren(childListItem, true))
-                .andThen(persistChildren());
+                .andThen(persistChildren())
+                .doOnError(throwable -> {
+                    ViewError viewError = createErrorBuilder(throwable)
+                            .withTitle(R.string.venue_children_add_error_title)
+                            .removeWhenShown()
+                            .build();
+                    addError(viewError);
+                });
     }
 
     Completable removeChild(@NonNull ChildListItem child) {
         return updateChildren(child, false)
-                .andThen(persistChildren());
+                .andThen(persistChildren())
+                .doOnError(throwable -> {
+                    ViewError viewError = createErrorBuilder(throwable)
+                            .withTitle(R.string.venue_children_remove_error_title)
+                            .removeWhenShown()
+                            .build();
+                    addError(viewError);
+                });
     }
 
     private Completable updateChildren(ChildListItem child, boolean shouldAdd) {
@@ -63,6 +79,10 @@ public class VenueChildrenViewModel extends BaseViewModel {
             }
             return update(children, childrenContainer);
         });
+    }
+
+    public static boolean isValidChildName(@NonNull String childName) {
+        return !StringSanitizeUtil.sanitize(childName).trim().isEmpty();
     }
 
     public void persistChildrenAsSideEffect() {

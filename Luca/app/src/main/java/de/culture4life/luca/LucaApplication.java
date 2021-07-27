@@ -20,6 +20,7 @@ import de.culture4life.luca.checkin.CheckInManager;
 import de.culture4life.luca.crypto.CryptoManager;
 import de.culture4life.luca.dataaccess.DataAccessManager;
 import de.culture4life.luca.document.DocumentManager;
+import de.culture4life.luca.genuinity.GenuinityManager;
 import de.culture4life.luca.history.HistoryManager;
 import de.culture4life.luca.location.GeofenceManager;
 import de.culture4life.luca.location.LocationManager;
@@ -32,7 +33,6 @@ import de.culture4life.luca.registration.RegistrationManager;
 import de.culture4life.luca.service.LucaService;
 import de.culture4life.luca.ui.ViewError;
 import de.culture4life.luca.ui.dialog.BaseDialogFragment;
-import de.culture4life.luca.util.TimeUtil;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -68,6 +68,7 @@ public class LucaApplication extends MultiDexApplication {
 
     private final PreferencesManager preferencesManager;
     private final CryptoManager cryptoManager;
+    private final GenuinityManager genuinityManager;
     private final NetworkManager networkManager;
     private final LucaNotificationManager notificationManager;
     private final LocationManager locationManager;
@@ -106,6 +107,7 @@ public class LucaApplication extends MultiDexApplication {
         geofenceManager = new GeofenceManager();
         historyManager = new HistoryManager(preferencesManager);
         cryptoManager = new CryptoManager(preferencesManager, networkManager);
+        genuinityManager = new GenuinityManager(preferencesManager, networkManager);
         registrationManager = new RegistrationManager(preferencesManager, networkManager, cryptoManager);
         meetingManager = new MeetingManager(preferencesManager, networkManager, locationManager, historyManager, cryptoManager);
         checkInManager = new CheckInManager(preferencesManager, networkManager, geofenceManager, locationManager, historyManager, cryptoManager, notificationManager);
@@ -175,6 +177,7 @@ public class LucaApplication extends MultiDexApplication {
                 notificationManager.initialize(this).subscribeOn(Schedulers.io()),
                 networkManager.initialize(this).subscribeOn(Schedulers.io()),
                 cryptoManager.initialize(this).subscribeOn(Schedulers.io()),
+                genuinityManager.initialize(this).subscribeOn(Schedulers.io()),
                 locationManager.initialize(this).subscribeOn(Schedulers.io()),
                 registrationManager.initialize(this).subscribeOn(Schedulers.io()),
                 checkInManager.initialize(this).subscribeOn(Schedulers.io()),
@@ -183,7 +186,7 @@ public class LucaApplication extends MultiDexApplication {
                 documentManager.initialize(this).subscribeOn(Schedulers.io()),
                 geofenceManager.initialize(this).subscribeOn(Schedulers.io())
         ).andThen(Completable.mergeArray(
-                invokeServerTimeCheck(),
+                invokeServerTimeCheck().delaySubscription(5, TimeUnit.SECONDS, Schedulers.io()),
                 invokeRotatingBackendPublicKeyUpdate(),
                 invokeAccessedDataUpdate(),
                 startKeepingDataUpdated()
@@ -191,16 +194,10 @@ public class LucaApplication extends MultiDexApplication {
     }
 
     private Completable invokeServerTimeCheck() {
-        return Completable.fromAction(() -> applicationDisposable.add(networkManager.getLucaEndpointsV3()
-                .flatMap(LucaEndpointsV3::getServerTime)
-                .map(jsonObject -> jsonObject.get("unix").getAsInt())
-                .flatMap(TimeUtil::convertFromUnixTimestamp)
-                .map(serverTimestamp -> Math.abs(System.currentTimeMillis() - serverTimestamp))
+        return Completable.fromAction(() -> applicationDisposable.add(genuinityManager.isGenuineTime()
                 .subscribeOn(Schedulers.io())
-                .subscribe(
-                        timestampOffset -> {
-                            Timber.d("Timestamp offset: %d ms", timestampOffset);
-                            if (timestampOffset > MAXIMUM_TIMESTAMP_OFFSET) {
+                .subscribe(isGenuineTime -> {
+                            if (!isGenuineTime) {
                                 showErrorAsDialog(new ViewError.Builder(this)
                                         .withTitle(R.string.error_timestamp_offset_title)
                                         .withDescription(R.string.error_timestamp_offset_description)
@@ -213,8 +210,7 @@ public class LucaApplication extends MultiDexApplication {
                                         .removeWhenShown()
                                         .build());
                             }
-                        },
-                        throwable -> Timber.w("Unable to get server time offset: %s", throwable.toString())
+                        }
                 )));
     }
 
@@ -241,7 +237,7 @@ public class LucaApplication extends MultiDexApplication {
         return Completable.fromAction(() -> applicationDisposable.add(dataAccessManager.update()
                 .subscribeOn(Schedulers.io())
                 .subscribe(
-                        () -> Timber.i("Updated accessed data"),
+                        () -> Timber.d("Updated accessed data"),
                         throwable -> Timber.w("Unable to update accessed data: %s", throwable.toString())
                 )));
     }
@@ -461,6 +457,10 @@ public class LucaApplication extends MultiDexApplication {
 
     public CryptoManager getCryptoManager() {
         return cryptoManager;
+    }
+
+    public GenuinityManager getGenuinityManager() {
+        return genuinityManager;
     }
 
     public NetworkManager getNetworkManager() {

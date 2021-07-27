@@ -163,7 +163,8 @@ public class RegistrationManager extends Manager {
         return Single.defer(() -> {
             JsonObject message = new JsonObject();
             message.addProperty("phone", formattedPhoneNumber);
-            return networkManager.getLucaEndpoints().requestPhoneNumberVerificationTan(message)
+            return networkManager.getLucaEndpointsV3()
+                    .flatMap(lucaEndpointsV3 -> lucaEndpointsV3.requestPhoneNumberVerificationTan(message))
                     .doOnSubscribe(disposable -> Timber.i("Requesting TAN for %s", formattedPhoneNumber))
                     .map(jsonObject -> jsonObject.get("challengeId").getAsString());
         });
@@ -182,7 +183,8 @@ public class RegistrationManager extends Manager {
             }
             jsonObject.add("challengeIds", challengeIdArray);
             jsonObject.addProperty("tan", verificationTan);
-            return networkManager.getLucaEndpoints().verifyPhoneNumberBulk(jsonObject);
+            return networkManager.getLucaEndpointsV3()
+                    .flatMapCompletable(lucaEndpointsV3 -> lucaEndpointsV3.verifyPhoneNumberBulk(jsonObject));
         });
     }
 
@@ -193,7 +195,8 @@ public class RegistrationManager extends Manager {
     public Completable registerUser() {
         return createUserRegistrationRequestData()
                 .doOnSuccess(data -> Timber.d("User registration request data: %s", data))
-                .flatMap(data -> networkManager.getLucaEndpoints().registerUser(data)
+                .flatMap(data -> networkManager.getLucaEndpointsV3()
+                        .flatMap(lucaEndpointsV3 -> lucaEndpointsV3.registerUser(data))
                         .map(jsonObject -> jsonObject.get("userId").getAsString())
                         .map(UUID::fromString))
                 .doOnSuccess(userId -> Timber.i("Registered user for ID: %s", userId))
@@ -222,7 +225,8 @@ public class RegistrationManager extends Manager {
                 .doOnSuccess(data -> data.setGuestKeyPairPublicKey(null)) // not part of update request
                 .doOnSuccess(data -> Timber.d("User update request data: %s", data))
                 .flatMapCompletable(data -> getUserIdIfAvailable()
-                        .flatMapCompletable(userId -> networkManager.getLucaEndpoints().updateUser(userId.toString(), data)))
+                        .flatMapCompletable(userId -> networkManager.getLucaEndpointsV3()
+                                .flatMapCompletable(lucaEndpointsV3 -> lucaEndpointsV3.updateUser(userId.toString(), data))))
                 .doOnComplete(() -> Timber.i("Updated user"));
 
     }
@@ -340,7 +344,8 @@ public class RegistrationManager extends Manager {
         // TODO: 24.03.21 This doesn't seem to belong to the registration process
         return createDataTransferRequestData(days)
                 .doOnSuccess(data -> Timber.d("User data transfer request data: %s", data))
-                .flatMap(data -> networkManager.getLucaEndpoints().getTracingTan(data))
+                .flatMap(data -> networkManager.getLucaEndpointsV3()
+                        .flatMap(lucaEndpointsV3 -> lucaEndpointsV3.getTracingTan(data)))
                 .map(jsonObject -> jsonObject.get("tan").getAsString());
     }
 

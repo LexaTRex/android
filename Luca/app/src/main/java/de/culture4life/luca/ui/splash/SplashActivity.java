@@ -9,6 +9,8 @@ import de.culture4life.luca.ui.BaseActivity;
 import de.culture4life.luca.ui.MainActivity;
 import de.culture4life.luca.ui.onboarding.OnboardingActivity;
 import de.culture4life.luca.ui.registration.RegistrationActivity;
+import de.culture4life.luca.ui.terms.UpdatedTermsActivity;
+import de.culture4life.luca.ui.terms.UpdatedTermsUtil;
 
 import timber.log.Timber;
 
@@ -35,7 +37,13 @@ public class SplashActivity extends BaseActivity {
         } else if (!hasCompletedRegistration()) {
             navigate(RegistrationActivity.class);
         } else {
-            navigate(MainActivity.class);
+            activityDisposable.add(UpdatedTermsUtil.Companion.areTermsAccepted(application).subscribe(accepted -> {
+                if (accepted) {
+                    navigate(MainActivity.class);
+                } else {
+                    navigate(UpdatedTermsActivity.class);
+                }
+            }));
         }
     }
 

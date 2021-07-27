@@ -13,6 +13,7 @@ import de.culture4life.luca.crypto.CryptoManager;
 import de.culture4life.luca.history.HistoryItem;
 import de.culture4life.luca.history.HistoryManager;
 import de.culture4life.luca.network.NetworkManager;
+import de.culture4life.luca.network.endpoints.LucaEndpointsV3;
 import de.culture4life.luca.network.pojo.AccessedHashedTraceIdsData;
 import de.culture4life.luca.notification.LucaNotificationManager;
 import de.culture4life.luca.preference.PreferencesManager;
@@ -240,7 +241,8 @@ public class DataAccessManager extends Manager {
     }
 
     public Observable<AccessedHashedTraceIdsData> fetchAllRecentlyAccessedHashedTraceIdsData() {
-        return networkManager.getLucaEndpoints().getAccessedTraces()
+        return networkManager.getLucaEndpointsV3()
+                .flatMap(LucaEndpointsV3::getAccessedTraces)
                 .flatMapObservable(Observable::fromIterable);
     }
 

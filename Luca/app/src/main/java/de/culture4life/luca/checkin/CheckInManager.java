@@ -169,7 +169,8 @@ public class CheckInManager extends Manager {
     public Completable checkIn(@NonNull UUID scannerId, @NonNull QrCodeData qrCodeData) {
         return assertNotCheckedIn()
                 .andThen(generateCheckInData(qrCodeData, scannerId)
-                        .flatMapCompletable(checkInRequestData -> networkManager.getLucaEndpoints().checkIn(checkInRequestData)))
+                        .flatMapCompletable(checkInRequestData -> networkManager.getLucaEndpointsV3()
+                                .flatMapCompletable(lucaEndpointsV3 -> lucaEndpointsV3.checkIn(checkInRequestData))))
                 .andThen(getCheckInDataFromBackend()
                         .switchIfEmpty(Single.error(new IllegalStateException("No check-in data available at backend after checking in"))))
                 .flatMapCompletable(this::processCheckIn);
@@ -201,7 +202,8 @@ public class CheckInManager extends Manager {
     }
 
     public Single<ECPublicKey> getLocationPublicKey(@NonNull UUID scannerId) {
-        return networkManager.getLucaEndpoints().getScanner(scannerId.toString())
+        return networkManager.getLucaEndpointsV3()
+                .flatMap(lucaEndpointsV3 -> lucaEndpointsV3.getScanner(scannerId.toString()))
                 .map(jsonObject -> jsonObject.get("publicKey").getAsString())
                 .flatMap(SerializationUtil::deserializeFromBase64)
                 .flatMap(AsymmetricCipherProvider::decodePublicKey);
@@ -365,7 +367,8 @@ public class CheckInManager extends Manager {
                 .andThen(getCheckedInTraceId())
                 .toSingle()
                 .flatMap(traceId -> generateAdditionalCheckInProperties(properties, traceId, locationPublicKey))
-                .flatMapCompletable(requestData -> networkManager.getLucaEndpoints().addAdditionalCheckInProperties(requestData))
+                .flatMapCompletable(requestData -> networkManager.getLucaEndpointsV3()
+                        .flatMapCompletable(lucaEndpointsV3 -> lucaEndpointsV3.addAdditionalCheckInProperties(requestData)))
                 .andThen(persistAdditionalCheckInProperties(properties));
     }
 
@@ -431,8 +434,8 @@ public class CheckInManager extends Manager {
                 .andThen(networkManager.assertNetworkConnected())
                 .andThen(generateCheckOutData()
                         .doOnSuccess(checkOutRequestData -> Timber.i("Generated checkout data: %s", checkOutRequestData))
-                        .flatMapCompletable(checkOutRequestData -> networkManager.getLucaEndpoints()
-                                .checkOut(checkOutRequestData)
+                        .flatMapCompletable(checkOutRequestData -> networkManager.getLucaEndpointsV3()
+                                .flatMapCompletable(lucaEndpointsV3 -> lucaEndpointsV3.checkOut(checkOutRequestData))
                                 .onErrorResumeNext(throwable -> {
                                     if (NetworkManager.isHttpException(throwable, HttpURLConnection.HTTP_NOT_FOUND)) {
                                         // user is currently not checked-in
@@ -716,7 +719,8 @@ public class CheckInManager extends Manager {
                     if (traceData.isCheckedOut()) {
                         return Maybe.empty();
                     }
-                    return networkManager.getLucaEndpoints().getLocation(traceData.getLocationId())
+                    return networkManager.getLucaEndpointsV3()
+                            .flatMap(lucaEndpointsV3 -> lucaEndpointsV3.getLocation(traceData.getLocationId()))
                             .map(location -> {
                                 Timber.d("Creating check-in data for location: %s", location);
                                 CheckInData checkInData = new CheckInData();
@@ -815,7 +819,8 @@ public class CheckInManager extends Manager {
                     jsonObject.add("traceIds", jsonArray);
                     return jsonObject;
                 })
-                .flatMap(jsonObject -> networkManager.getLucaEndpoints().getTraces(jsonObject))
+                .flatMap(jsonObject -> networkManager.getLucaEndpointsV3()
+                        .flatMap(lucaEndpointsV3 -> lucaEndpointsV3.getTraces(jsonObject)))
                 .flatMapObservable(Observable::fromIterable)
                 .sorted((first, second) -> Long.compare(first.getCheckInTimestamp(), second.getCheckInTimestamp()));
     }

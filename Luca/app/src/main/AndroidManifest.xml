@@ -63,6 +63,11 @@
         </activity>
 
         <activity
+                android:name=".ui.terms.UpdatedTermsActivity"
+                android:screenOrientation="portrait">
+        </activity>
+
+        <activity
                 android:name="de.culture4life.luca.ui.registration.RegistrationActivity"
                 android:screenOrientation="portrait">
             <intent-filter>

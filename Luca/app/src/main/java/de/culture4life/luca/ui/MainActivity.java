@@ -14,11 +14,12 @@ import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent;
 
 import androidx.annotation.Nullable;
 import androidx.navigation.NavController;
-import androidx.navigation.Navigation;
+import androidx.navigation.fragment.NavHostFragment;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 import five.star.me.FiveStarMe;
 import io.reactivex.rxjava3.core.Completable;
+import io.reactivex.rxjava3.core.Single;
 import timber.log.Timber;
 
 public class MainActivity extends BaseActivity {
@@ -43,12 +44,30 @@ public class MainActivity extends BaseActivity {
 
     private void initializeNavigation() {
         AppBarConfiguration appBarConfiguration = new AppBarConfiguration.Builder(
-                R.id.qrCodeFragment, R.id.historyFragment
+                R.id.qrCodeFragment, R.id.myLucaFragment, R.id.historyFragment, R.id.accountFragment
         ).build();
-        navigationController = Navigation.findNavController(this, R.id.navigationHostFragment);
+        NavHostFragment navHostFragment = (NavHostFragment) getSupportFragmentManager()
+                .findFragmentById(R.id.navigationHostFragment);
+        navigationController = navHostFragment.getNavController();
+        navigationController.setGraph(R.navigation.mobile_navigation);
         NavigationUI.setupActionBarWithNavController(this, navigationController, appBarConfiguration);
         bottomNavigationView = findViewById(R.id.bottomNavigationView);
         NavigationUI.setupWithNavController(bottomNavigationView, navigationController);
+
+        bottomNavigationView.setOnNavigationItemSelectedListener(item -> {
+            int currentDestinationId = navigationController.getCurrentDestination().getId();
+            if (currentDestinationId != item.getItemId()) {
+                if (item.getItemId() == R.id.qrCodeFragment) {
+                    int destinationId = getCheckInScreenDestinationId().blockingGet();
+                    if (currentDestinationId != destinationId) {
+                        navigationController.navigate(destinationId);
+                    }
+                } else {
+                    NavigationUI.onNavDestinationSelected(item, navigationController);
+                }
+            }
+            return true;
+        });
 
         if (application.isInDarkMode()) {
             // workaround for removing the elevation color overlay
@@ -110,6 +129,26 @@ public class MainActivity extends BaseActivity {
                         startActivity(intent);
                     }
                 }));
+    }
+
+    private Single<Integer> getCheckInScreenDestinationId() {
+        Single<Boolean> checkedIn = application.getCheckInManager()
+                .initialize(application)
+                .andThen(application.getCheckInManager().isCheckedIn());
+
+        Single<Boolean> hostingMeeting = application.getMeetingManager()
+                .initialize(application)
+                .andThen(application.getMeetingManager().isCurrentlyHostingMeeting());
+
+        return Single.zip(checkedIn, hostingMeeting, (isCheckedIn, isHostingMeeting) -> {
+            if (isCheckedIn) {
+                return R.id.venueDetailFragment;
+            } else if (isHostingMeeting) {
+                return R.id.meetingFragment;
+            } else {
+                return R.id.qrCodeFragment;
+            }
+        });
     }
 
 }

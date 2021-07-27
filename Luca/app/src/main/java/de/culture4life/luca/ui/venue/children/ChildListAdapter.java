@@ -65,7 +65,9 @@ public class ChildListAdapter extends ArrayAdapter<ChildListItem> {
         nameTextView.setText(childItem.getName());
 
         ImageView removeChildImageView = convertView.findViewById(R.id.removeChildImageView);
-        removeChildImageView.setOnClickListener(view -> viewModel.removeChild(childItem).subscribe());
+        removeChildImageView.setOnClickListener(view -> viewModel.removeChild(childItem)
+                .onErrorComplete()
+                .subscribe());
 
         return convertView;
     }

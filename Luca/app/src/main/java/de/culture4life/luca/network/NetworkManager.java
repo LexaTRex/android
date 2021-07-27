@@ -112,16 +112,13 @@ public class NetworkManager extends Manager {
         return builder.build();
     }
 
-    @Deprecated
-    public LucaEndpointsV3 getLucaEndpoints() {
-        if (lucaEndpointsV3 == null) {
-            lucaEndpointsV3 = createEndpoints();
-        }
-        return lucaEndpointsV3;
-    }
-
     public Single<LucaEndpointsV3> getLucaEndpointsV3() {
-        return Single.defer(() -> getInitializedField(getLucaEndpoints()));
+        return Single.fromCallable(() -> {
+            if (lucaEndpointsV3 == null) {
+                lucaEndpointsV3 = createEndpoints();
+            }
+            return lucaEndpointsV3;
+        });
     }
 
     public Completable assertNetworkConnected() {

@@ -4,10 +4,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import androidx.annotation.NonNull;
-import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.RecyclerView;
-import androidx.viewpager2.widget.ViewPager2;
+import de.culture4life.luca.R;
+import de.culture4life.luca.ui.myluca.viewholders.MultipleMyLucaItemViewHolder;
+import de.culture4life.luca.ui.myluca.viewholders.SingleMyLucaItemViewHolder;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -15,9 +14,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import de.culture4life.luca.R;
-import de.culture4life.luca.ui.myluca.viewholders.MultipleMyLucaItemViewHolder;
-import de.culture4life.luca.ui.myluca.viewholders.SingleMyLucaItemViewHolder;
+import androidx.annotation.NonNull;
+import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.viewpager2.widget.ViewPager2;
 
 public class MyLucaListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
@@ -40,7 +40,7 @@ public class MyLucaListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
     private final Fragment fragment;
 
     private final List<MyLucaListItemsWrapper> items = new ArrayList<>();
-    private final Map<Integer, Integer> viewPagerPositionMap = new HashMap<Integer, Integer>();
+    private final Map<Integer, Integer> viewPagerPositionMap = new HashMap<>();
 
     public MyLucaListAdapter(MyLucaListClickListener listener, Fragment fragment) {
         this.clickListener = listener;
@@ -50,7 +50,7 @@ public class MyLucaListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
     @Override
     public @NonNull RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         if (viewType == SINGLE_ITEM_VIEW_HOLDER) {
-            ViewGroup view = (ViewGroup) LayoutInflater.from(parent.getContext()).inflate(R.layout.my_luca_list_item_container, parent, false);
+            SingleLucaItemView view = new SingleLucaItemView(parent.getContext());
             return new SingleMyLucaItemViewHolder(view);
         } else {
             ViewGroup view = (ViewGroup) LayoutInflater.from(parent.getContext()).inflate(R.layout.my_luca_list_items_viewpager, parent, false);
@@ -61,22 +61,19 @@ public class MyLucaListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder viewHolder, int position) {
         List<MyLucaListItem> items = getItem(position).getItems();
-        if (items.isEmpty()) return;
 
         if (viewHolder.getItemViewType() == SINGLE_ITEM_VIEW_HOLDER) {
             SingleMyLucaItemViewHolder holder = (SingleMyLucaItemViewHolder) viewHolder;
             MyLucaListItem item = items.get(0);
 
-            holder.getConstraintLayoutContainer().removeAllViews();
             View.OnClickListener expandClickListener = (v -> {
                 item.toggleExpanded();
                 notifyItemChanged(position);
             });
             View.OnClickListener deleteClickListener = (v -> clickListener.onDelete(item));
 
-            SingleLucaItemView singleLucaItemView = new SingleLucaItemView(holder.itemView.getContext(), null, 0, item);
-            holder.getConstraintLayoutContainer().addView(singleLucaItemView);
-            singleLucaItemView.setListeners(expandClickListener, deleteClickListener);
+            holder.show(item);
+            holder.setListeners(expandClickListener, deleteClickListener);
         } else {
             MyLucaListItemExpandListener expandClickListener = () -> {
                 for (int i = 0; i < items.size(); i++) {
@@ -133,7 +130,7 @@ public class MyLucaListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
 
     private static List<MyLucaListItemsWrapper> sortAndPairItems(List<MyLucaListItem> list) {
         List<MyLucaListItem> vaccinationItems = new ArrayList<>();
-        List<MyLucaListItemsWrapper> sortedList = new ArrayList<MyLucaListItemsWrapper>();
+        List<MyLucaListItemsWrapper> sortedList = new ArrayList<>();
         for (int i = 0; i < list.size(); i++) {
             MyLucaListItem currentListItem = list.get(i);
             if (currentListItem.getClass().equals(VaccinationItem.class)) {

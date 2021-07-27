@@ -125,6 +125,16 @@
         </item>
     </style>
 
+    <style name="Button.Luca.TertiaryActionButton" parent="Button.Luca.SecondaryActionButton">
+        <item name="android:padding">@dimen/spacing_small</item>
+    </style>
+
+    <style name="Button.Luca.TertiaryActionButton.Black" parent="Button.Luca.TertiaryActionButton">
+        <item name="android:textColor">?attr/colorSurface</item>
+        <item name="iconTint">?attr/colorSurface</item>
+        <item name="strokeColor">?attr/colorSurface</item>
+    </style>
+
     <style name="AccountTabButton">
         <item name="android:textSize">16sp</item>
         <item name="android:textColor">?attr/colorOnSurface</item>
@@ -139,6 +149,17 @@
     <style name="AccountTabButton.BottomStroke" parent="AccountTabButton">
         <item name="android:background">@drawable/account_tab_button_bottom_stroke</item>
     </style>
+
+    <style name="TextInputLayout.Luca.ShareDataTextBox" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu">
+        <item name="materialThemeOverlay">@style/ThemeOverlay.Luca.TextInputLayout</item>
+    </style>
+
+    <style name="ThemeOverlay.Luca.TextInputLayout" parent="">
+        <item name="colorSurface">?attr/colorOnSurface</item>
+        <item name="editTextStyle">@style/Widget.MaterialComponents.TextInputEditText.OutlinedBox
+        </item>
+    </style>
+
 
     <!--  AlertDialog  -->
 
