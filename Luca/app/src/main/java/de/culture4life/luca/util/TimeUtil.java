@@ -53,45 +53,28 @@ public final class TimeUtil {
         });
     }
 
-    public static Single<String> getReadableApproximateDuration(long duration, @NonNull Context context) {
-        return Single.fromCallable(() -> {
-            long amount;
-            int unit;
-            if (duration < TimeUnit.MINUTES.toMillis(2)) {
-                amount = TimeUnit.MILLISECONDS.toSeconds(duration);
-                unit = R.string.time_seconds;
-            } else if (duration < TimeUnit.HOURS.toMillis(2)) {
-                amount = TimeUnit.MILLISECONDS.toMinutes(duration);
-                unit = R.string.time_minutes;
-            } else if (duration < TimeUnit.DAYS.toMillis(2)) {
-                amount = TimeUnit.MILLISECONDS.toHours(duration);
-                unit = R.string.time_hours;
-            } else {
-                amount = TimeUnit.MILLISECONDS.toDays(duration);
-                unit = R.string.time_days;
-            }
-            return amount + " " + context.getString(unit);
-        });
-    }
-
     public static Single<String> getReadableDurationWithPlural(long duration, @NonNull Context context) {
         return Single.fromCallable(() -> {
-            long amount;
-            int unit;
-            if (duration < TimeUnit.MINUTES.toMillis(2)) {
-                amount = TimeUnit.MILLISECONDS.toSeconds(duration);
-                unit = R.plurals.time_plural_seconds;
-            } else if (duration < TimeUnit.HOURS.toMillis(2)) {
-                amount = TimeUnit.MILLISECONDS.toMinutes(duration);
-                unit = R.plurals.time_plural_minutes;
-            } else if (duration < TimeUnit.DAYS.toMillis(2)) {
-                amount = TimeUnit.MILLISECONDS.toHours(duration);
-                unit = R.plurals.time_plural_hours;
+            TimeUnit timeUnit;
+            int unitStringResource;
+            if (duration < TimeUnit.MINUTES.toMillis(1)) {
+                timeUnit = TimeUnit.SECONDS;
+                unitStringResource = R.plurals.time_plural_seconds;
+            } else if (duration < TimeUnit.HOURS.toMillis(1)) {
+                timeUnit = TimeUnit.MINUTES;
+                unitStringResource = R.plurals.time_plural_minutes;
+            } else if (duration < TimeUnit.DAYS.toMillis(1)) {
+                timeUnit = TimeUnit.HOURS;
+                unitStringResource = R.plurals.time_plural_hours;
             } else {
-                amount = TimeUnit.MILLISECONDS.toDays(duration);
-                unit = R.plurals.time_plural_days;
+                timeUnit = TimeUnit.DAYS;
+                unitStringResource = R.plurals.time_plural_days;
             }
-            return context.getResources().getQuantityString(unit, (int) amount + 1, (int) amount + 1);
+            int amount = (int) timeUnit.convert(duration, TimeUnit.MILLISECONDS);
+            if (duration - timeUnit.toMillis(amount) > 0) {
+                amount++;
+            }
+            return context.getResources().getQuantityString(unitStringResource, amount, amount);
         });
     }
 

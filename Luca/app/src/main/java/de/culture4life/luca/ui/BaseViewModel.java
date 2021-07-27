@@ -282,7 +282,8 @@ public abstract class BaseViewModel extends AndroidViewModel {
      * successful, show error dialog when an error occurred.
      */
     public void deleteAccount() {
-        modelDisposable.add(application.getRegistrationManager().deleteRegistrationOnBackend()
+        modelDisposable.add(application.getDocumentManager().unredeemAndDeleteAllDocuments()
+                .andThen(application.getRegistrationManager().deleteRegistrationOnBackend())
                 .doOnSubscribe(disposable -> {
                     updateAsSideEffect(isLoading, true);
                     removeError(deleteAccountError);

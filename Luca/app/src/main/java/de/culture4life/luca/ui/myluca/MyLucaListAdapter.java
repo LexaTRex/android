@@ -9,8 +9,6 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
 
-import org.jetbrains.annotations.NotNull;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -50,7 +48,7 @@ public class MyLucaListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
     }
 
     @Override
-    public RecyclerView.@NotNull ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public @NonNull RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         if (viewType == SINGLE_ITEM_VIEW_HOLDER) {
             ViewGroup view = (ViewGroup) LayoutInflater.from(parent.getContext()).inflate(R.layout.my_luca_list_item_container, parent, false);
             return new SingleMyLucaItemViewHolder(view);
@@ -80,16 +78,12 @@ public class MyLucaListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
             holder.getConstraintLayoutContainer().addView(singleLucaItemView);
             singleLucaItemView.setListeners(expandClickListener, deleteClickListener);
         } else {
-            MyLucaListItemExpandListener expandClickListener = new MyLucaListItemExpandListener() {
-                @Override
-                public void onExpand() {
-                    for (int i = 0; i < items.size(); i++) {
-                        MyLucaListItem item = items.get(i);
-                        item.toggleExpanded();
-                    }
-                    notifyItemChanged(position);
+            MyLucaListItemExpandListener expandClickListener = () -> {
+                for (int i = 0; i < items.size(); i++) {
+                    MyLucaListItem item = items.get(i);
+                    item.toggleExpanded();
                 }
-
+                notifyItemChanged(position);
             };
             Integer hashCode = items.hashCode();
             MyLucaItemViewPager viewPagerAdapter = new MyLucaItemViewPager(this.fragment, items, expandClickListener, clickListener, position);

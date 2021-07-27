@@ -1,21 +1,16 @@
 package de.culture4life.luca.ui.myluca;
 
+import com.google.zxing.EncodeHintType;
+
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.text.TextUtils;
 import android.util.Pair;
 
-import androidx.annotation.ColorInt;
-import androidx.annotation.DrawableRes;
-import androidx.annotation.IntDef;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-
-import com.google.zxing.EncodeHintType;
+import de.culture4life.luca.R;
 
 import net.glxn.qrgen.android.QRCode;
 
-import java.io.Serializable;
 import java.lang.annotation.Retention;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -23,7 +18,11 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-import de.culture4life.luca.R;
+import androidx.annotation.ColorInt;
+import androidx.annotation.DrawableRes;
+import androidx.annotation.IntDef;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import io.reactivex.rxjava3.core.Single;
 
 import static java.lang.annotation.RetentionPolicy.SOURCE;
@@ -33,6 +32,7 @@ public abstract class MyLucaListItem {
     public static final int TYPE_UNKNOWN = 0;
     public static final int TYPE_TEST_RESULT = 1;
     public static final int TYPE_APPOINTMENT = 2;
+    @Deprecated
     public static final int TYPE_GREEN_PASS = 3;
 
     @IntDef({TYPE_UNKNOWN, TYPE_TEST_RESULT, TYPE_APPOINTMENT, TYPE_GREEN_PASS})

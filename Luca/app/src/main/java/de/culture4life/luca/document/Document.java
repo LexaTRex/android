@@ -68,13 +68,14 @@ public class Document {
 
     }
 
-    public static final long MAXIMUM_FAST_TEST_VALIDITY = TimeUnit.DAYS.toMillis(2);
-    public static final long MAXIMUM_PCR_TEST_VALIDITY = TimeUnit.DAYS.toMillis(3);
+    public static final long MAXIMUM_RECOVERY_VALIDITY = TimeUnit.DAYS.toMillis(30 * 6);
+    public static final long MAXIMUM_APPOINTMENT_VALIDITY = TimeUnit.HOURS.toMillis(2);
     public static final long TIME_UNTIL_VACCINATION_IS_VALID = TimeUnit.DAYS.toMillis(15);
     public static final long MAXIMUM_VACCINATION_VALIDITY = TimeUnit.DAYS.toMillis(365);
     public static final long TIME_UNTIL_RECOVERY_IS_VALID = TimeUnit.DAYS.toMillis(15);
-    public static final long MAXIMUM_RECOVERY_VALIDITY = TimeUnit.DAYS.toMillis(30 * 6);
-    public static final long MAXIMUM_APPOINTMENT_VALIDITY = TimeUnit.HOURS.toMillis(2);
+    public static final long MAXIMUM_FAST_TEST_VALIDITY = TimeUnit.DAYS.toMillis(2);
+    public static final long MAXIMUM_NEGATIVE_PCR_TEST_VALIDITY = TimeUnit.DAYS.toMillis(3);
+    public static final long MAXIMUM_POSITIVE_PCR_TEST_VALIDITY = MAXIMUM_RECOVERY_VALIDITY;
 
     @IntDef({TYPE_UNKNOWN, TYPE_FAST, TYPE_PCR, TYPE_VACCINATION, TYPE_APPOINTMENT, TYPE_GREEN_PASS, TYPE_RECOVERY})
     @Retention(SOURCE)
@@ -87,6 +88,7 @@ public class Document {
     public static final int TYPE_PCR = 2;
     public static final int TYPE_VACCINATION = 3;
     public static final int TYPE_APPOINTMENT = 4;
+    @Deprecated
     public static final int TYPE_GREEN_PASS = 5;
     public static final int TYPE_RECOVERY = 6;
 
@@ -159,6 +161,10 @@ public class Document {
     @Expose
     @SerializedName("provider")
     private String provider;
+
+    @Expose
+    @SerializedName("verified")
+    private boolean verified = false;
 
     @Expose
     @SerializedName("encodedData")
@@ -270,6 +276,14 @@ public class Document {
         this.provider = provider;
     }
 
+    public boolean isVerified() {
+        return verified;
+    }
+
+    public void setVerified(boolean verified) {
+        this.verified = verified;
+    }
+
     public String getEncodedData() {
         return encodedData;
     }
@@ -313,6 +327,8 @@ public class Document {
             return getTestingTimestamp() + TIME_UNTIL_VACCINATION_IS_VALID;
         } else if (type == TYPE_RECOVERY && outcome == OUTCOME_FULLY_IMMUNE) {
             return getTestingTimestamp() + TIME_UNTIL_RECOVERY_IS_VALID;
+        } else if (type == TYPE_PCR && outcome == OUTCOME_POSITIVE) {
+            return getTestingTimestamp() + TIME_UNTIL_RECOVERY_IS_VALID;
         } else {
             return getTestingTimestamp();
         }
@@ -333,12 +349,16 @@ public class Document {
      * The duration in milliseconds after which a document with the specified {@link Type} should be
      * treated as invalid.
      */
-    public static long getExpirationDuration(@Type int type) {
+    public long getExpirationDuration(@Type int type) {
         switch (type) {
             case TYPE_FAST:
                 return MAXIMUM_FAST_TEST_VALIDITY;
             case TYPE_PCR:
-                return MAXIMUM_PCR_TEST_VALIDITY;
+                if (outcome == OUTCOME_POSITIVE) {
+                    return MAXIMUM_POSITIVE_PCR_TEST_VALIDITY;
+                } else {
+                    return MAXIMUM_NEGATIVE_PCR_TEST_VALIDITY;
+                }
             case TYPE_VACCINATION:
                 return MAXIMUM_VACCINATION_VALIDITY;
             case TYPE_RECOVERY:
@@ -348,6 +368,18 @@ public class Document {
             default:
                 return -1;
         }
+    }
+
+    /**
+     * @return true if this document is a valid recovery certificate. This is the case when it is a
+     *  positive PCR test older than 14 days but no more than 6 months.
+     */
+    public boolean isValidRecovery() {
+        if (type == TYPE_RECOVERY || (type == TYPE_PCR && outcome == OUTCOME_POSITIVE)) {
+            long now = System.currentTimeMillis();
+            return now > getValidityStartTimestamp() && now < getExpirationTimestamp();
+        }
+        return false;
     }
 
     @Override

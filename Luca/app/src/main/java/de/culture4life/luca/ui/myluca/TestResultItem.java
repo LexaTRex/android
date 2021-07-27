@@ -4,6 +4,7 @@ import android.content.Context;
 
 import de.culture4life.luca.R;
 import de.culture4life.luca.document.Document;
+import de.culture4life.luca.util.TimeUtil;
 
 import java.text.SimpleDateFormat;
 import java.util.Locale;
@@ -45,16 +46,18 @@ public class TestResultItem extends MyLucaListItem {
         this.barcode = generateQrCode(document.getEncodedData()).blockingGet();
         this.color = getColor(context, document);
         this.deleteButtonText = context.getString(R.string.delete_test_action);
-        String time = context.getString(R.string.document_result_time, getReadableTime(getDateFormatFor(context, document), document.getResultTimestamp()));
+        this.imageResource = document.isVerified() ? R.drawable.ic_verified : 0;
 
+        String duration = TimeUtil.getReadableDurationWithPlural(System.currentTimeMillis() - document.getResultTimestamp(), context).blockingGet();
         addTopContent(context.getString(R.string.document_type_of_document_label), getReadableTestType(context, document));
-        addTopContent(context.getString(R.string.document_issued_at), time);
+        addTopContent(context.getString(R.string.document_created_before), duration);
 
-        addCollapsedContent(context.getString(R.string.document_issued_by), document.getLabName());
-        addCollapsedContent(context.getString(R.string.document_lab_doctor_name), document.getLabDoctorName());
+        String time = context.getString(R.string.document_result_time, getReadableTime(getDateFormatFor(context, document), document.getResultTimestamp()));
+        addCollapsedContent(context.getString(R.string.document_issued_by), time + "\n" + document.getLabName());
+        addCollapsedContent(context.getString(R.string.document_lab_issuer), document.getLabDoctorName());
     }
 
-    private static String getReadableTestType(@NonNull Context context, @NonNull Document document) {
+    static String getReadableTestType(@NonNull Context context, @NonNull Document document) {
         switch (document.getType()) {
             case Document.TYPE_FAST: {
                 return context.getString(R.string.document_type_fast);
@@ -86,7 +89,11 @@ public class TestResultItem extends MyLucaListItem {
     private static int getColor(@NonNull Context context, @NonNull Document document) {
         switch (document.getOutcome()) {
             case Document.OUTCOME_POSITIVE: {
-                return ContextCompat.getColor(context, R.color.document_outcome_positive);
+                if (document.isValidRecovery()) {
+                    return ContextCompat.getColor(context, R.color.document_outcome_partially_vaccinated);
+                } else {
+                    return ContextCompat.getColor(context, R.color.document_outcome_positive);
+                }
             }
             case Document.OUTCOME_NEGATIVE: {
                 return ContextCompat.getColor(context, R.color.document_outcome_negative);
@@ -97,7 +104,7 @@ public class TestResultItem extends MyLucaListItem {
         }
     }
 
-    protected static SimpleDateFormat getDateFormatFor(@NonNull Context context, Document document) {
+    protected static SimpleDateFormat getDateFormatFor(@NonNull Context context, @NonNull Document document) {
         if (document.getType() == Document.TYPE_VACCINATION || document.getType() == Document.TYPE_RECOVERY) {
             return new SimpleDateFormat("dd.MM.yyyy");
         } else {

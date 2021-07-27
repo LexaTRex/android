@@ -174,9 +174,10 @@ class EudccDocumentProviderTest : LucaUnitTest() {
                 .test().assertError(DocumentVerificationException::class.java)
     }
 
-    @Test(expected = DocumentParsingException::class)
+    @Test
     fun validate_fakedDocument_fails() {
-        provider.parse(EUDCC_FAKED_VACCINATION).test()
+        provider.parse(EUDCC_FAKED_VACCINATION)
+                .test().assertError(DocumentParsingException::class.java)
     }
 
     @Test

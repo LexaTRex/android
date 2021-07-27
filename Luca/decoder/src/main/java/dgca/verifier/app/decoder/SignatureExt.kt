@@ -59,7 +59,8 @@ private fun sequence(members: ArrayList<ByteArray>): ByteArray {
 }
 
 private fun toBytes(x: ArrayList<ByteArray>): ByteArray {
-    var l = x.sumOf { a -> a.size }
+    var l = 0
+    l = x.stream().map { r: ByteArray -> r.size }.reduce(l) { i: Int, i1: Int -> Integer.sum(i, i1) }
     val b = ByteArray(l)
     l = 0
     for (r in x) {

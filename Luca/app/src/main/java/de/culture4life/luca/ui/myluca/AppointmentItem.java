@@ -13,7 +13,7 @@ public class AppointmentItem extends TestResultItem {
     public AppointmentItem(@NonNull Context context, @NonNull Document document) {
         super(context, document);
 
-        this.title = context.getString(R.string.appointment_title);
+        this.title = context.getString(R.string.appointment_title, document.getFirstName());
         this.color = ContextCompat.getColor(context, R.color.appointment);
         this.deleteButtonText = context.getString(R.string.delete_appointment_action);
         this.provider = null;

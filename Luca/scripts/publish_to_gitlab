@@ -15,7 +15,7 @@ git remote remove public-origin
 git remote add public-origin $GITLAB_REPO
 git pull public-origin master:$DEPLOYMENT_BRANCH
 git checkout $DEPLOYMENT_BRANCH
-git diff $DEPLOYMENT_BRANCH release/$VERSION | git apply
+git diff $DEPLOYMENT_BRANCH $CURRENT_BRANCH | git apply
 git add -A && git commit -m "Release $VERSION"
 
 echo "Check your git status and apply the following line if everything looks good:"

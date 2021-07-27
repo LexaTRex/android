@@ -35,10 +35,10 @@ open class VaccinationItem(context: Context, document: Document) :
     private fun setDescriptionAndColor(context: Context, document: Document) {
         var descriptionLabel = context.getString(R.string.document_outcome_unknown)
         val firstProcedure = document.procedures.first()
-        val procedureNumber = String.format("%d/%d", firstProcedure.doseNumber, firstProcedure.totalSeriesOfDoses)
+        val procedureNumber = String.format("(%d/%d)", firstProcedure.doseNumber, firstProcedure.totalSeriesOfDoses)
         when (document.outcome) {
             Document.OUTCOME_PARTIALLY_IMMUNE -> {
-                descriptionLabel = context.getString(R.string.document_outcome_partially_immune, procedureNumber)
+                descriptionLabel = context.getString(R.string.document_outcome_partially_vaccinated, procedureNumber)
                 color = ContextCompat.getColor(context, R.color.document_outcome_partially_vaccinated)
             }
             Document.OUTCOME_FULLY_IMMUNE -> {

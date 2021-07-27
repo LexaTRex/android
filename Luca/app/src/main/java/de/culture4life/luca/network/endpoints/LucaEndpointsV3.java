@@ -154,6 +154,9 @@ public interface LucaEndpointsV3 {
     @POST("tests/redeem")
     Completable redeemDocument(@Body JsonObject message);
 
+    @HTTP(method = "DELETE", path = "tests/redeem", hasBody = true)
+    Completable unredeemDocument(@Body JsonObject message);
+
     @GET("testProviders")
     Single<DocumentProviderDataList> getDocumentProviders();
 
