@@ -5,6 +5,7 @@ import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.common.util.concurrent.ListenableFuture;
 
+import android.content.Intent;
 import android.util.Size;
 import android.view.View;
 import android.widget.ImageView;
@@ -70,7 +71,8 @@ public class MyLucaFragment extends BaseFragment<MyLucaViewModel> implements MyL
         super.onResume();
         viewDisposable.add(Completable.mergeArray(
                 viewModel.updateUserName(),
-                viewModel.invokeListUpdate()
+                viewModel.invokeListUpdate(),
+                viewModel.invokeServerTimeOffsetUpdate()
         ).subscribe());
     }
 
@@ -81,6 +83,7 @@ public class MyLucaFragment extends BaseFragment<MyLucaViewModel> implements MyL
                     initializeMyLucaItemsViews();
                     initializeEmptyStateViews();
                     initializeImportViews();
+                    initializeTimeSyncErrorViews();
                 }));
     }
 
@@ -146,6 +149,22 @@ public class MyLucaFragment extends BaseFragment<MyLucaViewModel> implements MyL
             } else {
                 hideCameraPreview();
             }
+        });
+    }
+
+    private void initializeTimeSyncErrorViews() {
+        View timeSyncErrorLayout = getView().findViewById(R.id.timeSyncErrorLayout);
+        TextView sheetDescriptionTextView = timeSyncErrorLayout.findViewById(R.id.sheetDescriptionTextView);
+        sheetDescriptionTextView.setText(R.string.time_error_description);
+        MaterialButton sheetActionButton = timeSyncErrorLayout.findViewById(R.id.sheetActionButton);
+        sheetActionButton.setText(R.string.time_error_action);
+        sheetActionButton.setOnClickListener(v -> {
+            Intent intent = new Intent(android.provider.Settings.ACTION_DATE_SETTINGS);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
+        });
+        observe(viewModel.getIsGenuineTime(), isGenuineTime -> {
+            timeSyncErrorLayout.setVisibility(isGenuineTime ? View.GONE : View.VISIBLE);
         });
     }
 

@@ -124,7 +124,8 @@ public class MeetingManager extends Manager {
                     jsonObject.addProperty("publicKey", serializedPubKey);
                     return jsonObject;
                 })
-                .flatMap(requestData -> networkManager.getLucaEndpoints().createPrivateLocation(requestData))
+                .flatMap(requestData -> networkManager.getLucaEndpointsV3()
+                        .flatMap(lucaEndpointsV3 -> lucaEndpointsV3.createPrivateLocation(requestData)))
                 .map(MeetingData::new);
     }
 
@@ -134,8 +135,8 @@ public class MeetingManager extends Manager {
 
     public Completable closePrivateLocation() {
         return restoreCurrentMeetingDataIfAvailable()
-                .flatMapCompletable(meetingData -> networkManager.getLucaEndpoints()
-                        .closePrivateLocation(meetingData.getAccessId().toString())
+                .flatMapCompletable(meetingData -> networkManager.getLucaEndpointsV3()
+                        .flatMapCompletable(lucaEndpointsV3 -> lucaEndpointsV3.closePrivateLocation(meetingData.getAccessId().toString()))
                         .onErrorResumeNext(throwable -> {
                             if (NetworkManager.isHttpException(throwable, HttpURLConnection.HTTP_NOT_FOUND)) {
                                 // meeting has already ended
@@ -168,7 +169,8 @@ public class MeetingManager extends Manager {
     public Observable<TracesResponseData> fetchGuestData() {
         return restoreCurrentMeetingDataIfAvailable()
                 .map(MeetingData::getAccessId)
-                .flatMapSingle(accessUuid -> networkManager.getLucaEndpoints().fetchGuestList(accessUuid.toString()))
+                .flatMapSingle(accessUuid -> networkManager.getLucaEndpointsV3()
+                        .flatMap(lucaEndpointsV3 -> lucaEndpointsV3.fetchGuestList(accessUuid.toString())))
                 .doOnSuccess(tracesResponseData -> Timber.d("Location traces: %s", tracesResponseData))
                 .flatMapObservable(Observable::fromIterable);
     }

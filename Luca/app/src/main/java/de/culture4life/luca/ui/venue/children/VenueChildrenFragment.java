@@ -7,6 +7,7 @@ import com.google.android.material.textfield.TextInputLayout;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -16,6 +17,8 @@ import de.culture4life.luca.ui.BaseFragment;
 import de.culture4life.luca.ui.UiUtil;
 import de.culture4life.luca.ui.dialog.BaseDialogFragment;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import io.reactivex.rxjava3.core.Completable;
 
 public class VenueChildrenFragment extends BaseFragment<VenueChildrenViewModel> {
@@ -77,15 +80,37 @@ public class VenueChildrenFragment extends BaseFragment<VenueChildrenViewModel> 
         ViewGroup viewGroup = getActivity().findViewById(android.R.id.content);
         View dialogView = LayoutInflater.from(getContext()).inflate(R.layout.child_name_dialog, viewGroup, false);
 
-        new BaseDialogFragment(new MaterialAlertDialogBuilder(getContext())
+        BaseDialogFragment baseDialogFragment = new BaseDialogFragment(new MaterialAlertDialogBuilder(getContext())
                 .setView(dialogView)
+                .setTitle(R.string.venue_children_add)
                 .setPositiveButton(R.string.action_add, (dialog, i) -> {
-                    TextInputLayout childNameTextInputLayout = dialogView.findViewById(R.id.childNameTextInputLayout);
-                    String childName = childNameTextInputLayout.getEditText().getText().toString();
-                    viewModel.addChild(childName).subscribe();
+                    // will be overwritten later on
                 })
-                .setNegativeButton(R.string.action_cancel, (dialog, i) -> dialog.cancel()))
-                .show();
+                .setNegativeButton(R.string.action_cancel, (dialog, i) -> dialog.dismiss()));
+
+        baseDialogFragment.show();
+
+        // ensure dialog is being created
+        getActivity().getSupportFragmentManager().executePendingTransactions();
+
+        AlertDialog alertDialog = (AlertDialog) baseDialogFragment.getDialog();
+        alertDialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
+        alertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(view -> {
+            TextInputLayout childNameTextInputLayout = dialogView.findViewById(R.id.childNameTextInputLayout);
+            validateChildName(alertDialog, childNameTextInputLayout);
+        });
+    }
+
+    private void validateChildName(@NonNull AlertDialog alertDialog, TextInputLayout childNameTextInputLayout) {
+        String childName = childNameTextInputLayout.getEditText().getText().toString();
+        if (VenueChildrenViewModel.isValidChildName(childName)) {
+            viewDisposable.add(viewModel.addChild(childName)
+                    .onErrorComplete()
+                    .doFinally(alertDialog::dismiss)
+                    .subscribe());
+        } else {
+            childNameTextInputLayout.setError(getString(R.string.venue_children_add_validation_error));
+        }
     }
 
     private void updateChildItemsList(ChildListItemContainer children) {

@@ -10,8 +10,8 @@ android {
         applicationId "de.culture4life.luca"
         minSdkVersion 21
         targetSdkVersion 30
-        versionCode 77
-        versionName "1.11.0"
+        versionCode 78
+        versionName "1.11.1"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     signingConfigs {
@@ -93,6 +93,9 @@ android {
             applicationIdSuffix ".preprod"
             buildConfigField "String", "API_BASE_URL", '"https://app-preprod.luca-app.de"'
         }
+    }
+    buildFeatures {
+        viewBinding = true
     }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8

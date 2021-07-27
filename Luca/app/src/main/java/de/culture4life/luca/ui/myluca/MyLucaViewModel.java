@@ -18,6 +18,7 @@ import de.culture4life.luca.document.DocumentManager;
 import de.culture4life.luca.document.DocumentParsingException;
 import de.culture4life.luca.document.DocumentVerificationException;
 import de.culture4life.luca.document.TestResultPositiveException;
+import de.culture4life.luca.genuinity.GenuinityManager;
 import de.culture4life.luca.meeting.MeetingManager;
 import de.culture4life.luca.notification.LucaNotificationManager;
 import de.culture4life.luca.registration.RegistrationManager;
@@ -26,6 +27,7 @@ import de.culture4life.luca.ui.ViewError;
 import de.culture4life.luca.ui.ViewEvent;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import androidx.annotation.NonNull;
 import androidx.camera.core.ImageAnalysis;
@@ -47,11 +49,13 @@ public class MyLucaViewModel extends BaseViewModel implements ImageAnalysis.Anal
     private final DocumentManager documentManager;
     private final LucaNotificationManager notificationManager;
     private final RegistrationManager registrationManager;
+    private final GenuinityManager genuinityManager;
 
     private final MutableLiveData<String> userName = new MutableLiveData<>();
     private final MutableLiveData<List<MyLucaListItem>> myLucaItems = new MutableLiveData<>();
     private final MutableLiveData<ViewEvent<Document>> parsedDocument = new MutableLiveData<>();
     private final MutableLiveData<ViewEvent<Document>> addedDocument = new MutableLiveData<>();
+    private final MutableLiveData<Boolean> isGenuineTime = new MutableLiveData<>();
 
     private final BarcodeScanner scanner;
 
@@ -64,6 +68,7 @@ public class MyLucaViewModel extends BaseViewModel implements ImageAnalysis.Anal
         this.documentManager = this.application.getDocumentManager();
         this.notificationManager = this.application.getNotificationManager();
         this.registrationManager = this.application.getRegistrationManager();
+        this.genuinityManager = this.application.getGenuinityManager();
         this.scanner = BarcodeScanning.getClient();
         this.isLoading.setValue(false);
     }
@@ -74,11 +79,26 @@ public class MyLucaViewModel extends BaseViewModel implements ImageAnalysis.Anal
                 .andThen(Completable.mergeArray(
                         documentManager.initialize(application),
                         notificationManager.initialize(application),
-                        registrationManager.initialize(application)
+                        registrationManager.initialize(application),
+                        genuinityManager.initialize(application)
                 ))
                 .andThen(updateUserName())
                 .andThen(invokeListUpdate())
+                .andThen(invokeIsGenuineTimeUpdate())
                 .andThen(handleApplicationDeepLinkIfAvailable());
+    }
+
+    @Override
+    public Completable keepDataUpdated() {
+        return Completable.mergeArray(
+                super.keepDataUpdated(),
+                keepIsGenuineTimeUpdated()
+        );
+    }
+
+    private Completable keepIsGenuineTimeUpdated() {
+        return genuinityManager.getIsGenuineTimeChanges()
+                .flatMapCompletable(genuineTime -> update(isGenuineTime, genuineTime));
     }
 
     public Completable invokeListUpdate() {
@@ -88,6 +108,19 @@ public class MyLucaViewModel extends BaseViewModel implements ImageAnalysis.Anal
                         () -> Timber.d("Updated my luca list"),
                         throwable -> Timber.w("Unable to update my luca list: %s", throwable.toString())
                 )));
+    }
+
+    private Completable invokeIsGenuineTimeUpdate() {
+        return Completable.fromAction(() -> modelDisposable.add(genuinityManager.isGenuineTime()
+                .flatMapCompletable(genuineTime -> update(isGenuineTime, genuineTime))
+                .subscribe()));
+    }
+
+    public Completable invokeServerTimeOffsetUpdate() {
+        return Completable.fromAction(() -> modelDisposable.add(genuinityManager.invokeServerTimeOffsetUpdate()
+                .delaySubscription(1, TimeUnit.SECONDS)
+                .subscribeOn(Schedulers.io())
+                .subscribe()));
     }
 
     public Completable updateUserName() {
@@ -352,6 +385,10 @@ public class MyLucaViewModel extends BaseViewModel implements ImageAnalysis.Anal
 
     public LiveData<String> getUserName() {
         return userName;
+    }
+
+    public LiveData<Boolean> getIsGenuineTime() {
+        return isGenuineTime;
     }
 
 }

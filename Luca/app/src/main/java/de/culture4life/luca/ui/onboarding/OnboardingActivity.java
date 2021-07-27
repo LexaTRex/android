@@ -14,6 +14,7 @@ import android.widget.TextView;
 import de.culture4life.luca.R;
 import de.culture4life.luca.ui.BaseActivity;
 import de.culture4life.luca.ui.registration.RegistrationActivity;
+import de.culture4life.luca.ui.terms.UpdatedTermsUtil;
 
 import androidx.core.content.ContextCompat;
 
@@ -45,6 +46,7 @@ public class OnboardingActivity extends BaseActivity {
             if (termsCheckBox.isChecked() && privacyCheckBox.isChecked()) {
                 activityDisposable.add(application.getPreferencesManager()
                         .persist(WELCOME_SCREEN_SEEN_KEY, true)
+                        .andThen(UpdatedTermsUtil.Companion.markTermsAsAccepted(application))
                         .onErrorComplete()
                         .subscribe(this::showInfoScreen));
             } else {

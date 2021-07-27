@@ -169,11 +169,17 @@ public class VenueDetailsFragment extends BaseFragment<VenueDetailsViewModel> {
             }
         });
 
+        if (Build.VERSION.SDK_INT == Build.VERSION_CODES.LOLLIPOP_MR1) {
+            // Work-around because resetSlider fails on SDK 22 in onDraw():
+            //  java.lang.IllegalArgumentException: width and height must be > 0
+            //    at com.ncorti.slidetoact.SlideToActView.onDraw(SlideToActView.kt:525)
+            slideToActView.setAnimateCompletion(false);
+        }
+
         observe(viewModel.getIsCheckedIn(), isCheckedIn -> {
             slideToActView.setReversed(isCheckedIn);
-            String buttonText = getString(isCheckedIn ? R.string.venue_check_out_action : R.string.venue_check_in_action);
-            slideToActView.setText(buttonText);
-            slideToActView.setContentDescription(buttonText);
+            slideToActView.setText(getString(isCheckedIn ? R.string.venue_check_out_action : R.string.venue_check_in_action));
+            slideToActView.setContentDescription(getString(isCheckedIn ? R.string.venue_check_out_content_description : R.string.venue_check_in_content_description));
             checkInDurationHeadingTextView.setVisibility(isCheckedIn ? View.VISIBLE : View.GONE);
             checkInDurationTextView.setVisibility(isCheckedIn ? View.VISIBLE : View.GONE);
             if (!isCheckedIn) {

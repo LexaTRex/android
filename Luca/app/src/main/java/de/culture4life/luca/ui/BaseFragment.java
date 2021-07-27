@@ -5,7 +5,6 @@ import com.google.android.material.snackbar.Snackbar;
 
 import android.Manifest;
 import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
 import android.os.StrictMode;
 import android.text.SpannedString;
@@ -25,7 +24,6 @@ import de.culture4life.luca.BuildConfig;
 import de.culture4life.luca.LucaApplication;
 import de.culture4life.luca.R;
 import de.culture4life.luca.ui.dialog.BaseDialogFragment;
-import de.culture4life.luca.ui.registration.RegistrationActivity;
 
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -285,12 +283,12 @@ public abstract class BaseFragment<ViewModelType extends BaseViewModel> extends 
         errorSnackbar = Snackbar.make(getView(), error.getTitle(), duration);
         errorSnackbar.addCallback(new Snackbar.Callback() {
             @Override
-            public void onShown(Snackbar sb) {
+            public void onShown(Snackbar snackbar) {
                 viewModel.onErrorShown(error);
             }
 
             @Override
-            public void onDismissed(Snackbar transientBottomBar, int event) {
+            public void onDismissed(Snackbar snackbar, int event) {
                 viewModel.onErrorDismissed(error);
             }
         });
@@ -358,15 +356,6 @@ public abstract class BaseFragment<ViewModelType extends BaseViewModel> extends 
                 .setTitle(R.string.version_details_dialog_title)
                 .setMessage(message)
                 .setPositiveButton(R.string.version_details_dialog_action, (dialog, which) -> dialog.dismiss()))
-                .show();
-    }
-
-    private void showDeleteAccountDialog() {
-        new BaseDialogFragment(new MaterialAlertDialogBuilder(getContext())
-                .setTitle(R.string.delete_account_dialog_title)
-                .setMessage(R.string.delete_account_dialog_message)
-                .setPositiveButton(R.string.delete_account_dialog_action, (dialog, which) -> viewModel.deleteAccount())
-                .setNegativeButton(R.string.action_cancel, (dialog, which) -> dialog.dismiss()))
                 .show();
     }
 

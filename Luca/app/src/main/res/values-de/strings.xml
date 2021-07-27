@@ -2,8 +2,8 @@
     <!-- Global -->
     <string name="unknown">Unbekannt</string>
     <string name="feature_unavailable">Demnächst verfügbar</string>
-    <string name="url_terms_and_conditions">https://luca-app.de/app-terms-and-conditions</string>
-    <string name="url_privacy_policy">https://luca-app.de/app-privacy-policy</string>
+    <string name="url_terms_and_conditions">https://www.luca-app.de/app-terms-and-conditions-2/</string>
+    <string name="url_privacy_policy">https://www.luca-app.de/app-privacy-policy/</string>
     <string name="url_imprint">https://luca-app.de/imprint</string>
     <string name="url_faq">https://www.luca-app.de/faq/</string>
     <string name="mail_support">hello@luca-app.de</string>
@@ -77,9 +77,9 @@
     <string name="welcome_app_slogan">Gemeinsam erleben.</string>
     <string name="welcome_heading">Hallo</string>
     <string name="welcome_description">luca hilft dir bei der sicheren und verschlüsselten Angabe deiner Kontaktdaten. Du musst dir keine Sorgen um deine Daten mehr machen, wenn du Veranstaltungen, Kulturstätten, Restaurants, Cafés oder Bars besuchst.</string>
-    <string name="welcome_terms_description"><a href="https://luca-app.de/app-terms-and-conditions">Nutzungsbedingungen</a> zustimmen</string>
+    <string name="welcome_terms_description"><a href="https://www.luca-app.de/app-terms-and-conditions-2/">Nutzungsbedingungen</a> zustimmen</string>
     <string name="welcome_terms_checkbox_content_description">Nutzungsbedingungen</string>
-    <string name="welcome_privacy_description"><a href="https://luca-app.de/app-privacy-policy">Datenschutzbestimmungen</a> zustimmen</string>
+    <string name="welcome_privacy_description"><a href="https://www.luca-app.de/app-privacy-policy/">Datenschutzerklärung</a> zustimmen</string>
     <string name="welcome_privacy_checkbox_content_description">Datenschutzerklärung</string>
     <string name="welcome_action">Los geht\'s!</string>
 
@@ -144,7 +144,7 @@
     <string name="menu_more_content_description">Mehr Menu</string>
     <string name="menu_contact_data">Kontaktdaten</string>
     <string name="menu_clear_history">Historie löschen</string>
-    <string name="menu_privacy_policy">Datenschutzbestimmungen</string>
+    <string name="menu_privacy_policy">Datenschutzerklärung</string>
     <string name="menu_terms_and_conditions">Nutzungsbedingungen</string>
     <string name="menu_faq">FAQ</string>
     <string name="menu_imprint">Impressum</string>
@@ -198,6 +198,7 @@
     <string name="venue_property_patient_name">Name des Patienten</string>
 
     <string name="venue_check_in_action">EINCHECKEN</string>
+    <string name="venue_check_in_content_description">Check-in Schalter</string>
     <string name="venue_check_out_action">AUSCHECKEN</string>
     <string name="venue_check_out_content_description">Check-out Schalter</string>
     <string name="venue_checked_in_time">Eingecheckt seit:\n<xliff:g example="18.08.2020 – 19:23" id="time">%1$s</xliff:g> Uhr</string>
@@ -210,6 +211,9 @@
     <string name="venue_children_list_description">Wähle die Kinder aus, die mit dir eingecheckt werden sollen.</string>
     <string name="venue_children_add_description">Diese Information wird nicht an ein Gesundheitsamt weitergegeben, sie dient lediglich als Gedankenstütze. Wenn du deine Historie mit dem Gesundheitsamt teilst, kannst du die Namen der Kinder freiwillig dem Gesundheitsamt mitteilen.</string>
     <string name="venue_children_add">Kind hinzufügen</string>
+    <string name="venue_children_add_validation_error">Bitte einen gültigen Namen eingeben</string>
+    <string name="venue_children_add_error_title">Kind konnte nicht hinzugefügt werden</string>
+    <string name="venue_children_remove_error_title">Kind konnte nicht entfernt werden</string>
     <string name="venue_children_name">Name des Kindes</string>
     <string name="venue_children_check_in">Kinder einchecken</string>
 
@@ -223,7 +227,7 @@
     <string name="auto_checkout_info_title">Automatischer Check-out</string>
     <string name="auto_checkout_info_description">Wenn du diese Funktion aktivierst, wirst du automatisch ausgecheckt, sobald du den Standort verlässt, bei dem du gerade eingecheckt bist.\n\nDazu muss luca auf deinen Standort zugreifen können. Sobald du ausgecheckt wirst, die Standortdienste deaktivierst oder dein Handy neu startest, wird diese Funktion deaktiviert.</string>
     <string name="auto_checkout_location_access_title">Standortzugriff aktivieren</string>
-    <string name="auto_checkout_location_access_description">Die Funktion des automatischen Check-outs nutzt Geofencing. Wenn ein luca-Standort diese Funktion verwendet, kannst du durch die Nutzung der Standortdienste deines Handys automatisch auschecken, selbst wenn die App geschlossen ist. Dies erfolgt nur aufgrund deiner Einwilligung gem. Art. 6 (1) 1 a) DSGVO (mehr: <a href="https://www.luca-app.de/app-privacy-policy/">Datenschutz - App</a>. Natürlich kannst du dich auch jederzeit manuell auschecken.</string>
+    <string name="auto_checkout_location_access_description">Die Funktion des automatischen Check-outs nutzt Geofencing. Wenn ein luca-Standort diese Funktion verwendet, kannst du durch die Nutzung der Standortdienste deines Handys automatisch auschecken, selbst wenn die App geschlossen ist. Dies erfolgt nur aufgrund deiner Einwilligung gem. Art. 6 (1) 1 a) DSGVO (mehr: <a href="https://www.luca-app.de/app-privacy-policy/">Datenschutzerklärung - App</a>. Natürlich kannst du dich auch jederzeit manuell auschecken.</string>
     <string name="auto_checkout_background_location_access_title">@string/auto_checkout_location_access_title</string>
     <string name="auto_checkout_background_location_access_description">Für die Funktion des automatischen Check-outs muss luca auf deinen Standort zugreifen können solange du eingecheckt bist, selbst wenn die App geschlossen ist. Aktiviere dafür bitte die folgende Option: <xliff:g example="Allow all the time" id="locationPermissionOption">%1$s</xliff:g></string>
     <string name="auto_checkout_enable_location_title">Standortdienste aktivieren</string>
@@ -244,7 +248,7 @@
     <string name="history_share_selection_action">Wählen</string>
     <string name="history_share_selection_hint">Tage</string>
     <string name="history_share_confirmation_title">@string/history_share</string>
-    <string name="history_share_confirmation_description">Möchtest du deine Historie der letzten <xliff:g example="14" id="count">%1$d</xliff:g>&#160;Tage und deine Kontaktdaten für das Gesundheitsamt freigeben? Dies erfolgt nur aufgrund deiner freiwilligen Einwilligung gem. Art. 9 (2) a) DSGVO (mehr: <a href="https://www.luca-app.de/app-privacy-policy/">Datenschutz - App</a>).</string>
+    <string name="history_share_confirmation_description">Möchtest du deine Historie der letzten <xliff:g example="14" id="count">%1$d</xliff:g>&#160;Tage und deine Kontaktdaten für das Gesundheitsamt freigeben? Dies erfolgt nur aufgrund deiner freiwilligen Einwilligung gem. Art. 9 (2) a) DSGVO (mehr: <a href="https://www.luca-app.de/app-privacy-policy/">Datenschutzerklärung - App</a>).</string>
     <string name="history_share_confirmation_action">Freigeben</string>
     <string name="history_share_tan_title">@string/history_share</string>
     <string name="history_share_tan_description">Wenn du einem Gesundheitsamt diese TAN nennst, kann es deine Historie entschlüsseln und die luca-Standorte informieren:\n\n<xliff:g example="VU5S-86V6-H8FV" id="tan">%1$s</xliff:g></string>
@@ -284,6 +288,8 @@
     <string name="my_luca_heading">Mein luca</string>
     <string name="my_luca_empty_title">Willkommen bei \"Mein luca\"</string>
     <string name="my_luca_empty_description">Das ist dein persönlicher Bereich. Hier kannst du Dokumente <b>hinzufügen</b>, die dir den <b>Check-in</b> erleichtern.\n\nÜber das Kalender-Icon oben rechts kannst du Termine für Tests buchen.</string>
+    <string name="time_error_description">Die von dir eingestellte Zeit entspricht nicht der aktuellen Zeit.</string>
+    <string name="time_error_action">Zu den Einstellungen</string>
     <string name="appointment_action">Termin buchen</string>
     <string name="document_import_action">Dokument Hinzufügen</string>
     <string name="document_import_hint">Scanne den QR-Code deines Dokuments, um dieses zur App hinzuzufügen.</string>
@@ -397,5 +403,11 @@
     <string name="delete_account_dialog_title">Möchtest du deinen Account wirklich löschen?</string>
     <string name="delete_account_dialog_message">Löschst du deinen Account, kannst du keine neuen Check-ins vornehmen und auf deine Historie zugreifen.\n\nDaten, die durch einen Check-in bei einem Betreiber verschlüsselt hinterlegt wurden, werden gemäß der Corona/COVID-19 Infektionsschutzverordnung nach 4 Wochen gelöscht.\n\nNach der Löschung des Accounts kannst du noch bis zu 4 Wochen nach dem letzten Check-in von dem Gesundheitsamt benachrichtigt werden.</string>
     <string name="delete_account_dialog_action">Löschen</string>
+
+    <!-- Updated Terms -->
+    <string name="updated_terms_description">Wir aktualisieren unsere Nutzungsbedingungen und Datenschutzerklärung.</string>
+    <string name="updated_terms_info">Tippe auf „ZUSTIMMEN”, um die aktualisierten <b><a href="https://www.luca-app.de/app-terms-and-conditions-2/">Nutzungsbedingungen</a></b> und die <b><a href="https://www.luca-app.de/app-privacy-policy/">Datenschutzerklärung</a></b> zu akzeptieren.</string>
+    <string name="updated_terms_button_agree">ZUSTIMMEN</string>
+    <string name="updated_terms_changes_action">Änderungen</string>
 
 </resources>
