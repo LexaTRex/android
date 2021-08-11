@@ -1,17 +1,17 @@
 package de.culture4life.luca.history;
 
+import androidx.annotation.NonNull;
+
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
 import java.util.concurrent.TimeUnit;
 
-import androidx.annotation.NonNull;
-
 public class DataSharedItem extends HistoryItem {
 
     @SerializedName("days")
     @Expose
-    private int days = (int) TimeUnit.MILLISECONDS.toDays(HistoryManager.KEEP_DATA_DURATION);
+    private int days = (int) TimeUnit.MILLISECONDS.toDays(HistoryManager.SHARE_DATA_DURATION);
 
     public DataSharedItem() {
         super(HistoryItem.TYPE_CONTACT_DATA_REQUEST);

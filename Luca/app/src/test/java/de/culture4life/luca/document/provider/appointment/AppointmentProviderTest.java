@@ -1,6 +1,6 @@
 package de.culture4life.luca.document.provider.appointment;
 
-import de.culture4life.luca.document.Document;
+import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -9,7 +9,7 @@ import org.robolectric.annotation.Config;
 
 import java.util.concurrent.TimeUnit;
 
-import androidx.test.runner.AndroidJUnit4;
+import de.culture4life.luca.document.Document;
 
 import static junit.framework.TestCase.assertEquals;
 

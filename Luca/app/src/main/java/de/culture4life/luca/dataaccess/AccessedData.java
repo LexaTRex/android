@@ -11,7 +11,7 @@ import java.util.List;
  * hashed trace IDs by a given health department.
  *
  * @see <a href="https://www.luca-app.de/securityoverview/processes/tracing_find_contacts.html#notifying-guests-about-data-access">Security
- *         Overview: Notifying Guests about Data Access</a>
+ * Overview: Notifying Guests about Data Access</a>
  */
 public class AccessedData {
 

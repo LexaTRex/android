@@ -44,8 +44,6 @@
     <string name="error_qr_code_broken">QR-Code is invalid. Please try a different one.</string>
     <string name="error_certificate_pinning_title">Unexpected server certificates</string>
     <string name="error_certificate_pinning_description">When attempting to establish a secure connection to the luca servers, we found untrusted certificates.\n\nPlease try switching your network and make sure that you\'re using the latest app version.</string>
-    <string name="error_timestamp_offset_title">Wrong phone time</string>
-    <string name="error_timestamp_offset_description">We noticed that your phone time is not in sync with our server. Please open your system settings and make sure that your phone time is correct. Using luca with a wrong phone time can lead to unexpected issues.</string>
 
     <!-- Statuses -->
     <string name="status_check_out_in_progress">Checking out…</string>
@@ -81,8 +79,7 @@
     <string name="welcome_description">luca helps you encrypt and securely submit your contact data. With luca, you don\'t have to worry about your data when visiting events, restaurants, cafés or bars anymore.</string>
     <string name="welcome_terms_description">Accept <a href="https://www.luca-app.de/app-terms-and-conditions-2/">terms of use</a></string>
     <string name="welcome_terms_checkbox_content_description">Terms of use</string>
-    <string name="welcome_privacy_description">Accept <a href="https://www.luca-app.de/app-privacy-policy/">privacy policy</a></string>
-    <string name="welcome_privacy_checkbox_content_description">Privacy Policy</string>
+    <string name="welcome_privacy_description">You can view our <a href="https://www.luca-app.de/app-privacy-policy/">privacy policy</a> under this link.</string>
     <string name="welcome_action">Get started!</string>
 
     <!-- Pre-Registration -->
@@ -207,6 +204,8 @@
     <string name="venue_automatic_check_out">Automatic Check-Out</string>
     <string name="venue_slider_clicked">Please slide the arrow to the left</string>
     <string name="venue_checked_out">You have checked out</string>
+    <string name="venue_check_in_document_redirect_title">Continue with import?</string>
+    <string name="venue_check_in_document_redirect_description">Hey, you\'re scanning the QR code of a document and not of a luca location. If you want to add a document, click \"CONTINUE\".</string>
 
     <string name="venue_children_title">Children</string>
     <string name="venue_children_empty_list_description">You can check your children (up to&#160;14 years) in with you. Please indicate who is accompanying you.</string>
@@ -241,13 +240,13 @@
 
     <!-- History -->
     <string name="history_empty_title">No entries</string>
-    <string name="history_empty_description">Your history collects all your activities from the last 14&#160;days. You don\'t have any entries during this period at the moment.</string>
+    <string name="history_empty_description">Your history collects all your activities from the last <xliff:g example="28" id="count">%1$d</xliff:g>&#160;days. You don\'t have any entries during this period at the moment.</string>
     <string name="history_requests"><xliff:g example="0" id="count">%1$d</xliff:g> data requests</string>
     <string name="history_time"><xliff:g example="18.08.2020 – 19:23" id="time">%1$s</xliff:g></string>
     <string name="history_time_merged" translatable="false"><xliff:g example="18.08.2020 – 19:23" id="startTime">%1$s</xliff:g> -\n<xliff:g example="18.08.2020 – 20:11" id="endTime">%2$s</xliff:g></string>
     <string name="history_share">Share data</string>
     <string name="history_share_selection_title">Define timeframe</string>
-    <string name="history_share_selection_description">Your history gathers all of your check-ins from the last 14&#160;days. You can decide how many days you want to share with the health department. Define the number of days:</string>
+    <string name="history_share_selection_description">Your history gathers all of your check-ins from the last <xliff:g example="28" id="count">%1$d</xliff:g>&#160;days. You can decide how many days you want to share with the health department. Define the number of days:</string>
     <string name="history_share_selection_action">Select</string>
     <string name="history_share_selection_hint">Days</string>
     <string name="history_share_confirmation_title">@string/history_share</string>
@@ -272,7 +271,7 @@
     <string name="history_data_shared_title">Data shared</string>
     <string name="history_data_shared_description">You released your contact data and the last <xliff:g example="14" id="count">%1$d</xliff:g>&#160;days of your history for the health authorities.</string>
     <string name="history_clear_title">Do you really want to clear your history?</string>
-    <string name="history_clear_description">Past entries won\'t be displayed in your app anymore, but will stay in the system for up to 30&#160;days and will be shared with the health authorities if you share your data.</string>
+    <string name="history_clear_description">Past entries won\'t be displayed in your app anymore, but will stay in the system for up to 28&#160;days and will be shared with the health authorities if you share your data.</string>
     <string name="history_clear_action">Clear</string>
     <string name="history_children_title">Children: <xliff:g example="1" id="count">%1$d</xliff:g></string>
     <string name="history_children_description" translatable="false"><xliff:g example="- John Doe\n- Jane Doe" id="members">%1$s</xliff:g></string>
@@ -300,7 +299,7 @@
     <string name="document_import_action">Add Document</string>
     <string name="document_import_hint">Scan the QR code of your document to add it to the app.</string>
     <string name="document_import_success_message">The document was imported</string>
-    <string name="document_import_consent">I hereby declare my consent in accordance with Art. 9 (2) a) in conjunction with Art. 6 (1) 1 a) DSGVO to the transmission of a pseudonymized identifier during the local storage of my COVID test, recovery or vaccination certificate in the luca app. This is solely to prevent misuse so that multiple people cannot import and use the same document. The document\’s individual identifier is automatically deleted from the luca system after 72 hours of storage.</string>
+    <string name="document_import_consent">I hereby declare my consent in accordance with Art. 9 (2) a) in conjunction with Art. 6 (1) 1 a) GDPR to the transmission of a pseudonymized identifier during the local storage of my COVID test, recovery or vaccination certificate in the luca app. This is solely to prevent document misuse so that multiple people cannot import and use the same document. The identifier of the recovery or vaccination document can be deleted by deleting the document in the app.</string>
     <string name="document_import_error_title">The document could not be imported</string>
     <string name="document_import_error_name_mismatch_description">It was not possible to validate that this document belongs to you. Please check if your name is entered correctly in the app.</string>
     <string name="document_import_error_invalid_signature_description">It was not possible to validate the signature of this document. The document provider may not be supported by luca yet.</string>
@@ -312,8 +311,10 @@
     <string name="document_import_error_unsupported_but_url_description">The data didn\'t contain a valid document from a provider that we support.\n\nHowever, it seems to point to a website where you may get more details.</string>
     <string name="document_import_error_check_in_scanner_title">You cannot check in here</string>
     <string name="document_import_error_check_in_scanner_description">This scanner is only for adding documents. If you want to check in at a location, switch to the \"Check-In\" tab (bottom left of the navigation bar). There you will find the \"Self Check-In\" button.</string>
-    <string name="document_outcome_negative">RESULT: Negative</string>
-    <string name="document_outcome_positive">RESULT: Positive</string>
+    <string name="document_import_check_in_redirect_title">Proceed with check-in?</string>
+    <string name="document_import_check_in_redirect_description">Hey, you\'re scanning the QR code of a luca location and not of a document. Click \"CONTINUE\" to check in.</string>
+    <string name="document_outcome_negative">Result Negative</string>
+    <string name="document_outcome_positive">Result Positive</string>
     <string name="document_outcome_partially_immune">Partially Immune %1$s</string>
     <string name="document_outcome_partially_vaccinated">Partial vaccination %1$s</string>
     <string name="document_outcome_fully_vaccinated">Complete vaccination %1$s</string>
@@ -385,20 +386,20 @@
     <string name="time_hours">hours</string>
     <string name="time_days">days</string>
     <plurals name="time_plural_seconds">
-        <item quantity="one" formatted="true">%d second</item>
-        <item quantity="other" formatted="true">%d seconds</item>
+        <item formatted="true" quantity="one">%d second</item>
+        <item formatted="true" quantity="other">%d seconds</item>
     </plurals>
     <plurals name="time_plural_minutes">
-        <item quantity="one" formatted="true">%d minute</item>
-        <item quantity="other" formatted="true">%d minutes</item>
+        <item formatted="true" quantity="one">%d minute</item>
+        <item formatted="true" quantity="other">%d minutes</item>
     </plurals>
     <plurals name="time_plural_hours">
-        <item quantity="one" formatted="true">%d hour</item>
-        <item quantity="other" formatted="true">%d hours</item>
+        <item formatted="true" quantity="one">%d hour</item>
+        <item formatted="true" quantity="other">%d hours</item>
     </plurals>
     <plurals name="time_plural_days">
-        <item quantity="one" formatted="true">%d day</item>
-        <item quantity="other" formatted="true">%d days</item>
+        <item formatted="true" quantity="one">%d day</item>
+        <item formatted="true" quantity="other">%d days</item>
     </plurals>
 
     <!-- Version details -->
@@ -417,6 +418,18 @@
     <string name="updated_terms_button_agree">AGREE</string>
     <string name="updated_terms_changes_action">Changes</string>
     <string name="updated_terms_changes_url" translatable="false">https://www.luca-app.de/changes-terms-of-use-app/</string>
+
+    <!-- Account tab -->
+    <string name="account_tab_key_for_health_dep">Key for health departments</string>
+
+    <!-- key for health department view -->
+    <string name="key_health_department_title">Daily Key</string>
+    <string name="key_health_department_transfer_key">Daily Key</string>
+    <string name="key_health_department_date">@string/document_issued_at</string>
+    <string name="key_health_department_issuer">Issuer:</string>
+    <string name="key_health_department_signed">Signed:</string>
+    <string name="key_health_department_download_cert">Download certificate chain</string>
+    <string name="key_health_department_description">Every day a new daily key is created by one of the health departments that use luca. The health departments need this key to decrypt check-in data. Here you can see which health department created the key that\'s currently in use.</string>
 
     <!-- Dummy Data -->
     <string name="dummy_heading" translatable="false">Lorem Ipsum</string>

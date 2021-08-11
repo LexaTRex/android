@@ -1,6 +1,11 @@
 package de.culture4life.luca.preference;
 
+import androidx.annotation.NonNull;
+
 import com.nexenio.rxpreferences.provider.PreferencesProvider;
+
+import java.util.HashMap;
+import java.util.UUID;
 
 import de.culture4life.luca.checkin.ArchivedCheckInData;
 import de.culture4life.luca.checkin.CheckInData;
@@ -10,6 +15,8 @@ import de.culture4life.luca.crypto.TraceIdWrapperList;
 import de.culture4life.luca.crypto.WrappedSecret;
 import de.culture4life.luca.dataaccess.AccessedData;
 import de.culture4life.luca.dataaccess.DataAccessManager;
+import de.culture4life.luca.document.DocumentManager;
+import de.culture4life.luca.document.Documents;
 import de.culture4life.luca.history.HistoryItemContainer;
 import de.culture4life.luca.history.HistoryManager;
 import de.culture4life.luca.meeting.ArchivedMeetingData;
@@ -17,16 +24,9 @@ import de.culture4life.luca.meeting.MeetingData;
 import de.culture4life.luca.meeting.MeetingManager;
 import de.culture4life.luca.registration.RegistrationData;
 import de.culture4life.luca.registration.RegistrationManager;
-import de.culture4life.luca.document.Documents;
-import de.culture4life.luca.document.DocumentManager;
 import de.culture4life.luca.ui.onboarding.OnboardingActivity;
 import de.culture4life.luca.ui.registration.RegistrationActivity;
 import de.culture4life.luca.ui.registration.RegistrationViewModel;
-
-import java.util.HashMap;
-import java.util.UUID;
-
-import androidx.annotation.NonNull;
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Maybe;
 import timber.log.Timber;

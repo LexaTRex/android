@@ -1,11 +1,11 @@
 package de.culture4life.luca.ui.venue.children;
 
+import androidx.annotation.NonNull;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
-
-import androidx.annotation.NonNull;
 
 public class ChildListItemContainer extends ArrayList<ChildListItem> {
 

@@ -1,16 +1,6 @@
 package de.culture4life.luca.dataaccess;
 
-import de.culture4life.luca.LucaUnitTest;
-import de.culture4life.luca.checkin.CheckInManager;
-import de.culture4life.luca.crypto.CryptoManager;
-import de.culture4life.luca.history.HistoryManager;
-import de.culture4life.luca.location.GeofenceManager;
-import de.culture4life.luca.location.LocationManager;
-import de.culture4life.luca.network.NetworkManager;
-import de.culture4life.luca.network.pojo.AccessedHashedTraceIdsData;
-import de.culture4life.luca.network.pojo.HealthDepartment;
-import de.culture4life.luca.notification.LucaNotificationManager;
-import de.culture4life.luca.preference.PreferencesManager;
+import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -22,7 +12,17 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
-import androidx.test.runner.AndroidJUnit4;
+import de.culture4life.luca.LucaUnitTest;
+import de.culture4life.luca.checkin.CheckInManager;
+import de.culture4life.luca.crypto.CryptoManager;
+import de.culture4life.luca.history.HistoryManager;
+import de.culture4life.luca.location.GeofenceManager;
+import de.culture4life.luca.location.LocationManager;
+import de.culture4life.luca.network.NetworkManager;
+import de.culture4life.luca.network.pojo.AccessedHashedTraceIdsData;
+import de.culture4life.luca.network.pojo.HealthDepartment;
+import de.culture4life.luca.notification.LucaNotificationManager;
+import de.culture4life.luca.preference.PreferencesManager;
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.core.Single;
 

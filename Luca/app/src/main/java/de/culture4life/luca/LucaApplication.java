@@ -1,9 +1,5 @@
 package de.culture4life.luca;
 
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GoogleApiAvailability;
-import com.google.android.material.dialog.MaterialAlertDialogBuilder;
-
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
@@ -15,6 +11,24 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.StrictMode;
 import android.provider.Settings;
+
+import androidx.annotation.CallSuper;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatDelegate;
+import androidx.core.app.ShareCompat;
+import androidx.multidex.MultiDexApplication;
+
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GoogleApiAvailability;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
+
+import javax.net.ssl.SSLPeerUnverifiedException;
 
 import de.culture4life.luca.checkin.CheckInManager;
 import de.culture4life.luca.crypto.CryptoManager;
@@ -33,20 +47,6 @@ import de.culture4life.luca.registration.RegistrationManager;
 import de.culture4life.luca.service.LucaService;
 import de.culture4life.luca.ui.ViewError;
 import de.culture4life.luca.ui.dialog.BaseDialogFragment;
-
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
-
-import javax.net.ssl.SSLPeerUnverifiedException;
-
-import androidx.annotation.CallSuper;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatDelegate;
-import androidx.core.app.ShareCompat;
-import androidx.multidex.MultiDexApplication;
 import hu.akarnokd.rxjava3.debug.RxJavaAssemblyTracking;
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Maybe;
@@ -186,32 +186,10 @@ public class LucaApplication extends MultiDexApplication {
                 documentManager.initialize(this).subscribeOn(Schedulers.io()),
                 geofenceManager.initialize(this).subscribeOn(Schedulers.io())
         ).andThen(Completable.mergeArray(
-                invokeServerTimeCheck().delaySubscription(5, TimeUnit.SECONDS, Schedulers.io()),
                 invokeRotatingBackendPublicKeyUpdate(),
                 invokeAccessedDataUpdate(),
                 startKeepingDataUpdated()
         ));
-    }
-
-    private Completable invokeServerTimeCheck() {
-        return Completable.fromAction(() -> applicationDisposable.add(genuinityManager.isGenuineTime()
-                .subscribeOn(Schedulers.io())
-                .subscribe(isGenuineTime -> {
-                            if (!isGenuineTime) {
-                                showErrorAsDialog(new ViewError.Builder(this)
-                                        .withTitle(R.string.error_timestamp_offset_title)
-                                        .withDescription(R.string.error_timestamp_offset_description)
-                                        .withResolveLabel(R.string.action_resolve)
-                                        .withResolveAction(Completable.fromAction(() -> {
-                                            Intent intent = new Intent(android.provider.Settings.ACTION_DATE_SETTINGS);
-                                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                                            startActivity(intent);
-                                        }))
-                                        .removeWhenShown()
-                                        .build());
-                            }
-                        }
-                )));
     }
 
     private Completable invokeRotatingBackendPublicKeyUpdate() {

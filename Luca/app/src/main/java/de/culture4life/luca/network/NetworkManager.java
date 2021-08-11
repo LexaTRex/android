@@ -1,20 +1,20 @@
 package de.culture4life.luca.network;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+
+import androidx.annotation.NonNull;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
+import java.util.concurrent.TimeUnit;
 
 import de.culture4life.luca.BuildConfig;
 import de.culture4life.luca.LucaApplication;
 import de.culture4life.luca.Manager;
 import de.culture4life.luca.network.endpoints.LucaEndpointsV3;
-
-import java.util.concurrent.TimeUnit;
-
-import androidx.annotation.NonNull;
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Maybe;
 import io.reactivex.rxjava3.core.Single;

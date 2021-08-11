@@ -2,11 +2,11 @@ package de.culture4life.luca.ui;
 
 import android.content.Context;
 
-import de.culture4life.luca.R;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
+
+import de.culture4life.luca.R;
 import hu.akarnokd.rxjava3.debug.RxJavaAssemblyException;
 import io.reactivex.rxjava3.core.Completable;
 

@@ -1,123 +1,123 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
-        xmlns:tools="http://schemas.android.com/tools"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@android:color/transparent"
-        android:descendantFocusability="blocksDescendants"
-        android:paddingStart="@dimen/spacing_default"
-        android:paddingEnd="@dimen/spacing_default"
-        android:paddingBottom="@dimen/spacing_default">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@android:color/transparent"
+    android:descendantFocusability="blocksDescendants"
+    android:paddingStart="@dimen/spacing_default"
+    android:paddingEnd="@dimen/spacing_default"
+    android:paddingBottom="@dimen/spacing_default">
 
     <com.google.android.material.card.MaterialCardView
-            android:id="@+id/cardView"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            app:cardBackgroundColor="?attr/colorOnSurface"
-            app:cardCornerRadius="8dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
+        android:id="@+id/cardView"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:cardBackgroundColor="?attr/colorOnSurface"
+        app:cardCornerRadius="8dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
 
         <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/constraintLayout"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:padding="@dimen/spacing_default">
+            android:id="@+id/constraintLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="@dimen/spacing_default">
 
             <ImageView
-                    android:id="@+id/itemTitleImageView"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:maxWidth="30dp"
-                    android:maxHeight="30dp"
-                    android:adjustViewBounds="true"
-                    android:src="@drawable/ic_verified"
-                    android:contentDescription="@string/additional_details_content_description"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent" />
+                android:id="@+id/itemTitleImageView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:adjustViewBounds="true"
+                android:contentDescription="@string/additional_details_content_description"
+                android:maxWidth="30dp"
+                android:maxHeight="30dp"
+                android:src="@drawable/ic_verified"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
             <TextView
-                    android:id="@+id/itemTitleTextView"
-                    style="@style/TextAppearance.Luca.Body1"
-                    app:fontFamily="@font/montserrat_bold"
-                    android:textColor="@android:color/black"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="60dp"
-                    android:layout_marginBottom="@dimen/spacing_default"
-                    android:ellipsize="end"
-                    android:maxLines="2"
-                    tools:text="@string/dummy_heading"
-                    app:layout_constraintHorizontal_bias="0"
-                    app:layout_constrainedWidth="true"
-                    app:layout_constraintEnd_toStartOf="@id/itemTitleImageView"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
+                android:id="@+id/itemTitleTextView"
+                style="@style/TextAppearance.Luca.Body1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="60dp"
+                android:layout_marginBottom="@dimen/spacing_default"
+                android:ellipsize="end"
+                android:maxLines="2"
+                android:textColor="@android:color/black"
+                app:fontFamily="@font/montserrat_bold"
+                app:layout_constrainedWidth="true"
+                app:layout_constraintEnd_toStartOf="@id/itemTitleImageView"
+                app:layout_constraintHorizontal_bias="0"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:text="@string/dummy_heading" />
 
             <LinearLayout
-                    android:id="@+id/topContent"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/spacing_small"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/itemTitleTextView"
-                    android:orientation="vertical" />
+                android:id="@+id/topContent"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_small"
+                android:orientation="vertical"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/itemTitleTextView" />
 
             <ImageView
-                    android:id="@+id/collapseIndicator"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="@dimen/spacing_small"
-                    android:src="@drawable/ic_collapse_indicator"
-                    app:layout_constraintBottom_toBottomOf="@id/topContent"
-                    app:layout_constraintEnd_toEndOf="parent" />
+                android:id="@+id/collapseIndicator"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/spacing_small"
+                android:src="@drawable/ic_collapse_indicator"
+                app:layout_constraintBottom_toBottomOf="@id/topContent"
+                app:layout_constraintEnd_toEndOf="parent" />
 
             <LinearLayout
-                    android:id="@+id/collapseLayout"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/topContent">
+                android:id="@+id/collapseLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/topContent">
 
                 <LinearLayout
-                        android:id="@+id/collapsedContent"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical" />
+                    android:id="@+id/collapsedContent"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical" />
 
                 <ImageView
-                        android:id="@+id/qrCodeImageView"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        tools:src="@color/primaryColor"
-                        android:adjustViewBounds="true"
-                        android:scaleType="fitCenter"
-                        android:padding="@dimen/spacing_default" />
+                    android:id="@+id/qrCodeImageView"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:adjustViewBounds="true"
+                    android:padding="@dimen/spacing_default"
+                    android:scaleType="fitCenter"
+                    tools:src="@color/primaryColor" />
 
                 <TextView
-                        android:id="@+id/providerTextView"
-                        style="@style/TextAppearance.Luca.Body2"
-                        android:layout_marginBottom="8dp"
-                        android:textColor="@android:color/black"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:ellipsize="end"
-                        android:maxLines="2"
-                        tools:text="@string/unknown"
-                        android:gravity="center" />
+                    android:id="@+id/providerTextView"
+                    style="@style/TextAppearance.Luca.Body2"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
+                    android:ellipsize="end"
+                    android:gravity="center"
+                    android:maxLines="2"
+                    android:textColor="@android:color/black"
+                    tools:text="@string/unknown" />
 
 
                 <com.google.android.material.button.MaterialButton
-                        android:id="@+id/deleteItemButton"
-                        style="@style/Button.Luca.TertiaryActionButton.Black"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="end"
-                        android:layout_marginEnd="@dimen/spacing_default"
-                        android:text="@string/delete_test_action" />
+                    android:id="@+id/deleteItemButton"
+                    style="@style/Button.Luca.TertiaryActionButton.Black"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="end"
+                    android:layout_marginEnd="@dimen/spacing_default"
+                    android:text="@string/delete_test_action" />
 
             </LinearLayout>
 

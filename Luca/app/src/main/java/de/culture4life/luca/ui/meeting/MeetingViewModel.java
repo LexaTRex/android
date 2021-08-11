@@ -1,11 +1,24 @@
 package de.culture4life.luca.ui.meeting;
 
-import com.google.gson.Gson;
-import com.google.zxing.EncodeHintType;
-
 import android.app.Application;
 import android.graphics.Bitmap;
 import android.util.Pair;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
+
+import com.google.gson.Gson;
+import com.google.zxing.EncodeHintType;
+
+import net.glxn.qrgen.android.QRCode;
+
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 import de.culture4life.luca.BuildConfig;
 import de.culture4life.luca.R;
@@ -20,19 +33,6 @@ import de.culture4life.luca.ui.BaseViewModel;
 import de.culture4life.luca.ui.ViewError;
 import de.culture4life.luca.ui.venue.details.VenueDetailsViewModel;
 import de.culture4life.luca.util.SerializationUtil;
-
-import net.glxn.qrgen.android.QRCode;
-
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-import java.util.concurrent.TimeUnit;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MutableLiveData;
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.core.Single;

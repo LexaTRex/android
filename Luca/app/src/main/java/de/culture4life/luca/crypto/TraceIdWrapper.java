@@ -8,10 +8,10 @@ import com.google.gson.JsonParseException;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 
-import de.culture4life.luca.util.SerializationUtil;
-
 import java.lang.reflect.Type;
 import java.util.Arrays;
+
+import de.culture4life.luca.util.SerializationUtil;
 
 /**
  * An opaque identifier derived from a Guest’s user ID and tracing secret during Guest Check-In. It

@@ -7,11 +7,11 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
-import de.culture4life.luca.R;
+import androidx.annotation.NonNull;
 
 import java.util.List;
 
-import androidx.annotation.NonNull;
+import de.culture4life.luca.R;
 
 public class AccessedDataListAdapter extends ArrayAdapter<AccessedDataListItem> {
 

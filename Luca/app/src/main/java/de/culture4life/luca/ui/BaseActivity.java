@@ -2,10 +2,10 @@ package de.culture4life.luca.ui;
 
 import android.os.Bundle;
 
-import de.culture4life.luca.LucaApplication;
-
 import androidx.annotation.CallSuper;
 import androidx.appcompat.app.AppCompatActivity;
+
+import de.culture4life.luca.LucaApplication;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
 
 public abstract class BaseActivity extends AppCompatActivity {

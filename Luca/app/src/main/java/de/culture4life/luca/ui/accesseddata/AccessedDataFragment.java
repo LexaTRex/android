@@ -1,17 +1,17 @@
 package de.culture4life.luca.ui.accesseddata;
 
+import static androidx.core.view.ViewCompat.IMPORTANT_FOR_ACCESSIBILITY_NO;
+
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
 import de.culture4life.luca.R;
+import de.culture4life.luca.history.HistoryManager;
 import de.culture4life.luca.ui.BaseFragment;
 import de.culture4life.luca.ui.UiUtil;
-
 import io.reactivex.rxjava3.core.Completable;
-
-import static androidx.core.view.ViewCompat.IMPORTANT_FOR_ACCESSIBILITY_NO;
 
 public class AccessedDataFragment extends BaseFragment<AccessedDataViewModel> {
 

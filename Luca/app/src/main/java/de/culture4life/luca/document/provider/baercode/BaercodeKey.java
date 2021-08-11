@@ -1,13 +1,13 @@
 package de.culture4life.luca.document.provider.baercode;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import androidx.annotation.NonNull;
 
-import de.culture4life.luca.util.SerializationUtil;
+import com.fasterxml.jackson.databind.JsonNode;
 
 import java.io.IOException;
 import java.util.Arrays;
 
-import androidx.annotation.NonNull;
+import de.culture4life.luca.util.SerializationUtil;
 
 /**
  * Key object as stored in the Baercode bundle file

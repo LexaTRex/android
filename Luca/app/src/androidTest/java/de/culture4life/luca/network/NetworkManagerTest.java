@@ -1,17 +1,18 @@
 package de.culture4life.luca.network;
 
-import com.google.gson.JsonObject;
+import androidx.test.platform.app.InstrumentationRegistry;
 
-import de.culture4life.luca.BuildConfig;
-import de.culture4life.luca.LucaApplication;
-import de.culture4life.luca.network.endpoints.LucaEndpointsV3;
-import de.culture4life.luca.network.pojo.UserDeletionRequestData;
+import com.google.gson.JsonObject;
 
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import androidx.test.platform.app.InstrumentationRegistry;
+import de.culture4life.luca.BuildConfig;
+import de.culture4life.luca.LucaApplication;
+import de.culture4life.luca.network.endpoints.LucaEndpointsV3;
+import de.culture4life.luca.network.pojo.DailyKeyPair;
+import de.culture4life.luca.network.pojo.UserDeletionRequestData;
 import retrofit2.HttpException;
 
 public class NetworkManagerTest {
@@ -31,8 +32,8 @@ public class NetworkManagerTest {
 
     @Test
     public void getDailyKeyPairPublicKey_call_isSuccessful() {
-        JsonObject response = lucaEndpoints.getDailyKeyPairPublicKey().blockingGet();
-        Assert.assertTrue(response.has("publicKey"));
+        DailyKeyPair response = lucaEndpoints.getDailyKeyPair().blockingGet();
+        Assert.assertFalse(response.getPublicKey().isEmpty());
     }
 
     @Test(expected = HttpException.class)

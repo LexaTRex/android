@@ -4,9 +4,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import de.culture4life.luca.R;
-import de.culture4life.luca.ui.myluca.viewholders.MultipleMyLucaItemViewHolder;
-import de.culture4life.luca.ui.myluca.viewholders.SingleMyLucaItemViewHolder;
+import androidx.annotation.NonNull;
+import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.viewpager2.widget.ViewPager2;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -14,10 +15,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import androidx.annotation.NonNull;
-import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.RecyclerView;
-import androidx.viewpager2.widget.ViewPager2;
+import de.culture4life.luca.R;
+import de.culture4life.luca.ui.myluca.viewholders.MultipleMyLucaItemViewHolder;
+import de.culture4life.luca.ui.myluca.viewholders.SingleMyLucaItemViewHolder;
 
 public class MyLucaListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
@@ -48,12 +48,14 @@ public class MyLucaListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
     }
 
     @Override
-    public @NonNull RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public @NonNull
+    RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         if (viewType == SINGLE_ITEM_VIEW_HOLDER) {
             SingleLucaItemView view = new SingleLucaItemView(parent.getContext());
             return new SingleMyLucaItemViewHolder(view);
         } else {
-            ViewGroup view = (ViewGroup) LayoutInflater.from(parent.getContext()).inflate(R.layout.my_luca_list_items_viewpager, parent, false);
+            ViewGroup view = (ViewGroup) LayoutInflater.from(parent.getContext())
+                    .inflate(R.layout.my_luca_list_items_viewpager, parent, false);
             return new MultipleMyLucaItemViewHolder(view);
         }
     }
@@ -83,7 +85,13 @@ public class MyLucaListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
                 notifyItemChanged(position);
             };
             Integer hashCode = items.hashCode();
-            MyLucaItemViewPager viewPagerAdapter = new MyLucaItemViewPager(this.fragment, items, expandClickListener, clickListener, position);
+            MyLucaItemViewPager viewPagerAdapter = new MyLucaItemViewPager(
+                    this.fragment,
+                    items,
+                    expandClickListener,
+                    clickListener,
+                    position
+            );
             MultipleMyLucaItemViewHolder multipleHolder = (MultipleMyLucaItemViewHolder) viewHolder;
             multipleHolder.getViewPager().setAdapter(viewPagerAdapter);
             ViewPager2.OnPageChangeCallback pageChangeCallback = new ViewPager2.OnPageChangeCallback() {

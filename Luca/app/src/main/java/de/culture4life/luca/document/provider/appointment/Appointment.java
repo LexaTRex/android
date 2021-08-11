@@ -2,12 +2,12 @@ package de.culture4life.luca.document.provider.appointment;
 
 import android.net.Uri;
 
-import de.culture4life.luca.document.Document;
-import de.culture4life.luca.document.provider.ProvidedDocument;
+import androidx.annotation.NonNull;
 
 import java.util.UUID;
 
-import androidx.annotation.NonNull;
+import de.culture4life.luca.document.Document;
+import de.culture4life.luca.document.provider.ProvidedDocument;
 
 public class Appointment extends ProvidedDocument {
 

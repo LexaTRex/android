@@ -18,6 +18,7 @@ class UpdatedTermsUtilTest : LucaUnitTest() {
 
     @Test
     fun areTermsAccepted_afterMarkingAccepted_isTrue() {
-        markTermsAsAccepted(application).andThen(areTermsAccepted(application)).test().assertValue(true)
+        markTermsAsAccepted(application).andThen(areTermsAccepted(application)).test()
+            .assertValue(true)
     }
 }

@@ -1,9 +1,9 @@
 package de.culture4life.luca.crypto;
 
+import androidx.annotation.NonNull;
+
 import com.nexenio.rxkeystore.RxKeyStore;
 import com.nexenio.rxkeystore.provider.signature.BaseSignatureProvider;
-
-import androidx.annotation.NonNull;
 
 /**
  * Signature provider used for signing contact data and verifying daily key.

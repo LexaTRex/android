@@ -17,12 +17,18 @@ class RecoveryItem(context: Context, document: Document) :
         deleteButtonText = context.getString(R.string.delete_certificate_action)
 
         topContent.clear()
-        val createdBefore = TimeUtil.getReadableDurationWithPlural(System.currentTimeMillis() - document.testingTimestamp, context).blockingGet()
+        val createdBefore = TimeUtil.getReadableDurationWithPlural(
+            System.currentTimeMillis() - document.testingTimestamp,
+            context
+        ).blockingGet()
         addTopContent(context.getString(R.string.document_created_before), createdBefore)
 
         collapsedContent.clear()
         val time = MyLucaListItem.getReadableDate(context, document.testingTimestamp)
-        addCollapsedContent(context.getString(R.string.document_issued_by), "$time\n${document.labName}")
+        addCollapsedContent(
+            context.getString(R.string.document_issued_by),
+            "$time\n${document.labName}"
+        )
         val validUntil = MyLucaListItem.getReadableDate(context, document.expirationTimestamp)
         addCollapsedContent(context.getString(R.string.document_valid_until), validUntil)
         val date = MyLucaListItem.getReadableDate(context, document.dateOfBirth)
@@ -33,19 +39,34 @@ class RecoveryItem(context: Context, document: Document) :
         when (document.outcome) {
             Document.OUTCOME_PARTIALLY_IMMUNE -> {
                 val firstProcedure = document.procedures.first()
-                val procedureNumber = String.format("%d/%d", firstProcedure.doseNumber, firstProcedure.totalSeriesOfDoses)
-                title = context.getString(R.string.document_outcome_partially_immune, procedureNumber)
-                color = ContextCompat.getColor(context, R.color.document_outcome_partially_vaccinated)
+                val procedureNumber = String.format(
+                    "%d/%d",
+                    firstProcedure.doseNumber,
+                    firstProcedure.totalSeriesOfDoses
+                )
+                title =
+                    context.getString(R.string.document_outcome_partially_immune, procedureNumber)
+                color =
+                    ContextCompat.getColor(context, R.color.document_outcome_partially_vaccinated)
             }
             Document.OUTCOME_FULLY_IMMUNE -> {
                 val timeUntilValid = document.validityStartTimestamp - System.currentTimeMillis()
                 if (timeUntilValid <= 0) {
                     title = context.getString(R.string.document_outcome_fully_recovered)
-                    color = ContextCompat.getColor(context, R.color.document_outcome_fully_recovered)
+                    color =
+                        ContextCompat.getColor(context, R.color.document_outcome_fully_recovered)
                 } else {
-                    val readableDuration = TimeUtil.getReadableDurationWithPlural(timeUntilValid, context).blockingGet()
-                    title = context.getString(R.string.document_outcome_fully_recovered_in, readableDuration)
-                    color = ContextCompat.getColor(context, R.color.document_outcome_fully_vaccinated_but_not_yet_valid)
+                    val readableDuration =
+                        TimeUtil.getReadableDurationWithPlural(timeUntilValid, context)
+                            .blockingGet()
+                    title = context.getString(
+                        R.string.document_outcome_fully_recovered_in,
+                        readableDuration
+                    )
+                    color = ContextCompat.getColor(
+                        context,
+                        R.color.document_outcome_fully_vaccinated_but_not_yet_valid
+                    )
                 }
             }
             else -> {

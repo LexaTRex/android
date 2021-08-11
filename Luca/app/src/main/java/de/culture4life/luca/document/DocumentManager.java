@@ -1,11 +1,16 @@
 package de.culture4life.luca.document;
 
-import com.google.gson.JsonObject;
-
 import android.content.Context;
 import android.util.Base64;
 
+import androidx.annotation.NonNull;
+
+import com.google.gson.JsonObject;
 import com.nexenio.rxkeystore.util.RxBase64;
+
+import java.net.HttpURLConnection;
+import java.nio.charset.StandardCharsets;
+import java.util.NoSuchElementException;
 
 import de.culture4life.luca.BuildConfig;
 import de.culture4life.luca.Manager;
@@ -27,12 +32,6 @@ import de.culture4life.luca.network.pojo.DocumentProviderDataList;
 import de.culture4life.luca.preference.PreferencesManager;
 import de.culture4life.luca.registration.RegistrationManager;
 import de.culture4life.luca.util.TimeUtil;
-
-import java.net.HttpURLConnection;
-import java.nio.charset.StandardCharsets;
-import java.util.NoSuchElementException;
-
-import androidx.annotation.NonNull;
 import io.reactivex.rxjava3.core.BackpressureStrategy;
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Maybe;
@@ -114,8 +113,8 @@ public class DocumentManager extends Manager {
     public Completable addDocument(@NonNull Document document) {
         return getDocumentResultIfAvailable(document.getId())
                 .isEmpty()
-                .flatMapCompletable(isNewTest -> {
-                    if (!isNewTest) {
+                .flatMapCompletable(isNewDocument -> {
+                    if (!isNewDocument) {
                         return Completable.error(new DocumentAlreadyImportedException());
                     }
                     if (document.getExpirationTimestamp() < System.currentTimeMillis() && !BuildConfig.DEBUG) {
@@ -136,7 +135,7 @@ public class DocumentManager extends Manager {
                             .mergeWith(Observable.just(document))
                             .toList()
                             .map(Documents::new)
-                            .flatMapCompletable(this::persistDocument)
+                            .flatMapCompletable(this::persistDocuments)
                             .andThen(addToHistory(document))
                             .doOnSubscribe(disposable -> Timber.d("Persisting document: %s", document));
                 });
@@ -186,19 +185,16 @@ public class DocumentManager extends Manager {
      * @param document document object to unredeem
      */
     public Completable unredeemDocument(@NonNull Document document) {
-        return networkManager.getLucaEndpointsV3()
-                .flatMapCompletable(lucaEndpointsV3 ->
-                        Single.zip(generateEncodedDocumentHash(document), generateOrRestoreDocumentTag(document), (hash, tag) ->
-                                jsonObjectWith(hash, tag)
-                        ).flatMapCompletable(body -> lucaEndpointsV3.unredeemDocument(body)
-                                .onErrorResumeNext(throwable -> {
-                                    if (NetworkManager.isHttpException(throwable, HttpURLConnection.HTTP_NOT_FOUND)) {
-                                        // The route is not yet available on backend or the document was already unredeemed
-                                        return Completable.complete();
-                                    }
-                                    return Completable.error(throwable);
-                                })
-                        ));
+        return Single.zip(generateEncodedDocumentHash(document), generateOrRestoreDocumentTag(document), this::jsonObjectWith)
+                .flatMapCompletable(jsonObject -> networkManager.getLucaEndpointsV3()
+                        .flatMapCompletable(lucaEndpointsV3 -> lucaEndpointsV3.unredeemDocument(jsonObject)))
+                .onErrorResumeNext(throwable -> {
+                    if (NetworkManager.isHttpException(throwable, HttpURLConnection.HTTP_NOT_FOUND)) {
+                        // The route is not yet available on backend or the document was already unredeemed
+                        return Completable.complete();
+                    }
+                    return Completable.error(throwable);
+                });
     }
 
     /**
@@ -207,7 +203,7 @@ public class DocumentManager extends Manager {
     public Completable unredeemAndDeleteAllDocuments() {
         return getOrRestoreDocuments()
                 .flatMapCompletable(document -> unredeemDocument(document)
-                    .andThen(deleteDocument(document.getId())));
+                        .andThen(deleteDocument(document.getId())));
     }
 
     private JsonObject jsonObjectWith(String hash, String tag) {
@@ -258,7 +254,7 @@ public class DocumentManager extends Manager {
                 .flatMapObservable(Observable::fromIterable);
     }
 
-    private Completable persistDocument(@NonNull Documents documents) {
+    private Completable persistDocuments(@NonNull Documents documents) {
         return preferencesManager.persist(KEY_DOCUMENTS, documents)
                 .doOnSubscribe(disposable -> {
                     Timber.d("Persisting " + documents.size() + " documents");
@@ -268,6 +264,8 @@ public class DocumentManager extends Manager {
 
     public Completable reImportDocuments() {
         return getOrRestoreDocuments()
+                .flatMapSingle(document -> unredeemDocument(document)
+                        .andThen(Single.just(document)))
                 .map(Document::getEncodedData).toList()
                 .doOnSuccess(encodedDocuments -> Timber.i("Re-importing %d documents", encodedDocuments.size()))
                 .flatMapCompletable(encodedDocuments -> clearDocuments()
@@ -304,7 +302,7 @@ public class DocumentManager extends Manager {
                 .filter(filterFunction)
                 .toList()
                 .map(Documents::new)
-                .flatMapCompletable(this::persistDocument);
+                .flatMapCompletable(this::persistDocuments);
     }
 
     /**
@@ -345,7 +343,7 @@ public class DocumentManager extends Manager {
 
     /**
      * @return true if the given url is a document in the <a href="https://app.luca-app.de/webapp/testresult/#eyJ0eXAi...">luca
-     *         style</a>
+     * style</a>
      */
     public static boolean isTestResult(@NonNull String url) {
         return url.contains("luca-app.de/webapp/testresult/#");

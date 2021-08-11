@@ -1,7 +1,6 @@
 package de.culture4life.luca.document.provider.ubirch;
 
-import de.culture4life.luca.document.Document;
-import de.culture4life.luca.document.provider.ProvidedDocument;
+import androidx.annotation.NonNull;
 
 import java.lang.reflect.Field;
 import java.text.ParseException;
@@ -10,7 +9,8 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.UUID;
 
-import androidx.annotation.NonNull;
+import de.culture4life.luca.document.Document;
+import de.culture4life.luca.document.provider.ProvidedDocument;
 
 import static de.culture4life.luca.document.provider.ubirch.UbirchDocumentProvider.URL_PREFIX;
 

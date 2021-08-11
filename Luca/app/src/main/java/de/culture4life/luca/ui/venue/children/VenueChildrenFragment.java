@@ -1,9 +1,5 @@
 package de.culture4life.luca.ui.venue.children;
 
-import com.google.android.material.button.MaterialButton;
-import com.google.android.material.dialog.MaterialAlertDialogBuilder;
-import com.google.android.material.textfield.TextInputLayout;
-
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,18 +8,21 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
+
+import com.google.android.material.button.MaterialButton;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.google.android.material.textfield.TextInputLayout;
+
 import de.culture4life.luca.R;
 import de.culture4life.luca.ui.BaseFragment;
 import de.culture4life.luca.ui.UiUtil;
 import de.culture4life.luca.ui.dialog.BaseDialogFragment;
-
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AlertDialog;
 import io.reactivex.rxjava3.core.Completable;
 
 public class VenueChildrenFragment extends BaseFragment<VenueChildrenViewModel> {
 
-    private ImageView backImageView;
     private TextView childAddingDescriptionTextView;
     private ChildListAdapter childListAdapter;
     private ListView childListView;
@@ -55,8 +54,6 @@ public class VenueChildrenFragment extends BaseFragment<VenueChildrenViewModel> 
     }
 
     private void initializeAddChildViews() {
-        backImageView = getView().findViewById(R.id.back);
-        backImageView.setOnClickListener(view -> viewModel.openVenueDetailsView());
         addChildButton = getView().findViewById(R.id.primaryActionButton);
         addChildButton.setOnClickListener(view -> showAddChildDialog());
     }

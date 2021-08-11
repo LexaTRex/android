@@ -1,26 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    android:layout_height="wrap_content">
 
     <androidx.viewpager2.widget.ViewPager2
-        app:layout_constraintTop_toTopOf="parent"
         android:id="@+id/myLucaItemsViewPager"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <com.rd.PageIndicatorView
         android:id="@+id/myLucaItemsViewPagerIndicator"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/myLucaItemsViewPager"
         app:piv_animationType="color"
         app:piv_radius="4dp"
         app:piv_unselectedColor="@color/material_grey500"
-        app:piv_viewPager="@id/myLucaItemsViewPager"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center" />
+        app:piv_viewPager="@id/myLucaItemsViewPager" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

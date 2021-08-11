@@ -1,9 +1,5 @@
 package de.culture4life.luca.ui.qrcode;
 
-import com.google.android.material.button.MaterialButton;
-import com.google.android.material.dialog.MaterialAlertDialogBuilder;
-import com.google.common.util.concurrent.ListenableFuture;
-
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Size;
@@ -12,15 +8,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-
-import de.culture4life.luca.BuildConfig;
-import de.culture4life.luca.R;
-import de.culture4life.luca.ui.BaseFragment;
-import de.culture4life.luca.ui.dialog.BaseDialogFragment;
-import de.culture4life.luca.ui.registration.RegistrationActivity;
-
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executors;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -31,11 +18,27 @@ import androidx.camera.lifecycle.ProcessCameraProvider;
 import androidx.camera.view.PreviewView;
 import androidx.core.content.ContextCompat;
 import androidx.lifecycle.LifecycleOwner;
+
+import com.google.android.material.button.MaterialButton;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.google.common.util.concurrent.ListenableFuture;
+
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
+
+import de.culture4life.luca.BuildConfig;
+import de.culture4life.luca.R;
+import de.culture4life.luca.ui.BaseFragment;
+import de.culture4life.luca.ui.dialog.BaseDialogFragment;
+import de.culture4life.luca.ui.registration.RegistrationActivity;
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Maybe;
 import io.reactivex.rxjava3.core.Single;
 import io.reactivex.rxjava3.disposables.Disposable;
 import timber.log.Timber;
+
+import static de.culture4life.luca.ui.BaseQrCodeViewModel.BARCODE_DATA_KEY;
 
 public class QrCodeFragment extends BaseFragment<QrCodeViewModel> {
 
@@ -87,6 +90,13 @@ public class QrCodeFragment extends BaseFragment<QrCodeViewModel> {
     @Override
     protected Class<QrCodeViewModel> getViewModelClass() {
         return QrCodeViewModel.class;
+    }
+
+    @Override
+    protected Completable initializeViewModel() {
+        return super.initializeViewModel()
+                .observeOn(AndroidSchedulers.mainThread())
+                .doOnComplete(() -> viewModel.setupViewModelReference(requireActivity()));
     }
 
     @Override
@@ -147,6 +157,21 @@ public class QrCodeFragment extends BaseFragment<QrCodeViewModel> {
                             hideCameraPreview();
                         }
                     });
+
+                    observe(viewModel.getPossibleDocumentData(), barcodeDataEvent -> {
+                        if (barcodeDataEvent != null && !barcodeDataEvent.hasBeenHandled()) {
+                            Bundle bundle = new Bundle();
+                            String barcodeData = barcodeDataEvent.getValueAndMarkAsHandled();
+                            bundle.putString(BARCODE_DATA_KEY, barcodeData);
+                            new BaseDialogFragment(new MaterialAlertDialogBuilder(getContext())
+                                    .setTitle(R.string.venue_check_in_document_redirect_title)
+                                    .setMessage(R.string.venue_check_in_document_redirect_description)
+                                    .setPositiveButton(R.string.action_continue, (dialogInterface, i) -> navigationController.navigate(R.id.myLucaFragment, bundle))
+                                    .setNegativeButton(R.string.action_cancel, (dialogInterface, i) -> {
+                                        // do nothing
+                                    })).show();
+                        }
+                    });
                 }));
     }
 
@@ -157,6 +182,15 @@ public class QrCodeFragment extends BaseFragment<QrCodeViewModel> {
         viewModel.checkIfContactDataMissing();
         viewModel.checkIfUpdateIsRequired();
         viewModel.checkIfHostingMeeting();
+        Bundle arguments = getArguments();
+        if (arguments != null) {
+            String barcode = arguments.getString(BARCODE_DATA_KEY);
+            if (barcode != null) {
+                viewDisposable.add(viewModel.process(barcode)
+                        .onErrorComplete()
+                        .subscribe());
+            }
+        }
     }
 
     private void showContactDataDialog() {

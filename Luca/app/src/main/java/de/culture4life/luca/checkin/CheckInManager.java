@@ -1,14 +1,32 @@
 package de.culture4life.luca.checkin;
 
+import android.annotation.SuppressLint;
+import android.content.Context;
+import android.location.Location;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.RequiresPermission;
+import androidx.core.app.NotificationCompat;
+
 import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.GeofencingRequest;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
-import android.annotation.SuppressLint;
-import android.content.Context;
-import android.location.Location;
+import java.net.HttpURLConnection;
+import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
+import java.security.KeyPair;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.interfaces.ECPublicKey;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 import de.culture4life.luca.BuildConfig;
 import de.culture4life.luca.LucaApplication;
@@ -34,24 +52,6 @@ import de.culture4life.luca.ui.qrcode.QrCodeData;
 import de.culture4life.luca.ui.qrcode.QrCodeViewModel;
 import de.culture4life.luca.util.SerializationUtil;
 import de.culture4life.luca.util.TimeUtil;
-
-import java.net.HttpURLConnection;
-import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
-import java.security.KeyPair;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-import java.security.interfaces.ECPublicKey;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
-import java.util.concurrent.TimeUnit;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.annotation.RequiresPermission;
-import androidx.core.app.NotificationCompat;
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Maybe;
 import io.reactivex.rxjava3.core.Observable;
@@ -75,9 +75,9 @@ import static de.culture4life.luca.util.SerializationUtil.serializeToBase64;
  * QR-code.
  *
  * @see <a href="https://www.luca-app.de/securityoverview/processes/guest_app_checkin.html">Security
- *         Overview: Check-In via Mobile Phone App</a>
+ * Overview: Check-In via Mobile Phone App</a>
  * @see <a href="https://www.luca-app.de/securityoverview/processes/guest_self_checkin.html">Security
- *         Overview: Check-In via a Printed QR Code</a>
+ * Overview: Check-In via a Printed QR Code</a>
  */
 public class CheckInManager extends Manager {
 
@@ -164,7 +164,7 @@ public class CheckInManager extends Manager {
      * server.
      *
      * @see <a href="https://www.luca-app.de/securityoverview/processes/guest_self_checkin.html">Security
-     *         Overview: Check-In via a Printed QR Code</a>
+     * Overview: Check-In via a Printed QR Code</a>
      */
     public Completable checkIn(@NonNull UUID scannerId, @NonNull QrCodeData qrCodeData) {
         return assertNotCheckedIn()
@@ -220,7 +220,7 @@ public class CheckInManager extends Manager {
      * using the venue's key.
      *
      * @see <a href="https://www.luca-app.de/securityoverview/processes/guest_self_checkin.html">Security
-     *         Overview: Check-In via a Printed QR Code</a>
+     * Overview: Check-In via a Printed QR Code</a>
      */
     private Single<CheckInRequestData> generateCheckInData(@NonNull QrCodeData qrCodeData, @NonNull PublicKey locationPublicKey) {
         return Single.fromCallable(() -> {
@@ -424,7 +424,7 @@ public class CheckInManager extends Manager {
      * Perform check-out, uploading trace ID and checkout time to the luca server.
      *
      * @see <a href="https://www.luca-app.de/securityoverview/processes/guest_checkout.html#checkout-process">Security
-     *         Overview: Checkout Process</a>
+     * Overview: Checkout Process</a>
      */
     @SuppressLint("MissingPermission")
     public Completable checkOut() {
@@ -466,7 +466,7 @@ public class CheckInManager extends Manager {
      * Create check-out data of current trace ID and the current timestamp.
      *
      * @see <a href="https://www.luca-app.de/securityoverview/processes/guest_checkout.html#checkout-process">Security
-     *         Overview: Checkout Process</a>
+     * Overview: Checkout Process</a>
      */
     private Single<CheckOutRequestData> generateCheckOutData() {
         return Single.just(new CheckOutRequestData())
@@ -690,7 +690,7 @@ public class CheckInManager extends Manager {
      * @param interval to poll backend at (millis)
      * @return Completable to finalize check-in {@link #processCheckIn(CheckInData)}
      * @see <a href="https://luca-app.de/securityoverview/processes/guest_app_checkin.html#qr-code-scanning-feedback">Security
-     *         Overview: QR Code Scanning Feedback</a>
+     * Overview: QR Code Scanning Feedback</a>
      */
     public Completable requestCheckInDataUpdates(long interval) {
         return pollCheckInData(interval)

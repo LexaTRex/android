@@ -11,7 +11,6 @@ import de.culture4life.luca.ui.onboarding.OnboardingActivity;
 import de.culture4life.luca.ui.registration.RegistrationActivity;
 import de.culture4life.luca.ui.terms.UpdatedTermsActivity;
 import de.culture4life.luca.ui.terms.UpdatedTermsUtil;
-
 import timber.log.Timber;
 
 public class SplashActivity extends BaseActivity {

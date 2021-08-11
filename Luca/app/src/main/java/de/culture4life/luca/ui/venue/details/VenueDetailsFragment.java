@@ -1,8 +1,5 @@
 package de.culture4life.luca.ui.venue.details;
 
-import com.google.android.material.dialog.MaterialAlertDialogBuilder;
-import com.google.android.material.switchmaterial.SwitchMaterial;
-
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -14,6 +11,11 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.google.android.material.switchmaterial.SwitchMaterial;
 import com.ncorti.slidetoact.SlideToActView;
 import com.tbruyelle.rxpermissions3.Permission;
 
@@ -22,9 +24,6 @@ import de.culture4life.luca.ui.BaseFragment;
 import de.culture4life.luca.ui.ViewError;
 import de.culture4life.luca.ui.dialog.BaseDialogFragment;
 import de.culture4life.luca.util.AccessibilityServiceUtil;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import five.star.me.FiveStarMe;
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.schedulers.Schedulers;

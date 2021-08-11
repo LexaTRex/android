@@ -1,8 +1,8 @@
 package de.culture4life.luca.checkin;
 
-import java.lang.annotation.Retention;
-
 import androidx.annotation.IntDef;
+
+import java.lang.annotation.Retention;
 
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 

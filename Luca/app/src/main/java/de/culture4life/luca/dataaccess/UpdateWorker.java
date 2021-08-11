@@ -2,11 +2,11 @@ package de.culture4life.luca.dataaccess;
 
 import android.content.Context;
 
-import de.culture4life.luca.LucaApplication;
-
 import androidx.annotation.NonNull;
 import androidx.work.WorkerParameters;
 import androidx.work.rxjava3.RxWorker;
+
+import de.culture4life.luca.LucaApplication;
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Single;
 

@@ -1,10 +1,10 @@
 package de.culture4life.luca.ui.qrcode;
 
-import de.culture4life.luca.util.SerializationUtil;
+import androidx.annotation.IntDef;
 
 import java.lang.annotation.Retention;
 
-import androidx.annotation.IntDef;
+import de.culture4life.luca.util.SerializationUtil;
 
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
@@ -12,7 +12,7 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
  * Model holding necessary details to facilitate checking in at a venue.
  *
  * @see <a href="https://www.luca-app.de/securityoverview/processes/guest_app_checkin.html#qr-code-generation-and-check-in">Security
- *         Overview: QR Code Generation and Check-In</a>
+ * Overview: QR Code Generation and Check-In</a>
  */
 public class QrCodeData {
 

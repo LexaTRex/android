@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 
 import de.culture4life.luca.LucaApplication;
-
 import io.reactivex.rxjava3.schedulers.Schedulers;
 import timber.log.Timber;
 

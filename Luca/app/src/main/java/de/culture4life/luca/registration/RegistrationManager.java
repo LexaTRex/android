@@ -1,10 +1,20 @@
 package de.culture4life.luca.registration;
 
+import android.content.Context;
+import android.util.Pair;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
-import android.content.Context;
-import android.util.Pair;
+import java.nio.charset.StandardCharsets;
+import java.security.interfaces.ECPublicKey;
+import java.util.Collections;
+import java.util.List;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 import de.culture4life.luca.Manager;
 import de.culture4life.luca.crypto.AsymmetricCipherProvider;
@@ -19,16 +29,6 @@ import de.culture4life.luca.network.pojo.UserRegistrationRequestData;
 import de.culture4life.luca.preference.PreferencesManager;
 import de.culture4life.luca.util.SerializationUtil;
 import de.culture4life.luca.util.TimeUtil;
-
-import java.nio.charset.StandardCharsets;
-import java.security.interfaces.ECPublicKey;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
-import java.util.concurrent.TimeUnit;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Maybe;
 import io.reactivex.rxjava3.core.Single;
@@ -42,7 +42,7 @@ import static de.culture4life.luca.util.SerializationUtil.serializeToBase64;
  * created, encrypting {@link ContactData} before it is uploaded to the Luca Server.
  *
  * @see <a href="https://www.luca-app.de/securityoverview/processes/guest_registration.html">Security
- *         Overview: Guest Registration</a>
+ * Overview: Guest Registration</a>
  */
 public class RegistrationManager extends Manager {
 
@@ -214,11 +214,11 @@ public class RegistrationManager extends Manager {
      * guest keypair and uploading it to the luca server.
      *
      * @see <a href="https://luca-app.de/securityoverview/processes/guest_registration.html#updating-the-contact-data">Security
-     *         Overview: Updating the Contact Data</a>
+     * Overview: Updating the Contact Data</a>
      * @see <a href="https://luca-app.de/securityoverview/processes/guest_registration.html#process-guest-registration-encryption">Security
-     *         Overview: Encrypting the Contact Data</a>
+     * Overview: Encrypting the Contact Data</a>
      * @see <a href="https://luca-app.de/securityoverview/properties/secrets.html#term-guest-keypair">Security
-     *         Overview: Secrets</a>
+     * Overview: Secrets</a>
      */
     public Completable updateUser() {
         return createUserRegistrationRequestData()
@@ -237,9 +237,9 @@ public class RegistrationManager extends Manager {
      *
      * @return encrypted guest data including IV, MAC, signature and the guest keypair's public key
      * @see <a href="https://luca-app.de/securityoverview/processes/guest_registration.html#registering-to-the-luca-server">Security
-     *         Overview: Registering to the Luca Server</a>
+     * Overview: Registering to the Luca Server</a>
      * @see <a href="https://luca-app.de/securityoverview/properties/secrets.html#term-guest-keypair">Security
-     *         Overview: Secrets</a>
+     * Overview: Secrets</a>
      */
     private Single<UserRegistrationRequestData> createUserRegistrationRequestData() {
         return getOrCreateRegistrationData()
@@ -282,9 +282,9 @@ public class RegistrationManager extends Manager {
      * @param contactData to be encrypted
      * @return IV and ciphertext of contact data
      * @see <a href="https://www.luca-app.de/securityoverview/properties/secrets.html#term-data-secret">Security
-     *         Overview: Secrets</a>
+     * Overview: Secrets</a>
      * @see <a href="https://luca-app.de/securityoverview/processes/guest_registration.html#encrypting-the-contact-data">Security
-     *         Overview: Encrypting the Contact Data</a>
+     * Overview: Encrypting the Contact Data</a>
      */
     public Single<Pair<byte[], byte[]>> encryptContactData(@NonNull ContactData contactData) {
         return SerializationUtil.serializeToJson(contactData)
@@ -305,7 +305,7 @@ public class RegistrationManager extends Manager {
      * the Luca server as part of the encrypted guest data.
      *
      * @see <a href="https://www.luca-app.de/securityoverview/properties/secrets.html#term-data-authentication-key">Security
-     *         Overview: Secrets</a>
+     * Overview: Secrets</a>
      */
     public Single<byte[]> createContactDataMac(byte[] encryptedContactData) {
         return cryptoManager.getDataSecret()
@@ -318,7 +318,7 @@ public class RegistrationManager extends Manager {
      * Sign given encrypted contact data using the guest's private key.
      *
      * @see <a href="https://luca-app.de/securityoverview/properties/secrets.html#term-guest-keypair">Security
-     *         Overview: Secrets</a>
+     * Overview: Secrets</a>
      */
     public Single<byte[]> createContactDataSignature(byte[] encryptedContactData, byte[] mac, byte[] iv) {
         return CryptoManager.concatenate(encryptedContactData, mac, iv)
@@ -336,9 +336,9 @@ public class RegistrationManager extends Manager {
      * department to initiate tracing.
      *
      * @return tracing TAN to be shown to the user / communicated to a health department by
-     *         telephone
+     * telephone
      * @see <a href="https://www.luca-app.de/securityoverview/processes/tracing_access_to_history.html#process">Security
-     *         Overview: Tracing the Check-In History of an Infected Guest</a>
+     * Overview: Tracing the Check-In History of an Infected Guest</a>
      */
     public Single<String> transferUserData(int days) {
         // TODO: 24.03.21 This doesn't seem to belong to the registration process
@@ -354,9 +354,9 @@ public class RegistrationManager extends Manager {
      *
      * @return encrypted guest data transfer object
      * @see <a href="https://www.luca-app.de/securityoverview/processes/tracing_access_to_history.html#accessing-the-infected-guest-s-tracing-secrets">Security
-     *         Overview: Accessing the Infected Guest’s Tracing Secrets</a>
+     * Overview: Accessing the Infected Guest’s Tracing Secrets</a>
      * @see <a href="https://www.luca-app.de/securityoverview/properties/secrets.html#term-guest-data-transfer-object">Security
-     *         Overview: Secrets</a>
+     * Overview: Secrets</a>
      */
     private Single<DataTransferRequestData> createDataTransferRequestData(int days) {
         return Single.just(new DataTransferRequestData())
@@ -392,7 +392,7 @@ public class RegistrationManager extends Manager {
      *
      * @return {@link TransferData}
      * @see <a href="https://www.luca-app.de/securityoverview/processes/tracing_access_to_history.html#accessing-the-infected-guest-s-tracing-secrets">Security
-     *         Overview: Accessing the Infected Guest’s Tracing Secrets</a>
+     * Overview: Accessing the Infected Guest’s Tracing Secrets</a>
      */
     public Single<TransferData> createTransferData(int days) {
         return Single.just(new TransferData())

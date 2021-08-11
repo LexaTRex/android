@@ -3,21 +3,6 @@ package de.culture4life.luca.ui;
 import android.app.Application;
 import android.content.ActivityNotFoundException;
 
-import com.tbruyelle.rxpermissions3.Permission;
-
-import de.culture4life.luca.LucaApplication;
-import de.culture4life.luca.R;
-import de.culture4life.luca.checkin.CheckInManager;
-import de.culture4life.luca.document.DocumentManager;
-import de.culture4life.luca.meeting.MeetingManager;
-import de.culture4life.luca.notification.LucaNotificationManager;
-import de.culture4life.luca.preference.PreferencesManager;
-
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
-
 import androidx.annotation.CallSuper;
 import androidx.annotation.IdRes;
 import androidx.annotation.NonNull;
@@ -28,6 +13,21 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.navigation.NavController;
 import androidx.navigation.NavDestination;
+
+import com.tbruyelle.rxpermissions3.Permission;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+
+import de.culture4life.luca.LucaApplication;
+import de.culture4life.luca.R;
+import de.culture4life.luca.checkin.CheckInManager;
+import de.culture4life.luca.document.DocumentManager;
+import de.culture4life.luca.meeting.MeetingManager;
+import de.culture4life.luca.notification.LucaNotificationManager;
+import de.culture4life.luca.preference.PreferencesManager;
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Maybe;
@@ -195,7 +195,7 @@ public abstract class BaseViewModel extends AndroidViewModel {
 
     public void onErrorShown(@Nullable ViewError viewError) {
         Timber.d("onErrorShown() called with: viewError = [%s]", viewError);
-        if (viewError.getRemoveWhenShown()) {
+        if (viewError != null && viewError.getRemoveWhenShown()) {
             removeError(viewError);
         }
     }

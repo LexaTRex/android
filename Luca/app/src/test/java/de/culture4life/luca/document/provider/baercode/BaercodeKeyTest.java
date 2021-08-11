@@ -1,11 +1,11 @@
 package de.culture4life.luca.document.provider.baercode;
 
+import androidx.test.runner.AndroidJUnit4;
+
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.annotation.Config;
-
-import androidx.test.runner.AndroidJUnit4;
 
 @Config(sdk = 28)
 @RunWith(AndroidJUnit4.class)

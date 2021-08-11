@@ -1,9 +1,9 @@
 package de.culture4life.luca.crypto;
 
+import androidx.annotation.NonNull;
+
 import com.nexenio.rxkeystore.RxKeyStore;
 import com.nexenio.rxkeystore.provider.mac.HmacProvider;
-
-import androidx.annotation.NonNull;
 
 /**
  * Provides message authentication codes using HMAC-SHA256.

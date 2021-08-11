@@ -2,23 +2,23 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
-            android:id="@+id/qrCodeFragment"
-            android:icon="@drawable/ic_navigation_checkin"
-            android:title="@string/navigation_check_in" />
+        android:id="@+id/qrCodeFragment"
+        android:icon="@drawable/ic_navigation_checkin"
+        android:title="@string/navigation_check_in" />
 
     <item
-            android:id="@+id/myLucaFragment"
-            android:icon="@drawable/ic_navigation_my_luca"
-            android:title="@string/navigation_my_luca" />
+        android:id="@+id/myLucaFragment"
+        android:icon="@drawable/ic_navigation_my_luca"
+        android:title="@string/navigation_my_luca" />
 
     <item
-            android:id="@+id/historyFragment"
-            android:icon="@drawable/ic_navigation_history"
-            android:title="@string/navigation_history" />
+        android:id="@+id/historyFragment"
+        android:icon="@drawable/ic_navigation_history"
+        android:title="@string/navigation_history" />
 
     <item
-            android:id="@+id/accountFragment"
-            android:icon="@drawable/ic_account"
-            android:title="@string/navigation_account" />
+        android:id="@+id/accountFragment"
+        android:icon="@drawable/ic_account"
+        android:title="@string/navigation_account" />
 
 </menu>

@@ -6,6 +6,12 @@ import android.content.Intent;
 import android.os.IBinder;
 import android.widget.Toast;
 
+import androidx.annotation.CallSuper;
+import androidx.annotation.Nullable;
+import androidx.annotation.StringRes;
+
+import java.util.concurrent.TimeUnit;
+
 import de.culture4life.luca.LucaApplication;
 import de.culture4life.luca.R;
 import de.culture4life.luca.checkin.CheckInData;
@@ -13,12 +19,6 @@ import de.culture4life.luca.checkin.CheckInManager;
 import de.culture4life.luca.meeting.MeetingManager;
 import de.culture4life.luca.notification.LucaNotificationManager;
 import de.culture4life.luca.ui.MainActivity;
-
-import java.util.concurrent.TimeUnit;
-
-import androidx.annotation.CallSuper;
-import androidx.annotation.Nullable;
-import androidx.annotation.StringRes;
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;

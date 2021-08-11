@@ -1,15 +1,15 @@
 package de.culture4life.luca.ui.myluca;
 
-import de.culture4life.luca.LucaUnitTest;
-import de.culture4life.luca.R;
-import de.culture4life.luca.document.Document;
-import de.culture4life.luca.document.provider.opentestcheck.OpenTestCheckDocument;
+import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.annotation.Config;
 
-import androidx.test.runner.AndroidJUnit4;
+import de.culture4life.luca.LucaUnitTest;
+import de.culture4life.luca.R;
+import de.culture4life.luca.document.Document;
+import de.culture4life.luca.document.provider.opentestcheck.OpenTestCheckDocument;
 
 import static org.junit.Assert.assertEquals;
 

@@ -1,13 +1,17 @@
 package de.culture4life.luca.ui.myluca;
 
-import com.google.zxing.EncodeHintType;
-
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.text.TextUtils;
 import android.util.Pair;
 
-import de.culture4life.luca.R;
+import androidx.annotation.ColorInt;
+import androidx.annotation.DrawableRes;
+import androidx.annotation.IntDef;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
+import com.google.zxing.EncodeHintType;
 
 import net.glxn.qrgen.android.QRCode;
 
@@ -18,11 +22,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-import androidx.annotation.ColorInt;
-import androidx.annotation.DrawableRes;
-import androidx.annotation.IntDef;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
+import de.culture4life.luca.R;
 import io.reactivex.rxjava3.core.Single;
 
 import static java.lang.annotation.RetentionPolicy.SOURCE;

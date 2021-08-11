@@ -1,13 +1,13 @@
 package de.culture4life.luca.util;
 
+import androidx.test.runner.AndroidJUnit4;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.annotation.Config;
 
 import java.util.Arrays;
 import java.util.HashMap;
-
-import androidx.test.runner.AndroidJUnit4;
 
 @Config(sdk = 28)
 @RunWith(AndroidJUnit4.class)

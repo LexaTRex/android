@@ -1,13 +1,13 @@
 package de.culture4life.luca.document.provider.appointment;
 
-import de.culture4life.luca.registration.RegistrationData;
-import de.culture4life.luca.document.DocumentParsingException;
-import de.culture4life.luca.document.DocumentManager;
-import de.culture4life.luca.document.provider.DocumentProvider;
+import androidx.annotation.NonNull;
 
 import org.jetbrains.annotations.NotNull;
 
-import androidx.annotation.NonNull;
+import de.culture4life.luca.document.DocumentManager;
+import de.culture4life.luca.document.DocumentParsingException;
+import de.culture4life.luca.document.provider.DocumentProvider;
+import de.culture4life.luca.registration.RegistrationData;
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Single;
 

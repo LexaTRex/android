@@ -5,9 +5,9 @@ import android.content.Context;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 
-import java.util.List;
-
 import androidx.annotation.NonNull;
+
+import java.util.List;
 
 /**
  * Helper for AccessibilityServices

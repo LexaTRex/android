@@ -6,7 +6,7 @@ import java.nio.charset.StandardCharsets;
 
 /**
  * Request body for deleting an account.
- *
+ * <p>
  * Example:
  * <pre>
  * {

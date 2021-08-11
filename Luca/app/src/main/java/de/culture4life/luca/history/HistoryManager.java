@@ -1,6 +1,14 @@
 package de.culture4life.luca.history;
 
+import static de.culture4life.luca.checkin.CheckInManager.KEY_CHILDREN;
+
 import android.content.Context;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import de.culture4life.luca.Manager;
 import de.culture4life.luca.checkin.CheckInData;
@@ -13,24 +21,18 @@ import de.culture4life.luca.preference.PreferencesManager;
 import de.culture4life.luca.registration.RegistrationData;
 import de.culture4life.luca.ui.venue.children.ChildListItem;
 import de.culture4life.luca.ui.venue.children.ChildListItemContainer;
-
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.core.Single;
 import io.reactivex.rxjava3.subjects.PublishSubject;
 import timber.log.Timber;
 
-import static de.culture4life.luca.checkin.CheckInManager.KEY_CHILDREN;
-
 public class HistoryManager extends Manager {
 
     public static final long MAXIMUM_CHECK_IN_DURATION = TimeUnit.DAYS.toMillis(1);
-    public static final long KEEP_DATA_DURATION = TimeUnit.DAYS.toMillis(14);
+    public static final long SHARE_DATA_DURATION = TimeUnit.DAYS.toMillis(14);
+    public static final int KEEP_DATA_DAYS = 28;
+    public static final long KEEP_DATA_DURATION = TimeUnit.DAYS.toMillis(KEEP_DATA_DAYS);
     public static final String KEY_HISTORY_ITEMS = "history_items_2";
 
     @Deprecated
@@ -177,7 +179,7 @@ public class HistoryManager extends Manager {
                 .andThen(addHistoryDeletedItem());
     }
 
-    private Completable deleteOldItems() {
+    protected Completable deleteOldItems() {
         return Single.fromCallable(() -> System.currentTimeMillis() - KEEP_DATA_DURATION)
                 .flatMapCompletable(this::deleteItemsCreatedBefore);
     }
@@ -234,6 +236,18 @@ public class HistoryManager extends Manager {
         StringBuilder stringBuilder = new StringBuilder();
         for (String item : items) {
             stringBuilder.append("- ").append(item).append(System.lineSeparator());
+        }
+        stringBuilder.deleteCharAt(stringBuilder.length() - 1); // remove last line break
+        return stringBuilder.toString();
+    }
+
+    public static String createOrderedList(@NonNull List<String> items) {
+        if (items.isEmpty()) {
+            return "";
+        }
+        StringBuilder stringBuilder = new StringBuilder();
+        for (int i = 0; i < items.size(); i++) {
+            stringBuilder.append(i + 1).append("\t\t\t").append(items.get(i)).append(System.lineSeparator());
         }
         stringBuilder.deleteCharAt(stringBuilder.length() - 1); // remove last line break
         return stringBuilder.toString();

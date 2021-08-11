@@ -2,6 +2,8 @@ package de.culture4life.luca.crypto;
 
 import android.content.Context;
 
+import androidx.annotation.NonNull;
+
 import com.nexenio.rxkeystore.RxKeyStore;
 import com.nexenio.rxkeystore.provider.cipher.asymmetric.ec.EcCipherProvider;
 
@@ -24,7 +26,6 @@ import java.security.spec.ECPoint;
 import java.security.spec.ECPublicKeySpec;
 import java.security.spec.EllipticCurve;
 
-import androidx.annotation.NonNull;
 import io.reactivex.rxjava3.core.Single;
 
 import static com.nexenio.rxkeystore.RxKeyStore.DIGEST_SHA256;
@@ -33,7 +34,7 @@ import static com.nexenio.rxkeystore.RxKeyStore.PROVIDER_BOUNCY_CASTLE;
 
 /**
  * Provides EC cryptography using the secp256r1 curve.
- *
+ * <p>
  * Uses Bouncy Castle due to Android limitations.
  */
 public class AsymmetricCipherProvider extends EcCipherProvider {

@@ -1,11 +1,11 @@
 package de.culture4life.luca.history;
 
+import androidx.annotation.NonNull;
+
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
 import de.culture4life.luca.document.Document;
-
-import androidx.annotation.NonNull;
 
 public class DocumentImportedItem extends HistoryItem {
 

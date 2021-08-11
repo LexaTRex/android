@@ -1,11 +1,11 @@
 package de.culture4life.luca.document.provider;
 
-import de.culture4life.luca.document.DocumentVerificationException;
-import de.culture4life.luca.registration.RegistrationData;
+import androidx.annotation.NonNull;
 
 import javax.annotation.Nonnull;
 
-import androidx.annotation.NonNull;
+import de.culture4life.luca.document.DocumentVerificationException;
+import de.culture4life.luca.registration.RegistrationData;
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Single;
 

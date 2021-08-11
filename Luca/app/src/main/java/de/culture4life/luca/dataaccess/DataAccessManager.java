@@ -3,6 +3,20 @@ package de.culture4life.luca.dataaccess;
 import android.content.Context;
 import android.util.Pair;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.work.Constraints;
+import androidx.work.NetworkType;
+import androidx.work.PeriodicWorkRequest;
+import androidx.work.WorkManager;
+import androidx.work.WorkRequest;
+
+import java.util.List;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
+
+import javax.crypto.SecretKey;
+
 import de.culture4life.luca.BuildConfig;
 import de.culture4life.luca.LucaApplication;
 import de.culture4life.luca.Manager;
@@ -19,20 +33,6 @@ import de.culture4life.luca.notification.LucaNotificationManager;
 import de.culture4life.luca.preference.PreferencesManager;
 import de.culture4life.luca.ui.MainActivity;
 import de.culture4life.luca.util.TimeUtil;
-
-import java.util.List;
-import java.util.UUID;
-import java.util.concurrent.TimeUnit;
-
-import javax.crypto.SecretKey;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.work.Constraints;
-import androidx.work.NetworkType;
-import androidx.work.PeriodicWorkRequest;
-import androidx.work.WorkManager;
-import androidx.work.WorkRequest;
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Maybe;
 import io.reactivex.rxjava3.core.Observable;
@@ -48,7 +48,7 @@ import static de.culture4life.luca.notification.LucaNotificationManager.NOTIFICA
  * department. The user is notified in case the data was accessed.
  *
  * @see <a href="https://www.luca-app.de/securityoverview/processes/tracing_find_contacts.html#notifying-guests-about-data-access">Security
- *         Overview: Notifying Guests about Data Access</a>
+ * Overview: Notifying Guests about Data Access</a>
  */
 public class DataAccessManager extends Manager {
 

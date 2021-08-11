@@ -3,10 +3,10 @@ package de.culture4life.luca.registration;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
+import java.util.UUID;
+
 import de.culture4life.luca.network.pojo.ContactData;
 import de.culture4life.luca.util.StringSanitizeUtil;
-
-import java.util.UUID;
 
 /**
  * Model of user-provided contact data, entered during registration. Will be transferred into {@link
@@ -14,7 +14,7 @@ import java.util.UUID;
  * automatically removed to keep the dataset cleaner.
  *
  * @see <a href="https://www.luca-app.de/securityoverview/processes/guest_registration.html">Security
- *         Overview: Guest Registration</a>
+ * Overview: Guest Registration</a>
  */
 public class RegistrationData {
 

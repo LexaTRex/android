@@ -1,20 +1,12 @@
 package de.culture4life.luca.meeting;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
-
 import android.content.Context;
 
-import de.culture4life.luca.Manager;
-import de.culture4life.luca.crypto.AsymmetricCipherProvider;
-import de.culture4life.luca.crypto.CryptoManager;
-import de.culture4life.luca.history.HistoryManager;
-import de.culture4life.luca.location.LocationManager;
-import de.culture4life.luca.network.NetworkManager;
-import de.culture4life.luca.network.pojo.TracesResponseData;
-import de.culture4life.luca.preference.PreferencesManager;
-import de.culture4life.luca.util.SerializationUtil;
-import de.culture4life.luca.util.TimeUtil;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 
 import java.net.HttpURLConnection;
 import java.nio.charset.StandardCharsets;
@@ -27,8 +19,16 @@ import java.util.concurrent.TimeUnit;
 
 import javax.crypto.SecretKey;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
+import de.culture4life.luca.Manager;
+import de.culture4life.luca.crypto.AsymmetricCipherProvider;
+import de.culture4life.luca.crypto.CryptoManager;
+import de.culture4life.luca.history.HistoryManager;
+import de.culture4life.luca.location.LocationManager;
+import de.culture4life.luca.network.NetworkManager;
+import de.culture4life.luca.network.pojo.TracesResponseData;
+import de.culture4life.luca.preference.PreferencesManager;
+import de.culture4life.luca.util.SerializationUtil;
+import de.culture4life.luca.util.TimeUtil;
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Maybe;
 import io.reactivex.rxjava3.core.Observable;

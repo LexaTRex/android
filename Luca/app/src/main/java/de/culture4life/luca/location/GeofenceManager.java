@@ -1,21 +1,20 @@
 package de.culture4life.luca.location;
 
-import com.google.android.gms.location.Geofence;
-import com.google.android.gms.location.GeofencingClient;
-import com.google.android.gms.location.GeofencingEvent;
-import com.google.android.gms.location.GeofencingRequest;
-import com.google.android.gms.location.LocationServices;
-
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 
-import de.culture4life.luca.BuildConfig;
-import de.culture4life.luca.LucaApplication;
-import de.culture4life.luca.Manager;
-import de.culture4life.luca.util.RxTasks;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.RequiresPermission;
+
+import com.google.android.gms.location.Geofence;
+import com.google.android.gms.location.GeofencingClient;
+import com.google.android.gms.location.GeofencingEvent;
+import com.google.android.gms.location.GeofencingRequest;
+import com.google.android.gms.location.LocationServices;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -23,9 +22,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.annotation.RequiresPermission;
+import de.culture4life.luca.BuildConfig;
+import de.culture4life.luca.LucaApplication;
+import de.culture4life.luca.Manager;
+import de.culture4life.luca.util.RxTasks;
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Maybe;
 import io.reactivex.rxjava3.core.Observable;
@@ -49,7 +49,7 @@ public class GeofenceManager extends Manager {
 
     /**
      * From the android documentation regarding geofence creation and monitoring:
-     *
+     * <p>
      * "For best results, the minimum radius of the geofence should be set between 100 - 150 meters.
      * When Wi-Fi is available location accuracy is usually between 20 - 50 meters. When indoor
      * location is available, the accuracy range can be as small as 5 meters. Unless you know indoor
@@ -57,7 +57,7 @@ public class GeofenceManager extends Manager {
      * meters."
      *
      * @see <a href="https://developer.android.com/training/location/geofencing#Troubleshooting">Create
-     *         and monitor geofences</a>
+     * and monitor geofences</a>
      */
     public static final long MINIMUM_GEOFENCE_RADIUS = 50;
     public static final long MAXIMUM_GEOFENCE_RADIUS = 5000;
@@ -104,7 +104,7 @@ public class GeofenceManager extends Manager {
      * Will call {@link #addGeofences(GeofencingRequest)} and emit the results of {@link
      * #getGeofenceEvents(Geofence)} for all requested geofences. Will also call {@link
      * #removeGeofences(GeofencingRequest)} when disposing the observable.
-     *
+     * <p>
      * If you just want to get the {@link GeofenceEvent}s from a previously added request, use
      * {@link #getGeofenceEvents(Geofence)} instead.
      */
@@ -123,7 +123,7 @@ public class GeofenceManager extends Manager {
 
     /**
      * Will emit events related to the specified {@link Geofence}.
-     *
+     * <p>
      * Note that subscribing to this method will not call {@link #addGeofences(GeofencingRequest)}
      * and disposing will not call {@link #removeGeofences(GeofencingRequest)}. Use {@link
      * #getGeofenceEvents(GeofencingRequest)} instead if you want to add (and remove) new

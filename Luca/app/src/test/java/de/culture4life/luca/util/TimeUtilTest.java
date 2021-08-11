@@ -1,6 +1,6 @@
 package de.culture4life.luca.util;
 
-import de.culture4life.luca.LucaUnitTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -9,7 +9,7 @@ import org.robolectric.annotation.Config;
 import java.nio.ByteBuffer;
 import java.util.concurrent.TimeUnit;
 
-import androidx.test.runner.AndroidJUnit4;
+import de.culture4life.luca.LucaUnitTest;
 
 import static de.culture4life.luca.document.Document.TIME_UNTIL_VACCINATION_IS_VALID;
 

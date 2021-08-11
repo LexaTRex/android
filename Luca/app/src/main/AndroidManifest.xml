@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:dist="http://schemas.android.com/apk/distribution"
-        package="de.culture4life.luca"
-        android:targetSandboxVersion="2">
+    xmlns:dist="http://schemas.android.com/apk/distribution"
+    package="de.culture4life.luca"
+    android:targetSandboxVersion="2">
 
     <dist:module dist:instant="true" />
 
@@ -15,18 +15,18 @@
     <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
 
     <application
-            android:name="de.culture4life.luca.LucaApplication"
-            android:allowBackup="false"
-            android:icon="@mipmap/ic_launcher"
-            android:label="@string/app_name"
-            android:roundIcon="@mipmap/ic_launcher_round"
-            android:supportsRtl="true"
-            android:theme="@style/Theme.Luca.DayNight">
+        android:name="de.culture4life.luca.LucaApplication"
+        android:allowBackup="false"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.Luca.DayNight">
 
         <activity
-                android:name=".ui.splash.SplashActivity"
-                android:screenOrientation="portrait"
-                android:theme="@style/Theme.Luca.DayNight.Splash">
+            android:name=".ui.splash.SplashActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.Luca.DayNight.Splash">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -39,46 +39,45 @@
                 <category android:name="android.intent.category.BROWSABLE" />
 
                 <data
-                        android:scheme="https"
-                        android:host="app.luca-app.de"
-                        android:pathPrefix="/webapp/" />
+                    android:host="app.luca-app.de"
+                    android:pathPrefix="/webapp/"
+                    android:scheme="https" />
 
                 <!-- The Play Store is blocking releases that don't support HTTP for web intent-filters -->
 
                 <data
-                        android:scheme="http"
-                        android:host="app.luca-app.de"
-                        android:pathPrefix="/webapp/" />
+                    android:host="app.luca-app.de"
+                    android:pathPrefix="/webapp/"
+                    android:scheme="http" />
 
             </intent-filter>
 
         </activity>
 
         <activity
-                android:name=".ui.onboarding.OnboardingActivity"
-                android:screenOrientation="portrait">
+            android:name=".ui.onboarding.OnboardingActivity"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
             </intent-filter>
         </activity>
 
         <activity
-                android:name=".ui.terms.UpdatedTermsActivity"
-                android:screenOrientation="portrait">
-        </activity>
+            android:name=".ui.terms.UpdatedTermsActivity"
+            android:screenOrientation="portrait"></activity>
 
         <activity
-                android:name="de.culture4life.luca.ui.registration.RegistrationActivity"
-                android:screenOrientation="portrait">
+            android:name="de.culture4life.luca.ui.registration.RegistrationActivity"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
             </intent-filter>
         </activity>
 
         <activity
-                android:name="de.culture4life.luca.ui.MainActivity"
-                android:screenOrientation="portrait"
-                android:windowSoftInputMode="stateAlwaysHidden|adjustResize">
+            android:name="de.culture4life.luca.ui.MainActivity"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateAlwaysHidden|adjustResize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
             </intent-filter>
@@ -94,8 +93,8 @@
         </receiver>
 
         <meta-data
-                android:name="com.google.mlkit.vision.DEPENDENCIES"
-                android:value="barcode" />
+            android:name="com.google.mlkit.vision.DEPENDENCIES"
+            android:value="barcode" />
 
     </application>
 

@@ -1,16 +1,16 @@
 package de.culture4life.luca.network.pojo;
 
+import androidx.annotation.NonNull;
+
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
 import de.culture4life.luca.registration.RegistrationData;
 
-import androidx.annotation.NonNull;
-
 /**
  * Contact data entered during initial registration (see {@link RegistrationData}), will be
  * encrypted before leaving the device.
- *
+ * <p>
  * Example:
  * <pre>
  * {
@@ -27,7 +27,7 @@ import androidx.annotation.NonNull;
  * </pre>
  *
  * @see <a href="https://www.luca-app.de/securityoverview/processes/guest_registration.html">Security
- *         Overview: Guest Registration</a>
+ * Overview: Guest Registration</a>
  */
 public class ContactData {
 

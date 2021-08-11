@@ -2,11 +2,11 @@ package de.culture4life.luca.ui.myluca;
 
 import android.content.Context;
 
-import de.culture4life.luca.R;
-import de.culture4life.luca.document.Document;
-
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
+
+import de.culture4life.luca.R;
+import de.culture4life.luca.document.Document;
 
 public class AppointmentItem extends TestResultItem {
 
@@ -20,7 +20,7 @@ public class AppointmentItem extends TestResultItem {
         String time = context.getString(R.string.document_result_time, getReadableTime(getDateFormatFor(context, document), document.getResultTimestamp()));
 
         topContent.clear();
-        addTopContent(document.getLabName(), "");
+        addTopContent(document.getLabName(), context.getString(R.string.unknown));
         addTopContent(context.getString(R.string.document_issued_at), time);
 
         collapsedContent.clear();

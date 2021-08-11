@@ -1,10 +1,10 @@
 package de.culture4life.luca.meeting;
 
+import androidx.annotation.NonNull;
+
 import com.google.gson.annotations.SerializedName;
 
 import de.culture4life.luca.registration.RegistrationData;
-
-import androidx.annotation.NonNull;
 
 public class MeetingAdditionalData {
 
