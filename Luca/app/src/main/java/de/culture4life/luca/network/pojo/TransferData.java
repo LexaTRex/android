@@ -8,7 +8,7 @@ import java.util.List;
 /**
  * Contains tracing secrets, user ID and the user's data secret. Will be encrypted using the daily
  * keypair to be accessed by the health department only.
- *
+ * <p>
  * Example:
  * <pre>
  * {

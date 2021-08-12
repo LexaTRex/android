@@ -2,6 +2,10 @@ package de.culture4life.luca.network.endpoints;
 
 import com.google.gson.JsonObject;
 
+import java.util.List;
+
+import de.culture4life.luca.network.pojo.DailyKeyPair;
+import de.culture4life.luca.network.pojo.Issuer;
 import de.culture4life.luca.meeting.MeetingCreationResponse;
 import de.culture4life.luca.network.pojo.AccessedHashedTraceIdsDataList;
 import de.culture4life.luca.network.pojo.AdditionalCheckInPropertiesRequestData;
@@ -14,8 +18,6 @@ import de.culture4life.luca.network.pojo.TraceData;
 import de.culture4life.luca.network.pojo.TracesResponseData;
 import de.culture4life.luca.network.pojo.UserDeletionRequestData;
 import de.culture4life.luca.network.pojo.UserRegistrationRequestData;
-
-import java.util.List;
 
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Single;
@@ -35,10 +37,10 @@ public interface LucaEndpointsV3 {
      */
 
     @GET("keys/daily/current")
-    Single<JsonObject> getDailyKeyPairPublicKey();
+    Single<DailyKeyPair> getDailyKeyPair();
 
     @GET("keys/issuers/{issuerId}")
-    Single<JsonObject> getKeyIssuer(@Path("issuerId") String issuerId);
+    Single<Issuer> getIssuer(@Path("issuerId") String issuerId);
 
     /*
         Locations

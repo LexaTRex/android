@@ -2,21 +2,21 @@ package de.culture4life.luca.ui.accesseddata;
 
 import android.app.Application;
 
-import de.culture4life.luca.R;
-import de.culture4life.luca.dataaccess.DataAccessManager;
-import de.culture4life.luca.history.HistoryItem;
-import de.culture4life.luca.history.HistoryManager;
-import de.culture4life.luca.history.TraceDataAccessedItem;
-import de.culture4life.luca.ui.BaseViewModel;
+import androidx.annotation.NonNull;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-import androidx.annotation.NonNull;
-import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MutableLiveData;
+import de.culture4life.luca.R;
+import de.culture4life.luca.dataaccess.DataAccessManager;
+import de.culture4life.luca.history.HistoryItem;
+import de.culture4life.luca.history.HistoryManager;
+import de.culture4life.luca.history.TraceDataAccessedItem;
+import de.culture4life.luca.ui.BaseViewModel;
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Maybe;
 import io.reactivex.rxjava3.core.Observable;

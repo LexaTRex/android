@@ -1,11 +1,5 @@
 package de.culture4life.luca.ui.registration;
 
-import com.google.android.material.button.MaterialButton;
-import com.google.android.material.dialog.MaterialAlertDialogBuilder;
-import com.google.android.material.progressindicator.LinearProgressIndicator;
-import com.google.android.material.textfield.TextInputEditText;
-import com.google.android.material.textfield.TextInputLayout;
-
 import android.animation.ObjectAnimator;
 import android.text.Editable;
 import android.view.LayoutInflater;
@@ -14,6 +8,25 @@ import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.Observer;
+
+import com.google.android.material.button.MaterialButton;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.google.android.material.progressindicator.LinearProgressIndicator;
+import com.google.android.material.textfield.TextInputEditText;
+import com.google.android.material.textfield.TextInputLayout;
+
+import java.net.HttpURLConnection;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 import de.culture4life.luca.BuildConfig;
 import de.culture4life.luca.LucaApplication;
@@ -24,19 +37,6 @@ import de.culture4life.luca.ui.DefaultTextWatcher;
 import de.culture4life.luca.ui.dialog.BaseDialogFragment;
 import de.culture4life.luca.util.AccessibilityServiceUtil;
 import de.culture4life.luca.util.TimeUtil;
-
-import java.net.HttpURLConnection;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Objects;
-import java.util.concurrent.TimeUnit;
-
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AlertDialog;
-import androidx.lifecycle.LiveData;
-import androidx.lifecycle.Observer;
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.schedulers.Schedulers;

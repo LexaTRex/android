@@ -1,3 +1,31 @@
+# Release 1.12.0
+
+- Text and UI adjustments
+- Bug fixes and improvements 
+
+In this update we made some adjustments to text as well as UI. Further, this updates includes bug fixes.
+
+# Release 1.11.1
+
+- Bug fixes and improvements
+- Text and UI adjustments
+
+This update includes bug fixes and UI improvements that optimize usage.
+
+# Release 1.11.0
+
+- Bug fixes and improvement
+- Text and UI adjustments
+
+This update includes bug fixes and UI improvements that optimize usage. 
+
+# Release 1.10.0
+
+- Account Tab
+- Text and UI adjustments
+
+With this update we introduce a new tab: the "Account" tab. In the "Account" tab you can find all general functions about the App. Further, we made some text and UI adjustments.
+
 # Release 1.9.0
 
 - Bug fixes and improvement

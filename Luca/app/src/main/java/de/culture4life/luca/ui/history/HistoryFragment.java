@@ -1,7 +1,6 @@
 package de.culture4life.luca.ui.history;
 
-import com.google.android.material.button.MaterialButton;
-import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import static androidx.core.view.ViewCompat.IMPORTANT_FOR_ACCESSIBILITY_NO;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,21 +11,22 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+
+import com.google.android.material.button.MaterialButton;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+
 import de.culture4life.luca.R;
 import de.culture4life.luca.dataaccess.AccessedTraceData;
 import de.culture4life.luca.history.HistoryManager;
 import de.culture4life.luca.ui.BaseFragment;
 import de.culture4life.luca.ui.UiUtil;
 import de.culture4life.luca.ui.dialog.BaseDialogFragment;
-
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-
-import androidx.annotation.NonNull;
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Observable;
-
-import static androidx.core.view.ViewCompat.IMPORTANT_FOR_ACCESSIBILITY_NO;
 
 public class HistoryFragment extends BaseFragment<HistoryViewModel> {
 
@@ -110,6 +110,7 @@ public class HistoryFragment extends BaseFragment<HistoryViewModel> {
         emptyTitleTextView = getView().findViewById(R.id.emptyTitleTextView);
         emptyDescriptionTextView = getView().findViewById(R.id.emptyDescriptionTextView);
         emptyImageView = getView().findViewById(R.id.emptyImageView);
+        emptyDescriptionTextView.setText(getString(R.string.history_empty_description, HistoryManager.KEEP_DATA_DAYS));
 
         observe(viewModel.getHistoryItems(), items -> {
             int emptyStateVisibility = items.isEmpty() ? View.VISIBLE : View.GONE;
@@ -134,11 +135,13 @@ public class HistoryFragment extends BaseFragment<HistoryViewModel> {
         ViewGroup viewGroup = getActivity().findViewById(android.R.id.content);
         View dialogView = LayoutInflater.from(getContext()).inflate(R.layout.days_selection_dialog, viewGroup, false);
 
-        int maximumDays = (int) TimeUnit.MILLISECONDS.toDays(HistoryManager.KEEP_DATA_DURATION);
+        int maximumDays = (int) TimeUnit.MILLISECONDS.toDays(HistoryManager.SHARE_DATA_DURATION);
         String[] items = new String[maximumDays];
         Observable.range(1, maximumDays)
                 .map(String::valueOf)
                 .toList().blockingGet().toArray(items);
+        TextView message = dialogView.findViewById(R.id.messageTextView);
+        message.setText(getString(R.string.history_share_selection_description, HistoryManager.KEEP_DATA_DAYS));
 
         ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(), R.layout.day_selection_item, items);
         AutoCompleteTextView autoCompleteTextView = dialogView.findViewById(R.id.dayInputAutoCompleteTextView);

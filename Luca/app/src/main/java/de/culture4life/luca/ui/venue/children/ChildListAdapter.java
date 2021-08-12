@@ -9,11 +9,11 @@ import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import de.culture4life.luca.R;
+import androidx.annotation.NonNull;
 
 import java.util.List;
 
-import androidx.annotation.NonNull;
+import de.culture4life.luca.R;
 
 public class ChildListAdapter extends ArrayAdapter<ChildListItem> {
 

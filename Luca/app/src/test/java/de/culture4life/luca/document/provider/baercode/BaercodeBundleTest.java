@@ -1,6 +1,6 @@
 package de.culture4life.luca.document.provider.baercode;
 
-import de.culture4life.luca.document.DocumentParsingException;
+import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -10,7 +10,7 @@ import org.robolectric.annotation.Config;
 import java.security.PublicKey;
 import java.security.interfaces.ECPublicKey;
 
-import androidx.test.runner.AndroidJUnit4;
+import de.culture4life.luca.document.DocumentParsingException;
 
 @Config(sdk = 28)
 @RunWith(AndroidJUnit4.class)

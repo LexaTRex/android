@@ -1,7 +1,5 @@
 package de.culture4life.luca.ui.meeting;
 
-import com.google.android.material.dialog.MaterialAlertDialogBuilder;
-
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -10,15 +8,16 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.ncorti.slidetoact.SlideToActView;
 
 import de.culture4life.luca.R;
 import de.culture4life.luca.ui.BaseFragment;
 import de.culture4life.luca.ui.dialog.BaseDialogFragment;
 import de.culture4life.luca.util.AccessibilityServiceUtil;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import io.reactivex.rxjava3.core.Completable;
 
 public class MeetingFragment extends BaseFragment<MeetingViewModel> {

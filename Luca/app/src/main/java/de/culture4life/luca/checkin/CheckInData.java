@@ -1,18 +1,18 @@
 package de.culture4life.luca.checkin;
 
+import androidx.annotation.Nullable;
+
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
 import java.util.UUID;
-
-import androidx.annotation.Nullable;
 
 /**
  * Check-In data containing trace id enabling health departments to contact guests in case of an
  * infection.
  *
  * @see <a href="https://luca-app.de/securityoverview/properties/assets.html#term-Check-In">Security
- *         Overview: Assets</a>
+ * Overview: Assets</a>
  */
 public class CheckInData {
 

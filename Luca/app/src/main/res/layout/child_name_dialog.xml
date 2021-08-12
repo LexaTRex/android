@@ -1,45 +1,48 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
-        xmlns:tools="http://schemas.android.com/tools"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingStart="?dialogPreferredPadding"
-        android:paddingEnd="?dialogPreferredPadding"
-        android:requiresFadingEdge="vertical"
-        android:fadingEdgeLength="4dp">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:fadingEdgeLength="4dp"
+    android:paddingStart="?dialogPreferredPadding"
+    android:paddingEnd="?dialogPreferredPadding"
+    android:requiresFadingEdge="vertical">
 
     <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
 
         <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="@dimen/spacing_default"
-                android:text="@string/venue_children_add_description"
-                style="@style/MaterialAlertDialog.Luca.Body.Text" />
+            style="@style/MaterialAlertDialog.Luca.Body.Text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/spacing_default"
+            android:text="@string/venue_children_add_description" />
 
         <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/childNameTextInputLayout"
-                style="@style/TextInputLayout.Luca.RegistrationTextBox"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textColorHint="@color/secondaryColor"
-                android:hint="@string/venue_children_name"
-                android:focusedByDefault="true"
-                app:hintTextColor="@color/secondaryColor"
-                app:boxStrokeColor="@color/secondaryColor"
-                tools:targetApi="o">
+            android:id="@+id/childNameTextInputLayout"
+            style="@style/TextInputLayout.Luca.RegistrationTextBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:focusedByDefault="true"
+            android:hint="@string/venue_children_name"
+            android:textColorHint="@color/secondaryColor"
+            app:boxStrokeColor="@color/secondaryColor"
+            app:endIconDrawable="@drawable/ic_delete_input"
+            app:endIconMode="clear_text"
+            app:endIconTint="@color/secondaryColor"
+            app:hintTextColor="@color/secondaryColor"
+            tools:targetApi="o">
 
             <com.google.android.material.textfield.TextInputEditText
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:textColor="@android:color/black"
-                    android:singleLine="true"
-                    android:maxLines="1"
-                    android:maxLength="32" />
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:maxLength="32"
+                android:maxLines="1"
+                android:singleLine="true"
+                android:textColor="@android:color/black" />
 
         </com.google.android.material.textfield.TextInputLayout>
 

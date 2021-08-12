@@ -1,11 +1,8 @@
 package de.culture4life.luca.document.provider.baercode;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import androidx.annotation.NonNull;
 
-import de.culture4life.luca.document.Document;
-import de.culture4life.luca.document.DocumentParsingException;
-import de.culture4life.luca.document.provider.ProvidedDocument;
-import de.culture4life.luca.util.SerializationUtil;
+import com.fasterxml.jackson.databind.JsonNode;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
@@ -17,7 +14,10 @@ import java.util.Iterator;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
-import androidx.annotation.NonNull;
+import de.culture4life.luca.document.Document;
+import de.culture4life.luca.document.DocumentParsingException;
+import de.culture4life.luca.document.provider.ProvidedDocument;
+import de.culture4life.luca.util.SerializationUtil;
 
 public class BaercodeDocument extends ProvidedDocument {
 

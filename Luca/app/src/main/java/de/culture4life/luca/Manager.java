@@ -4,6 +4,7 @@ import android.content.Context;
 
 import androidx.annotation.CallSuper;
 import androidx.annotation.NonNull;
+
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Single;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
@@ -44,7 +45,7 @@ public abstract class Manager {
                         .doFinally(() -> {
                             isInitializing = false;
                             synchronized (this) {
-                                notify();
+                                notifyAll();
                             }
                         });
             } else {

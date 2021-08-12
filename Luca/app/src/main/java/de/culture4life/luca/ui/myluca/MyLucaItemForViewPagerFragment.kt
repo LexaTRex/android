@@ -8,7 +8,7 @@ import androidx.fragment.app.Fragment
 import de.culture4life.luca.ui.myluca.viewholders.SingleMyLucaItemViewHolder
 
 class MyLucaItemForViewPagerFragment :
-        Fragment() {
+    Fragment() {
 
     private var positionInRecyclerView: Int? = null
     private lateinit var expandClickLister: MyLucaListAdapter.MyLucaListItemExpandListener
@@ -17,22 +17,24 @@ class MyLucaItemForViewPagerFragment :
     private lateinit var itemViewHolder: SingleMyLucaItemViewHolder
 
     override fun onCreateView(
-            inflater: LayoutInflater,
-            container: ViewGroup?,
-            savedInstanceState: Bundle?,
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?,
     ): View {
         itemViewHolder = SingleMyLucaItemViewHolder(SingleLucaItemView(requireContext()))
         itemViewHolder.show(item)
-        itemViewHolder.setListeners({ expandClickLister?.onExpand() }, { deleteClickListener?.onDelete(item) })
+        itemViewHolder.setListeners(
+            { expandClickLister?.onExpand() },
+            { deleteClickListener?.onDelete(item) })
         return itemViewHolder.view
     }
 
     companion object {
         fun newInstance(
-                item: MyLucaListItem,
-                expandClickLister: MyLucaListAdapter.MyLucaListItemExpandListener,
-                deleteClickListener: MyLucaListAdapter.MyLucaListClickListener,
-                positionInRecyclerView: Int,
+            item: MyLucaListItem,
+            expandClickLister: MyLucaListAdapter.MyLucaListItemExpandListener,
+            deleteClickListener: MyLucaListAdapter.MyLucaListClickListener,
+            positionInRecyclerView: Int,
         ): MyLucaItemForViewPagerFragment {
             return MyLucaItemForViewPagerFragment().apply {
                 this.expandClickLister = expandClickLister

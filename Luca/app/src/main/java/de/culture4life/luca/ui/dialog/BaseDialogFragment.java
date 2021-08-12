@@ -1,7 +1,5 @@
 package de.culture4life.luca.ui.dialog;
 
-import com.google.android.material.dialog.MaterialAlertDialogBuilder;
-
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
@@ -17,6 +15,8 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
+
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 public class BaseDialogFragment extends DialogFragment {
 

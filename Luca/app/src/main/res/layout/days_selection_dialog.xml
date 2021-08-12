@@ -1,47 +1,47 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@android:color/white"
-        android:orientation="vertical">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@android:color/white"
+    android:orientation="vertical">
 
     <androidx.constraintlayout.widget.ConstraintLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:padding="?dialogPreferredPadding">
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="?dialogPreferredPadding">
 
         <TextView
-                android:id="@+id/messageTextView"
-                style="@style/MaterialAlertDialog.Luca.Body.Text"
-                android:text="@string/history_share_selection_description"
-                app:layout_constraintTop_toTopOf="parent"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+            android:id="@+id/messageTextView"
+            style="@style/MaterialAlertDialog.Luca.Body.Text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/history_share_selection_description"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/tanInputLayout"
-                style="@style/TextInputLayout.Luca.ShareDataTextBox"
-                android:hint="@string/history_share_selection_hint"
-                android:labelFor="@id/dayInputAutoCompleteTextView"
-                android:textColorHint="@android:color/black"
-                app:hintTextColor="@android:color/black"
-                app:boxStrokeColor="@android:color/black"
-                app:layout_constraintTop_toBottomOf="@id/messageTextView"
-                android:layout_marginTop="16dp"
-                android:layout_marginBottom="0dp"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+            android:id="@+id/tanInputLayout"
+            style="@style/TextInputLayout.Luca.ShareDataTextBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="0dp"
+            android:hint="@string/history_share_selection_hint"
+            android:labelFor="@id/dayInputAutoCompleteTextView"
+            android:textColorHint="@android:color/black"
+            app:boxStrokeColor="@android:color/black"
+            app:hintTextColor="@android:color/black"
+            app:layout_constraintTop_toBottomOf="@id/messageTextView">
 
             <AutoCompleteTextView
-                    android:id="@+id/dayInputAutoCompleteTextView"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:padding="16dp"
-                    android:textColor="@android:color/black"
-                    android:imeOptions="actionDone"
-                    android:inputType="none" />
+                android:id="@+id/dayInputAutoCompleteTextView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:imeOptions="actionDone"
+                android:inputType="none"
+                android:padding="16dp"
+                android:textColor="@android:color/black" />
 
         </com.google.android.material.textfield.TextInputLayout>
 

@@ -14,8 +14,8 @@ import java.util.concurrent.TimeUnit
 import kotlin.math.abs
 
 class GenuinityManager(
-        val preferencesManager: PreferencesManager,
-        val networkManager: NetworkManager
+    val preferencesManager: PreferencesManager,
+    val networkManager: NetworkManager
 ) : Manager() {
 
     companion object {
@@ -27,8 +27,8 @@ class GenuinityManager(
 
     override fun doInitialize(context: Context): Completable {
         return Completable.mergeArray(
-                preferencesManager.initialize(context),
-                networkManager.initialize(context)
+            preferencesManager.initialize(context),
+            networkManager.initialize(context)
         ).andThen(invokeServerTimeOffsetUpdateIfRequired().delaySubscription(3, TimeUnit.SECONDS))
     }
 
@@ -42,23 +42,25 @@ class GenuinityManager(
 
     fun invokeServerTimeOffsetUpdate(): Completable {
         return Completable.fromAction {
-            managerDisposable.add(fetchServerTimeOffset()
+            managerDisposable.add(
+                fetchServerTimeOffset()
                     .subscribeOn(Schedulers.io())
                     .onErrorComplete()
-                    .subscribe())
+                    .subscribe()
+            )
         }
     }
 
     fun isGenuineTime(): Single<Boolean> {
         return getOrFetchOrRestoreServerTimeOffset()
-                .map { it < MAXIMUM_SERVER_TIME_OFFSET }
-                .onErrorReturnItem(false)
+            .map { it < MAXIMUM_SERVER_TIME_OFFSET }
+            .onErrorReturnItem(false)
     }
 
     fun getIsGenuineTimeChanges(): Observable<Boolean> {
         return preferencesManager.getChanges(KEY_SERVER_TIME_OFFSET, Long::class.java)
-                .flatMapSingle { isGenuineTime() }
-                .distinctUntilChanged()
+            .flatMapSingle { isGenuineTime() }
+            .distinctUntilChanged()
     }
 
     private fun getOrFetchOrRestoreServerTimeOffset(): Single<Long> {
@@ -69,7 +71,9 @@ class GenuinityManager(
                 fetchServerTimeOffset()
             }
         }.onErrorResumeWith(restoreLastKnownServerTimeOffset())
-                .onErrorResumeNext { Single.error(IllegalStateException("Unable to get server time offset", it)) }
+            .onErrorResumeNext {
+                Single.error(IllegalStateException("Unable to get server time offset", it))
+            }
     }
 
     private fun restoreLastKnownServerTimeOffset(): Single<Long> {
@@ -78,16 +82,18 @@ class GenuinityManager(
 
     private fun fetchServerTimeOffset(): Single<Long> {
         return networkManager.lucaEndpointsV3
-                .flatMap { it.serverTime }
-                .map { it["unix"].asLong }
-                .flatMap { TimeUtil.convertFromUnixTimestamp(it) }
-                .map { abs(System.currentTimeMillis() - it) }
-                .doOnSuccess {
-                    timestampOffset = it
-                    Timber.d("Server timestamp offset updated: %d", timestampOffset)
-                }
-                .doOnError { Timber.w("Unable to update server timestamp offset: %s", it.toString()) }
-                .flatMap { preferencesManager.persist(KEY_SERVER_TIME_OFFSET, it).andThen(Single.just(it)) }
+            .flatMap { it.serverTime }
+            .map { it["unix"].asLong }
+            .flatMap { TimeUtil.convertFromUnixTimestamp(it) }
+            .map { abs(System.currentTimeMillis() - it) }
+            .doOnSuccess {
+                timestampOffset = it
+                Timber.d("Server timestamp offset updated: %d", timestampOffset)
+            }
+            .doOnError { Timber.w("Unable to update server timestamp offset: %s", it.toString()) }
+            .flatMap {
+                preferencesManager.persist(KEY_SERVER_TIME_OFFSET, it).andThen(Single.just(it))
+            }
     }
 
 }

@@ -1,13 +1,13 @@
 package de.culture4life.luca.crypto;
 
-import com.google.gson.annotations.Expose;
-
 import android.util.Pair;
-
-import de.culture4life.luca.util.SerializationUtil;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+
+import com.google.gson.annotations.Expose;
+
+import de.culture4life.luca.util.SerializationUtil;
 
 /**
  * Model to store on-device secrets encrypted using the {@link WrappingCipherProvider}. This, among

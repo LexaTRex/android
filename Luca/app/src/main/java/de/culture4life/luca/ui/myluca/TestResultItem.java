@@ -2,16 +2,16 @@ package de.culture4life.luca.ui.myluca;
 
 import android.content.Context;
 
-import de.culture4life.luca.R;
-import de.culture4life.luca.document.Document;
-import de.culture4life.luca.util.TimeUtil;
+import androidx.annotation.ColorInt;
+import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 
 import java.text.SimpleDateFormat;
 import java.util.Locale;
 
-import androidx.annotation.ColorInt;
-import androidx.annotation.NonNull;
-import androidx.core.content.ContextCompat;
+import de.culture4life.luca.R;
+import de.culture4life.luca.document.Document;
+import de.culture4life.luca.util.TimeUtil;
 
 public class TestResultItem extends MyLucaListItem {
 

@@ -1,8 +1,5 @@
 package de.culture4life.luca.ui.onboarding;
 
-import com.google.android.material.button.MaterialButton;
-import com.google.android.material.checkbox.MaterialCheckBox;
-
 import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.graphics.drawable.Drawable;
@@ -11,12 +8,15 @@ import android.text.method.LinkMovementMethod;
 import android.widget.CompoundButton;
 import android.widget.TextView;
 
+import androidx.core.content.ContextCompat;
+
+import com.google.android.material.button.MaterialButton;
+import com.google.android.material.checkbox.MaterialCheckBox;
+
 import de.culture4life.luca.R;
 import de.culture4life.luca.ui.BaseActivity;
 import de.culture4life.luca.ui.registration.RegistrationActivity;
 import de.culture4life.luca.ui.terms.UpdatedTermsUtil;
-
-import androidx.core.content.ContextCompat;
 
 public class OnboardingActivity extends BaseActivity {
 
@@ -25,7 +25,6 @@ public class OnboardingActivity extends BaseActivity {
     private MaterialButton primaryActionButton;
     private MaterialCheckBox termsCheckBox;
     private TextView termsTextView;
-    private MaterialCheckBox privacyCheckBox;
     private TextView privacyTextView;
     private Drawable errorDrawable;
     private int errorTint;
@@ -43,7 +42,7 @@ public class OnboardingActivity extends BaseActivity {
 
         primaryActionButton = findViewById(R.id.primaryActionButton);
         primaryActionButton.setOnClickListener(view -> {
-            if (termsCheckBox.isChecked() && privacyCheckBox.isChecked()) {
+            if (termsCheckBox.isChecked()) {
                 activityDisposable.add(application.getPreferencesManager()
                         .persist(WELCOME_SCREEN_SEEN_KEY, true)
                         .andThen(UpdatedTermsUtil.Companion.markTermsAsAccepted(application))
@@ -58,16 +57,10 @@ public class OnboardingActivity extends BaseActivity {
             if (termsCheckBox.isChecked()) {
                 setErrorFor(termsCheckBox, termsTextView, false);
             }
-            if (privacyCheckBox.isChecked()) {
-                setErrorFor(privacyCheckBox, privacyTextView, false);
-            }
         };
 
         termsCheckBox = findViewById(R.id.termsCheckBox);
         termsCheckBox.setOnCheckedChangeListener(checkBoxListener);
-
-        privacyCheckBox = findViewById(R.id.privacyCheckBox);
-        privacyCheckBox.setOnCheckedChangeListener(checkBoxListener);
 
         termsTextView = findViewById(R.id.termsTextView);
         termsTextView.setMovementMethod(LinkMovementMethod.getInstance());
@@ -88,7 +81,6 @@ public class OnboardingActivity extends BaseActivity {
 
     private void showCheckboxErrors() {
         setErrorFor(termsCheckBox, termsTextView, !termsCheckBox.isChecked());
-        setErrorFor(privacyCheckBox, privacyTextView, !privacyCheckBox.isChecked());
     }
 
     private void showInfoScreen() {

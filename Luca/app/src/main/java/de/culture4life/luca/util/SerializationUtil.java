@@ -1,14 +1,14 @@
 package de.culture4life.luca.util;
 
-import com.google.gson.Gson;
-
 import android.util.Base64;
 
+import androidx.annotation.NonNull;
+
+import com.google.gson.Gson;
 import com.nexenio.rxkeystore.util.RxBase64;
 
 import org.apache.commons.codec.binary.Base32;
 
-import androidx.annotation.NonNull;
 import io.reactivex.rxjava3.core.Single;
 
 public final class SerializationUtil {

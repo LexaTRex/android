@@ -42,8 +42,6 @@
     <string name="error_qr_code_broken">QR-Code fehlerhaft. Bitte versuche es mit einem anderen.</string>
     <string name="error_certificate_pinning_title">Unerwartete Server Zertifikate</string>
     <string name="error_certificate_pinning_description">Wegen nicht vertrauenswürdigen Zertifikaten konnte keine sichere Verbindung zu den luca Servern hergestellt werden.\n\nBitte wechsle dein Netzwerk und vergewissere dich, dass du die aktuellste App Version nutzt.</string>
-    <string name="error_timestamp_offset_title">Falsche Uhrzeit</string>
-    <string name="error_timestamp_offset_description">Die Uhrzeit deines Handys stimmt nicht mit der Zeit unserer Server überein. Bitte öffne die Systemeinstellungen und vergewissere dich, dass die Uhreit korrekt ist. Eine falsche Uhrzeit kann zu unerwartetem Verhalten führen.</string>
 
     <!-- Statuses -->
     <string name="status_check_out_in_progress">Du wirst ausgecheckt…</string>
@@ -79,8 +77,7 @@
     <string name="welcome_description">luca hilft dir bei der sicheren und verschlüsselten Angabe deiner Kontaktdaten. Du musst dir keine Sorgen um deine Daten mehr machen, wenn du Veranstaltungen, Kulturstätten, Restaurants, Cafés oder Bars besuchst.</string>
     <string name="welcome_terms_description"><a href="https://www.luca-app.de/app-terms-and-conditions-2/">Nutzungsbedingungen</a> zustimmen</string>
     <string name="welcome_terms_checkbox_content_description">Nutzungsbedingungen</string>
-    <string name="welcome_privacy_description"><a href="https://www.luca-app.de/app-privacy-policy/">Datenschutzerklärung</a> zustimmen</string>
-    <string name="welcome_privacy_checkbox_content_description">Datenschutzerklärung</string>
+    <string name="welcome_privacy_description">Unter diesem Link kannst du unsere <a href="https://www.luca-app.de/app-privacy-policy/">Datenschutzerklärung</a> einsehen.</string>
     <string name="welcome_action">Los geht\'s!</string>
 
     <!-- Pre-Registration -->
@@ -205,6 +202,8 @@
     <string name="venue_automatic_check_out">Automatisch auschecken</string>
     <string name="venue_slider_clicked">Bitte den Pfeil nach links ziehen</string>
     <string name="venue_checked_out">Du hast ausgecheckt</string>
+    <string name="venue_check_in_document_redirect_title">Mit Import fortfahren?</string>
+    <string name="venue_check_in_document_redirect_description">Hey, du scannst gerade den QR-Code eines Dokuments und nicht den eines luca-Standorts. Wenn du ein Dokument hinzufügen möchtest, klicke auf „WEITER“.</string>
 
     <string name="venue_children_title">Kinder</string>
     <string name="venue_children_empty_list_description">Kinder (bis 14&#160;Jahre) kannst du gemeinsam mit dir  einchecken. Gib hier an, wer dich begleitet.</string>
@@ -239,12 +238,12 @@
 
     <!-- History -->
     <string name="history_empty_title">Keine Einträge</string>
-    <string name="history_empty_description">Deine Historie sammelt alle Aktivitäten der letzten 14&#160;Tage. Im Moment hast du keine Einträge aus diesem Zeitraum.</string>
+    <string name="history_empty_description">Deine Historie sammelt alle Aktivitäten der letzten <xliff:g example="28" id="count">%1$d</xliff:g>&#160;Tage. Im Moment hast du keine Einträge aus diesem Zeitraum.</string>
     <string name="history_requests"><xliff:g example="0" id="count">%1$d</xliff:g> Datenzugriffe</string>
     <string name="history_time"><xliff:g example="18.08.2020 – 19:23" id="time">%1$s</xliff:g> Uhr</string>
     <string name="history_share">Daten freigeben</string>
     <string name="history_share_selection_title">Zeitraum festlegen</string>
-    <string name="history_share_selection_description">Die Historie sammelt die Check-ins der letzten 14&#160;Tage. Du kannst selbst entscheiden, wie viele Tage du davon mit dem Gesundheitsamt teilen möchtest. Lege zunächst die Anzahl der Tage fest:</string>
+    <string name="history_share_selection_description">Die Historie sammelt die Check-ins der letzten <xliff:g example="28" id="count">%1$d</xliff:g>&#160;Tage. Du kannst selbst entscheiden, wie viele Tage du davon mit dem Gesundheitsamt teilen möchtest. Lege zunächst die Anzahl der Tage fest:</string>
     <string name="history_share_selection_action">Wählen</string>
     <string name="history_share_selection_hint">Tage</string>
     <string name="history_share_confirmation_title">@string/history_share</string>
@@ -269,7 +268,7 @@
     <string name="history_data_shared_title">Daten freigegeben</string>
     <string name="history_data_shared_description">Du hast deine Kontaktdaten und Historie der letzten <xliff:g example="14" id="count">%1$d</xliff:g>&#160;Tage für das Gesundheitsamt freigegeben.</string>
     <string name="history_clear_title">Möchtest du deine Historie wirklich leeren?</string>
-    <string name="history_clear_description">Vergangene Einträge werden in deiner App nicht mehr angezeigt, bleiben aber noch bis zu 30&#160;Tage im System und werden bei einer Datenfreigabe mit dem Gesundheitsamt geteilt.</string>
+    <string name="history_clear_description">Vergangene Einträge werden in deiner App nicht mehr angezeigt, bleiben aber noch bis zu 28&#160;Tage im System und werden bei einer Datenfreigabe mit dem Gesundheitsamt geteilt.</string>
     <string name="history_clear_action">Leeren</string>
     <string name="history_children_title">Kinder: <xliff:g example="1" id="count">%1$d</xliff:g></string>
 
@@ -286,7 +285,7 @@
 
     <!-- My Luca -->
     <string name="my_luca_heading">Mein luca</string>
-    <string name="my_luca_empty_title">Willkommen bei \"Mein luca\"</string>
+    <string name="my_luca_empty_title">Willkommen bei „Mein luca“</string>
     <string name="my_luca_empty_description">Das ist dein persönlicher Bereich. Hier kannst du Dokumente <b>hinzufügen</b>, die dir den <b>Check-in</b> erleichtern.\n\nÜber das Kalender-Icon oben rechts kannst du Termine für Tests buchen.</string>
     <string name="time_error_description">Die von dir eingestellte Zeit entspricht nicht der aktuellen Zeit.</string>
     <string name="time_error_action">Zu den Einstellungen</string>
@@ -294,7 +293,7 @@
     <string name="document_import_action">Dokument Hinzufügen</string>
     <string name="document_import_hint">Scanne den QR-Code deines Dokuments, um dieses zur App hinzuzufügen.</string>
     <string name="document_import_success_message">Das Dokument wurde importiert</string>
-    <string name="document_import_consent">Hiermit erkläre ich mein Einverständnis gemäß Art. 9 (2) a) in Verbindung mit Art. 6 (1) 1 a) DSGVO zum Übermitteln einer pseudonymisierten Kennung im Zuge der lokalen Hinterlegung meines COVID-Tests, meines Genesen- oder Impfausweises in der luca App. Dies dient ausschließlich der Vorbeugung von Missbrauch, indem ein Dokument durch unterschiedliche Personen genutzt wird. Daher ist ein mehrfaches Importieren nicht möglich. Die individuelle Kennung des Dokuments wird nach 72 Stunden ab Hinterlegung automatisch aus dem luca System gelöscht.</string>
+    <string name="document_import_consent">Hiermit erkläre ich mein Einverständnis gemäß Art. 9 (2) a) in Verbindung mit Art. 6 (1) 1 a) DSGVO zum Übermitteln einer pseudonymisierten Kennung im Zuge der lokalen Hinterlegung meines COVID-Tests, meines Genesen- oder Impfausweises in der luca App. Dies dient ausschließlich der Vorbeugung von Missbrauch, indem ein Dokument durch unterschiedliche Personen genutzt wird. Daher ist ein mehrfaches Importieren nicht möglich. Die Kennung eines Genesen- / Impfausweises wird durch die lokale Löschung des Dokuments in der App entfernt.</string>
     <string name="document_import_error_title">Das Dokument konnte nicht importiert werden</string>
     <string name="document_import_error_name_mismatch_description">Es konnte nicht validiert werden, dass dieses Dokument für dich erstellt wurde. Bitte prüfe, ob dein Name richtig in der App hinterlegt ist.</string>
     <string name="document_import_error_invalid_signature_description">Die Signatur dieses Dokuments konnte nicht verifiziert werden. Der Aussteller wird möglicherweise noch nicht von luca unterstützt.</string>
@@ -306,8 +305,10 @@
     <string name="document_import_error_unsupported_but_url_description">Die Daten sind kein Dokument von einem Testcenter das wir unterstützen.\n\nAllerdings verweisen die Daten auf eine Webseite, bei der es möglicherweise mehr Details gibt.</string>
     <string name="document_import_error_check_in_scanner_title">Check-in hier nicht möglich</string>
     <string name="document_import_error_check_in_scanner_description">Dieser Scanner ist nur für das Hinzufügen von Dokumenten gedacht. Wenn du an einem Standort einchecken möchtest, wechsle in den Tab „Einchecken“ (unten links in der Navigationsleiste). Dort findest du die Funktion „Selbst einchecken“.</string>
-    <string name="document_outcome_negative">TESTERGEBNIS: Negativ</string>
-    <string name="document_outcome_positive">TESTERGEBNIS: Positiv</string>
+    <string name="document_import_check_in_redirect_title">Mit Check-in fortfahren?</string>
+    <string name="document_import_check_in_redirect_description">Hey, du scannst gerade den QR-Code eines luca-Standorts und keinen Dokument-QR-Code. Klicke „WEITER“ um eingecheckt zu werden.</string>
+    <string name="document_outcome_negative">Testergebnis Negativ</string>
+    <string name="document_outcome_positive">Testergebnis Positiv</string>
     <string name="document_outcome_partially_immune">Teilweise Immunisiert %1$s</string>
     <string name="document_outcome_partially_vaccinated">Partieller Impfschutz %1$s</string>
     <string name="document_outcome_fully_vaccinated">Vollständiger Impfschutz %1$s</string>
@@ -378,20 +379,20 @@
     <string name="time_hours">Stunden</string>
     <string name="time_days">Tage</string>
     <plurals name="time_plural_seconds">
-        <item quantity="one" formatted="true">%d Sekunde</item>
-        <item quantity="other" formatted="true">%d Sekunden</item>
+        <item formatted="true" quantity="one">%d Sekunde</item>
+        <item formatted="true" quantity="other">%d Sekunden</item>
     </plurals>
     <plurals name="time_plural_minutes">
-        <item quantity="one" formatted="true">%d Minute</item>
-        <item quantity="other" formatted="true">%d Minuten</item>
+        <item formatted="true" quantity="one">%d Minute</item>
+        <item formatted="true" quantity="other">%d Minuten</item>
     </plurals>
     <plurals name="time_plural_hours">
-        <item quantity="one" formatted="true">%d Stunde</item>
-        <item quantity="other" formatted="true">%d Stunden</item>
+        <item formatted="true" quantity="one">%d Stunde</item>
+        <item formatted="true" quantity="other">%d Stunden</item>
     </plurals>
     <plurals name="time_plural_days">
-        <item quantity="one" formatted="true">%d Tag</item>
-        <item quantity="other" formatted="true">%d Tagen</item>
+        <item formatted="true" quantity="one">%d Tag</item>
+        <item formatted="true" quantity="other">%d Tagen</item>
     </plurals>
 
     <!-- Version details -->
@@ -409,5 +410,17 @@
     <string name="updated_terms_info">Tippe auf „ZUSTIMMEN”, um die aktualisierten <b><a href="https://www.luca-app.de/app-terms-and-conditions-2/">Nutzungsbedingungen</a></b> und die <b><a href="https://www.luca-app.de/app-privacy-policy/">Datenschutzerklärung</a></b> zu akzeptieren.</string>
     <string name="updated_terms_button_agree">ZUSTIMMEN</string>
     <string name="updated_terms_changes_action">Änderungen</string>
+
+    <!-- Account tab -->
+    <string name="account_tab_key_for_health_dep">Schlüssel für Gesundheitsämter</string>
+
+    <!-- key for health department view -->
+    <string name="key_health_department_title">Tagesschlüssel</string>
+    <string name="key_health_department_transfer_key">Tagesschlüssel</string>
+    <string name="key_health_department_date">@string/document_issued_at</string>
+    <string name="key_health_department_issuer">Aussteller:</string>
+    <string name="key_health_department_signed">Signiert:</string>
+    <string name="key_health_department_download_cert">Zertifikatskette herunterladen</string>
+    <string name="key_health_department_description">Jeden Tag wird von einem der Gesundheitsämter, die luca nutzen, ein neuer Tagesschlüssel erstellt. Diesen Schlüssel benötigen alle Gesundheitsämter für die Entschlüsselung von Check-in-Datensätzen. Hier kannst du sehen, welches Gesundheitsamt den aktuellen Schlüssel erstellt hat.</string>
 
 </resources>

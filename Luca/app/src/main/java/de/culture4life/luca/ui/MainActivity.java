@@ -1,22 +1,22 @@
 package de.culture4life.luca.ui;
 
-import com.google.android.material.bottomnavigation.BottomNavigationView;
-
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
-
-import de.culture4life.luca.R;
-import de.culture4life.luca.notification.LucaNotificationManager;
-import de.culture4life.luca.ui.registration.RegistrationActivity;
-
-import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent;
 
 import androidx.annotation.Nullable;
 import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
+
+import com.google.android.material.bottomnavigation.BottomNavigationView;
+
+import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent;
+
+import de.culture4life.luca.R;
+import de.culture4life.luca.notification.LucaNotificationManager;
+import de.culture4life.luca.ui.registration.RegistrationActivity;
 import five.star.me.FiveStarMe;
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Single;

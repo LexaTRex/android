@@ -2,12 +2,7 @@ package de.culture4life.luca.document.provider.baercode;
 
 import android.content.Context;
 
-import de.culture4life.luca.BuildConfig;
-import de.culture4life.luca.document.DocumentExpiredException;
-import de.culture4life.luca.document.DocumentImportException;
-import de.culture4life.luca.document.DocumentParsingException;
-import de.culture4life.luca.document.provider.DocumentProvider;
-import de.culture4life.luca.util.SerializationUtil;
+import androidx.annotation.NonNull;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -26,7 +21,12 @@ import java.security.spec.InvalidParameterSpecException;
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
-import androidx.annotation.NonNull;
+import de.culture4life.luca.BuildConfig;
+import de.culture4life.luca.document.DocumentExpiredException;
+import de.culture4life.luca.document.DocumentImportException;
+import de.culture4life.luca.document.DocumentParsingException;
+import de.culture4life.luca.document.provider.DocumentProvider;
+import de.culture4life.luca.util.SerializationUtil;
 import io.reactivex.rxjava3.core.Single;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;

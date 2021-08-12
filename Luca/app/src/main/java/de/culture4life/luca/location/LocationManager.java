@@ -1,11 +1,5 @@
 package de.culture4life.luca.location;
 
-import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationAvailability;
-import com.google.android.gms.location.LocationCallback;
-import com.google.android.gms.location.LocationRequest;
-import com.google.android.gms.location.LocationResult;
-
 import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -14,14 +8,20 @@ import android.os.Build;
 import android.os.Looper;
 import android.provider.Settings;
 
-import de.culture4life.luca.Manager;
-import de.culture4life.luca.util.RxTasks;
-
-import java.util.concurrent.TimeUnit;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresPermission;
 import androidx.core.app.ActivityCompat;
+
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationAvailability;
+import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
+
+import java.util.concurrent.TimeUnit;
+
+import de.culture4life.luca.Manager;
+import de.culture4life.luca.util.RxTasks;
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Maybe;
 import io.reactivex.rxjava3.core.Observable;

@@ -6,21 +6,12 @@ import android.os.Build;
 import android.util.Base64;
 import android.util.Pair;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
 import com.nexenio.rxkeystore.RxKeyStore;
 import com.nexenio.rxkeystore.provider.hash.RxHashProvider;
 import com.nexenio.rxkeystore.util.RxBase64;
-
-import de.culture4life.luca.Manager;
-import de.culture4life.luca.checkin.CheckInManager;
-import de.culture4life.luca.meeting.MeetingGuestData;
-import de.culture4life.luca.network.NetworkManager;
-import de.culture4life.luca.network.endpoints.LucaEndpointsV3;
-import de.culture4life.luca.network.pojo.CheckInRequestData;
-import de.culture4life.luca.preference.PreferencesManager;
-import de.culture4life.luca.ui.qrcode.QrCodeData;
-import de.culture4life.luca.ui.qrcode.QrCodeViewModel;
-import de.culture4life.luca.util.SerializationUtil;
-import de.culture4life.luca.util.TimeUtil;
 
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1Encoding;
@@ -53,8 +44,18 @@ import java.util.concurrent.TimeUnit;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
+import de.culture4life.luca.Manager;
+import de.culture4life.luca.checkin.CheckInManager;
+import de.culture4life.luca.meeting.MeetingGuestData;
+import de.culture4life.luca.network.NetworkManager;
+import de.culture4life.luca.network.endpoints.LucaEndpointsV3;
+import de.culture4life.luca.network.pojo.CheckInRequestData;
+import de.culture4life.luca.network.pojo.DailyKeyPairIssuer;
+import de.culture4life.luca.preference.PreferencesManager;
+import de.culture4life.luca.ui.qrcode.QrCodeData;
+import de.culture4life.luca.ui.qrcode.QrCodeViewModel;
+import de.culture4life.luca.util.SerializationUtil;
+import de.culture4life.luca.util.TimeUtil;
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Maybe;
 import io.reactivex.rxjava3.core.Observable;
@@ -286,7 +287,7 @@ public class CryptoManager extends Manager {
     /**
      * Will restore the {@link WrappedSecret} using the {@link #preferencesManager} and decrypt it
      * using the {@link #wrappingCipherProvider}.
-     *
+     * <p>
      * {@link WrappedSecret}s are encrypted using an AndroidKeyStore-backed key.
      */
     private Maybe<byte[]> restoreWrappedSecretIfAvailable(@NonNull String alias) {
@@ -388,7 +389,7 @@ public class CryptoManager extends Manager {
     /**
      * Will fetch the latest daily key pair public key from the API, update {@link
      * #dailyKeyPairPublicKeyWrapper} and persist it in the preferences.
-     *
+     * <p>
      * This should be done on each app start, but not required for a successful initialization (e.g.
      * because the user may be offline).
      */
@@ -411,28 +412,63 @@ public class CryptoManager extends Manager {
                                 .andThen(Single.fromCallable(() -> dailyKeyPairPublicKeyWrapper))));
     }
 
+    public Single<DailyKeyPairIssuer> getDailyKeyPair() {
+        return networkManager.getLucaEndpointsV3()
+                .flatMap(LucaEndpointsV3::getDailyKeyPair)
+                .flatMap(dailyKeyPair -> networkManager.getLucaEndpointsV3()
+                        .flatMap(lucaEndpointsV3 -> lucaEndpointsV3.getIssuer(dailyKeyPair.getIssuerId()))
+                        .map(issuer -> new DailyKeyPairIssuer(dailyKeyPair, issuer))
+                );
+    }
+
+    public Completable verifyDailyKeyPair(@NonNull DailyKeyPairIssuer dailyKeyPairIssuer) {
+        return Completable.defer(() -> {
+            PublicKey issuerSigningKey = dailyKeyPairIssuer.getIssuer().publicHDSKPToPublicKey();
+            byte[] signedData = concatenate(
+                    dailyKeyPairIssuer.getDailyKeyPair().getEncodedKeyId(),
+                    dailyKeyPairIssuer.getDailyKeyPair().getEncodedCreatedAt(),
+                    decodeFromString(dailyKeyPairIssuer.getDailyKeyPair().getPublicKey()).blockingGet()
+            ).blockingGet();
+
+            byte[] signature = decodeFromString(dailyKeyPairIssuer.getDailyKeyPair().getSignature()).blockingGet();
+
+            return signatureProvider.verify(signedData, signature, issuerSigningKey);
+        });
+    }
+
+    public Single<StringBuilder> generateDailyKeyPairString(@NonNull DailyKeyPairIssuer dailyKeyPairIssuer) {
+        return Single.fromCallable(() -> new StringBuilder()
+                .append("publicKey:\n")
+                .append(dailyKeyPairIssuer.getDailyKeyPair().getPublicKey() + "\n")
+                .append("signature:\n")
+                .append(dailyKeyPairIssuer.getDailyKeyPair().getSignature() + "\n")
+                .append("issuer:\n")
+                .append(dailyKeyPairIssuer.getIssuer().getName() + "\n")
+                .append("issuer signing key:\n")
+                .append(dailyKeyPairIssuer.getIssuer().getPublicHDSKP()));
+    }
+
     /**
      * Fetch {@link DailyKeyPairPublicKeyWrapper} from server, verify its authenticity and ensure
      * its less than 7 days old.
      */
     private Single<DailyKeyPairPublicKeyWrapper> fetchDailyKeyPairPublicKeyWrapperFromBackend() {
-        return networkManager.getLucaEndpointsV3()
-                .flatMap(LucaEndpointsV3::getDailyKeyPairPublicKey)
-                .flatMap(jsonObject -> Single.fromCallable(() -> {
-                    byte[] encodedPublicKey = decodeFromString(jsonObject.get("publicKey").getAsString()).blockingGet();
+        return getDailyKeyPair()
+                .flatMap(dailyKeyPairIssuer -> Single.fromCallable(() -> {
+                    byte[] encodedPublicKey = decodeFromString(dailyKeyPairIssuer.getDailyKeyPair().getPublicKey()).blockingGet();
                     ECPublicKey publicKey = AsymmetricCipherProvider.decodePublicKey(encodedPublicKey).blockingGet();
 
-                    int creationUnixTimestamp = jsonObject.get("createdAt").getAsInt();
+                    long creationUnixTimestamp = dailyKeyPairIssuer.getDailyKeyPair().getCreatedAt();
                     byte[] encodedCreationTimestamp = TimeUtil.encodeUnixTimestamp(creationUnixTimestamp).blockingGet();
 
-                    int id = jsonObject.get("keyId").getAsInt();
+                    int id = dailyKeyPairIssuer.getDailyKeyPair().getKeyId();
                     byte[] encodedId = ByteBuffer.allocate(4)
                             .order(ByteOrder.LITTLE_ENDIAN)
                             .putInt(id)
                             .array();
 
-                    PublicKey issuerSigningKey = getKeyIssuerSigningKey(jsonObject.get("issuerId").getAsString()).blockingGet();
-                    byte[] signature = decodeFromString(jsonObject.get("signature").getAsString()).blockingGet();
+                    PublicKey issuerSigningKey = dailyKeyPairIssuer.getIssuer().publicHDSKPToPublicKey();
+                    byte[] signature = decodeFromString(dailyKeyPairIssuer.getDailyKeyPair().getSignature()).blockingGet();
                     byte[] signedData = concatenate(encodedId, encodedCreationTimestamp, encodedPublicKey).blockingGet();
 
                     signatureProvider.verify(signedData, signature, issuerSigningKey).blockingAwait();
@@ -450,21 +486,6 @@ public class CryptoManager extends Manager {
                     wrapper.setPublicKey(publicKey);
                     return wrapper;
                 })).doOnSuccess(wrapper -> Timber.d("Fetched daily key pair public key from backend: %s", wrapper));
-    }
-
-    /**
-     * Fetch Health Department Signing Key (HDSKP), used to verify authenticity of the daily
-     * keypair.
-     *
-     * @param issuerId individual ID of given health department
-     */
-    private Single<PublicKey> getKeyIssuerSigningKey(@NonNull String issuerId) {
-        // TODO: 18.03.21 cache previously requested issuers
-        return networkManager.getLucaEndpointsV3()
-                .flatMap(lucaEndpointsV3 -> lucaEndpointsV3.getKeyIssuer(issuerId))
-                .map(jsonObject -> jsonObject.get("publicHDSKP").getAsString())
-                .flatMap(CryptoManager::decodeFromString)
-                .flatMap(AsymmetricCipherProvider::decodePublicKey);
     }
 
     /**
@@ -522,7 +543,7 @@ public class CryptoManager extends Manager {
      * Generate guest key pair, used to sign encrypted {@link MeetingGuestData}.
      *
      * @see <a href="https://luca-app.de/securityoverview/properties/secrets.html#term-guest-keypair">Security
-     *         Overview: Secrets</a>
+     * Overview: Secrets</a>
      */
     private Single<KeyPair> generateGuestKeyPair() {
         return asymmetricCipherProvider.generateKeyPair(ALIAS_GUEST_KEY_PAIR, context)
@@ -619,9 +640,9 @@ public class CryptoManager extends Manager {
      * or generating (and persisting) a new one for today.
      *
      * @see <a href="https://www.luca-app.de/securityoverview/properties/secrets.html#term-tracing-secret">Security
-     *         Overview: Secrets</a>
+     * Overview: Secrets</a>
      * @see <a href="https://luca-app.de/securityoverview/processes/guest_registration.html#rotating-the-tracing-secret">Security
-     *         Overview: Rotating the Tracing Secret</a>
+     * Overview: Rotating the Tracing Secret</a>
      */
     public Single<byte[]> getCurrentTracingSecret() {
         return restoreCurrentTracingSecret()
@@ -689,7 +710,7 @@ public class CryptoManager extends Manager {
      * sent to the Luca Server during Check-In and ultimately protects the Guest’s Contact Data.
      *
      * @see <a href="https://www.luca-app.de/securityoverview/properties/secrets.html#term-data-secret">Security
-     *         Overview: Secrets</a>
+     * Overview: Secrets</a>
      */
     public Single<byte[]> getDataSecret() {
         return restoreDataSecret()
@@ -782,7 +803,7 @@ public class CryptoManager extends Manager {
      * re-encryption of {@link CheckInRequestData} usually performed by the Scanner Frontend.
      *
      * @see <a href="https://luca-app.de/securityoverview/processes/guest_self_checkin.html">Security
-     *         Overview: Check-In via a Printed QR Code</a>
+     * Overview: Check-In via a Printed QR Code</a>
      */
     public Single<KeyPair> getScannerEphemeralKeyPair() {
         return asymmetricCipherProvider.getKeyPair(ALIAS_SCANNER_EPHEMERAL_KEY_PAIR);

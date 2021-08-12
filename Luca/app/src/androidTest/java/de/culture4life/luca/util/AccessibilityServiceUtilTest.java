@@ -1,13 +1,13 @@
 package de.culture4life.luca.util;
 
-import de.culture4life.luca.LucaApplication;
+import androidx.test.platform.app.InstrumentationRegistry;
 
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import androidx.test.platform.app.InstrumentationRegistry;
+import de.culture4life.luca.LucaApplication;
 
 public class AccessibilityServiceUtilTest {
 

@@ -1,9 +1,6 @@
 package de.culture4life.luca.document.provider.baercode;
 
-import de.culture4life.luca.BuildConfig;
-import de.culture4life.luca.document.Document;
-import de.culture4life.luca.document.DocumentParsingException;
-import de.culture4life.luca.document.provider.opentestcheck.OpenTestCheckDocumentProviderTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Assert;
 import org.junit.Assume;
@@ -17,7 +14,10 @@ import org.robolectric.annotation.Config;
 import java.io.IOException;
 import java.security.cert.CertificateException;
 
-import androidx.test.runner.AndroidJUnit4;
+import de.culture4life.luca.BuildConfig;
+import de.culture4life.luca.document.Document;
+import de.culture4life.luca.document.DocumentParsingException;
+import de.culture4life.luca.document.provider.opentestcheck.OpenTestCheckDocumentProviderTest;
 
 @Config(sdk = 28)
 @RunWith(AndroidJUnit4.class)

@@ -1,10 +1,10 @@
 package de.culture4life.luca.document.provider.baercode;
 
+import androidx.annotation.NonNull;
+
 import com.fasterxml.jackson.databind.JsonNode;
 
 import de.culture4life.luca.document.Document;
-
-import androidx.annotation.NonNull;
 
 /**
  * Procedure of a Baercode. Can be either a Covid test or a vaccination

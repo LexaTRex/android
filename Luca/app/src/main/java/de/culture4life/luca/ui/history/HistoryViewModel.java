@@ -2,6 +2,17 @@ package de.culture4life.luca.ui.history;
 
 import android.app.Application;
 
+import androidx.annotation.NonNull;
+import androidx.core.util.Pair;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
+import java.util.Locale;
+import java.util.concurrent.TimeUnit;
+
 import de.culture4life.luca.R;
 import de.culture4life.luca.dataaccess.AccessedTraceData;
 import de.culture4life.luca.dataaccess.DataAccessManager;
@@ -14,17 +25,6 @@ import de.culture4life.luca.preference.PreferencesManager;
 import de.culture4life.luca.ui.BaseViewModel;
 import de.culture4life.luca.ui.ViewError;
 import de.culture4life.luca.ui.ViewEvent;
-
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.List;
-import java.util.Locale;
-import java.util.concurrent.TimeUnit;
-
-import androidx.annotation.NonNull;
-import androidx.core.util.Pair;
-import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MutableLiveData;
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Maybe;
 import io.reactivex.rxjava3.core.Observable;
@@ -207,7 +207,7 @@ public class HistoryViewModel extends BaseViewModel {
                             }
                             builder = builder.append(application.getString(R.string.history_children_title, children.size()));
                             item.setDescription(builder.toString());
-                            item.setAdditionalDescriptionDetails(application.getString(R.string.history_children_description, createUnorderedList(children)));
+                            item.setAdditionalDescriptionDetails(application.getString(R.string.history_children_description, HistoryManager.createOrderedList(children)));
                             item.setDescriptionIconResourceId(R.drawable.ic_information_outline);
                         }
                     }

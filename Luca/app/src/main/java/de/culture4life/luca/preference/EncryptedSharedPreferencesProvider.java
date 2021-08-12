@@ -3,14 +3,14 @@ package de.culture4life.luca.preference;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import androidx.annotation.NonNull;
+import androidx.security.crypto.EncryptedSharedPreferences;
+import androidx.security.crypto.MasterKey;
+
 import com.nexenio.rxpreferences.provider.SharedPreferencesProvider;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
-
-import androidx.annotation.NonNull;
-import androidx.security.crypto.EncryptedSharedPreferences;
-import androidx.security.crypto.MasterKey;
 
 /**
  * Provider that uses Androids EncryptedSharedPreferences for storing keys and values encrypted.

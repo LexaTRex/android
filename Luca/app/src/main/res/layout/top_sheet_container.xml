@@ -1,46 +1,44 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
-        android:id="@+id/sheetContainerLayout"
-        android:background="?attr/colorOnSurface"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:padding="@dimen/spacing_default">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/sheetContainerLayout"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="?attr/colorOnSurface"
+    android:padding="@dimen/spacing_default">
 
     <ImageView
-            android:id="@+id/sheetIconImageView"
-            android:layout_width="20dp"
-            android:layout_height="20dp"
-            android:scaleType="fitCenter"
-            android:src="@drawable/ic_information_outline"
-            android:contentDescription="@string/additional_details_content_description"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:tint="?attr/colorSurface" />
+        android:id="@+id/sheetIconImageView"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:contentDescription="@string/additional_details_content_description"
+        android:scaleType="fitCenter"
+        android:src="@drawable/ic_information_outline"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:tint="?attr/colorSurface" />
 
     <TextView
-            android:id="@+id/sheetDescriptionTextView"
-            app:layout_constraintStart_toEndOf="@id/sheetIconImageView"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constrainedWidth="true"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/spacing_small"
-            android:text="@string/dummy_paragraph"
-            style="@style/MaterialAlertDialog.Luca.Body.Text" />
+        android:id="@+id/sheetDescriptionTextView"
+        style="@style/MaterialAlertDialog.Luca.Body.Text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/spacing_small"
+        android:text="@string/dummy_paragraph"
+        app:layout_constrainedWidth="true"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/sheetIconImageView"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <com.google.android.material.button.MaterialButton
-            android:id="@+id/sheetActionButton"
-            style="@style/Button.Luca.TertiaryActionButton.Black"
-            android:text="@string/dummy_heading"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:paddingStart="@dimen/spacing_default"
-            android:paddingEnd="@dimen/spacing_default"
-            app:layout_constraintTop_toBottomOf="@id/sheetDescriptionTextView"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent" />
+        android:id="@+id/sheetActionButton"
+        style="@style/Button.Luca.TertiaryActionButton.Black"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="@string/dummy_heading"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/sheetDescriptionTextView" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

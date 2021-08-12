@@ -1,37 +1,23 @@
 package de.culture4life.luca.ui.qrcode;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import com.google.mlkit.vision.barcode.Barcode;
-import com.google.mlkit.vision.barcode.BarcodeScanner;
-import com.google.mlkit.vision.barcode.BarcodeScanning;
-import com.google.mlkit.vision.common.InputImage;
-import com.google.zxing.EncodeHintType;
-
-import android.annotation.SuppressLint;
 import android.app.Application;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.webkit.URLUtil;
 
-import de.culture4life.luca.R;
-import de.culture4life.luca.checkin.CheckInData;
-import de.culture4life.luca.checkin.CheckInManager;
-import de.culture4life.luca.crypto.AsymmetricCipherProvider;
-import de.culture4life.luca.crypto.CryptoManager;
-import de.culture4life.luca.crypto.DailyKeyPairPublicKeyWrapper;
-import de.culture4life.luca.meeting.MeetingAdditionalData;
-import de.culture4life.luca.meeting.MeetingManager;
-import de.culture4life.luca.network.NetworkManager;
-import de.culture4life.luca.notification.LucaNotificationManager;
-import de.culture4life.luca.registration.RegistrationData;
-import de.culture4life.luca.registration.RegistrationManager;
-import de.culture4life.luca.ui.BaseViewModel;
-import de.culture4life.luca.ui.ViewError;
-import de.culture4life.luca.util.SerializationUtil;
-import de.culture4life.luca.util.TimeUtil;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.core.util.Pair;
+import androidx.fragment.app.FragmentActivity;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.ViewModelProvider;
+
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.google.zxing.EncodeHintType;
 
 import net.glxn.qrgen.android.QRCode;
 
@@ -43,26 +29,35 @@ import java.security.interfaces.ECPublicKey;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.camera.core.ImageAnalysis;
-import androidx.camera.core.ImageProxy;
-import androidx.core.util.Pair;
-import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MutableLiveData;
+import de.culture4life.luca.R;
+import de.culture4life.luca.checkin.CheckInData;
+import de.culture4life.luca.checkin.CheckInManager;
+import de.culture4life.luca.crypto.AsymmetricCipherProvider;
+import de.culture4life.luca.crypto.CryptoManager;
+import de.culture4life.luca.crypto.DailyKeyPairPublicKeyWrapper;
+import de.culture4life.luca.meeting.MeetingAdditionalData;
+import de.culture4life.luca.meeting.MeetingManager;
+import de.culture4life.luca.network.NetworkManager;
+import de.culture4life.luca.registration.RegistrationData;
+import de.culture4life.luca.registration.RegistrationManager;
+import de.culture4life.luca.ui.BaseQrCodeViewModel;
+import de.culture4life.luca.ui.ViewError;
+import de.culture4life.luca.ui.ViewEvent;
+import de.culture4life.luca.ui.myluca.MyLucaViewModel;
+import de.culture4life.luca.util.SerializationUtil;
+import de.culture4life.luca.util.TimeUtil;
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Maybe;
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.core.Single;
-import io.reactivex.rxjava3.disposables.Disposable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 import timber.log.Timber;
 
 import static de.culture4life.luca.crypto.HashProvider.TRIMMED_HASH_LENGTH;
 import static de.culture4life.luca.registration.RegistrationManager.USER_ID_KEY;
 
-public class QrCodeViewModel extends BaseViewModel implements ImageAnalysis.Analyzer {
+public class QrCodeViewModel extends BaseQrCodeViewModel {
 
     private static final UUID DEBUGGING_SCANNER_ID = UUID.fromString("1444c1a2-1922-4c11-813d-710d9f901227");
     private static final long CHECK_IN_POLLING_INTERVAL = TimeUnit.SECONDS.toMillis(3);
@@ -71,7 +66,6 @@ public class QrCodeViewModel extends BaseViewModel implements ImageAnalysis.Anal
     private final CheckInManager checkInManager;
     private final CryptoManager cryptoManager;
     private final MeetingManager meetingManager;
-    private final LucaNotificationManager notificationManager;
 
     private final MutableLiveData<Bitmap> qrCode = new MutableLiveData<>();
     private final MutableLiveData<String> name = new MutableLiveData<>();
@@ -82,11 +76,12 @@ public class QrCodeViewModel extends BaseViewModel implements ImageAnalysis.Anal
     private final MutableLiveData<Boolean> contactDataMissing = new MutableLiveData<>();
     private final MutableLiveData<Boolean> updateRequired = new MutableLiveData<>();
     private final MutableLiveData<String> privateMeetingUrl = new MutableLiveData<>();
+    private final MutableLiveData<ViewEvent<String>> possibleDocumentData = new MutableLiveData<>();
 
-    private final BarcodeScanner scanner;
+    private MyLucaViewModel myLucaViewModel;
 
     private UUID userId;
-    private Disposable imageProcessingDisposable;
+
     private ViewError meetingError;
     private ViewError deepLinkError;
 
@@ -96,9 +91,13 @@ public class QrCodeViewModel extends BaseViewModel implements ImageAnalysis.Anal
         this.checkInManager = this.application.getCheckInManager();
         this.cryptoManager = this.application.getCryptoManager();
         this.meetingManager = this.application.getMeetingManager();
-        this.notificationManager = this.application.getNotificationManager();
-        this.scanner = BarcodeScanning.getClient();
-        this.isLoading.setValue(true);
+    }
+
+    public void setupViewModelReference(FragmentActivity activity) {
+        if (myLucaViewModel == null) {
+            myLucaViewModel = new ViewModelProvider(activity).get(MyLucaViewModel.class);
+            myLucaViewModel.setupViewModelReference(activity);
+        }
     }
 
     @Override
@@ -109,8 +108,7 @@ public class QrCodeViewModel extends BaseViewModel implements ImageAnalysis.Anal
                         registrationManager.initialize(application),
                         checkInManager.initialize(application),
                         cryptoManager.initialize(application),
-                        meetingManager.initialize(application),
-                        notificationManager.initialize(application)
+                        meetingManager.initialize(application)
                 ))
                 .andThen(application.getPreferencesManager().restore(USER_ID_KEY, UUID.class)
                         .doOnSuccess(uuid -> this.userId = uuid)
@@ -152,9 +150,9 @@ public class QrCodeViewModel extends BaseViewModel implements ImageAnalysis.Anal
      * Poll backend for a processed check-in referencing trace IDs previously shown as QR-code.
      *
      * @return Completable providing visual feedback, e.g. redirecting the user to the venue
-     *         fragment
+     * fragment
      * @see <a href="https://luca-app.de/securityoverview/processes/guest_app_checkin.html#qr-code-scanning-feedback">Security
-     *         Overview: QR Code Scanning Feedback</a>
+     * Overview: QR Code Scanning Feedback</a>
      */
     private Completable observeCheckInDataChanges() {
         return Completable.mergeArray(
@@ -307,62 +305,44 @@ public class QrCodeViewModel extends BaseViewModel implements ImageAnalysis.Anal
     /*
         QR code scanning
      */
-
-    @SuppressLint("UnsafeExperimentalUsageError")
     @Override
-    public void analyze(@NonNull ImageProxy imageProxy) {
-        if (imageProcessingDisposable != null && !imageProcessingDisposable.isDisposed()) {
-            Timber.v("Not processing new camera image, still processing previous one");
-            imageProxy.close();
-            return;
+    protected boolean canProcessImage() {
+        if (deepLinkError != null && errors.getValue().contains(deepLinkError)) {
+            // currently showing a deep-link related error
+            return false;
+        } else if (privateMeetingUrl.getValue() != null) {
+            // currently joining private meeting
+            return false;
+        } else {
+            return true;
         }
-
-        imageProcessingDisposable = processCameraImage(imageProxy)
-                .doOnError(throwable -> Timber.w("Unable to process camera image: %s", throwable.toString()))
-                .onErrorComplete()
-                .observeOn(AndroidSchedulers.mainThread())
-                .doFinally(imageProxy::close)
-                .subscribeOn(Schedulers.computation())
-                .subscribe();
-
-        modelDisposable.add(imageProcessingDisposable);
     }
 
-    @SuppressLint("UnsafeExperimentalUsageError")
-    private Completable processCameraImage(@NonNull ImageProxy imageProxy) {
-        return Maybe.fromCallable(imageProxy::getImage)
-                .filter(image -> {
-                    if (deepLinkError != null && errors.getValue().contains(deepLinkError)) {
-                        // currently showing a deep-link related error
-                        return false;
-                    } else if (privateMeetingUrl.getValue() != null) {
-                        // currently joining private meeting
-                        return false;
-                    } else {
-                        return true;
-                    }
-                })
-                .map(image -> InputImage.fromMediaImage(image, imageProxy.getImageInfo().getRotationDegrees()))
-                .flatMapObservable(this::detectBarcodes)
-                .flatMapCompletable(this::processBarcode);
+    public boolean canProcessBarcode(@NonNull String url) {
+        return isDeepLink(url) && (CheckInManager.isSelfCheckInUrl(url) || MeetingManager.isPrivateMeeting(url));
     }
 
-    private Observable<Barcode> detectBarcodes(@NonNull InputImage image) {
-        return Observable.create(emitter -> scanner.process(image)
-                .addOnSuccessListener(barcodes -> {
-                    for (Barcode barcode : barcodes) {
-                        emitter.onNext(barcode);
-                    }
-                    emitter.onComplete();
-                })
-                .addOnFailureListener(emitter::tryOnError));
+    @Override
+    @NonNull
+    protected Completable processBarcode(@NonNull String barcodeData) {
+        return Completable.defer(() -> {
+            if (myLucaViewModel.canProcessBarcode(barcodeData)) {
+                ViewEvent<String> barcodeDataEvent = new ViewEvent<>(barcodeData);
+                return update(possibleDocumentData, barcodeDataEvent);
+            } else {
+                return process(barcodeData);
+            }
+        }).doOnSubscribe(disposable -> {
+            removeError(deepLinkError);
+            updateAsSideEffect(showCameraPreview, false);
+            updateAsSideEffect(isLoading, true);
+        }).doFinally(() -> updateAsSideEffect(isLoading, false));
     }
 
-    private Completable processBarcode(@NonNull Barcode barcode) {
-        return Maybe.fromCallable(barcode::getRawValue)
+    public Completable process(@NonNull String barcodeData) {
+        return Single.just(barcodeData)
                 .doOnSuccess(value -> Timber.d("Processing barcode: %s", value))
-                .filter(QrCodeViewModel::isDeepLink)
-                .doOnSuccess(deepLink -> notificationManager.vibrate().subscribe())
+                .doOnSuccess(deepLink -> getNotificationManager().vibrate().subscribe())
                 .flatMapCompletable(this::handleDeepLink);
     }
 
@@ -388,7 +368,7 @@ public class QrCodeViewModel extends BaseViewModel implements ImageAnalysis.Anal
             } else if (CheckInManager.isSelfCheckInUrl(url)) {
                 return handleSelfCheckInDeepLink(url);
             } else {
-                return Completable.complete();
+                return Completable.error(new Exception("Can't process the given data"));
             }
         })
                 .doOnSubscribe(disposable -> {
@@ -417,7 +397,7 @@ public class QrCodeViewModel extends BaseViewModel implements ImageAnalysis.Anal
                 .ignoreElement();
 
         Single<UUID> scannerId = getScannerIdFromUrl(url);
-        Single<String> additionalData = application.getRegistrationManager()
+        Single<String> additionalData = registrationManager
                 .getOrCreateRegistrationData()
                 .map(MeetingAdditionalData::new)
                 .map(meetingAdditionalData -> new Gson().toJson(meetingAdditionalData));
@@ -615,6 +595,10 @@ public class QrCodeViewModel extends BaseViewModel implements ImageAnalysis.Anal
 
     public LiveData<String> getPrivateMeetingUrl() {
         return privateMeetingUrl;
+    }
+
+    public LiveData<ViewEvent<String>> getPossibleDocumentData() {
+        return possibleDocumentData;
     }
 
 }

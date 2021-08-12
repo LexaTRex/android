@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <ImageView
+        android:id="@+id/backImageView"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_marginStart="@dimen/spacing_default"
+        android:src="@drawable/ic_back"
+        app:layout_constraintBottom_toTopOf="@id/headingSeparatorView"
+        app:layout_constraintEnd_toStartOf="@id/headingTextView"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:tint="?attr/colorOnSurface" />
+
+    <TextView
+        android:id="@+id/headingTextView"
+        style="@style/TextAppearance.Luca.Headline2"
+        android:layout_margin="@dimen/spacing_default"
+        android:text="@string/key_health_department_title"
+        app:layout_constraintStart_toEndOf="@id/backImageView"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <View
+        android:id="@+id/headingSeparatorView"
+        style="@style/HeaderSeparatorView"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/headingTextView" />
+
+    <androidx.constraintlayout.widget.Group
+        android:id="@+id/contentGroup"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="visible"
+        app:constraint_referenced_ids="descriptionTextView,transferKeyTextView,dateTextView,dateValueTextView,issuerTextView,issuerValueTextView,signedTextView,signedImageView,saveKeyMaterialButton" />
+
+    <TextView
+        android:id="@+id/transferKeyTextView"
+        style="@style/EmptyStateTitleTextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/spacing_default"
+        android:layout_marginTop="@dimen/spacing_default"
+        android:layout_marginEnd="@dimen/spacing_default"
+        android:text="@string/key_health_department_transfer_key"
+        android:textColor="#FFFFFF"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/headingSeparatorView" />
+
+    <TextView
+        android:id="@+id/descriptionTextView"
+        style="@style/TextAppearance.Luca.Body2"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/spacing_default"
+        android:layout_marginTop="@dimen/spacing_default"
+        android:layout_marginEnd="@dimen/spacing_default"
+        android:text="@string/key_health_department_description"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/transferKeyTextView" />
+
+    <!-- date -->
+    <TextView
+        android:id="@+id/dateTextView"
+        style="@style/TextAppearance.Luca.Body2"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/spacing_default"
+        android:layout_marginTop="@dimen/spacing_large"
+        android:text="@string/key_health_department_date"
+        app:layout_constraintEnd_toStartOf="@id/dateValueTextView"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/descriptionTextView" />
+
+    <TextView
+        android:id="@+id/dateValueTextView"
+        style="@style/TextAppearance.Luca.Body2"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="@dimen/spacing_default"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/dateTextView"
+        app:layout_constraintTop_toTopOf="@id/dateTextView"
+        tools:text="01.02.2021" />
+
+    <!-- issuer -->
+    <TextView
+        android:id="@+id/issuerTextView"
+        style="@style/EmptyStateDescriptionTextView"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/spacing_default"
+        android:layout_marginTop="@dimen/spacing_default"
+        android:text="@string/key_health_department_issuer"
+        app:layout_constraintEnd_toStartOf="@id/issuerValueTextView"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/dateTextView" />
+
+    <TextView
+        android:id="@+id/issuerValueTextView"
+        style="@style/TextAppearance.Luca.Body2"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="@dimen/spacing_default"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/issuerTextView"
+        app:layout_constraintTop_toTopOf="@id/issuerTextView"
+        tools:text="Health Department QS" />
+
+    <!-- signed -->
+    <TextView
+        android:id="@+id/signedTextView"
+        style="@style/TextAppearance.Luca.Body2"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/spacing_default"
+        android:layout_marginTop="@dimen/spacing_default"
+        android:text="@string/key_health_department_signed"
+        app:layout_constraintEnd_toStartOf="@id/issuerValueTextView"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/issuerValueTextView" />
+
+    <ImageView
+        android:id="@+id/signedImageView"
+        android:layout_width="16dp"
+        android:layout_height="16dp"
+        android:src="@drawable/ic_key_signed"
+        app:layout_constraintBottom_toBottomOf="@id/signedTextView"
+        app:layout_constraintStart_toEndOf="@id/signedTextView"
+        app:layout_constraintTop_toTopOf="@id/signedTextView" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/saveKeyMaterialButton"
+        style="@style/Button.Luca.TertiaryActionButton"
+        android:layout_margin="@dimen/spacing_default"
+        android:text="@string/key_health_department_download_cert"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <ProgressBar
+        android:id="@+id/loadingProgressBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:indeterminateTint="?attr/colorOnSurface"
+        android:indeterminateTintMode="src_atop"
+        android:visibility="visible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

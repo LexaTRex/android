@@ -1,12 +1,12 @@
 package de.culture4life.luca.meeting;
 
-import de.culture4life.luca.LucaUnitTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.annotation.Config;
 
-import androidx.test.runner.AndroidJUnit4;
+import de.culture4life.luca.LucaUnitTest;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;

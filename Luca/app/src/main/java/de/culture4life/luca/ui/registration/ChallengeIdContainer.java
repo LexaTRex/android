@@ -1,9 +1,9 @@
 package de.culture4life.luca.ui.registration;
 
+import androidx.annotation.NonNull;
+
 import java.util.ArrayList;
 import java.util.Collection;
-
-import androidx.annotation.NonNull;
 
 public class ChallengeIdContainer extends ArrayList<String> {
 

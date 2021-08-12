@@ -1,8 +1,5 @@
 package de.culture4life.luca.ui;
 
-import com.google.android.material.dialog.MaterialAlertDialogBuilder;
-import com.google.android.material.snackbar.Snackbar;
-
 import android.Manifest;
 import android.content.Context;
 import android.os.Bundle;
@@ -16,17 +13,6 @@ import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ImageView;
 import android.widget.Toast;
-
-import com.tbruyelle.rxpermissions3.Permission;
-import com.tbruyelle.rxpermissions3.RxPermissions;
-
-import de.culture4life.luca.BuildConfig;
-import de.culture4life.luca.LucaApplication;
-import de.culture4life.luca.R;
-import de.culture4life.luca.ui.dialog.BaseDialogFragment;
-
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
 
 import androidx.annotation.CallSuper;
 import androidx.annotation.IdRes;
@@ -43,6 +29,19 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.fragment.FragmentNavigator;
+
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.google.android.material.snackbar.Snackbar;
+import com.tbruyelle.rxpermissions3.Permission;
+import com.tbruyelle.rxpermissions3.RxPermissions;
+
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
+
+import de.culture4life.luca.BuildConfig;
+import de.culture4life.luca.LucaApplication;
+import de.culture4life.luca.R;
+import de.culture4life.luca.ui.dialog.BaseDialogFragment;
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Observable;
@@ -72,6 +71,9 @@ public abstract class BaseFragment<ViewModelType extends BaseViewModel> extends 
     protected ImageView menuImageView;
 
     protected boolean initialized;
+
+    @Nullable
+    protected ImageView backImageView;
 
     @NonNull
     @CallSuper
@@ -165,7 +167,19 @@ public abstract class BaseFragment<ViewModelType extends BaseViewModel> extends 
 
     @CallSuper
     protected Completable initializeViews() {
-        return setupMenu();
+        return Completable.mergeArray(setupMenu(), setupBackButton());
+    }
+
+    protected Completable setupBackButton() {
+        return Completable.fromAction(() -> {
+            backImageView = getView().findViewById(R.id.backImageView);
+            if (backImageView == null) {
+                return;
+            }
+            backImageView.setOnClickListener(view -> {
+                navigationController.popBackStack();
+            });
+        });
     }
 
     protected Completable setupMenu() {
@@ -333,7 +347,7 @@ public abstract class BaseFragment<ViewModelType extends BaseViewModel> extends 
     protected void hideKeyboard() {
         View view = getView();
         Context context = getContext();
-        if (view == null && context == null) {
+        if (view == null || context == null) {
             Timber.w("Unable to hide keyboard, view or context not available");
             return;
         }

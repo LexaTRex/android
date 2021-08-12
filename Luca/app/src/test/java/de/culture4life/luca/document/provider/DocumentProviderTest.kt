@@ -18,8 +18,13 @@ class DocumentProviderTest {
         }
     }
 
-    private fun validateName(firstName: String, lastName: String, registeredFirstName: String, registeredLastName: String): Completable {
-        val document = object : ProvidedDocument() { }.apply {
+    private fun validateName(
+        firstName: String,
+        lastName: String,
+        registeredFirstName: String,
+        registeredLastName: String
+    ): Completable {
+        val document = object : ProvidedDocument() {}.apply {
             this.document.firstName = firstName
             this.document.lastName = lastName
         }
@@ -30,12 +35,22 @@ class DocumentProviderTest {
         return provider.validate(document, registration)
     }
 
-    private fun validateSucceeds(firstName: String, lastName: String, registeredFirstName: String, registeredLastName: String) {
+    private fun validateSucceeds(
+        firstName: String,
+        lastName: String,
+        registeredFirstName: String,
+        registeredLastName: String
+    ) {
         validateName(firstName, lastName, registeredFirstName, registeredLastName)
             .test().assertComplete()
     }
 
-    private fun validateFails(firstName: String, lastName: String, registeredFirstName: String, registeredLastName: String) {
+    private fun validateFails(
+        firstName: String,
+        lastName: String,
+        registeredFirstName: String,
+        registeredLastName: String
+    ) {
         validateName(firstName, lastName, registeredFirstName, registeredLastName)
             .test().assertError(DocumentVerificationException::class.java)
     }

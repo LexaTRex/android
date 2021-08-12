@@ -5,16 +5,16 @@ import com.google.gson.annotations.SerializedName
 
 data class DocumentProviderData(
 
-        @Expose
-        @SerializedName("name")
-        val name: String,
+    @Expose
+    @SerializedName("name")
+    val name: String,
 
-        @Expose
-        @SerializedName("publicKey")
-        val publicKey: String,
+    @Expose
+    @SerializedName("publicKey")
+    val publicKey: String,
 
-        @Expose
-        @SerializedName("fingerprint")
-        val fingerprint: String
+    @Expose
+    @SerializedName("fingerprint")
+    val fingerprint: String
 
 )

@@ -15,7 +15,7 @@ pipeline {
     }
 
     environment {
-        CONTAINER = 'harbor.seamlessme.local/seamlessme/android:build'
+        CONTAINER = 'harbor.seamlessme.local/luca-apps/android:base'
         QUOTE = '\\"'
         C4L_SIGNING_KEY_ALIAS = 'upload'
         COMMIT_HASH = sh(script: 'git rev-parse HEAD', returnStdout: true).trim()
@@ -44,6 +44,18 @@ pipeline {
                     cd Luca
                     docker run --rm -u $(id -u):$(id -g) -v `pwd`:/Luca ${CONTAINER} bash -c "cd /Luca/app; ./../gradlew :app:testDebug :app:testProduction"
                 '''
+            }
+        }
+        stage('Sonar') {
+            steps {
+                withSonarQubeEnv('sonarqube-luca') {
+                    sh '''
+                        cd Luca
+                        GENERAL_PARAMS="-PSONAR_HOST_URL=$SONAR_HOST_URL -PSONAR_AUTH_TOKEN=$SONAR_AUTH_TOKEN -PBRANCH_NAME=$BRANCH_NAME"
+                        CMD="cd /Luca/app; ./../gradlew :app:sonarqube --stacktrace $GENERAL_PARAMS"
+                        docker run --rm -u $(id -u):$(id -g) -v `pwd`:/Luca ${CONTAINER} bash -c "$CMD"
+                    '''
+                }
             }
         }
         stage('Build Dev APK') {

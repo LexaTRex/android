@@ -1,14 +1,14 @@
 package de.culture4life.luca.registration;
 
-import de.culture4life.luca.BuildConfig;
-import de.culture4life.luca.LucaApplication;
+import androidx.test.platform.app.InstrumentationRegistry;
 
 import org.junit.Assert;
 import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Test;
 
-import androidx.test.platform.app.InstrumentationRegistry;
+import de.culture4life.luca.BuildConfig;
+import de.culture4life.luca.LucaApplication;
 
 import static org.junit.Assert.assertFalse;
 

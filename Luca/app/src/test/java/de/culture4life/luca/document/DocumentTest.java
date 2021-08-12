@@ -74,7 +74,7 @@ public class DocumentTest {
     @Test
     public void getExpirationDuration_typePositivePcr_isSixMonths() {
         document.setOutcome(Document.OUTCOME_POSITIVE);
-        assertEquals(TimeUnit.DAYS.toMillis(30*6), document.getExpirationDuration(Document.TYPE_PCR));
+        assertEquals(TimeUnit.DAYS.toMillis(30 * 6), document.getExpirationDuration(Document.TYPE_PCR));
     }
 
     @Test

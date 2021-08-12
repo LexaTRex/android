@@ -1,13 +1,13 @@
 package de.culture4life.luca.document;
 
+import androidx.annotation.IntDef;
+
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
 import java.lang.annotation.Retention;
 import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
-
-import androidx.annotation.IntDef;
 
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
@@ -318,7 +318,7 @@ public class Document {
 
     /**
      * @return timestamp from which the document becomes valid. This is immediately for tests and
-     *         after two weeks for vaccinations.
+     * after two weeks for vaccinations.
      */
     public long getValidityStartTimestamp() {
         if (validityStartTimestamp != 0) {
@@ -372,7 +372,7 @@ public class Document {
 
     /**
      * @return true if this document is a valid recovery certificate. This is the case when it is a
-     *  positive PCR test older than 14 days but no more than 6 months.
+     * positive PCR test older than 14 days but no more than 6 months.
      */
     public boolean isValidRecovery() {
         if (type == TYPE_RECOVERY || (type == TYPE_PCR && outcome == OUTCOME_POSITIVE)) {

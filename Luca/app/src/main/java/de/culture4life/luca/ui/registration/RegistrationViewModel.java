@@ -1,10 +1,23 @@
 package de.culture4life.luca.ui.registration;
 
+import android.app.Application;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
+
 import com.google.i18n.phonenumbers.NumberParseException;
 import com.google.i18n.phonenumbers.PhoneNumberUtil;
 import com.google.i18n.phonenumbers.Phonenumber;
 
-import android.app.Application;
+import java.net.HttpURLConnection;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 import de.culture4life.luca.LucaApplication;
 import de.culture4life.luca.R;
@@ -16,19 +29,6 @@ import de.culture4life.luca.registration.RegistrationManager;
 import de.culture4life.luca.ui.BaseViewModel;
 import de.culture4life.luca.ui.ViewError;
 import de.culture4life.luca.util.TimeUtil;
-
-import java.net.HttpURLConnection;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.concurrent.TimeUnit;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MutableLiveData;
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Maybe;
@@ -617,7 +617,9 @@ public class RegistrationViewModel extends BaseViewModel {
     }
 
     static boolean isValidPostalCode(String postalCode) {
-        return postalCode.length() == 5 && isInteger(postalCode);
+        return postalCode.matches("^[a-zA-Z0-9]*$")
+                && postalCode.length() >= 3
+                && postalCode.length() <= 15;
     }
 
     static boolean isValidCity(String city) {

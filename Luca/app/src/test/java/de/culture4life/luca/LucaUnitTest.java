@@ -1,10 +1,10 @@
 package de.culture4life.luca;
 
+import androidx.test.core.app.ApplicationProvider;
+
 import net.lachlanmckee.timberjunit.TimberTestRule;
 
 import org.junit.Rule;
-
-import androidx.test.core.app.ApplicationProvider;
 
 public class LucaUnitTest {
 

@@ -1,8 +1,8 @@
 package de.culture4life.luca.ui.registration;
 
-import java.util.Objects;
-
 import androidx.annotation.NonNull;
+
+import java.util.Objects;
 
 public class VerificationException extends Exception {
 

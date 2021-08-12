@@ -2,13 +2,13 @@ package de.culture4life.luca.util;
 
 import android.content.Context;
 
-import de.culture4life.luca.R;
+import androidx.annotation.NonNull;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.concurrent.TimeUnit;
 
-import androidx.annotation.NonNull;
+import de.culture4life.luca.R;
 import io.reactivex.rxjava3.core.Single;
 
 public final class TimeUtil {

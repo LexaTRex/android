@@ -1,5 +1,8 @@
 package de.culture4life.luca.ui.registration;
 
+import androidx.test.core.app.ApplicationProvider;
+import androidx.test.runner.AndroidJUnit4;
+
 import com.google.i18n.phonenumbers.PhoneNumberUtil;
 
 import org.junit.Assert;
@@ -7,9 +10,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.annotation.Config;
-
-import androidx.test.core.app.ApplicationProvider;
-import androidx.test.runner.AndroidJUnit4;
 
 import static org.junit.Assert.assertEquals;
 
@@ -68,7 +68,7 @@ public class RegistrationViewModelTest {
                 "a@b.de",
                 "user.name@nexenio.com",
         }) {
-            Assert.assertTrue(emailString, viewModel.isValidEMailAddress(emailString));
+            Assert.assertTrue(emailString, RegistrationViewModel.isValidEMailAddress(emailString));
         }
     }
 
@@ -79,8 +79,47 @@ public class RegistrationViewModelTest {
                 "@",
                 "user name",
         }) {
-            Assert.assertFalse(emailString, viewModel.isValidEMailAddress(emailString));
+            Assert.assertFalse(emailString, RegistrationViewModel.isValidEMailAddress(emailString));
         }
     }
 
+    @Test
+    public void isValidPostalCode_tenCharsWithLetters_isValid() {
+        Assert.assertTrue(RegistrationViewModel.isValidPostalCode("12345678AB"));
+    }
+
+    @Test
+    public void isValidPostalCode_fiveNumbers_isValid() {
+        Assert.assertTrue(RegistrationViewModel.isValidPostalCode("12345"));
+    }
+
+    @Test
+    public void isValidPostalCode_fourNumbers_isValid() {
+        Assert.assertTrue(RegistrationViewModel.isValidPostalCode("1234"));
+    }
+
+    @Test
+    public void isValidPostalCode_threeNumbers_isValid() {
+        Assert.assertTrue(RegistrationViewModel.isValidPostalCode("123"));
+    }
+
+    @Test
+    public void isValidPostalCode_hasSpecialsChars_isInvalid() {
+        Assert.assertFalse(RegistrationViewModel.isValidPostalCode("12345!"));
+    }
+
+    @Test
+    public void isValidPostalCode_isEmpty_isInvalid() {
+        Assert.assertFalse(RegistrationViewModel.isValidPostalCode(""));
+    }
+
+    @Test
+    public void isValidPostalCode_hasMoreThenFifteenChars_isInvalid() {
+        Assert.assertFalse(RegistrationViewModel.isValidPostalCode("1234567890123456"));
+    }
+
+    @Test
+    public void isValidPostalCode_twoChars_isInvalid() {
+        Assert.assertFalse(RegistrationViewModel.isValidPostalCode("12"));
+    }
 }

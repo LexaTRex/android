@@ -11,15 +11,15 @@ import android.os.Bundle;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 
-import de.culture4life.luca.Manager;
-import de.culture4life.luca.R;
-import de.culture4life.luca.service.LucaService;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.annotation.StringRes;
 import androidx.core.app.NotificationCompat;
+
+import de.culture4life.luca.Manager;
+import de.culture4life.luca.R;
+import de.culture4life.luca.service.LucaService;
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Maybe;
 
@@ -97,7 +97,7 @@ public class LucaNotificationManager extends Manager {
      * later.
      *
      * @see <a href="https://developer.android.com/preview/features/notification-channels.html">Notification
-     *         Channels</a>
+     * Channels</a>
      */
     @RequiresApi(api = Build.VERSION_CODES.O)
     private void createNotificationChannels() {

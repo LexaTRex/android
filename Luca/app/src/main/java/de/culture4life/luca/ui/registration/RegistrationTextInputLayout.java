@@ -1,12 +1,12 @@
 package de.culture4life.luca.ui.registration;
 
-import com.google.android.material.textfield.TextInputLayout;
-
 import android.content.Context;
 import android.util.AttributeSet;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+
+import com.google.android.material.textfield.TextInputLayout;
 
 public class RegistrationTextInputLayout extends TextInputLayout {
 

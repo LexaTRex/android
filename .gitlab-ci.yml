@@ -16,7 +16,7 @@ cache:
 build:
   stage: build
   script:
-  - ./gradlew :app:test
+  - ./gradlew :app:testDebug :app:testProduction
   artifacts:
     when: always
     reports:

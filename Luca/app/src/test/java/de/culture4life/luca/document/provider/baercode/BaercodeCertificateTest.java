@@ -1,5 +1,7 @@
 package de.culture4life.luca.document.provider.baercode;
 
+import androidx.test.runner.AndroidJUnit4;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -13,8 +15,6 @@ import java.security.cert.CertPathValidatorException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.List;
-
-import androidx.test.runner.AndroidJUnit4;
 
 @Config(sdk = 28)
 @RunWith(AndroidJUnit4.class)

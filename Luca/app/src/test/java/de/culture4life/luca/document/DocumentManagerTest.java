@@ -1,5 +1,16 @@
 package de.culture4life.luca.document;
 
+import androidx.test.runner.AndroidJUnit4;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.robolectric.annotation.Config;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+
 import de.culture4life.luca.BuildConfig;
 import de.culture4life.luca.LucaUnitTest;
 import de.culture4life.luca.crypto.CryptoManager;
@@ -12,17 +23,7 @@ import de.culture4life.luca.network.pojo.DocumentProviderData;
 import de.culture4life.luca.network.pojo.DocumentProviderDataList;
 import de.culture4life.luca.preference.PreferencesManager;
 import de.culture4life.luca.registration.RegistrationManager;
-
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.robolectric.annotation.Config;
-
-import java.util.Collections;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-
-import androidx.test.runner.AndroidJUnit4;
+import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Maybe;
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.core.Single;
@@ -34,6 +35,7 @@ import static de.culture4life.luca.document.provider.opentestcheck.OpenTestCheck
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
 
@@ -117,6 +119,7 @@ public class DocumentManagerTest extends LucaUnitTest {
     @Test
     public void reimportDocuments_validDocuments_reImportsDocuments() {
         assumeTrue("Only run on debug where we ignore the expiry time", BuildConfig.DEBUG);
+        doReturn(Completable.complete()).when(documentManager).unredeemDocument(any());
 
         Document validDocument = new Appointment(VALID_APPOINTMENT).getDocument();
         Document invalidDocument = new OpenTestCheckDocument(UNVERIFIED_TEST_RESULT).getDocument();

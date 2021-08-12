@@ -2,6 +2,8 @@ package de.culture4life.luca.crypto;
 
 import android.util.Base64;
 
+import androidx.test.runner.AndroidJUnit4;
+
 import com.nexenio.rxkeystore.RxKeyStore;
 import com.nexenio.rxkeystore.util.RxBase64;
 
@@ -13,8 +15,6 @@ import org.robolectric.annotation.Config;
 import java.math.BigInteger;
 import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
-
-import androidx.test.runner.AndroidJUnit4;
 
 @Config(sdk = 28)
 @RunWith(AndroidJUnit4.class)

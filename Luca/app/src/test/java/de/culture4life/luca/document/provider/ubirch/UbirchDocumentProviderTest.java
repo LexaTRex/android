@@ -1,15 +1,15 @@
 package de.culture4life.luca.document.provider.ubirch;
 
-import de.culture4life.luca.registration.RegistrationData;
-import de.culture4life.luca.document.DocumentParsingException;
-import de.culture4life.luca.document.DocumentVerificationException;
+import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.annotation.Config;
 
-import androidx.test.runner.AndroidJUnit4;
+import de.culture4life.luca.document.DocumentParsingException;
+import de.culture4life.luca.document.DocumentVerificationException;
+import de.culture4life.luca.registration.RegistrationData;
 
 import static org.junit.Assert.assertEquals;
 

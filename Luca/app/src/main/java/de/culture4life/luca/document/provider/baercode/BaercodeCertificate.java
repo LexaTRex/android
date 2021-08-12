@@ -4,7 +4,7 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Build;
 
-import de.culture4life.luca.LucaApplication;
+import androidx.annotation.NonNull;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -30,7 +30,7 @@ import java.util.Set;
 
 import javax.net.ssl.TrustManagerFactory;
 
-import androidx.annotation.NonNull;
+import de.culture4life.luca.LucaApplication;
 
 class BaercodeCertificate {
 
@@ -97,7 +97,7 @@ class BaercodeCertificate {
             parameters.addCertPathChecker(checker);
             X509CertSelector selector = new X509CertSelector();
             selector.addSubjectAlternativeName(2 /* for DNS, see RFC 5280 Page 38 */, AUTHORITY_BAERCODE_DE);
-            selector.setKeyUsage(new boolean[] {true, false, false, false, false, false, false, false, false});
+            selector.setKeyUsage(new boolean[]{true, false, false, false, false, false, false, false, false});
             parameters.setTargetCertConstraints(selector);
         } else {
             parameters.setRevocationEnabled(false);

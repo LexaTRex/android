@@ -7,9 +7,9 @@ import com.google.gson.annotations.SerializedName;
  * allowing health departments to reconstruct an infected guest's check-in history.
  *
  * @see <a href="https://www.luca-app.de/securityoverview/properties/secrets.html#term-guest-data-transfer-object">Security
- *         Overview: Glossary</a>
+ * Overview: Glossary</a>
  * @see <a href="https://www.luca-app.de/securityoverview/processes/tracing_access_to_history.html#reconstructing-the-infected-guest-s-check-in-history">Security
- *         Overview: Reconstructing the Infected Guest’s Check-In History</a>
+ * Overview: Reconstructing the Infected Guest’s Check-In History</a>
  */
 public class DataTransferRequestData {
 

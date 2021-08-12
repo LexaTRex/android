@@ -52,7 +52,10 @@ class EudccResult(encodedData: String, result: CertificateDecodingResult) : Prov
                     }
                 }
             }
-            throw DocumentParsingException("Could not parse EUDCC: ${error.error}", error.error.error)
+            throw DocumentParsingException(
+                "Could not parse EUDCC: ${error.error}",
+                error.error.error
+            )
         }
     }
 
@@ -94,7 +97,8 @@ class EudccResult(encodedData: String, result: CertificateDecodingResult) : Prov
                 val procedures = ArrayList<Procedure>()
                 for (vaccination in vaccinations) {
                     verifyCovid19(vaccination.disease)
-                    val type = VACCINATION_TYPES[vaccination.medicinalProduct] ?: Procedure.Type.UNKNOWN
+                    val type = VACCINATION_TYPES[vaccination.medicinalProduct]
+                        ?: Procedure.Type.UNKNOWN
                     val procedure = Procedure(
                         type, vaccination.dateOfVaccination.parseDate(),
                         vaccination.doseNumber, vaccination.totalSeriesOfDoses
@@ -137,7 +141,8 @@ class EudccResult(encodedData: String, result: CertificateDecodingResult) : Prov
                     validityStartTimestamp = it.certificateValidFrom.parseDate()
                     expirationTimestamp = it.certificateValidUntil.parseDate()
                 }
-                outcome = OUTCOME_FULLY_IMMUNE  // recoveries count as fully immune when in the validity time
+                outcome =
+                    OUTCOME_FULLY_IMMUNE  // recoveries count as fully immune when in the validity time
             }
         }
     }

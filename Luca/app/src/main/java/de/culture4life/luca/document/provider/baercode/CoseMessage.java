@@ -1,10 +1,10 @@
 package de.culture4life.luca.document.provider.baercode;
 
+import androidx.annotation.NonNull;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.cbor.databind.CBORMapper;
-
-import de.culture4life.luca.crypto.CryptoManager;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
@@ -17,7 +17,7 @@ import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
-import androidx.annotation.NonNull;
+import de.culture4life.luca.crypto.CryptoManager;
 
 class CoseMessage {
 

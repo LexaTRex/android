@@ -8,11 +8,11 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import de.culture4life.luca.R;
+import androidx.annotation.NonNull;
 
 import java.util.List;
 
-import androidx.annotation.NonNull;
+import de.culture4life.luca.R;
 import timber.log.Timber;
 
 public class HistoryListAdapter extends ArrayAdapter<HistoryListItem> {

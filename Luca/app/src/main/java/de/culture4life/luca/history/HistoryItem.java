@@ -1,5 +1,7 @@
 package de.culture4life.luca.history;
 
+import androidx.annotation.IntDef;
+
 import com.google.gson.Gson;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
@@ -11,8 +13,6 @@ import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
 import java.lang.annotation.Retention;
-
-import androidx.annotation.IntDef;
 
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 

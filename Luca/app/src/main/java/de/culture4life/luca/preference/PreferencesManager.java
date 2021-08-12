@@ -1,20 +1,15 @@
 package de.culture4life.luca.preference;
 
-import com.google.gson.GsonBuilder;
-
 import android.content.Context;
 
+import androidx.annotation.NonNull;
+
+import com.google.gson.GsonBuilder;
 import com.nexenio.rxpreferences.provider.BasePreferencesProvider;
 import com.nexenio.rxpreferences.provider.InMemoryPreferencesProvider;
 import com.nexenio.rxpreferences.provider.PreferencesProvider;
 import com.nexenio.rxpreferences.provider.TrayPreferencesProvider;
 import com.nexenio.rxpreferences.serializer.GsonSerializer;
-
-import de.culture4life.luca.BuildConfig;
-import de.culture4life.luca.LucaApplication;
-import de.culture4life.luca.Manager;
-import de.culture4life.luca.crypto.TraceIdWrapper;
-import de.culture4life.luca.history.HistoryItem;
 
 import net.grandcentrix.tray.TrayPreferences;
 import net.grandcentrix.tray.core.TrayStorage;
@@ -22,7 +17,11 @@ import net.grandcentrix.tray.core.TrayStorage;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 
-import androidx.annotation.NonNull;
+import de.culture4life.luca.BuildConfig;
+import de.culture4life.luca.LucaApplication;
+import de.culture4life.luca.Manager;
+import de.culture4life.luca.crypto.TraceIdWrapper;
+import de.culture4life.luca.history.HistoryItem;
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Maybe;
 import io.reactivex.rxjava3.core.Observable;

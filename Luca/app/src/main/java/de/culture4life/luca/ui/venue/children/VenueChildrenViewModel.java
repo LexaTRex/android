@@ -2,16 +2,16 @@ package de.culture4life.luca.ui.venue.children;
 
 import android.app.Application;
 
+import androidx.annotation.NonNull;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
+
 import de.culture4life.luca.R;
 import de.culture4life.luca.checkin.CheckInManager;
 import de.culture4life.luca.preference.PreferencesManager;
 import de.culture4life.luca.ui.BaseViewModel;
 import de.culture4life.luca.ui.ViewError;
 import de.culture4life.luca.util.StringSanitizeUtil;
-
-import androidx.annotation.NonNull;
-import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MutableLiveData;
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Single;
 
@@ -31,12 +31,6 @@ public class VenueChildrenViewModel extends BaseViewModel {
     public Completable initialize() {
         return super.initialize()
                 .andThen(restoreChildren());
-    }
-
-    void openVenueDetailsView() {
-        if (isCurrentDestinationId(R.id.venueChildrenFragment)) {
-            navigationController.navigate(R.id.action_venueChildFragment_to_venueDetailsFragment);
-        }
     }
 
     Completable addChild(@NonNull String childName) {

@@ -6,7 +6,21 @@ import android.app.Application;
 import android.content.pm.PackageManager;
 import android.os.Build;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
+import androidx.core.app.ActivityCompat;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
+
 import com.tbruyelle.rxpermissions3.Permission;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
+import java.util.Locale;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 import de.culture4life.luca.R;
 import de.culture4life.luca.checkin.CheckInData;
@@ -19,20 +33,6 @@ import de.culture4life.luca.ui.BaseViewModel;
 import de.culture4life.luca.ui.ViewError;
 import de.culture4life.luca.ui.venue.children.ChildListItem;
 import de.culture4life.luca.ui.venue.children.ChildListItemContainer;
-
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.List;
-import java.util.Locale;
-import java.util.UUID;
-import java.util.concurrent.TimeUnit;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.annotation.RequiresApi;
-import androidx.core.app.ActivityCompat;
-import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MutableLiveData;
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Flowable;
 import io.reactivex.rxjava3.core.Observable;
@@ -268,7 +268,7 @@ public class VenueDetailsViewModel extends BaseViewModel {
      * one by one.
      *
      * @return {@code true} if permissions are granted and location is active, {@code false}
-     *         otherwise.
+     * otherwise.
      */
     private boolean enableAutomaticCheckoutActivation() {
         if (ActivityCompat.checkSelfPermission(application, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -294,8 +294,8 @@ public class VenueDetailsViewModel extends BaseViewModel {
     public void setLocationConsentGiven() {
         modelDisposable.add(
                 preferenceManager.persist(KEY_LOCATION_CONSENT_GIVEN, true)
-                .subscribeOn(Schedulers.io())
-                .subscribe()
+                        .subscribeOn(Schedulers.io())
+                        .subscribe()
         );
     }
 

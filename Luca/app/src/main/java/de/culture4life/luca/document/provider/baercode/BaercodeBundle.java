@@ -2,9 +2,10 @@ package de.culture4life.luca.document.provider.baercode;
 
 import android.os.Build;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 
-import de.culture4life.luca.document.DocumentParsingException;
+import com.fasterxml.jackson.databind.JsonNode;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -16,8 +17,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.concurrent.TimeUnit;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.RequiresApi;
+import de.culture4life.luca.document.DocumentParsingException;
 
 /**
  * Baercode bundle data model

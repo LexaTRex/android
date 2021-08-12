@@ -17,9 +17,7 @@ import de.culture4life.luca.ui.myluca.MyLucaListItem
 import de.culture4life.luca.ui.myluca.SingleLucaItemView
 import kotlin.math.max
 
-class SingleMyLucaItemViewHolder(
-    val view: SingleLucaItemView,
-) : RecyclerView.ViewHolder(view) {
+class SingleMyLucaItemViewHolder(val view: SingleLucaItemView) : RecyclerView.ViewHolder(view) {
 
     val cardView: CardView = view.findViewById(R.id.cardView)
     val topContent: ViewGroup = view.findViewById(R.id.topContent)
@@ -67,9 +65,11 @@ class SingleMyLucaItemViewHolder(
         var labelAndTextView: ConstraintLayout? = labelTextView
         if (labelAndTextView == null) {
             val layoutInflater = LayoutInflater.from(container.context)
-            labelAndTextView = layoutInflater.inflate(R.layout.my_luca_label_and_text,
+            labelAndTextView = layoutInflater.inflate(
+                R.layout.my_luca_label_and_text,
                 container,
-                false) as ConstraintLayout
+                false
+            ) as ConstraintLayout
             container.addView(labelAndTextView)
         }
         val labelView = labelAndTextView.findViewById<TextView>(R.id.labelTextView)
@@ -92,13 +92,19 @@ class SingleMyLucaItemViewHolder(
 
     private fun setupDynamicContent(content: List<Pair<String, String>>, topContent: ViewGroup) {
         for (i in 0 until max(topContent.childCount, content.size)) {
-            val labelAndTextView = if (topContent.getChildAt(i) != null) topContent.getChildAt(i) as ConstraintLayout else null
+            val labelAndTextView = if (topContent.getChildAt(i) != null) {
+                topContent.getChildAt(i) as ConstraintLayout
+            } else {
+                null
+            }
             if (content.size > i) {
                 val labelAndText = content[i]
-                addLabelAndText(topContent,
+                addLabelAndText(
+                    topContent,
                     labelAndTextView,
                     labelAndText.first,
-                    labelAndText.second)
+                    labelAndText.second
+                )
             } else {
                 topContent.removeView(labelAndTextView)
             }

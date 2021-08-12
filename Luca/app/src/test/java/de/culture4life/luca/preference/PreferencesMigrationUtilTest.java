@@ -3,11 +3,11 @@ package de.culture4life.luca.preference;
 import com.nexenio.rxpreferences.provider.InMemoryPreferencesProvider;
 import com.nexenio.rxpreferences.provider.PreferencesProvider;
 
-import de.culture4life.luca.crypto.WrappedSecret;
-import de.culture4life.luca.history.HistoryItemContainer;
-
 import org.junit.Before;
 import org.junit.Test;
+
+import de.culture4life.luca.crypto.WrappedSecret;
+import de.culture4life.luca.history.HistoryItemContainer;
 
 import static de.culture4life.luca.crypto.CryptoManager.TRACING_SECRET_KEY_PREFIX;
 import static de.culture4life.luca.history.HistoryManager.KEY_HISTORY_ITEMS;
