@@ -6,6 +6,7 @@ import androidx.annotation.NonNull;
 
 import com.google.gson.GsonBuilder;
 import com.nexenio.rxpreferences.provider.BasePreferencesProvider;
+import com.nexenio.rxpreferences.provider.EncryptedSharedPreferencesProvider;
 import com.nexenio.rxpreferences.provider.InMemoryPreferencesProvider;
 import com.nexenio.rxpreferences.provider.PreferencesProvider;
 import com.nexenio.rxpreferences.provider.TrayPreferencesProvider;
@@ -13,9 +14,6 @@ import com.nexenio.rxpreferences.serializer.GsonSerializer;
 
 import net.grandcentrix.tray.TrayPreferences;
 import net.grandcentrix.tray.core.TrayStorage;
-
-import java.io.IOException;
-import java.security.GeneralSecurityException;
 
 import de.culture4life.luca.BuildConfig;
 import de.culture4life.luca.LucaApplication;
@@ -26,6 +24,7 @@ import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Maybe;
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.core.Single;
+import timber.log.Timber;
 
 public class PreferencesManager extends Manager implements PreferencesProvider {
 
@@ -47,15 +46,13 @@ public class PreferencesManager extends Manager implements PreferencesProvider {
             if (LucaApplication.isRunningUnitTests()) {
                 preferencesProvider = new InMemoryPreferencesProvider();
             } else {
-                try {
-                    preferencesProvider = new EncryptedSharedPreferencesProvider(context);
-                } catch (GeneralSecurityException | IOException e) {
-                    throw new RuntimeException(e);
-                }
+                preferencesProvider = new EncryptedSharedPreferencesProvider(context);
             }
             preferencesProvider.setSerializer(SERIALIZER);
             this.provider = preferencesProvider;
-        }).andThen(migratePreferencesIfRequired());
+        }).andThen(migratePreferencesIfRequired()
+                .doOnError(throwable -> Timber.e(throwable, "Unable to migrate preferences"))
+                .onErrorComplete());
     }
 
     private Completable migratePreferencesIfRequired() {

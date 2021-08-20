@@ -29,6 +29,7 @@
     <string name="action_update">Update</string>
     <string name="action_enable">Aktivieren</string>
     <string name="action_add">Hinzufügen</string>
+    <string name="action_copy">Kopieren</string>
 
     <!-- Errors -->
     <string name="error_generic_title">Etwas lief schief</string>
@@ -42,6 +43,8 @@
     <string name="error_qr_code_broken">QR-Code fehlerhaft. Bitte versuche es mit einem anderen.</string>
     <string name="error_certificate_pinning_title">Unerwartete Server Zertifikate</string>
     <string name="error_certificate_pinning_description">Wegen nicht vertrauenswürdigen Zertifikaten konnte keine sichere Verbindung zu den luca Servern hergestellt werden.\n\nBitte wechsle dein Netzwerk und vergewissere dich, dass du die aktuellste App Version nutzt.</string>
+    <string name="error_no_internet_connection_title">Keine Internetverbindung</string>
+    <string name="error_no_internet_connection_description">Der Vorgang konnte nicht durchgeführt werden. Bitte verbinde dich mit dem Internet und versuche es erneut.</string>
 
     <!-- Statuses -->
     <string name="status_check_out_in_progress">Du wirst ausgecheckt…</string>
@@ -183,8 +186,8 @@
     <string name="meeting_slider_content_description">Treffen beenden Schalter</string>
     <string name="meeting_was_ended_hint">Das Treffen wurde beendet</string>
 
-    <string name="meeting_join_heading">Privates Treffen</string>
-    <string name="meeting_join_description">Wenn du dich bei einem privaten Treffen eincheckst, werden deinem Gastgeber dein Vor- und Nachname angezeigt.\n\nPrivate Treffen sind nur Gedächtnisstützen und werden nicht mit dem Gesundheitsamt geteilt.</string>
+    <string name="meeting_join_heading">Check-in privates Treffen</string>
+    <string name="meeting_join_description">Wenn du fortfährst, checkst du dich bei einem privaten Treffen ein. Dabei wird dein Vor- und dein Nachname übermittelt.\n\nPrivate Treffen sind als Gedächtnisstütze für kleine Zusammenkünfte mit Freunden und Familie gedacht. Deshalb sehen Gastgeber:innen die Vor- und Nachnamen ihrer Gäste (und andersrum sehen Gäste die Vor- und Nachnamen ihrer Gastgeber:innen). Diese Daten stehen zwar in der Historie, können aber nicht mit Gesundheitsämtern geteilt werden.</string>
 
     <!-- Venues -->
     <string name="venue_heading">@string/dummy_heading</string>
@@ -205,15 +208,19 @@
     <string name="venue_check_in_document_redirect_title">Mit Import fortfahren?</string>
     <string name="venue_check_in_document_redirect_description">Hey, du scannst gerade den QR-Code eines Dokuments und nicht den eines luca-Standorts. Wenn du ein Dokument hinzufügen möchtest, klicke auf „WEITER“.</string>
 
-    <string name="venue_children_title">Kinder</string>
-    <string name="venue_children_empty_list_description">Kinder (bis 14&#160;Jahre) kannst du gemeinsam mit dir  einchecken. Gib hier an, wer dich begleitet.</string>
-    <string name="venue_children_list_description">Wähle die Kinder aus, die mit dir eingecheckt werden sollen.</string>
-    <string name="venue_children_add_description">Diese Information wird nicht an ein Gesundheitsamt weitergegeben, sie dient lediglich als Gedankenstütze. Wenn du deine Historie mit dem Gesundheitsamt teilst, kannst du die Namen der Kinder freiwillig dem Gesundheitsamt mitteilen.</string>
+    <string name="venue_children_title">Kinder einchecken</string>
+    <string name="add_children_title">Kinder hinzufügen</string>
+    <string name="venue_children_empty_list_description">Du kannst Kinder (bis 14&#160;Jahre) deiner App hinzufügen, um ihre Dokumente importieren und sie mit dir einchecken zu können.\n\nBitte achte dabei auf die Korrektheit der Angaben. Die Informationen werden nicht an das Gesundheitsamt weitergegeben, sie dienen lediglich der Gedankenstütze.</string>
+    <string name="venue_children_list_description">Du kannst Kinder (bis 14&#160;Jahre) deiner App hinzufügen, um ihre Dokumente importieren und sie mit dir einchecken zu können. Die Informationen werden nicht an das Gesundheitsamt weitergegeben, sie dienen lediglich der Gedankenstütze.</string>
+    <string name="venue_children_add_description">Bitte gib den vollständigen Namen deines Kindes an. Dokumente können nur hinzugefügt werden, wenn die Namen übereinstimmen.</string>
     <string name="venue_children_add">Kind hinzufügen</string>
     <string name="venue_children_add_validation_error">Bitte einen gültigen Namen eingeben</string>
     <string name="venue_children_add_error_title">Kind konnte nicht hinzugefügt werden</string>
     <string name="venue_children_remove_error_title">Kind konnte nicht entfernt werden</string>
-    <string name="venue_children_name">Name des Kindes</string>
+    <string name="venue_children_remove_confirmation_title">Änderungen speichern?</string>
+    <string name="venue_children_remove_confirmation_description">Beim Löschen eines Kindes werden auch alle dazugehörigen Dokumente gelöscht.</string>
+    <string name="venue_children_first_name_hint">Vorname des Kindes</string>
+    <string name="venue_children_last_name_hint">Nachname des Kindes</string>
     <string name="venue_children_check_in">Kinder einchecken</string>
 
     <string name="venue_check_out_error">Auschecken fehlgeschlagen</string>
@@ -257,6 +264,7 @@
     <string name="history_check_in_description"><xliff:g example="neXenio Office" id="locationName">%1$s</xliff:g></string>
     <string name="history_check_out_title">Check-Out</string>
     <string name="history_check_out_description"><xliff:g example="neXenio Office" id="locationName">%1$s</xliff:g></string>
+    <string name="history_check_out_details">Trace ID: <xliff:g example="NQqYEFIVbxqh5FFRxbfD5A==" id="traceId">%1$s</xliff:g></string>
     <string name="history_meeting_started_title">@string/history_meeting_ended_title</string>
     <string name="history_meeting_ended_title">Privates Treffen</string>
     <string name="history_meeting_ended_description"><xliff:g example="- John Doe\n- Jane Doe" id="members">%1$s</xliff:g></string>
@@ -291,12 +299,16 @@
     <string name="time_error_action">Zu den Einstellungen</string>
     <string name="appointment_action">Termin buchen</string>
     <string name="document_import_action">Dokument Hinzufügen</string>
+    <string name="document_import_anyway_action">Trotzdem importieren</string>
     <string name="document_import_hint">Scanne den QR-Code deines Dokuments, um dieses zur App hinzuzufügen.</string>
     <string name="document_import_success_message">Das Dokument wurde importiert</string>
     <string name="document_import_consent">Hiermit erkläre ich mein Einverständnis gemäß Art. 9 (2) a) in Verbindung mit Art. 6 (1) 1 a) DSGVO zum Übermitteln einer pseudonymisierten Kennung im Zuge der lokalen Hinterlegung meines COVID-Tests, meines Genesen- oder Impfausweises in der luca App. Dies dient ausschließlich der Vorbeugung von Missbrauch, indem ein Dokument durch unterschiedliche Personen genutzt wird. Daher ist ein mehrfaches Importieren nicht möglich. Die Kennung eines Genesen- / Impfausweises wird durch die lokale Löschung des Dokuments in der App entfernt.</string>
     <string name="document_import_error_title">Das Dokument konnte nicht importiert werden</string>
     <string name="document_import_error_name_mismatch_description">Es konnte nicht validiert werden, dass dieses Dokument für dich erstellt wurde. Bitte prüfe, ob dein Name richtig in der App hinterlegt ist.</string>
+    <string name="document_import_error_name_mismatch_including_children_description">Es konnte nicht validiert werden, dass dieses Dokument für dich oder deine Kinder erstellt wurde. Bitte prüfe, ob die Namen richtig in der App hinterlegt sind.</string>
     <string name="document_import_error_invalid_signature_description">Die Signatur dieses Dokuments konnte nicht verifiziert werden. Der Aussteller wird möglicherweise noch nicht von luca unterstützt.</string>
+    <string name="document_import_error_child_too_old_description">Dokumente für deine Kinder können nur hinzugefügt werden, wenn diese nicht älter als 14&#160;Jahre alt sind.</string>
+    <string name="document_import_error_time_in_future_description">Das Ausstellungsdatum des Dokuments liegt in der Zukunft. Du kannst nur Dokumente hinterlegen, die aktuell gültig sind.</string>
     <string name="document_import_error_expired_description">Leider kann das Dokument nicht importiert werden, da es bereits abgelaufen ist.</string>
     <string name="document_import_error_already_imported_description">Dieses Dokument wurde bereits importiert.</string>
     <string name="document_import_error_not_negative_title">Hinzufügen nicht möglich</string>
@@ -307,6 +319,8 @@
     <string name="document_import_error_check_in_scanner_description">Dieser Scanner ist nur für das Hinzufügen von Dokumenten gedacht. Wenn du an einem Standort einchecken möchtest, wechsle in den Tab „Einchecken“ (unten links in der Navigationsleiste). Dort findest du die Funktion „Selbst einchecken“.</string>
     <string name="document_import_check_in_redirect_title">Mit Check-in fortfahren?</string>
     <string name="document_import_check_in_redirect_description">Hey, du scannst gerade den QR-Code eines luca-Standorts und keinen Dokument-QR-Code. Klicke „WEITER“ um eingecheckt zu werden.</string>
+    <string name="document_import_error_different_birth_dates_title">Vorgang fehlgeschlagen</string>
+    <string name="document_import_error_different_birth_dates_description">Das Dokument konnte nicht hinzugefügt werden, da die Geburtsdaten nicht übereinstimmen.</string>
     <string name="document_outcome_negative">Testergebnis Negativ</string>
     <string name="document_outcome_positive">Testergebnis Positiv</string>
     <string name="document_outcome_partially_immune">Teilweise Immunisiert %1$s</string>
@@ -399,6 +413,11 @@
     <string name="version_details_dialog_title">App Version</string>
     <string name="version_details_dialog_message">Du benutzt aktuell die Android App Version <xliff:g example="1.0.0" id="version_name">%1$s</xliff:g> (Release <xliff:g example="42" id="version_code">%2$d</xliff:g>).\n\nDen Quellcode findest du auf GitLab mit dem Commit Hash <xliff:g example="843cbaf2d9840624defe303c0c854385ee69d23f" id="commit_hash">%3$s</xliff:g>.</string>
     <string name="version_details_dialog_action">@string/action_ok</string>
+
+    <!-- GitLab dialog -->
+    <string name="gitlab_dialog_title">Zum Code Repository</string>
+    <string name="gitlab_dialog_message">luca ist Open Source. Uns ist wichtig, dass alle nachvollziehen können, wie das luca-System funktioniert und dass ein unabhängiger Feedback-Prozess möglich ist. Wenn du dir das ganz genau anschauen möchtest, findest du das Code Repository bei GitLab.</string>
+    <string name="gitlab_dialog_action">GitLab öffnen</string>
 
     <!-- Account deletion -->
     <string name="delete_account_dialog_title">Möchtest du deinen Account wirklich löschen?</string>

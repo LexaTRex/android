@@ -1,9 +1,10 @@
-package de.culture4life.luca.ui.venue.children;
+package de.culture4life.luca.ui.children;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-public class ChildListItem {
+@Deprecated
+public class LegacyChildListItem {
 
     @SerializedName("name")
     @Expose
@@ -13,8 +14,13 @@ public class ChildListItem {
     @Expose
     private boolean checked;
 
-    public ChildListItem(String name) {
+    public LegacyChildListItem(String name) {
         this.name = name;
+    }
+
+    public LegacyChildListItem(String name, boolean checked) {
+        this.name = name;
+        this.checked = checked;
     }
 
     public String getName() {

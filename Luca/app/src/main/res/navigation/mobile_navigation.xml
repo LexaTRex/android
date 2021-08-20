@@ -9,7 +9,13 @@
         android:id="@+id/myLucaFragment"
         android:name="de.culture4life.luca.ui.myluca.MyLucaFragment"
         android:label="@string/navigation_my_luca"
-        tools:layout="@layout/fragment_my_luca" />
+        tools:layout="@layout/fragment_my_luca" >
+
+        <action
+            android:id="@+id/action_myLucaFragment_to_childrenFragment"
+            app:destination="@id/childrenFragment" />
+
+    </fragment>
 
     <fragment
         android:id="@+id/qrCodeFragment"
@@ -39,7 +45,7 @@
 
     <fragment
         android:id="@+id/venueDetailFragment"
-        android:name="de.culture4life.luca.ui.venue.details.VenueDetailsFragment"
+        android:name="de.culture4life.luca.ui.venue.VenueDetailsFragment"
         android:label="@string/navigation_venue_details"
         tools:layout="@layout/fragment_venue_details">
         <action
@@ -56,8 +62,8 @@
             app:popUpToInclusive="true" />
 
         <action
-            android:id="@+id/action_venueDetailsFragment_to_venueChildFragment"
-            app:destination="@id/venueChildrenFragment" />
+            android:id="@+id/action_venueDetailsFragment_to_childrenFragment"
+            app:destination="@id/childrenFragment" />
     </fragment>
 
     <fragment
@@ -90,15 +96,10 @@
         tools:layout="@layout/fragment_accessed_data" />
 
     <fragment
-        android:id="@+id/venueChildrenFragment"
-        android:name="de.culture4life.luca.ui.venue.children.VenueChildrenFragment"
-        android:label="@string/venue_children_title"
-        tools:layout="@layout/fragment_adding_children">
-        <action
-            android:id="@+id/action_venueChildFragment_to_venueDetailsFragment"
-            app:destination="@id/venueDetailFragment" />
-
-    </fragment>
+        android:id="@+id/childrenFragment"
+        android:name="de.culture4life.luca.ui.children.ChildrenFragment"
+        android:label="@string/add_children_title"
+        tools:layout="@layout/fragment_adding_children" />
 
     <fragment
         android:id="@+id/registrationFragment"

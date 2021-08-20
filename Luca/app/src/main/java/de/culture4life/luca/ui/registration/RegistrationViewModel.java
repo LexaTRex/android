@@ -61,7 +61,7 @@ public class RegistrationViewModel extends BaseViewModel {
     private final DocumentManager documentManager;
     private final PhoneNumberUtil phoneNumberUtil;
 
-    private final MutableLiveData<Double> progress = new MutableLiveData<>();
+    private final MutableLiveData<Double> progress = new MutableLiveData<>(0D);
     private final MutableLiveData<String> firstName = new MutableLiveData<>();
     private final MutableLiveData<String> lastName = new MutableLiveData<>();
     private final MutableLiveData<String> phoneNumber = new MutableLiveData<>();
@@ -74,9 +74,9 @@ public class RegistrationViewModel extends BaseViewModel {
     private final Map<LiveData<String>, MutableLiveData<Boolean>> validationStatuses;
     private final Map<LiveData<String>, BehaviorSubject<String>> formValueSubjects;
 
-    private final MutableLiveData<Boolean> shouldRequestNewVerificationTan = new MutableLiveData<>();
+    private final MutableLiveData<Boolean> shouldRequestNewVerificationTan = new MutableLiveData<>(true);
     private final MutableLiveData<Long> nextPossibleTanRequestTimestamp = new MutableLiveData<>();
-    private final MutableLiveData<Boolean> completed = new MutableLiveData<>();
+    private final MutableLiveData<Boolean> completed = new MutableLiveData<>(false);
 
     private RegistrationData registrationData;
     private ViewError registrationError;
@@ -91,10 +91,6 @@ public class RegistrationViewModel extends BaseViewModel {
         registrationManager = this.application.getRegistrationManager();
         documentManager = this.application.getDocumentManager();
         phoneNumberUtil = PhoneNumberUtil.getInstance();
-
-        progress.setValue(0D);
-        shouldRequestNewVerificationTan.setValue(true);
-        completed.setValue(false);
 
         formValueSubjects = new HashMap<>();
         validationStatuses = new HashMap<>();

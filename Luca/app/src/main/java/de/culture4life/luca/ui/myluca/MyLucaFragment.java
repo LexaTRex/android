@@ -4,8 +4,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Size;
 import android.view.View;
-import android.widget.ImageView;
-import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -14,22 +12,24 @@ import androidx.camera.core.CameraSelector;
 import androidx.camera.core.ImageAnalysis;
 import androidx.camera.core.Preview;
 import androidx.camera.lifecycle.ProcessCameraProvider;
-import androidx.camera.view.PreviewView;
 import androidx.core.content.ContextCompat;
 import androidx.lifecycle.LifecycleOwner;
 import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
+import androidx.viewbinding.ViewBinding;
 
 import com.google.android.material.button.MaterialButton;
-import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.common.util.concurrent.ListenableFuture;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 
 import de.culture4life.luca.R;
+import de.culture4life.luca.databinding.FragmentMyLucaBinding;
 import de.culture4life.luca.document.Document;
+import de.culture4life.luca.registration.Person;
 import de.culture4life.luca.ui.BaseFragment;
 import de.culture4life.luca.ui.dialog.BaseDialogFragment;
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
@@ -44,22 +44,15 @@ import static de.culture4life.luca.ui.BaseQrCodeViewModel.BARCODE_DATA_KEY;
 
 public class MyLucaFragment extends BaseFragment<MyLucaViewModel> implements MyLucaListAdapter.MyLucaListClickListener {
 
-    private MaterialCardView qrCodeCardView;
-    private PreviewView cameraPreviewView;
-    private View scanDocumentHintTextView;
-    private View loadingView;
-    private ImageView bookAppointmentImageView;
-    private ScrollView emptyStateScrollView;
-    private RecyclerView myLucaRecyclerView;
     private MyLucaListAdapter myLucaListAdapter;
-    private MaterialButton importTestButton;
-    private View blackBackgroundView;
     private ProcessCameraProvider cameraProvider;
     private Disposable cameraPreviewDisposable;
+    private FragmentMyLucaBinding binding;
 
     @Override
-    protected int getLayoutResource() {
-        return R.layout.fragment_my_luca;
+    protected ViewBinding getViewBinding() {
+        binding = FragmentMyLucaBinding.inflate(getLayoutInflater());
+        return binding;
     }
 
     @Override
@@ -99,50 +92,49 @@ public class MyLucaFragment extends BaseFragment<MyLucaViewModel> implements MyL
         return super.initializeViews()
                 .andThen(Completable.fromAction(() -> {
                     initializeMyLucaItemsViews();
-                    initializeEmptyStateViews();
                     initializeImportViews();
                     initializeTimeSyncErrorViews();
                 }));
     }
 
     private void initializeMyLucaItemsViews() {
-        TextView headingTextView = getView().findViewById(R.id.headingTextView);
-        observe(viewModel.getUserName(), headingTextView::setText);
-
-        myLucaRecyclerView = getView().findViewById(R.id.myLucaRecyclerView);
         myLucaListAdapter = new MyLucaListAdapter(this, this);
-        myLucaRecyclerView.setAdapter(myLucaListAdapter);
-        myLucaRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        binding.myLucaRecyclerView.setAdapter(myLucaListAdapter);
+        binding.myLucaRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        observe(viewModel.getMyLucaItems(), items -> myLucaListAdapter.setItems(items));
-    }
-
-    private void initializeEmptyStateViews() {
-        emptyStateScrollView = getView().findViewById(R.id.emptyStateScrollView);
+        binding.childAddingIconImageView.setOnClickListener(v -> viewModel.openChildrenView());
+        binding.childCounterTextView.setOnClickListener(view -> viewModel.openChildrenView());
+        observe(viewModel.getChildren(), children -> {
+            if (children.size() == 0) {
+                binding.childCounterTextView.setVisibility(View.GONE);
+            } else {
+                binding.childCounterTextView.setVisibility(View.VISIBLE);
+                binding.childCounterTextView.setText(String.valueOf(children.size()));
+            }
+        });
 
         observe(viewModel.getMyLucaItems(), items -> {
-            int emptyStateVisibility = items.isEmpty() ? View.VISIBLE : View.GONE;
-            int contentVisibility = !items.isEmpty() ? View.VISIBLE : View.GONE;
-            emptyStateScrollView.setVisibility(emptyStateVisibility);
-            myLucaRecyclerView.setVisibility(contentVisibility);
+            List<MyLucaListItemsWrapper> listItems = myLucaListAdapter.setItems(items, getPersons());
+            int emptyStateVisibility = listItems.isEmpty() ? View.VISIBLE : View.GONE;
+            int contentVisibility = !listItems.isEmpty() ? View.VISIBLE : View.GONE;
+            binding.emptyStateScrollView.setVisibility(emptyStateVisibility);
+            binding.myLucaRecyclerView.setVisibility(contentVisibility);
         });
     }
 
+    private ArrayList<Person> getPersons() {
+        ArrayList<Person> persons = new ArrayList<>();
+        persons.add(viewModel.getUser().getValue());
+        persons.addAll(viewModel.getChildren().getValue());
+        return persons;
+    }
+
     private void initializeImportViews() {
-        qrCodeCardView = getView().findViewById(R.id.cardView);
-        qrCodeCardView.setVisibility(View.GONE);
+        binding.cardView.setVisibility(View.GONE);
+        binding.bookAppointmentImageView.setOnClickListener(v -> viewModel.onAppointmentRequested());
+        binding.primaryActionButton.setOnClickListener(v -> toggleCameraPreview());
 
-        bookAppointmentImageView = getView().findViewById(R.id.bookAppointmentImageView);
-        bookAppointmentImageView.setOnClickListener(v -> viewModel.onAppointmentRequested());
-
-        importTestButton = getView().findViewById(R.id.primaryActionButton);
-        importTestButton.setOnClickListener(v -> toggleCameraPreview());
-
-        cameraPreviewView = getView().findViewById(R.id.cameraPreviewView);
-        scanDocumentHintTextView = getView().findViewById(R.id.scanDocumentHintTextView);
-        blackBackgroundView = getView().findViewById(R.id.blackBackground);
-        loadingView = getView().findViewById(R.id.loadingLayout);
-        observe(viewModel.getIsLoading(), loading -> loadingView.setVisibility(loading ? View.VISIBLE : View.GONE));
+        observe(viewModel.getIsLoading(), loading -> binding.loadingLayout.setVisibility(loading ? View.VISIBLE : View.GONE));
 
         observe(viewModel.getParsedDocument(), documentViewEvent -> {
             if (!documentViewEvent.hasBeenHandled()) {
@@ -179,6 +171,23 @@ public class MyLucaFragment extends BaseFragment<MyLucaViewModel> implements MyL
                         .setNegativeButton(R.string.action_cancel, (dialogInterface, i) -> {
                             // do nothing
                         })).show();
+            }
+        });
+
+        observe(viewModel.getShowBirthDateHint(), documentViewEvent -> {
+            if (!documentViewEvent.hasBeenHandled()) {
+                Document document = documentViewEvent.getValueAndMarkAsHandled();
+                new BaseDialogFragment(new MaterialAlertDialogBuilder(getContext())
+                        .setTitle(R.string.document_import_error_different_birth_dates_title)
+                        .setMessage(R.string.document_import_error_different_birth_dates_description)
+                        .setPositiveButton(R.string.action_ok, (dialogInterface, i) -> dialogInterface.dismiss())
+                        .setNeutralButton(R.string.document_import_anyway_action, (dialogInterface, i) -> {
+                            viewDisposable.add(viewModel.addDocument(document)
+                                    .onErrorComplete()
+                                    .subscribeOn(Schedulers.io())
+                                    .subscribe());
+                        }))
+                        .show();
             }
         });
     }
@@ -219,13 +228,13 @@ public class MyLucaFragment extends BaseFragment<MyLucaViewModel> implements MyL
     private void showCameraPreview() {
         cameraPreviewDisposable = getCameraPermission()
                 .doOnComplete(() -> {
-                    cameraPreviewView.setVisibility(View.VISIBLE);
-                    scanDocumentHintTextView.setVisibility(View.VISIBLE);
-                    qrCodeCardView.setVisibility(View.VISIBLE);
-                    blackBackgroundView.setVisibility(View.VISIBLE);
-                    myLucaRecyclerView.setVisibility(View.GONE);
-                    emptyStateScrollView.setVisibility(View.GONE);
-                    importTestButton.setText(R.string.action_cancel);
+                    binding.cameraPreviewView.setVisibility(View.VISIBLE);
+                    binding.scanDocumentHintTextView.setVisibility(View.VISIBLE);
+                    binding.cardView.setVisibility(View.VISIBLE);
+                    binding.blackBackground.setVisibility(View.VISIBLE);
+                    binding.myLucaRecyclerView.setVisibility(View.GONE);
+                    binding.emptyStateScrollView.setVisibility(View.GONE);
+                    binding.primaryActionButton.setText(R.string.action_cancel);
                 })
                 .andThen(startCameraPreview())
                 .doOnError(throwable -> Timber.w("Unable to show camera preview: %s", throwable.toString()))
@@ -241,13 +250,13 @@ public class MyLucaFragment extends BaseFragment<MyLucaViewModel> implements MyL
             cameraPreviewDisposable.dispose();
             cameraPreviewDisposable = null;
         }
-        scanDocumentHintTextView.setVisibility(View.GONE);
-        qrCodeCardView.setVisibility(View.GONE);
-        myLucaRecyclerView.setVisibility(View.VISIBLE);
-        blackBackgroundView.setVisibility(View.GONE);
+        binding.scanDocumentHintTextView.setVisibility(View.GONE);
+        binding.cardView.setVisibility(View.GONE);
+        binding.myLucaRecyclerView.setVisibility(View.VISIBLE);
+        binding.blackBackground.setVisibility(View.GONE);
         int emptyStateVisibility = myLucaListAdapter.getItemCount() == 0 ? View.VISIBLE : View.GONE;
-        emptyStateScrollView.setVisibility(emptyStateVisibility);
-        importTestButton.setText(R.string.document_import_action);
+        binding.emptyStateScrollView.setVisibility(emptyStateVisibility);
+        binding.primaryActionButton.setText(R.string.document_import_action);
     }
 
     public Completable startCameraPreview() {
@@ -280,7 +289,7 @@ public class MyLucaFragment extends BaseFragment<MyLucaViewModel> implements MyL
 
         imageAnalysis.setAnalyzer(Executors.newSingleThreadExecutor(), viewModel);
 
-        preview.setSurfaceProvider(cameraPreviewView.getSurfaceProvider());
+        preview.setSurfaceProvider(binding.cameraPreviewView.getSurfaceProvider());
         cameraProvider.bindToLifecycle((LifecycleOwner) getContext(), cameraSelector, imageAnalysis, preview);
     }
 
@@ -288,14 +297,13 @@ public class MyLucaFragment extends BaseFragment<MyLucaViewModel> implements MyL
         new BaseDialogFragment(new MaterialAlertDialogBuilder(getContext())
                 .setTitle(R.string.document_import_action)
                 .setMessage(R.string.document_import_consent)
-                .setPositiveButton(R.string.action_ok, (dialog, which) -> {
-                    viewDisposable.add(viewModel.addDocument(document)
-                            .subscribeOn(Schedulers.io())
-                            .subscribe(
-                                    () -> Timber.i("Document added: %s", document),
-                                    throwable -> Timber.w("Unable to add document: %s", throwable.toString())
-                            ));
-                })
+                .setPositiveButton(R.string.action_ok, (dialog, which) -> viewDisposable
+                        .add(viewModel.addDocumentIfBirthDatesMatch(document)
+                                .subscribeOn(Schedulers.io())
+                                .subscribe(
+                                        () -> Timber.i("Document added: %s", document),
+                                        throwable -> Timber.w("Unable to add document: %s", throwable.toString())
+                                )))
                 .setNegativeButton(R.string.action_cancel, (dialog, which) -> dialog.cancel()))
                 .show();
     }

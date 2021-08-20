@@ -1,10 +1,14 @@
 package de.culture4life.luca.network;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -17,8 +21,10 @@ import de.culture4life.luca.Manager;
 import de.culture4life.luca.network.endpoints.LucaEndpointsV3;
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Maybe;
+import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.core.Single;
 import io.reactivex.rxjava3.schedulers.Schedulers;
+import io.reactivex.rxjava3.subjects.BehaviorSubject;
 import okhttp3.CertificatePinner;
 import okhttp3.Credentials;
 import okhttp3.Interceptor;
@@ -29,6 +35,7 @@ import retrofit2.HttpException;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava3.RxJava3CallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
+import timber.log.Timber;
 
 public class NetworkManager extends Manager {
 
@@ -43,13 +50,24 @@ public class NetworkManager extends Manager {
     private LucaEndpointsV3 lucaEndpointsV3;
     private ConnectivityManager connectivityManager;
 
+    private final BehaviorSubject<Boolean> connectivityStateSubject = BehaviorSubject.create();
+
+    @Nullable
+    private BroadcastReceiver connectivityReceiver;
+
     public NetworkManager() {
         rxAdapter = RxJava3CallAdapterFactory.createWithScheduler(Schedulers.io());
     }
 
     @Override
     protected Completable doInitialize(@NonNull Context context) {
-        return Completable.fromAction(() -> connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE));
+        return initializeConnectivityReceiver();
+    }
+
+    @Override
+    public void dispose() {
+        super.dispose();
+        unregisterConnectivityReceiver();
     }
 
     private LucaEndpointsV3 createEndpoints() {
@@ -91,13 +109,14 @@ public class NetworkManager extends Manager {
 
         OkHttpClient.Builder builder = new OkHttpClient.Builder()
                 .addInterceptor(userAgentInterceptor)
-                .addInterceptor(timeoutInterceptor)
-                .certificatePinner(certificatePinner);
+                .addInterceptor(timeoutInterceptor);
 
         if (BuildConfig.DEBUG) {
             HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor();
             loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
             builder.addInterceptor(loggingInterceptor);
+        } else {
+            builder.certificatePinner(certificatePinner);
         }
 
         if (LucaApplication.IS_USING_STAGING_ENVIRONMENT) {
@@ -163,4 +182,36 @@ public class NetworkManager extends Manager {
         return expectedStatusCode == actualStatusCode;
     }
 
+    public Observable<Boolean> getConnectivityStateAndChanges() {
+        return connectivityStateSubject;
+    }
+
+    private Completable initializeConnectivityReceiver() {
+        return Completable.fromAction(() -> {
+            connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+
+            connectivityReceiver = new BroadcastReceiver() {
+                @Override
+                public void onReceive(Context context, Intent intent) {
+                    managerDisposable.add(
+                            isNetworkConnected()
+                                    .doOnSuccess(isConnected -> Timber.d("Connectivity state changed: isConnected=%b", isConnected))
+                                    .doOnSuccess(connectivityStateSubject::onNext)
+                                    .onErrorComplete()
+                                    .subscribe()
+                    );
+                }
+            };
+
+            context.registerReceiver(connectivityReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
+        });
+    }
+
+    private void unregisterConnectivityReceiver() {
+        if (connectivityReceiver != null) {
+            context.unregisterReceiver(connectivityReceiver);
+            connectivityReceiver = null;
+            connectivityStateSubject.onComplete();
+        }
+    }
 }

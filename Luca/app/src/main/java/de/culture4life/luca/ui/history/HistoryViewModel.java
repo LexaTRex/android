@@ -39,7 +39,6 @@ public class HistoryViewModel extends BaseViewModel {
 
     private final HistoryManager historyManager;
     private final DataAccessManager dataAccessManager;
-    private final PreferencesManager preferencesManager;
 
     private final SimpleDateFormat readableDateFormat;
 
@@ -53,7 +52,6 @@ public class HistoryViewModel extends BaseViewModel {
         super(application);
         historyManager = this.application.getHistoryManager();
         dataAccessManager = this.application.getDataAccessManager();
-        preferencesManager = this.application.getPreferencesManager();
         readableDateFormat = new SimpleDateFormat(application.getString(R.string.time_format), Locale.GERMANY);
     }
 
@@ -185,31 +183,35 @@ public class HistoryViewModel extends BaseViewModel {
             item.setTime(application.getString(R.string.history_time, getReadableTime(historyItem.getTimestamp())));
             switch (historyItem.getType()) {
                 case HistoryItem.TYPE_CHECK_IN: {
-                    // intended fall-through
+                    item.setTitle(historyItem.getDisplayName());
+                    break;
                 }
                 case HistoryItem.TYPE_CHECK_OUT: {
-                    item.setTitle(historyItem.getDisplayName());
-                    boolean accessed = dataAccessManager.hasBeenAccessed(historyItem.getRelatedId()).blockingGet();
+                    CheckOutItem checkOutItem = (CheckOutItem) historyItem;
+
+                    item.setTitle(checkOutItem.getDisplayName());
+
+                    boolean accessed = dataAccessManager.hasBeenAccessed(checkOutItem.getRelatedId()).blockingGet();
                     if (accessed) {
                         item.setAdditionalTitleDetails(application.getString(R.string.history_data_accessed_details));
                         item.setTitleIconResourceId(R.drawable.ic_eye);
+                    } else {
+                        item.setAdditionalTitleDetails(application.getString(R.string.history_check_out_details, checkOutItem.getRelatedId()));
+                        item.setTitleIconResourceId(R.drawable.ic_information_outline);
                     }
 
-                    if (historyItem instanceof CheckOutItem) {
-                        CheckOutItem checkOutItem = (CheckOutItem) historyItem;
-                        List<String> children = checkOutItem.getChildren();
-                        if (children != null && !children.isEmpty()) {
-                            String currentDescription = item.getDescription();
-                            StringBuilder builder = new StringBuilder();
-                            if (currentDescription != null) {
-                                builder = builder.append(currentDescription)
-                                        .append(System.lineSeparator());
-                            }
-                            builder = builder.append(application.getString(R.string.history_children_title, children.size()));
-                            item.setDescription(builder.toString());
-                            item.setAdditionalDescriptionDetails(application.getString(R.string.history_children_description, HistoryManager.createOrderedList(children)));
-                            item.setDescriptionIconResourceId(R.drawable.ic_information_outline);
+                    List<String> children = checkOutItem.getChildren();
+                    if (children != null && !children.isEmpty()) {
+                        String currentDescription = item.getDescription();
+                        StringBuilder builder = new StringBuilder();
+                        if (currentDescription != null) {
+                            builder = builder.append(currentDescription)
+                                    .append(System.lineSeparator());
                         }
+                        builder = builder.append(application.getString(R.string.history_children_title, children.size()));
+                        item.setDescription(builder.toString());
+                        item.setAdditionalDescriptionDetails(application.getString(R.string.history_children_description, HistoryManager.createOrderedList(children)));
+                        item.setDescriptionIconResourceId(R.drawable.ic_information_outline);
                     }
                     break;
                 }
@@ -247,7 +249,8 @@ public class HistoryViewModel extends BaseViewModel {
                 }
             }
             return item;
-        });
+        }).doOnError(throwable -> Timber.w("Unable to create history view item for %s: %s", historyItem, throwable.toString()))
+                .onErrorComplete();
     }
 
     public void onShareHistoryRequested(int days) {

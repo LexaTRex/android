@@ -12,22 +12,28 @@ import java.util.concurrent.TimeUnit;
 
 import de.culture4life.luca.LucaUnitTest;
 import de.culture4life.luca.checkin.CheckInData;
+import de.culture4life.luca.children.ChildrenManager;
+import de.culture4life.luca.crypto.CryptoManager;
+import de.culture4life.luca.network.NetworkManager;
 import de.culture4life.luca.preference.PreferencesManager;
-
-import static org.mockito.Mockito.spy;
+import de.culture4life.luca.registration.RegistrationManager;
 
 @RunWith(AndroidJUnit4.class)
 @Config(sdk = 28)
 public class HistoryManagerTest extends LucaUnitTest {
 
-    PreferencesManager preferencesManager;
+    ChildrenManager childrenManager;
     HistoryManager historyManager;
     CheckInData checkInData = new CheckInData();
 
     @Before
     public void setUp() {
-        preferencesManager = spy(new PreferencesManager());
-        historyManager = spy(new HistoryManager(preferencesManager));
+        PreferencesManager preferencesManager = new PreferencesManager();
+        NetworkManager networkManager = new NetworkManager();
+        CryptoManager cryptoManager = new CryptoManager(preferencesManager, networkManager);
+        RegistrationManager registrationManager = new RegistrationManager(preferencesManager, networkManager, cryptoManager);
+        childrenManager = new ChildrenManager(preferencesManager, registrationManager);
+        historyManager = new HistoryManager(preferencesManager, childrenManager);
         historyManager.initialize(application).blockingAwait();
 
         checkInData.setTraceId("asdf");

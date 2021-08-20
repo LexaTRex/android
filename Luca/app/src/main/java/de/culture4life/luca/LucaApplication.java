@@ -1,5 +1,7 @@
 package de.culture4life.luca;
 
+import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
+
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
@@ -31,6 +33,7 @@ import java.util.concurrent.TimeUnit;
 import javax.net.ssl.SSLPeerUnverifiedException;
 
 import de.culture4life.luca.checkin.CheckInManager;
+import de.culture4life.luca.children.ChildrenManager;
 import de.culture4life.luca.crypto.CryptoManager;
 import de.culture4life.luca.dataaccess.DataAccessManager;
 import de.culture4life.luca.document.DocumentManager;
@@ -58,8 +61,6 @@ import io.reactivex.rxjava3.schedulers.Schedulers;
 import rxdogtag2.RxDogTag;
 import timber.log.Timber;
 
-import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
-
 public class LucaApplication extends MultiDexApplication {
 
     public static final boolean IS_USING_STAGING_ENVIRONMENT = !BuildConfig.BUILD_TYPE.equals("production");
@@ -73,6 +74,7 @@ public class LucaApplication extends MultiDexApplication {
     private final LucaNotificationManager notificationManager;
     private final LocationManager locationManager;
     private final RegistrationManager registrationManager;
+    private final ChildrenManager childrenManager;
     private final CheckInManager checkInManager;
     private final MeetingManager meetingManager;
     private final HistoryManager historyManager;
@@ -105,14 +107,15 @@ public class LucaApplication extends MultiDexApplication {
         locationManager = new LocationManager();
         networkManager = new NetworkManager();
         geofenceManager = new GeofenceManager();
-        historyManager = new HistoryManager(preferencesManager);
         cryptoManager = new CryptoManager(preferencesManager, networkManager);
         genuinityManager = new GenuinityManager(preferencesManager, networkManager);
         registrationManager = new RegistrationManager(preferencesManager, networkManager, cryptoManager);
+        childrenManager = new ChildrenManager(preferencesManager, registrationManager);
+        historyManager = new HistoryManager(preferencesManager, childrenManager);
         meetingManager = new MeetingManager(preferencesManager, networkManager, locationManager, historyManager, cryptoManager);
         checkInManager = new CheckInManager(preferencesManager, networkManager, geofenceManager, locationManager, historyManager, cryptoManager, notificationManager);
         dataAccessManager = new DataAccessManager(preferencesManager, networkManager, notificationManager, checkInManager, historyManager, cryptoManager);
-        documentManager = new DocumentManager(preferencesManager, networkManager, historyManager, cryptoManager, registrationManager);
+        documentManager = new DocumentManager(preferencesManager, networkManager, historyManager, cryptoManager, registrationManager, childrenManager);
 
         applicationDisposable = new CompositeDisposable();
 
@@ -180,6 +183,7 @@ public class LucaApplication extends MultiDexApplication {
                 genuinityManager.initialize(this).subscribeOn(Schedulers.io()),
                 locationManager.initialize(this).subscribeOn(Schedulers.io()),
                 registrationManager.initialize(this).subscribeOn(Schedulers.io()),
+                childrenManager.initialize(this).subscribeOn(Schedulers.io()),
                 checkInManager.initialize(this).subscribeOn(Schedulers.io()),
                 historyManager.initialize(this).subscribeOn(Schedulers.io()),
                 dataAccessManager.initialize(this).subscribeOn(Schedulers.io()),
@@ -212,7 +216,7 @@ public class LucaApplication extends MultiDexApplication {
     }
 
     private Completable invokeAccessedDataUpdate() {
-        return Completable.fromAction(() -> applicationDisposable.add(dataAccessManager.update()
+        return Completable.fromAction(() -> applicationDisposable.add(dataAccessManager.updateIfNecessary()
                 .subscribeOn(Schedulers.io())
                 .subscribe(
                         () -> Timber.d("Updated accessed data"),
@@ -351,6 +355,17 @@ public class LucaApplication extends MultiDexApplication {
                 .startChooser();
     }
 
+    /**
+     * Delete the account data on backend and clear data locally.
+     */
+    public Completable deleteAccount() {
+        return documentManager.unredeemAndDeleteAllDocuments()
+                .andThen(registrationManager.deleteRegistrationOnBackend())
+                .andThen(registrationManager.deleteRegistrationData())
+                .andThen(cryptoManager.deleteAllKeyStoreEntries())
+                .andThen(preferencesManager.deleteAll());
+    }
+
     public Completable handleDeepLink(Uri uri) {
         return Completable.fromAction(() -> deepLink = uri.toString());
     }
@@ -455,6 +470,10 @@ public class LucaApplication extends MultiDexApplication {
 
     public RegistrationManager getRegistrationManager() {
         return registrationManager;
+    }
+
+    public ChildrenManager getChildrenManager() {
+        return childrenManager;
     }
 
     public CheckInManager getCheckInManager() {

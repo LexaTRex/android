@@ -2,19 +2,19 @@ package de.culture4life.luca.document.provider.ubirch;
 
 import android.util.Base64;
 
-import androidx.annotation.NonNull;
-
 import com.nexenio.rxkeystore.RxKeyStore;
 import com.nexenio.rxkeystore.provider.hash.RxHashProvider;
 import com.nexenio.rxkeystore.provider.hash.Sha256HashProvider;
 import com.nexenio.rxkeystore.util.RxBase64;
 
-import java.nio.charset.StandardCharsets;
-
 import de.culture4life.luca.document.DocumentParsingException;
 import de.culture4life.luca.document.DocumentVerificationException;
 import de.culture4life.luca.document.provider.DocumentProvider;
-import de.culture4life.luca.registration.RegistrationData;
+import de.culture4life.luca.registration.Person;
+
+import java.nio.charset.StandardCharsets;
+
+import androidx.annotation.NonNull;
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Single;
 import okhttp3.MediaType;
@@ -43,8 +43,8 @@ public class UbirchDocumentProvider extends DocumentProvider<UbirchDocument> {
     }
 
     @Override
-    public Completable validate(@NonNull UbirchDocument document, @NonNull RegistrationData registrationData) {
-        return super.validate(document, registrationData)
+    public Completable validate(@NonNull UbirchDocument document, @NonNull Person person) {
+        return super.validate(document, person)
                 .andThen(Single.fromCallable(document::toCompactJson)
                         .map(json -> json.getBytes(StandardCharsets.UTF_8))
                         .flatMap(HASH_PROVIDER::hash)

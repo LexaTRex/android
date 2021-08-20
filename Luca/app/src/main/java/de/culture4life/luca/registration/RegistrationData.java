@@ -152,4 +152,7 @@ public class RegistrationData {
         return getFirstName() + " " + getLastName();
     }
 
+    public Person getPerson() {
+        return new Person(getFirstName(), getLastName());
+    }
 }

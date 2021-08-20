@@ -217,6 +217,15 @@
         <item name="android:background">@android:color/white</item>
     </style>
 
+    <!-- Bottom Sheet -->
+
+    <style name="BottomSheetStyle" parent="Theme.Design.Light.BottomSheetDialog">
+        <item name="android:windowIsFloating">false</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:windowSoftInputMode">adjustResize</item>
+    </style>
+
+
     <!-- Registration -->
 
     <style name="Button.Luca.RegistrationButton" parent="Widget.Luca.Button.UnelevatedButton">

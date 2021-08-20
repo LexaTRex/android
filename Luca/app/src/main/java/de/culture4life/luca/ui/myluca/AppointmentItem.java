@@ -20,7 +20,7 @@ public class AppointmentItem extends TestResultItem {
         String time = context.getString(R.string.document_result_time, getReadableTime(getDateFormatFor(context, document), document.getResultTimestamp()));
 
         topContent.clear();
-        addTopContent(document.getLabName(), context.getString(R.string.unknown));
+        addTopContent(document.getLabName(), null);
         addTopContent(context.getString(R.string.document_issued_at), time);
 
         collapsedContent.clear();

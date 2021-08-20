@@ -18,18 +18,9 @@ class SingleLucaItemView @JvmOverloads constructor(
         true
     ) as ConstraintLayout
 
-    var withTopPadding = false
-
     init {
         val params = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT)
         this.layoutParams = params
-        val topPadding = if (withTopPadding) UiUtil.convertDpToPixel(8f, context).toInt() else 0
-        layout.setPadding(
-            layout.paddingLeft,
-            topPadding,
-            layout.paddingRight,
-            layout.paddingBottom
-        )
     }
 }
 

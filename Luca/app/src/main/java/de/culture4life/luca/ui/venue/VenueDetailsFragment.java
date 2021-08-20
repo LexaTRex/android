@@ -1,4 +1,4 @@
-package de.culture4life.luca.ui.venue.details;
+package de.culture4life.luca.ui.venue;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
@@ -92,6 +92,7 @@ public class VenueDetailsFragment extends BaseFragment<VenueDetailsViewModel> {
                     observe(viewModel.getShowAdditionalData(), value -> setAdditionalDataVisibility(value ? View.VISIBLE : View.GONE));
 
                     childCounterTextView = getView().findViewById(R.id.childCounterTextView);
+                    childCounterTextView.setOnClickListener(view -> viewModel.openChildrenView());
                     observe(viewModel.getChildCounter(), counter -> {
                         if (counter == 0) {
                             childCounterTextView.setVisibility(View.GONE);

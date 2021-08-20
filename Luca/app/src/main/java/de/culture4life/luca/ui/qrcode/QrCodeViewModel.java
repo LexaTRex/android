@@ -1,5 +1,8 @@
 package de.culture4life.luca.ui.qrcode;
 
+import static de.culture4life.luca.crypto.HashProvider.TRIMMED_HASH_LENGTH;
+import static de.culture4life.luca.registration.RegistrationManager.USER_ID_KEY;
+
 import android.app.Application;
 import android.graphics.Bitmap;
 import android.net.Uri;
@@ -53,9 +56,6 @@ import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.core.Single;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 import timber.log.Timber;
-
-import static de.culture4life.luca.crypto.HashProvider.TRIMMED_HASH_LENGTH;
-import static de.culture4life.luca.registration.RegistrationManager.USER_ID_KEY;
 
 public class QrCodeViewModel extends BaseQrCodeViewModel {
 
@@ -128,8 +128,7 @@ public class QrCodeViewModel extends BaseQrCodeViewModel {
     }
 
     private Completable observeNetworkChanges() {
-        return Observable.interval(0, 1, TimeUnit.SECONDS)
-                .flatMapSingle(tick -> application.getNetworkManager().isNetworkConnected())
+        return application.getNetworkManager().getConnectivityStateAndChanges()
                 .flatMapCompletable(isNetworkConnected -> update(networkAvailable, isNetworkConnected));
     }
 
@@ -377,11 +376,16 @@ public class QrCodeViewModel extends BaseQrCodeViewModel {
                     updateAsSideEffect(isLoading, true);
                 })
                 .doOnError(throwable -> {
-                    deepLinkError = createErrorBuilder(throwable)
+                    ViewError.Builder errorBuilder = createErrorBuilder(throwable)
                             .withTitle(R.string.error_check_in_failed)
                             .withResolveAction(handleDeepLink(url))
-                            .withResolveLabel(R.string.action_retry)
-                            .build();
+                            .withResolveLabel(R.string.action_retry);
+
+                    if (NetworkManager.isHttpException(throwable, HttpURLConnection.HTTP_NOT_FOUND)) {
+                        errorBuilder.withDescription(R.string.error_location_not_found);
+                    }
+
+                    deepLinkError = errorBuilder.build();
                     addError(deepLinkError);
                 })
                 .doFinally(() -> updateAsSideEffect(isLoading, false));

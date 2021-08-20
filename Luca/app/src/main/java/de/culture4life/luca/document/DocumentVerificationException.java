@@ -7,7 +7,9 @@ public class DocumentVerificationException extends DocumentImportException {
         INVALID_SIGNATURE,
         PROCEDURES_EMPTY,
         MIXED_TYPES_IN_PROCEDURES,
+        DATE_OF_BIRTH_TOO_OLD_FOR_CHILD,
         OUTCOME_UNKNOWN,
+        TIMESTAMP_IN_FUTURE,
         UNKNOWN
     }
 
@@ -47,8 +49,12 @@ public class DocumentVerificationException extends DocumentImportException {
                 return "Procedures size in baercode is empty";
             case MIXED_TYPES_IN_PROCEDURES:
                 return "Vaccination and non-vaccination types are mixed in procedures";
+            case DATE_OF_BIRTH_TOO_OLD_FOR_CHILD:
+                return "The date of birth is too old for being a child";
             case OUTCOME_UNKNOWN:
                 return "The outcome is unknown";
+            case TIMESTAMP_IN_FUTURE:
+                return "The timestamp of this document is in the future";
             case UNKNOWN:
             default:
                 return "Unknown verification error";

@@ -14,6 +14,8 @@ import java.util.concurrent.TimeUnit;
 
 import de.culture4life.luca.R;
 import de.culture4life.luca.checkin.CheckInManager;
+import de.culture4life.luca.children.Children;
+import de.culture4life.luca.children.ChildrenManager;
 import de.culture4life.luca.document.Document;
 import de.culture4life.luca.document.DocumentAlreadyImportedException;
 import de.culture4life.luca.document.DocumentExpiredException;
@@ -23,11 +25,13 @@ import de.culture4life.luca.document.DocumentVerificationException;
 import de.culture4life.luca.document.TestResultPositiveException;
 import de.culture4life.luca.genuinity.GenuinityManager;
 import de.culture4life.luca.meeting.MeetingManager;
+import de.culture4life.luca.registration.Person;
 import de.culture4life.luca.registration.RegistrationManager;
 import de.culture4life.luca.ui.BaseQrCodeViewModel;
 import de.culture4life.luca.ui.ViewError;
 import de.culture4life.luca.ui.ViewEvent;
 import de.culture4life.luca.ui.qrcode.QrCodeViewModel;
+import de.culture4life.luca.util.TimeUtil;
 import dgca.verifier.app.decoder.BuildConfig;
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Maybe;
@@ -41,13 +45,16 @@ public class MyLucaViewModel extends BaseQrCodeViewModel {
     private final DocumentManager documentManager;
     private final RegistrationManager registrationManager;
     private final GenuinityManager genuinityManager;
+    private final ChildrenManager childrenManager;
 
-    private final MutableLiveData<String> userName = new MutableLiveData<>();
+    private final MutableLiveData<Person> user = new MutableLiveData<>();
     private final MutableLiveData<List<MyLucaListItem>> myLucaItems = new MutableLiveData<>();
     private final MutableLiveData<ViewEvent<Document>> parsedDocument = new MutableLiveData<>();
     private final MutableLiveData<ViewEvent<Document>> addedDocument = new MutableLiveData<>();
     private final MutableLiveData<ViewEvent<String>> possibleCheckInData = new MutableLiveData<>();
-    private final MutableLiveData<Boolean> isGenuineTime = new MutableLiveData<>();
+    private final MutableLiveData<Boolean> isGenuineTime = new MutableLiveData<>(true);
+    private final MutableLiveData<Children> children = new MutableLiveData<>();
+    private final MutableLiveData<ViewEvent<Document>> showBirthDateHint = new MutableLiveData<>();
 
     private QrCodeViewModel qrCodeViewModel;
 
@@ -59,6 +66,7 @@ public class MyLucaViewModel extends BaseQrCodeViewModel {
         this.documentManager = this.application.getDocumentManager();
         this.registrationManager = this.application.getRegistrationManager();
         this.genuinityManager = this.application.getGenuinityManager();
+        this.childrenManager = this.application.getChildrenManager();
     }
 
     public void setupViewModelReference(FragmentActivity activity) {
@@ -74,12 +82,14 @@ public class MyLucaViewModel extends BaseQrCodeViewModel {
                 .andThen(Completable.mergeArray(
                         documentManager.initialize(application),
                         registrationManager.initialize(application),
-                        genuinityManager.initialize(application)
+                        genuinityManager.initialize(application),
+                        childrenManager.initialize(application)
                 ))
                 .andThen(updateUserName())
                 .andThen(invokeListUpdate())
                 .andThen(invokeIsGenuineTimeUpdate())
-                .andThen(handleApplicationDeepLinkIfAvailable());
+                .andThen(handleApplicationDeepLinkIfAvailable())
+                .andThen(updateChildCounter());
     }
 
     @Override
@@ -119,7 +129,7 @@ public class MyLucaViewModel extends BaseQrCodeViewModel {
 
     public Completable updateUserName() {
         return registrationManager.getOrCreateRegistrationData()
-                .flatMapCompletable(registrationData -> update(userName, registrationData.getFullName()));
+                .flatMapCompletable(registrationData -> update(user, registrationData.getPerson()));
     }
 
     private Completable updateList() {
@@ -270,10 +280,20 @@ public class MyLucaViewModel extends BaseQrCodeViewModel {
                     } else if (throwable instanceof DocumentVerificationException) {
                         switch (((DocumentVerificationException) throwable).getReason()) {
                             case NAME_MISMATCH:
-                                errorBuilder.withDescription(R.string.document_import_error_name_mismatch_description);
+                                if (childrenManager.hasChildren().blockingGet()) {
+                                    errorBuilder.withDescription(R.string.document_import_error_name_mismatch_including_children_description);
+                                } else {
+                                    errorBuilder.withDescription(R.string.document_import_error_name_mismatch_description);
+                                }
                                 break;
                             case INVALID_SIGNATURE:
                                 errorBuilder.withDescription(R.string.document_import_error_invalid_signature_description);
+                                break;
+                            case DATE_OF_BIRTH_TOO_OLD_FOR_CHILD:
+                                errorBuilder.withDescription(R.string.document_import_error_child_too_old_description);
+                                break;
+                            case TIMESTAMP_IN_FUTURE:
+                                errorBuilder.withDescription(R.string.document_import_error_time_in_future_description);
                                 break;
                         }
                     }
@@ -283,6 +303,16 @@ public class MyLucaViewModel extends BaseQrCodeViewModel {
                 })
                 .doFinally(() -> updateAsSideEffect(isLoading, false))
                 .subscribeOn(Schedulers.io());
+    }
+
+    public Completable addDocumentIfBirthDatesMatch(@NonNull Document document) {
+        return Completable.defer(() -> {
+            if (hasNonMatchingBirthDate(document, myLucaItems.getValue())) {
+                return update(showBirthDateHint, new ViewEvent<>(document));
+            } else {
+                return addDocument(document);
+            }
+        });
     }
 
     public Completable addDocument(@NonNull Document document) {
@@ -316,6 +346,38 @@ public class MyLucaViewModel extends BaseQrCodeViewModel {
                     addError(importError);
                 })
                 .doFinally(() -> updateAsSideEffect(isLoading, false));
+    }
+
+    void openChildrenView() {
+        navigationController.navigate(R.id.action_myLucaFragment_to_childrenFragment);
+    }
+
+    private Completable updateChildCounter() {
+        return childrenManager.getChildren()
+                .flatMapCompletable(children -> update(this.children, children));
+    }
+
+    protected static boolean hasNonMatchingBirthDate(@NonNull Document document, List<MyLucaListItem> myLucaItems) {
+        if (document.getType() != Document.TYPE_VACCINATION) {
+            return false;
+        }
+        for (MyLucaListItem myLucaListItem : myLucaItems) {
+            if (myLucaListItem instanceof VaccinationItem) {
+                Document oldDocument = myLucaListItem.getDocument();
+                if (hasNonMatchingBirthDate(document, oldDocument)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    static boolean hasNonMatchingBirthDate(@NonNull Document document1, @NonNull Document document2) {
+        long dateOfBirth1 = TimeUtil.getStartOfDayTimestamp(document1.getDateOfBirth()).blockingGet();
+        long dateOfBirth2 = TimeUtil.getStartOfDayTimestamp(document2.getDateOfBirth()).blockingGet();
+        return document2.getFirstName().equals(document1.getFirstName())
+                && document2.getLastName().equals(document1.getLastName())
+                && dateOfBirth2 != dateOfBirth1;
     }
 
     /*
@@ -367,8 +429,8 @@ public class MyLucaViewModel extends BaseQrCodeViewModel {
         return addedDocument;
     }
 
-    public LiveData<String> getUserName() {
-        return userName;
+    public LiveData<Person> getUser() {
+        return user;
     }
 
     public LiveData<ViewEvent<String>> getPossibleCheckInData() {
@@ -379,4 +441,11 @@ public class MyLucaViewModel extends BaseQrCodeViewModel {
         return isGenuineTime;
     }
 
+    public MutableLiveData<Children> getChildren() {
+        return children;
+    }
+
+    public LiveData<ViewEvent<Document>> getShowBirthDateHint() {
+        return showBirthDateHint;
+    }
 }

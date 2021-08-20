@@ -15,7 +15,7 @@
     <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
 
     <application
-        android:name="de.culture4life.luca.LucaApplication"
+        android:name=".LucaApplication"
         android:allowBackup="false"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -25,13 +25,13 @@
 
         <activity
             android:name=".ui.splash.SplashActivity"
+            android:exported="true"
             android:screenOrientation="portrait"
             android:theme="@style/Theme.Luca.DayNight.Splash">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-
             <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW" />
 
@@ -56,6 +56,7 @@
 
         <activity
             android:name=".ui.onboarding.OnboardingActivity"
+            android:exported="false"
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -64,27 +65,23 @@
 
         <activity
             android:name=".ui.terms.UpdatedTermsActivity"
-            android:screenOrientation="portrait"></activity>
+            android:exported="false"
+            android:screenOrientation="portrait" />
 
         <activity
-            android:name="de.culture4life.luca.ui.registration.RegistrationActivity"
-            android:screenOrientation="portrait">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-            </intent-filter>
-        </activity>
+            android:name=".ui.registration.RegistrationActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
 
         <activity
-            android:name="de.culture4life.luca.ui.MainActivity"
+            android:name=".ui.MainActivity"
+            android:exported="false"
             android:screenOrientation="portrait"
-            android:windowSoftInputMode="stateAlwaysHidden|adjustResize">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-            </intent-filter>
+            android:windowSoftInputMode="stateAlwaysHidden|adjustResize" />
 
-        </activity>
-
-        <service android:name="de.culture4life.luca.service.LucaService" />
+        <service
+            android:name=".service.LucaService"
+            android:exported="false" />
 
         <receiver android:name=".location.GeofenceBroadcastReceiver">
             <intent-filter>

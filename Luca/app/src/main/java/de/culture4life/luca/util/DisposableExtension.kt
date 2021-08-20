@@ -1,4 +1,4 @@
-package de.culture4life.luca.ui
+package de.culture4life.luca.util
 
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.disposables.Disposable

@@ -35,11 +35,8 @@ public class TestResultItem extends MyLucaListItem {
 
     }
 
-    protected final Document document;
-
     public TestResultItem(@NonNull Context context, @NonNull Document document) {
-        super(TYPE_TEST_RESULT);
-        this.document = document;
+        super(TYPE_TEST_RESULT, document);
 
         this.title = getReadableOutcome(context, document);
         this.provider = getReadableProvider(context, document.getProvider());
@@ -110,10 +107,6 @@ public class TestResultItem extends MyLucaListItem {
         } else {
             return new SimpleDateFormat(context.getString(R.string.time_format), Locale.GERMANY);
         }
-    }
-
-    public Document getDocument() {
-        return document;
     }
 
 }

@@ -1,7 +1,8 @@
 package de.culture4life.luca.ui.history;
 
-import static androidx.core.view.ViewCompat.IMPORTANT_FOR_ACCESSIBILITY_NO;
-
+import android.content.ClipData;
+import android.content.ClipboardManager;
+import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,6 +28,8 @@ import de.culture4life.luca.ui.UiUtil;
 import de.culture4life.luca.ui.dialog.BaseDialogFragment;
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Observable;
+
+import static androidx.core.view.ViewCompat.IMPORTANT_FOR_ACCESSIBILITY_NO;
 
 public class HistoryFragment extends BaseFragment<HistoryViewModel> {
 
@@ -127,7 +130,13 @@ public class HistoryFragment extends BaseFragment<HistoryViewModel> {
         new BaseDialogFragment(new MaterialAlertDialogBuilder(getContext())
                 .setTitle(item.getTitle())
                 .setMessage(additionalDetails)
-                .setPositiveButton(R.string.action_ok, (dialogInterface, i) -> dialogInterface.cancel()))
+                .setPositiveButton(R.string.action_ok, (dialogInterface, i) -> dialogInterface.cancel())
+                .setNeutralButton(R.string.action_copy, (dialogInterface, i) -> {
+                    String content = item.getTitle() + "\n" + item.getTime() + "\n" + additionalDetails;
+                    ClipboardManager clipboard = (ClipboardManager) getContext().getSystemService(Context.CLIPBOARD_SERVICE);
+                    ClipData clip = ClipData.newPlainText("luca", content);
+                    clipboard.setPrimaryClip(clip);
+                }))
                 .show();
     }
 

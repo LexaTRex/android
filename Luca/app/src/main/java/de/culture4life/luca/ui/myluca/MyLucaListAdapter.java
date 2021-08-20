@@ -16,25 +16,26 @@ import java.util.List;
 import java.util.Map;
 
 import de.culture4life.luca.R;
+import de.culture4life.luca.children.Child;
+import de.culture4life.luca.databinding.MyLucaListItemsSectionHeaderBinding;
+import de.culture4life.luca.registration.Person;
 import de.culture4life.luca.ui.myluca.viewholders.MultipleMyLucaItemViewHolder;
+import de.culture4life.luca.ui.myluca.viewholders.SectionHeaderViewHolder;
 import de.culture4life.luca.ui.myluca.viewholders.SingleMyLucaItemViewHolder;
 
 public class MyLucaListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     public interface MyLucaListClickListener {
-
         void onDelete(@NonNull MyLucaListItem myLucaListItem);
-
     }
 
     public interface MyLucaListItemExpandListener {
-
         void onExpand();
-
     }
 
     public static final int SINGLE_ITEM_VIEW_HOLDER = 0;
     public static final int MULTIPLE_ITEM_VIEW_HOLDER = 1;
+    public static final int SECTION_HEADER_ITEM_VIEW_HOLDER = 2;
 
     private final MyLucaListClickListener clickListener;
     private final Fragment fragment;
@@ -48,21 +49,26 @@ public class MyLucaListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
     }
 
     @Override
-    public @NonNull
-    RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         if (viewType == SINGLE_ITEM_VIEW_HOLDER) {
             SingleLucaItemView view = new SingleLucaItemView(parent.getContext());
             return new SingleMyLucaItemViewHolder(view);
-        } else {
+        } else if (viewType == MULTIPLE_ITEM_VIEW_HOLDER) {
             ViewGroup view = (ViewGroup) LayoutInflater.from(parent.getContext())
                     .inflate(R.layout.my_luca_list_items_viewpager, parent, false);
             return new MultipleMyLucaItemViewHolder(view);
+        } else if (viewType == SECTION_HEADER_ITEM_VIEW_HOLDER) {
+            MyLucaListItemsSectionHeaderBinding binding = MyLucaListItemsSectionHeaderBinding.inflate(LayoutInflater.from(parent.getContext()));
+            return new SectionHeaderViewHolder(binding);
+        } else {
+            throw new IllegalStateException(String.format("ViewType does not exist: ", viewType));
         }
     }
 
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder viewHolder, int position) {
-        List<MyLucaListItem> items = getItem(position).getItems();
+        MyLucaListItemsWrapper itemsWrapper = getItem(position);
+        List<MyLucaListItem> items = itemsWrapper.getItems();
 
         if (viewHolder.getItemViewType() == SINGLE_ITEM_VIEW_HOLDER) {
             SingleMyLucaItemViewHolder holder = (SingleMyLucaItemViewHolder) viewHolder;
@@ -76,7 +82,8 @@ public class MyLucaListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
 
             holder.show(item);
             holder.setListeners(expandClickListener, deleteClickListener);
-        } else {
+            setLeftPaddingForChild(holder.getView(), itemsWrapper.isChildSection());
+        } else if (viewHolder.getItemViewType() == MULTIPLE_ITEM_VIEW_HOLDER) {
             MyLucaListItemExpandListener expandClickListener = () -> {
                 for (int i = 0; i < items.size(); i++) {
                     MyLucaListItem item = items.get(i);
@@ -89,8 +96,7 @@ public class MyLucaListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
                     this.fragment,
                     items,
                     expandClickListener,
-                    clickListener,
-                    position
+                    clickListener
             );
             MultipleMyLucaItemViewHolder multipleHolder = (MultipleMyLucaItemViewHolder) viewHolder;
             multipleHolder.getViewPager().setAdapter(viewPagerAdapter);
@@ -99,7 +105,7 @@ public class MyLucaListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
                 public void onPageSelected(int positionInViewPager) {
                     multipleHolder.getPageIndicator().setSelected(positionInViewPager);
                     viewPagerPositionMap.put(hashCode, positionInViewPager);
-                    super.onPageSelected(position);
+                    super.onPageSelected(positionInViewPager);
                 }
             };
             multipleHolder.getViewPager().unregisterOnPageChangeCallback(pageChangeCallback);
@@ -107,7 +113,18 @@ public class MyLucaListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
             int viewPagerStarPos = viewPagerPositionMap.containsKey(hashCode) ? viewPagerPositionMap.get(hashCode) : items.size() - 1;
             multipleHolder.getViewPager().setCurrentItem(viewPagerStarPos, false);
             multipleHolder.getPageIndicator().setCount(items.size());
+
+            setLeftPaddingForChild(multipleHolder.getViewPager(), itemsWrapper.isChildSection());
+        } else if (viewHolder.getItemViewType() == SECTION_HEADER_ITEM_VIEW_HOLDER) {
+            MyLucaListItemsSectionHeaderBinding binding = ((SectionHeaderViewHolder) viewHolder).getBinding();
+            binding.personNameTextView.setText(itemsWrapper.getSectionHeader());
+            binding.personNameTextView.setCompoundDrawablesWithIntrinsicBounds(itemsWrapper.sectionDrawable(), 0, 0, 0);
         }
+    }
+
+    private void setLeftPaddingForChild(View view, boolean isChild) {
+        int margin = (int) view.getContext().getResources().getDimension(R.dimen.spacing_default);
+        view.setPadding(isChild ? margin : 0, 0, 0, 0);
     }
 
     private MyLucaListItemsWrapper getItem(int position) {
@@ -119,38 +136,66 @@ public class MyLucaListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
         return items.size();
     }
 
-    public void setItems(@NonNull List<MyLucaListItem> items) {
+    public List<MyLucaListItemsWrapper> setItems(@NonNull List<MyLucaListItem> items, List<Person> persons) {
+        List<MyLucaListItemsWrapper> sortedList = sortAndPairItems(items, persons);
         this.items.clear();
-        List<MyLucaListItemsWrapper> sortedList = sortAndPairItems(items);
         this.items.addAll(sortedList);
         notifyDataSetChanged();
+        return sortedList;
     }
 
     @Override
     public int getItemViewType(int position) {
         MyLucaListItemsWrapper item = this.items.get(position);
-        if (item.hasMultipleItems()) {
+        if (item.isSectionHeader()) {
+            return SECTION_HEADER_ITEM_VIEW_HOLDER;
+        } else if (item.hasMultipleItems()) {
             return MULTIPLE_ITEM_VIEW_HOLDER;
         } else {
             return SINGLE_ITEM_VIEW_HOLDER;
         }
     }
 
-    private static List<MyLucaListItemsWrapper> sortAndPairItems(List<MyLucaListItem> list) {
+    protected static List<MyLucaListItemsWrapper> sortAndPairItems(@NonNull List<MyLucaListItem> list, @NonNull List<Person> persons) {
+        List<MyLucaListItemsWrapper> myLucaItems = new ArrayList<>();
+        int visibleDocuments = 0;
+        for (Person person : persons) {
+            myLucaItems.add(new MyLucaListItemsWrapper(person.getFullName(), person instanceof Child));
+            List<MyLucaListItemsWrapper> items = sortedAndPairedItemsFor(list, person);
+            myLucaItems.addAll(items);
+            visibleDocuments += items.size();
+        }
+        if (visibleDocuments == 0) myLucaItems.clear();
+        return myLucaItems;
+    }
+
+    protected static List<MyLucaListItemsWrapper> sortedAndPairedItemsFor(@NonNull List<MyLucaListItem> list, @NonNull Person person) {
         List<MyLucaListItem> vaccinationItems = new ArrayList<>();
         List<MyLucaListItemsWrapper> sortedList = new ArrayList<>();
-        for (int i = 0; i < list.size(); i++) {
-            MyLucaListItem currentListItem = list.get(i);
-            if (currentListItem.getClass().equals(VaccinationItem.class)) {
-                vaccinationItems.add(currentListItem);
-            } else {
-                sortedList.add(new MyLucaListItemsWrapper(currentListItem));
+        for (MyLucaListItem listItem : list) {
+            if (isFrom(listItem, person)) {
+                if (listItem.getClass().equals(VaccinationItem.class)) {
+                    vaccinationItems.add(listItem);
+                } else {
+                    sortedList.add(new MyLucaListItemsWrapper(listItem, person instanceof Child));
+                }
             }
         }
-        if (!vaccinationItems.isEmpty())
-            sortedList.add(new MyLucaListItemsWrapper(vaccinationItems));
-
+        if (!vaccinationItems.isEmpty()) {
+            sortedList.add(new MyLucaListItemsWrapper(vaccinationItems, person instanceof Child));
+        }
         Collections.sort(sortedList, (first, second) -> Long.compare(second.getTimeStamp(), first.getTimeStamp()));
         return sortedList;
+    }
+
+    protected static boolean isFrom(@NonNull MyLucaListItem item, @NonNull Person person) {
+        String firstName = item.document.getFirstName();
+        String lastName = item.document.getLastName();
+        boolean isSameName = person.getFirstName().equals(firstName) && person.getLastName().equals(lastName);
+        if (person instanceof Child) {
+            return isSameName;
+        } else {
+            return isSameName || firstName == null;
+        }
     }
 }
