@@ -14,6 +14,8 @@ import java.util.NoSuchElementException;
 
 import de.culture4life.luca.BuildConfig;
 import de.culture4life.luca.Manager;
+import de.culture4life.luca.children.Children;
+import de.culture4life.luca.children.ChildrenManager;
 import de.culture4life.luca.crypto.CryptoManager;
 import de.culture4life.luca.crypto.HashProvider;
 import de.culture4life.luca.document.DocumentVerificationException.Reason;
@@ -30,6 +32,7 @@ import de.culture4life.luca.network.endpoints.LucaEndpointsV3;
 import de.culture4life.luca.network.pojo.DocumentProviderData;
 import de.culture4life.luca.network.pojo.DocumentProviderDataList;
 import de.culture4life.luca.preference.PreferencesManager;
+import de.culture4life.luca.registration.Person;
 import de.culture4life.luca.registration.RegistrationManager;
 import de.culture4life.luca.util.TimeUtil;
 import io.reactivex.rxjava3.core.BackpressureStrategy;
@@ -53,6 +56,7 @@ public class DocumentManager extends Manager {
     private final HistoryManager historyManager;
     private final CryptoManager cryptoManager;
     private final RegistrationManager registrationManager;
+    private final ChildrenManager childrenManager;
 
     private final AppointmentProvider appointmentProvider;
     private final UbirchDocumentProvider ubirchDocumentProvider;
@@ -62,12 +66,14 @@ public class DocumentManager extends Manager {
 
     private Documents documents;
 
-    public DocumentManager(@NonNull PreferencesManager preferencesManager, @NonNull NetworkManager networkManager, @NonNull HistoryManager historyManager, @NonNull CryptoManager cryptoManager, @NonNull RegistrationManager registrationManager) {
+    public DocumentManager(@NonNull PreferencesManager preferencesManager, @NonNull NetworkManager networkManager, @NonNull HistoryManager historyManager,
+                           @NonNull CryptoManager cryptoManager, @NonNull RegistrationManager registrationManager, @NonNull ChildrenManager childrenManager) {
         this.preferencesManager = preferencesManager;
         this.networkManager = networkManager;
         this.historyManager = historyManager;
         this.cryptoManager = cryptoManager;
         this.registrationManager = registrationManager;
+        this.childrenManager = childrenManager;
         this.appointmentProvider = new AppointmentProvider();
         this.ubirchDocumentProvider = new UbirchDocumentProvider();
         this.openTestCheckDocumentProvider = new OpenTestCheckDocumentProvider(this);
@@ -80,6 +86,7 @@ public class DocumentManager extends Manager {
                 networkManager.initialize(context),
                 historyManager.initialize(context),
                 registrationManager.initialize(context),
+                childrenManager.initialize(context),
                 cryptoManager.initialize(context)
         ).andThen(deleteExpiredDocuments())
                 .doOnComplete(() -> {
@@ -96,9 +103,13 @@ public class DocumentManager extends Manager {
         return Single.mergeDelayError(registrationManager.getOrCreateRegistrationData()
                 .flatMapPublisher(registrationData -> getDocumentProvidersFor(encodedDocument)
                         .doOnNext(documentProvider -> Timber.v("Attempting to parse using %s", documentProvider.getClass().getSimpleName()))
-                        .map(documentProvider -> documentProvider.verifyParseAndValidate(encodedDocument, registrationData)
-                                .doOnError(throwable -> Timber.w("Parsing failed: %s", throwable.toString()))
-                                .map(ProvidedDocument::getDocument))
+                        .map(documentProvider -> {
+                            Person person = registrationData.getPerson();
+                            Children children = childrenManager.getChildren().blockingGet();
+                            return documentProvider.verifyParseAndValidate(encodedDocument, person, children)
+                                    .doOnError(throwable -> Timber.w("Parsing failed: %s", throwable.toString()))
+                                    .map(ProvidedDocument::getDocument);
+                        })
                         .toFlowable(BackpressureStrategy.BUFFER)))
                 .firstOrError()
                 .onErrorResumeNext(throwable -> {
@@ -272,7 +283,8 @@ public class DocumentManager extends Manager {
                         .andThen(Observable.fromIterable(encodedDocuments)
                                 .flatMapCompletable(encodedDocument -> parseAndValidateEncodedDocument(encodedDocument)
                                         .doOnSuccess(document -> Timber.d("Re-importing document: %s", document))
-                                        .flatMapCompletable(this::addDocument)
+                                        .flatMapCompletable(document -> redeemDocument(document)
+                                            .andThen(addDocument(document)))
                                         .doOnError(throwable -> Timber.w("Unable to re-import document: %s", throwable.toString()))
                                         .onErrorComplete())));
     }

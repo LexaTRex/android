@@ -28,6 +28,7 @@ import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.security.KeyPair;
+import java.security.KeyStoreException;
 import java.security.PrivateKey;
 import java.security.Provider;
 import java.security.PublicKey;
@@ -64,6 +65,7 @@ import io.reactivex.rxjava3.schedulers.Schedulers;
 import timber.log.Timber;
 
 import static de.culture4life.luca.crypto.HashProvider.TRIMMED_HASH_LENGTH;
+import static de.culture4life.luca.util.SingleUtil.retryWhen;
 
 /**
  * Provides access to all cryptographic methods, handles Bouncy-Castle key store persistence.
@@ -281,7 +283,8 @@ public class CryptoManager extends Manager {
         return wrappingCipherProvider.getKeyPairIfAvailable(ALIAS_SECRET_WRAPPING_KEY_PAIR)
                 .switchIfEmpty(wrappingCipherProvider.generateKeyPair(ALIAS_SECRET_WRAPPING_KEY_PAIR, context)
                         .doOnSubscribe(disposable -> Timber.d("Generating new secret wrapping key pair"))
-                        .doOnError(throwable -> Timber.e("Unable to generate secret wrapping key pair: %s", throwable.toString())));
+                        .doOnError(throwable -> Timber.e("Unable to generate secret wrapping key pair: %s", throwable.toString())))
+                .compose(retryWhen(KeyStoreException.class, 3));
     }
 
     /**
@@ -293,7 +296,8 @@ public class CryptoManager extends Manager {
     private Maybe<byte[]> restoreWrappedSecretIfAvailable(@NonNull String alias) {
         return preferencesManager.restoreIfAvailable(alias, WrappedSecret.class)
                 .flatMapSingle(wrappedSecret -> getSecretWrappingKeyPair()
-                        .flatMap(keyPair -> wrappingCipherProvider.decrypt(wrappedSecret.getDeserializedEncryptedSecret(), wrappedSecret.getDeserializedIv(), keyPair.getPrivate())))
+                        .flatMap(keyPair -> wrappingCipherProvider.decrypt(wrappedSecret.getDeserializedEncryptedSecret(), wrappedSecret.getDeserializedIv(), keyPair.getPrivate())
+                                .compose(retryWhen(KeyStoreException.class, 3))))
                 .doOnError(throwable -> Timber.e("Unable to restore wrapped secret: %s", throwable.toString()));
     }
 
@@ -303,7 +307,8 @@ public class CryptoManager extends Manager {
      */
     private Completable persistWrappedSecret(@NonNull String alias, @NonNull byte[] secret) {
         return getSecretWrappingKeyPair()
-                .flatMap(keyPair -> wrappingCipherProvider.encrypt(secret, keyPair.getPublic()))
+                .flatMap(keyPair -> wrappingCipherProvider.encrypt(secret, keyPair.getPublic())
+                        .compose(retryWhen(KeyStoreException.class, 3)))
                 .map(WrappedSecret::new)
                 .flatMapCompletable(wrappedSecret -> preferencesManager.persist(alias, wrappedSecret))
                 .doOnError(throwable -> Timber.e("Unable to persist wrapped secret: %s", throwable.toString()));
@@ -672,7 +677,7 @@ public class CryptoManager extends Manager {
      * Persist given tracing secret to preferences, encrypted as a {@link WrappedSecret}.
      */
     private Completable persistCurrentTracingSecret(@NonNull byte[] secret) {
-        return TimeUtil.getStartOfDayTimestamp()
+        return TimeUtil.getStartOfCurrentDayTimestamp()
                 .map(startOfDayTimestamp -> TRACING_SECRET_KEY_PREFIX + startOfDayTimestamp)
                 .flatMapCompletable(preferenceKey -> persistWrappedSecret(preferenceKey, secret));
     }
@@ -684,7 +689,7 @@ public class CryptoManager extends Manager {
     }
 
     public Observable<Long> generateRecentStartOfDayTimestamps(long duration) {
-        return TimeUtil.getStartOfDayTimestamp()
+        return TimeUtil.getStartOfCurrentDayTimestamp()
                 .flatMapObservable(firstStartOfDayTimestamp -> Observable.range(0, (int) TimeUnit.MILLISECONDS.toDays(duration) + 1)
                         .map(dayIndex -> firstStartOfDayTimestamp - TimeUnit.DAYS.toMillis(dayIndex)));
     }

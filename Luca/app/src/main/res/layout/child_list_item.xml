@@ -1,55 +1,67 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="wrap_content">
 
-    <CheckBox
-        android:id="@+id/includeChildCheckBox"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:id="@+id/childNameLayout"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:buttonTint="@color/secondaryColor"
-        android:contentDescription="@string/venue_children_check_in"
-        android:text=" "
+        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <TextView
-        android:id="@+id/childNameTextView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="@dimen/spacing_default"
-        android:ellipsize="end"
-        android:maxLines="1"
-        android:text="@string/dummy_heading"
-        android:textColor="@android:color/black"
-        app:layout_constrainedWidth="true"
-        app:layout_constraintBottom_toBottomOf="@id/includeChildCheckBox"
-        app:layout_constraintEnd_toStartOf="@id/removeChildImageView"
-        app:layout_constraintHorizontal_bias="0"
-        app:layout_constraintStart_toEndOf="@id/includeChildCheckBox"
-        app:layout_constraintTop_toTopOf="@id/includeChildCheckBox" />
-
-    <ImageView
-        android:id="@+id/removeChildImageView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/spacing_default"
-        android:layout_marginEnd="@dimen/spacing_default"
-        android:scaleType="fitCenter"
-        android:src="@drawable/ic_delete_input"
-        app:layout_constraintBottom_toBottomOf="@id/includeChildCheckBox"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@id/includeChildCheckBox"
-        app:tint="@color/secondaryColor" />
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constrainedWidth="true"
+        android:orientation="horizontal">
+
+        <CheckBox
+            android:id="@+id/includeChildCheckBox"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_gravity="center_vertical"
+            android:buttonTint="@color/secondaryColor"
+            android:contentDescription="@string/venue_children_check_in"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <TextView
+            android:id="@+id/childNameTextView"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/spacing_default"
+            android:layout_marginTop="@dimen/spacing_default"
+            android:layout_marginBottom="@dimen/spacing_default"
+            android:layout_weight="1"
+            android:layout_gravity="center_vertical"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:text="@string/dummy_heading"
+            android:fontFamily="@font/montserrat_bold"
+            android:textSize="16sp"
+            android:textColor="@android:color/black" />
+
+        <ImageView
+            android:id="@+id/removeChildImageView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="@dimen/spacing_default"
+            android:layout_gravity="center_vertical"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_delete_input"
+            android:contentDescription="@string/item_delete_action"
+            app:tint="@color/secondaryColor" />
+
+    </LinearLayout>
 
     <View
         android:id="@+id/headingSeparatorView"
         style="@style/HeaderSeparatorView"
         android:layout_marginTop="0dp"
         app:layout_constrainedWidth="true"
-        app:layout_constraintEnd_toEndOf="@id/removeChildImageView"
-        app:layout_constraintStart_toStartOf="@id/childNameTextView"
-        app:layout_constraintTop_toBottomOf="@id/includeChildCheckBox" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/childNameLayout" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

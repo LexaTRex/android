@@ -1,5 +1,18 @@
 package de.culture4life.luca.document;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assume.assumeTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static de.culture4life.luca.document.provider.appointment.AppointmentProviderTest.VALID_APPOINTMENT;
+import static de.culture4life.luca.document.provider.opentestcheck.OpenTestCheckDocumentProviderTest.EXPIRED_TEST_RESULT_TICKET_IO;
+import static de.culture4life.luca.document.provider.opentestcheck.OpenTestCheckDocumentProviderTest.UNVERIFIED_TEST_RESULT;
+import static de.culture4life.luca.document.provider.opentestcheck.OpenTestCheckDocumentProviderTest.VALID_TEST_RESULT_TICKET_IO;
+
 import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Before;
@@ -13,56 +26,44 @@ import java.util.concurrent.TimeUnit;
 
 import de.culture4life.luca.BuildConfig;
 import de.culture4life.luca.LucaUnitTest;
+import de.culture4life.luca.children.Child;
+import de.culture4life.luca.children.ChildrenManager;
 import de.culture4life.luca.crypto.CryptoManager;
 import de.culture4life.luca.document.provider.appointment.Appointment;
+import de.culture4life.luca.document.provider.eudcc.EudccDocumentProviderTest;
 import de.culture4life.luca.document.provider.opentestcheck.OpenTestCheckDocument;
 import de.culture4life.luca.history.HistoryManager;
-import de.culture4life.luca.location.LocationManager;
 import de.culture4life.luca.network.NetworkManager;
 import de.culture4life.luca.network.pojo.DocumentProviderData;
 import de.culture4life.luca.network.pojo.DocumentProviderDataList;
 import de.culture4life.luca.preference.PreferencesManager;
+import de.culture4life.luca.registration.RegistrationData;
 import de.culture4life.luca.registration.RegistrationManager;
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Maybe;
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.core.Single;
 
-import static de.culture4life.luca.document.provider.appointment.AppointmentProviderTest.VALID_APPOINTMENT;
-import static de.culture4life.luca.document.provider.opentestcheck.OpenTestCheckDocumentProviderTest.EXPIRED_TEST_RESULT_TICKET_IO;
-import static de.culture4life.luca.document.provider.opentestcheck.OpenTestCheckDocumentProviderTest.UNVERIFIED_TEST_RESULT;
-import static de.culture4life.luca.document.provider.opentestcheck.OpenTestCheckDocumentProviderTest.VALID_TEST_RESULT_TICKET_IO;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assume.assumeTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.spy;
-
 @Config(sdk = 28)
 @RunWith(AndroidJUnit4.class)
 public class DocumentManagerTest extends LucaUnitTest {
 
-    PreferencesManager preferencesManager;
-    LocationManager locationManager;
-    NetworkManager networkManager;
-    HistoryManager historyManager;
-    CryptoManager cryptoManager;
     RegistrationManager registrationManager;
     DocumentManager documentManager;
+    ChildrenManager childrenManager;
 
     private Document document;
 
     @Before
     public void setUp() {
-        preferencesManager = spy(new PreferencesManager());
-        locationManager = spy(new LocationManager());
-        networkManager = spy(new NetworkManager());
-        historyManager = spy(new HistoryManager(preferencesManager));
-        cryptoManager = spy(new CryptoManager(preferencesManager, networkManager));
+        PreferencesManager preferencesManager = new PreferencesManager();
+        NetworkManager networkManager = new NetworkManager();
+        CryptoManager cryptoManager = new CryptoManager(preferencesManager, networkManager);
         registrationManager = spy(new RegistrationManager(preferencesManager, networkManager, cryptoManager));
+        childrenManager = new ChildrenManager(preferencesManager, registrationManager);
+        HistoryManager historyManager = new HistoryManager(preferencesManager, childrenManager);
 
-        documentManager = spy(new DocumentManager(preferencesManager, networkManager, historyManager, cryptoManager, registrationManager));
+        documentManager = spy(new DocumentManager(preferencesManager, networkManager, historyManager, cryptoManager, registrationManager, childrenManager));
         documentManager.initialize(application).blockingAwait();
 
         document = new Document();
@@ -120,6 +121,10 @@ public class DocumentManagerTest extends LucaUnitTest {
     public void reimportDocuments_validDocuments_reImportsDocuments() {
         assumeTrue("Only run on debug where we ignore the expiry time", BuildConfig.DEBUG);
         doReturn(Completable.complete()).when(documentManager).unredeemDocument(any());
+        RegistrationData registrationData = new RegistrationData();
+        registrationData.setFirstName("any");
+        registrationData.setLastName("any");
+        doReturn(Single.just(registrationData)).when(registrationManager).getOrCreateRegistrationData();
 
         Document validDocument = new Appointment(VALID_APPOINTMENT).getDocument();
         Document invalidDocument = new OpenTestCheckDocument(UNVERIFIED_TEST_RESULT).getDocument();
@@ -132,6 +137,34 @@ public class DocumentManagerTest extends LucaUnitTest {
                 .test()
                 .awaitDone(5, TimeUnit.SECONDS)
                 .assertValue(validDocument.getId());
+
+        verify(documentManager, times(2)).unredeemDocument(any(Document.class));
+        verify(documentManager, times(1)).redeemDocument(any(Document.class));
+    }
+
+    @Test
+    public void reimportDocuments_validDocumentOfChild_reImportsIt() {
+        assumeTrue("Only run on debug where we ignore the expiry time", BuildConfig.DEBUG);
+        doReturn(Completable.complete()).when(documentManager).unredeemDocument(any());
+        RegistrationData registrationData = new RegistrationData();
+        registrationData.setFirstName("Any");
+        registrationData.setLastName("Parent");
+        doReturn(Single.just(registrationData)).when(registrationManager).getOrCreateRegistrationData();
+
+        Document validDocument = childrenManager.addChild(new Child("Erika Dörte", "Dießner Musterfrau"))
+                .andThen(documentManager.parseAndValidateEncodedDocument(EudccDocumentProviderTest.EUDCC_FULLY_VACCINATED))
+                .blockingGet();
+
+        documentManager.addDocument(validDocument)
+                .andThen(documentManager.reImportDocuments())
+                .andThen(documentManager.getOrRestoreDocuments())
+                .map(Document::getId)
+                .test()
+                .assertValueCount(1)
+                .assertValue(validDocument.getId());
+
+        verify(documentManager, times(1)).unredeemDocument(any(Document.class));
+        verify(documentManager, times(1)).redeemDocument(any(Document.class));
     }
 
     @Test

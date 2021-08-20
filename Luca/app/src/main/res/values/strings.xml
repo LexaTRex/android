@@ -31,6 +31,7 @@
     <string name="action_update">Update</string>
     <string name="action_enable">Enable</string>
     <string name="action_add">Add</string>
+    <string name="action_copy">Copy</string>
 
     <!-- Errors -->
     <string name="error_generic_title">Something went wrong</string>
@@ -44,6 +45,8 @@
     <string name="error_qr_code_broken">QR-Code is invalid. Please try a different one.</string>
     <string name="error_certificate_pinning_title">Unexpected server certificates</string>
     <string name="error_certificate_pinning_description">When attempting to establish a secure connection to the luca servers, we found untrusted certificates.\n\nPlease try switching your network and make sure that you\'re using the latest app version.</string>
+    <string name="error_no_internet_connection_title">No internet connection</string>
+    <string name="error_no_internet_connection_description">The process could not be executed. Please connect to the internet and try again.</string>
 
     <!-- Statuses -->
     <string name="status_check_out_in_progress">Checking out…</string>
@@ -185,8 +188,8 @@
     <string name="meeting_slider_content_description">End meeting button</string>
     <string name="meeting_was_ended_hint">The meeting was ended</string>
 
-    <string name="meeting_join_heading">@string/meeting_heading</string>
-    <string name="meeting_join_description">When you check yourself in at a private meeting, your host can see your first and last name.\n\nPrivate meetings are used as reminders and won\'t be shared with health authorities.</string>
+    <string name="meeting_join_heading">Check-in private meeting</string>
+    <string name="meeting_join_description">If you continue, you will check into a private meeting. This will submit your first and last name.\n\nPrivate meetings serve as reminders for small gatherings with friends and family. Therefore, hosts see the first and last names of their guests (and guests see the first and last names of their hosts). This data is displayed in your history, but cannot be shared with health authorities.</string>
 
     <!-- Venues -->
     <string name="venue_heading">@string/dummy_heading</string>
@@ -207,15 +210,19 @@
     <string name="venue_check_in_document_redirect_title">Continue with import?</string>
     <string name="venue_check_in_document_redirect_description">Hey, you\'re scanning the QR code of a document and not of a luca location. If you want to add a document, click \"CONTINUE\".</string>
 
-    <string name="venue_children_title">Children</string>
-    <string name="venue_children_empty_list_description">You can check your children (up to&#160;14 years) in with you. Please indicate who is accompanying you.</string>
-    <string name="venue_children_list_description">Choose the children, who will be checked-in together with you.</string>
-    <string name="venue_children_add_description">This information will not be shared with the health department, it is only a reminder for yourself. If you share your history with the health department, you can voluntarily provide this information to them as well.</string>
+    <string name="venue_children_title">Check in children</string>
+    <string name="add_children_title">Add children</string>
+    <string name="venue_children_empty_list_description">You can add children (up to 14&#160;years) to your app to import their documents and check them in with you.\n\nPlease make sure that the provided data is correct. The information will not be shared with the health department, it is for your convenience only.</string>
+    <string name="venue_children_list_description">You can add children (up to 14&#160;years) to your app to import their documents and check them in with you. The information will not be shared with the health department, it is for your convenience only.</string>
+    <string name="venue_children_add_description">Please provide your child\'s full name. Documents can only be added if the names match.</string>
     <string name="venue_children_add">Add child</string>
     <string name="venue_children_add_validation_error">Please enter a valid name</string>
     <string name="venue_children_add_error_title">Unable to add child</string>
+    <string name="venue_children_remove_confirmation_title">Save changes?</string>
+    <string name="venue_children_remove_confirmation_description">When you delete a child, all the related documents are also deleted.</string>
     <string name="venue_children_remove_error_title">Unable to remove child</string>
-    <string name="venue_children_name">Child\'s name</string>
+    <string name="venue_children_first_name_hint">Child\'s first name</string>
+    <string name="venue_children_last_name_hint">Child\'s last name</string>
     <string name="venue_children_check_in">Check-In Children</string>
 
     <string name="venue_check_out_error">Checkout failed</string>
@@ -260,6 +267,7 @@
     <string name="history_check_in_description"><xliff:g example="neXenio Office" id="locationName">%1$s</xliff:g></string>
     <string name="history_check_out_title">Check-Out</string>
     <string name="history_check_out_description"><xliff:g example="neXenio Office" id="locationName">%1$s</xliff:g></string>
+    <string name="history_check_out_details">Trace ID: <xliff:g example="NQqYEFIVbxqh5FFRxbfD5A==" id="traceId">%1$s</xliff:g></string>
     <string name="history_meeting_started_title">@string/history_meeting_ended_title</string>
     <string name="history_meeting_ended_title">Private meeting</string>
     <string name="history_meeting_ended_description"><xliff:g example="- John Doe\n- Jane Doe" id="members">%1$s</xliff:g></string>
@@ -297,12 +305,16 @@
     <string name="time_error_action">Go to settings</string>
     <string name="appointment_action">Book appointment</string>
     <string name="document_import_action">Add Document</string>
+    <string name="document_import_anyway_action">Import anyway</string>
     <string name="document_import_hint">Scan the QR code of your document to add it to the app.</string>
     <string name="document_import_success_message">The document was imported</string>
     <string name="document_import_consent">I hereby declare my consent in accordance with Art. 9 (2) a) in conjunction with Art. 6 (1) 1 a) GDPR to the transmission of a pseudonymized identifier during the local storage of my COVID test, recovery or vaccination certificate in the luca app. This is solely to prevent document misuse so that multiple people cannot import and use the same document. The identifier of the recovery or vaccination document can be deleted by deleting the document in the app.</string>
     <string name="document_import_error_title">The document could not be imported</string>
     <string name="document_import_error_name_mismatch_description">It was not possible to validate that this document belongs to you. Please check if your name is entered correctly in the app.</string>
+    <string name="document_import_error_name_mismatch_including_children_description">It was not possible to validate that this document belongs to you or your children. Please check if the names are entered correctly in the app.</string>
     <string name="document_import_error_invalid_signature_description">It was not possible to validate the signature of this document. The document provider may not be supported by luca yet.</string>
+    <string name="document_import_error_child_too_old_description">Documents can only be added for your children if they are under the age of 14.</string>
+    <string name="document_import_error_time_in_future_description">This document\'s issue date is set in the future. You can only add documents that are valid at the moment.</string>
     <string name="document_import_error_expired_description">Unfortunately, the document cannot be imported because it already expired.</string>
     <string name="document_import_error_already_imported_description">This document was already imported.</string>
     <string name="document_import_error_not_negative_title">Adding not possible</string>
@@ -313,6 +325,8 @@
     <string name="document_import_error_check_in_scanner_description">This scanner is only for adding documents. If you want to check in at a location, switch to the \"Check-In\" tab (bottom left of the navigation bar). There you will find the \"Self Check-In\" button.</string>
     <string name="document_import_check_in_redirect_title">Proceed with check-in?</string>
     <string name="document_import_check_in_redirect_description">Hey, you\'re scanning the QR code of a luca location and not of a document. Click \"CONTINUE\" to check in.</string>
+    <string name="document_import_error_different_birth_dates_title">Operation failed</string>
+    <string name="document_import_error_different_birth_dates_description">The document could not be added because the dates of birth do not match.</string>
     <string name="document_outcome_negative">Result Negative</string>
     <string name="document_outcome_positive">Result Positive</string>
     <string name="document_outcome_partially_immune">Partially Immune %1$s</string>
@@ -406,6 +420,11 @@
     <string name="version_details_dialog_title">App Version</string>
     <string name="version_details_dialog_message">You are currently using the Android app version <xliff:g example="1.0.0" id="version_name">%1$s</xliff:g> (release <xliff:g example="42" id="version_code">%2$d</xliff:g>).\n\nThe source code can be found on GitLab using the commit hash <xliff:g example="843cbaf2d9840624defe303c0c854385ee69d23f" id="commit_hash">%3$s</xliff:g>.</string>
     <string name="version_details_dialog_action">@string/action_ok</string>
+
+    <!-- GitLab dialog -->
+    <string name="gitlab_dialog_title">Take me to the code repository</string>
+    <string name="gitlab_dialog_message">luca is open source. It\'s important to us that everyone can comprehend how the luca system works and that it\'s possible to give independent feedback. If you want to take a closer look, you\'ll find the code repository on GitLab.</string>
+    <string name="gitlab_dialog_action">Open GitLab</string>
 
     <!-- Account deletion -->
     <string name="delete_account_dialog_title">Do you really want to delete your account?</string>

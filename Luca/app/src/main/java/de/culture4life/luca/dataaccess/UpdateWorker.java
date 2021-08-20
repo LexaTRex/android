@@ -22,7 +22,7 @@ public class UpdateWorker extends RxWorker {
         return Completable.defer(() -> {
             LucaApplication application = (LucaApplication) getApplicationContext();
             DataAccessManager dataAccessManager = application.getDataAccessManager();
-            return dataAccessManager.initialize(application).andThen(dataAccessManager.update());
+            return dataAccessManager.initialize(application).andThen(dataAccessManager.updateIfNecessary());
         }).andThen(Single.just(Result.success()))
                 .onErrorReturnItem(Result.failure());
     }

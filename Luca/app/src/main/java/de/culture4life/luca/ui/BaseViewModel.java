@@ -44,21 +44,20 @@ public abstract class BaseViewModel extends AndroidViewModel {
     public static final String KEY_CAMERA_CONSENT_GIVEN = "camera_consent_given";
 
     protected final LucaApplication application;
+    protected final PreferencesManager preferencesManager;
+
     protected final CompositeDisposable modelDisposable = new CompositeDisposable();
-    protected final MutableLiveData<Boolean> isLoading = new MutableLiveData<>();
-    protected final MutableLiveData<Set<ViewError>> errors = new MutableLiveData<>();
+    protected final MutableLiveData<Boolean> isLoading = new MutableLiveData<>(false);
+    protected final MutableLiveData<Set<ViewError>> errors = new MutableLiveData<>(new HashSet<>());
     protected final MutableLiveData<ViewEvent<? extends Set<String>>> requiredPermissions = new MutableLiveData<>();
     protected final MutableLiveData<Boolean> showCameraPreview = new MutableLiveData<>();
+
     protected NavController navigationController;
-    private ViewError deleteAccountError;
-    private PreferencesManager preferencesManager;
 
     public BaseViewModel(@NonNull Application application) {
         super(application);
         this.application = (LucaApplication) application;
         this.preferencesManager = this.application.getPreferencesManager();
-        this.isLoading.setValue(false);
-        this.errors.setValue(new HashSet<>());
         Timber.d("Created %s", this);
     }
 
@@ -228,18 +227,6 @@ public abstract class BaseViewModel extends AndroidViewModel {
                 }));
     }
 
-    public void requestSupportMail() {
-        try {
-            this.application.openSupportMailIntent();
-        } catch (ActivityNotFoundException exception) {
-            addError(createErrorBuilder(exception)
-                    .withTitle(R.string.menu_support_error_title)
-                    .withDescription(R.string.menu_support_error_description)
-                    .removeWhenShown()
-                    .build());
-        }
-    }
-
     protected boolean isCurrentDestinationId(@IdRes int destinationId) {
         NavDestination currentDestination = navigationController.getCurrentDestination();
         return currentDestination != null && currentDestination.getId() == destinationId;
@@ -275,35 +262,6 @@ public abstract class BaseViewModel extends AndroidViewModel {
     @Override
     public String toString() {
         return this.getClass().getSimpleName();
-    }
-
-    /**
-     * Delete the account data on backend and clear data locally. Restart the app from scratch when
-     * successful, show error dialog when an error occurred.
-     */
-    public void deleteAccount() {
-        modelDisposable.add(application.getDocumentManager().unredeemAndDeleteAllDocuments()
-                .andThen(application.getRegistrationManager().deleteRegistrationOnBackend())
-                .doOnSubscribe(disposable -> {
-                    updateAsSideEffect(isLoading, true);
-                    removeError(deleteAccountError);
-                })
-                .andThen(application.getRegistrationManager().deleteRegistrationData())
-                .andThen(application.getCryptoManager().deleteAllKeyStoreEntries())
-                .andThen(application.getPreferencesManager().deleteAll())
-                .doFinally(() -> updateAsSideEffect(isLoading, false))
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(() -> {
-                    Timber.i("Account deleted");
-                    application.restart();
-                }, throwable -> {
-                    Timber.w("Unable to delete account: %s", throwable);
-                    deleteAccountError = createErrorBuilder(throwable)
-                            .withTitle(R.string.error_request_failed_title)
-                            .build();
-                    addError(deleteAccountError);
-                }));
     }
 
     public void showCameraPreview(boolean isActive) {

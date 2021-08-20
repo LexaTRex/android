@@ -35,11 +35,11 @@ class AccountFragment : BaseFragment<AccountViewModel>() {
     override fun initializeViews(): Completable {
         return super.initializeViews()
             .andThen {
-                initOnClickListeners()
+                initializeOnClickListeners()
             }
     }
 
-    private fun initOnClickListeners() {
+    private fun initializeOnClickListeners() {
         view?.also {
             binding.editContactDataTextView.setOnClickListener {
                 val intent = Intent(activity, RegistrationActivity::class.java)
@@ -55,7 +55,7 @@ class AccountFragment : BaseFragment<AccountViewModel>() {
             binding.imprintTextView.setOnClickListener { application.openUrl(getString(R.string.url_imprint)) }
             binding.showAppDataTextView.setOnClickListener { application.openAppSettings() }
             binding.versionTextView.setOnClickListener { showVersionDetailsDialog() }
-            binding.gitlabTextView.setOnClickListener { application.openUrl(getString(R.string.url_gitlab)) }
+            binding.gitlabTextView.setOnClickListener { showGitlabDialog() }
             binding.healthDepartmentKeyTextView.setOnClickListener { viewModel.openHealthDepartmentKeyView() }
         }
     }
@@ -87,6 +87,17 @@ class AccountFragment : BaseFragment<AccountViewModel>() {
                 .setTitle(R.string.version_details_dialog_title)
                 .setMessage(message)
                 .setPositiveButton(R.string.version_details_dialog_action) { dialog, _ -> dialog.dismiss() })
+                .show()
+        }
+    }
+
+    private fun showGitlabDialog() {
+        context?.let {
+            BaseDialogFragment(MaterialAlertDialogBuilder(it)
+                .setTitle(R.string.gitlab_dialog_title)
+                .setMessage(R.string.gitlab_dialog_message)
+                .setPositiveButton(R.string.gitlab_dialog_action) { _, _ -> application.openUrl(getString(R.string.url_gitlab)) }
+                .setNegativeButton(R.string.action_cancel) { dialog, _ -> dialog.dismiss() })
                 .show()
         }
     }

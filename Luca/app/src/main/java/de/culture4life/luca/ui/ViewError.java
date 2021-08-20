@@ -6,7 +6,10 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
 
+import java.net.UnknownHostException;
+
 import de.culture4life.luca.R;
+import de.culture4life.luca.util.ThrowableUtil;
 import hu.akarnokd.rxjava3.debug.RxJavaAssemblyException;
 import io.reactivex.rxjava3.core.Completable;
 
@@ -137,6 +140,8 @@ public class ViewError {
     private static String createTitle(@NonNull Throwable throwable, @NonNull Context context) {
         if (isGenericException(throwable)) {
             return context.getString(R.string.error_generic_title);
+        } else if (ThrowableUtil.isCause(UnknownHostException.class, throwable)) {
+            return context.getString(R.string.error_no_internet_connection_title);
         } else {
             String type = throwable.getClass().getSimpleName();
             return context.getString(R.string.error_specific_title, type);
@@ -144,11 +149,15 @@ public class ViewError {
     }
 
     private static String createDescription(@NonNull Throwable throwable, @NonNull Context context) {
-        String description = getMessagesFromThrowableAndCauses(throwable);
-        if (description != null) {
-            return context.getString(R.string.error_specific_description, description);
+        if (ThrowableUtil.isCause(UnknownHostException.class, throwable)) {
+            return context.getString(R.string.error_no_internet_connection_description);
         } else {
-            return context.getString(R.string.error_generic_description);
+            String description = getMessagesFromThrowableAndCauses(throwable);
+            if (description != null) {
+                return context.getString(R.string.error_specific_description, description);
+            } else {
+                return context.getString(R.string.error_generic_description);
+            }
         }
     }
 

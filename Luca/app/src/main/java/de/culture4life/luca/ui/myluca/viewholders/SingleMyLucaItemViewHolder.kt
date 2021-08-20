@@ -19,10 +19,10 @@ import kotlin.math.max
 
 class SingleMyLucaItemViewHolder(val view: SingleLucaItemView) : RecyclerView.ViewHolder(view) {
 
-    val cardView: CardView = view.findViewById(R.id.cardView)
-    val topContent: ViewGroup = view.findViewById(R.id.topContent)
-    val collapseLayout: ViewGroup = view.findViewById(R.id.collapseLayout)
-    val collapsedContent: ViewGroup = view.findViewById(R.id.collapsedContent)
+    private val cardView: CardView = view.findViewById(R.id.cardView)
+    private val topContent: ViewGroup = view.findViewById(R.id.topContent)
+    private val collapseLayout: ViewGroup = view.findViewById(R.id.collapseLayout)
+    private val collapsedContent: ViewGroup = view.findViewById(R.id.collapsedContent)
     private val titleTextView: TextView = view.findViewById(R.id.itemTitleTextView)
     private val itemTitleImageView: ImageView = view.findViewById(R.id.itemTitleImageView)
     private val barcodeImageView: ImageView = view.findViewById(R.id.qrCodeImageView)
@@ -31,7 +31,6 @@ class SingleMyLucaItemViewHolder(val view: SingleLucaItemView) : RecyclerView.Vi
     private val collapseIndicator: ImageView = view.findViewById(R.id.collapseIndicator)
 
     fun show(item: MyLucaListItem) {
-        view.withTopPadding = adapterPosition == 0
         cardView.setCardBackgroundColor(item.color)
         titleTextView.text = item.title
         itemTitleImageView.setImageResource(item.imageResource)

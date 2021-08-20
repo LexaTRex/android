@@ -116,7 +116,7 @@ public class DataAccessManager extends Manager {
                 .flatMapCompletable(initialDelay -> Completable.fromAction(() -> {
                     if (workManager == null) {
                         managerDisposable.add(Observable.interval(initialDelay, UPDATE_INTERVAL, TimeUnit.MILLISECONDS, Schedulers.io())
-                                .flatMapCompletable(tick -> update()
+                                .flatMapCompletable(tick -> updateIfNecessary()
                                         .doOnError(throwable -> Timber.w("Unable to update: %s", throwable.toString()))
                                         .onErrorComplete())
                                 .subscribe());
@@ -139,6 +139,12 @@ public class DataAccessManager extends Manager {
                         Timber.d("Update work request submitted to work manager");
                     }
                 }));
+    }
+
+    public Completable updateIfNecessary() {
+        return getRecentTraceIds()
+                .isEmpty()
+                .flatMapCompletable(isEmpty -> isEmpty ? Completable.complete() : update());
     }
 
     public Completable update() {

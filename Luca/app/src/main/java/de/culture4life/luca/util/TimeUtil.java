@@ -78,10 +78,14 @@ public final class TimeUtil {
         });
     }
 
-    public static Single<Long> getStartOfDayTimestamp() {
+    public static Single<Long> getStartOfCurrentDayTimestamp() {
         return Single.fromCallable(System::currentTimeMillis)
-                .map(TimeUnit.MILLISECONDS::toDays)
-                .map(TimeUnit.DAYS::toMillis);
+                .flatMap(TimeUtil::getStartOfDayTimestamp);
     }
+
+    public static Single<Long> getStartOfDayTimestamp(long timestamp) {
+        return Single.just(timestamp - timestamp % (60 * 60 * 24 * 1000));
+    }
+
 
 }

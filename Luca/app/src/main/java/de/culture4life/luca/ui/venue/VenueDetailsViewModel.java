@@ -1,10 +1,11 @@
-package de.culture4life.luca.ui.venue.details;
+package de.culture4life.luca.ui.venue;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Application;
 import android.content.pm.PackageManager;
 import android.os.Build;
+import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -26,21 +27,18 @@ import de.culture4life.luca.R;
 import de.culture4life.luca.checkin.CheckInData;
 import de.culture4life.luca.checkin.CheckInManager;
 import de.culture4life.luca.checkin.CheckOutException;
+import de.culture4life.luca.children.ChildrenManager;
 import de.culture4life.luca.location.GeofenceManager;
 import de.culture4life.luca.location.LocationManager;
 import de.culture4life.luca.preference.PreferencesManager;
 import de.culture4life.luca.ui.BaseViewModel;
 import de.culture4life.luca.ui.ViewError;
-import de.culture4life.luca.ui.venue.children.ChildListItem;
-import de.culture4life.luca.ui.venue.children.ChildListItemContainer;
+import de.culture4life.luca.ui.children.ChildrenFragment;
 import io.reactivex.rxjava3.core.Completable;
-import io.reactivex.rxjava3.core.Flowable;
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.core.Single;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 import timber.log.Timber;
-
-import static de.culture4life.luca.checkin.CheckInManager.KEY_CHILDREN;
 
 public class VenueDetailsViewModel extends BaseViewModel {
 
@@ -48,6 +46,7 @@ public class VenueDetailsViewModel extends BaseViewModel {
     private final SimpleDateFormat readableDateFormat;
 
     private final PreferencesManager preferenceManager;
+    private final ChildrenManager childrenManager;
     private final CheckInManager checkInManager;
     private final GeofenceManager geofenceManager;
     private final LocationManager locationManager;
@@ -58,10 +57,10 @@ public class VenueDetailsViewModel extends BaseViewModel {
     private final MutableLiveData<String> description = new MutableLiveData<>();
     private final MutableLiveData<String> additionalDataTitle = new MutableLiveData<>();
     private final MutableLiveData<String> additionalDataValue = new MutableLiveData<>();
-    private final MutableLiveData<Boolean> showAdditionalData = new MutableLiveData<>();
+    private final MutableLiveData<Boolean> showAdditionalData = new MutableLiveData<>(false);
     private final MutableLiveData<String> checkInTime = new MutableLiveData<>();
     private final MutableLiveData<String> checkInDuration = new MutableLiveData<>();
-    private final MutableLiveData<Boolean> isCheckedIn = new MutableLiveData<>();
+    private final MutableLiveData<Boolean> isCheckedIn = new MutableLiveData<>(false);
     private final MutableLiveData<Boolean> hasLocationRestriction = new MutableLiveData<>();
     private final MutableLiveData<Boolean> isGeofencingSupported = new MutableLiveData<>();
     private final MutableLiveData<Boolean> shouldEnableAutomaticCheckOut = new MutableLiveData<>();
@@ -77,13 +76,11 @@ public class VenueDetailsViewModel extends BaseViewModel {
     public VenueDetailsViewModel(@NonNull Application application) {
         super(application);
         preferenceManager = this.application.getPreferencesManager();
+        childrenManager = this.application.getChildrenManager();
         checkInManager = this.application.getCheckInManager();
-        isCheckedIn.setValue(false);
-        showAdditionalData.setValue(false);
         geofenceManager = this.application.getGeofenceManager();
         locationManager = this.application.getLocationManager();
         readableDateFormat = new SimpleDateFormat(application.getString(R.string.time_format), Locale.GERMANY);
-        isCheckedIn.setValue(false);
     }
 
     @Override
@@ -129,10 +126,7 @@ public class VenueDetailsViewModel extends BaseViewModel {
     }
 
     private Completable updateChildCounter() {
-        return preferenceManager.restoreOrDefault(KEY_CHILDREN, new ChildListItemContainer())
-                .flatMapPublisher(Flowable::fromIterable)
-                .filter(ChildListItem::isChecked)
-                .toList()
+        return childrenManager.getCheckedInChildren()
                 .map(List::size)
                 .flatMapCompletable(currentCount -> update(childCounter, currentCount));
     }
@@ -216,7 +210,9 @@ public class VenueDetailsViewModel extends BaseViewModel {
 
     void openChildrenView() {
         if (isCurrentDestinationId(R.id.venueDetailFragment)) {
-            navigationController.navigate(R.id.action_venueDetailsFragment_to_venueChildFragment);
+            Bundle extras = new Bundle();
+            extras.putBoolean(ChildrenFragment.CHECK_IN, true);
+            navigationController.navigate(R.id.action_venueDetailsFragment_to_childrenFragment, extras);
         }
     }
 

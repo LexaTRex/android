@@ -31,7 +31,7 @@ import de.culture4life.luca.meeting.MeetingManager;
 import de.culture4life.luca.registration.RegistrationManager;
 import de.culture4life.luca.ui.BaseViewModel;
 import de.culture4life.luca.ui.ViewError;
-import de.culture4life.luca.ui.venue.details.VenueDetailsViewModel;
+import de.culture4life.luca.ui.venue.VenueDetailsViewModel;
 import de.culture4life.luca.util.SerializationUtil;
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Observable;
@@ -48,9 +48,9 @@ public class MeetingViewModel extends BaseViewModel {
     private final MutableLiveData<Boolean> isHostingMeeting = new MutableLiveData<>();
     private final MutableLiveData<Bitmap> qrCode = new MutableLiveData<>();
     private final MutableLiveData<String> duration = new MutableLiveData<>();
-    private final MutableLiveData<String> membersCount = new MutableLiveData<>();
-    private final MutableLiveData<String> checkedInMemberNames = new MutableLiveData<>();
-    private final MutableLiveData<String> checkedOutMemberNames = new MutableLiveData<>();
+    private final MutableLiveData<String> membersCount = new MutableLiveData<>("0/0");
+    private final MutableLiveData<String> checkedInMemberNames = new MutableLiveData<>("");
+    private final MutableLiveData<String> checkedOutMemberNames = new MutableLiveData<>("");
 
     @Nullable
     private ViewError meetingError;
@@ -60,9 +60,6 @@ public class MeetingViewModel extends BaseViewModel {
         this.registrationManager = this.application.getRegistrationManager();
         this.meetingManager = this.application.getMeetingManager();
         this.cryptoManager = this.application.getCryptoManager();
-        membersCount.setValue("0/0");
-        checkedInMemberNames.setValue("");
-        checkedOutMemberNames.setValue("");
     }
 
     @Override

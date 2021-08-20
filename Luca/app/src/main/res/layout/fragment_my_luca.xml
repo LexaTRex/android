@@ -12,9 +12,33 @@
         style="@style/TextAppearance.Luca.Headline2"
         android:layout_margin="@dimen/spacing_default"
         android:text="@string/navigation_my_luca"
-        app:layout_constraintEnd_toStartOf="@id/bookAppointmentImageView"
+        app:layout_constraintEnd_toStartOf="@id/childAddingIconImageView"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/childCounterTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingEnd="@dimen/spacing_default"
+        android:textColor="@android:color/white"
+        android:textSize="@dimen/font_size_default"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="@id/childAddingIconImageView"
+        app:layout_constraintEnd_toStartOf="@id/childAddingIconImageView"
+        app:layout_constraintTop_toTopOf="@id/childAddingIconImageView"
+        tools:text="1" />
+
+    <ImageView
+        android:id="@+id/childAddingIconImageView"
+        style="@style/MenuImageView"
+        android:contentDescription="@string/venue_children_add"
+        android:src="@drawable/ic_add_child"
+        app:layout_constraintBottom_toBottomOf="@id/bookAppointmentImageView"
+        app:layout_constraintEnd_toStartOf="@id/bookAppointmentImageView"
+        app:layout_constraintHorizontal_bias="1"
+        app:layout_constraintTop_toTopOf="@id/bookAppointmentImageView"
+        app:tint="@android:color/white" />
 
     <ImageView
         android:id="@+id/bookAppointmentImageView"
@@ -100,7 +124,6 @@
         android:id="@+id/myLucaRecyclerView"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_marginTop="@dimen/spacing_default"
         android:cacheColorHint="@android:color/transparent"
         android:fadingEdgeLength="@dimen/spacing_large"
         android:listSelector="@android:color/transparent"

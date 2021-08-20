@@ -1,7 +1,5 @@
 package de.culture4life.luca.history;
 
-import static de.culture4life.luca.checkin.CheckInManager.KEY_CHILDREN;
-
 import android.content.Context;
 
 import androidx.annotation.NonNull;
@@ -12,6 +10,7 @@ import java.util.concurrent.TimeUnit;
 
 import de.culture4life.luca.Manager;
 import de.culture4life.luca.checkin.CheckInData;
+import de.culture4life.luca.children.ChildrenManager;
 import de.culture4life.luca.dataaccess.AccessedTraceData;
 import de.culture4life.luca.document.Document;
 import de.culture4life.luca.meeting.MeetingData;
@@ -19,8 +18,6 @@ import de.culture4life.luca.meeting.MeetingGuestData;
 import de.culture4life.luca.meeting.MeetingManager;
 import de.culture4life.luca.preference.PreferencesManager;
 import de.culture4life.luca.registration.RegistrationData;
-import de.culture4life.luca.ui.venue.children.ChildListItem;
-import de.culture4life.luca.ui.venue.children.ChildListItemContainer;
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.core.Single;
@@ -39,14 +36,16 @@ public class HistoryManager extends Manager {
     public static final String KEY_HISTORY_ITEMS_V1 = "history_items";
 
     private final PreferencesManager preferencesManager;
+    private final ChildrenManager childrenManager;
 
     private final PublishSubject<HistoryItem> newItemPublisher;
 
     @Nullable
     private Observable<HistoryItem> cachedHistoryItems;
 
-    public HistoryManager(@NonNull PreferencesManager preferencesManager) {
+    public HistoryManager(@NonNull PreferencesManager preferencesManager, @NonNull ChildrenManager childrenManager) {
         this.preferencesManager = preferencesManager;
+        this.childrenManager = childrenManager;
         this.newItemPublisher = PublishSubject.create();
     }
 
@@ -85,7 +84,8 @@ public class HistoryManager extends Manager {
                     return item;
                 })
                 .flatMap(this::setChildren)
-                .flatMapCompletable(this::addItem);
+                .flatMapCompletable(this::addItem)
+                .andThen(childrenManager.clearCheckIns());
     }
 
     public Completable addContactDataUpdateItem(@NonNull RegistrationData registrationData) {
@@ -212,19 +212,9 @@ public class HistoryManager extends Manager {
     }
 
     private Single<CheckOutItem> setChildren(@NonNull CheckOutItem item) {
-        return preferencesManager.restoreOrDefault(KEY_CHILDREN, new ChildListItemContainer())
-                .flatMap(childListItems -> {
-                    ChildListItemContainer checkedInChildren = new ChildListItemContainer();
-                    for (ChildListItem childListItem : childListItems) {
-                        if (childListItem.isChecked()) {
-                            checkedInChildren.add(childListItem);
-                            childListItem.toggleIsChecked();
-                        }
-                    }
-                    return preferencesManager.persist(KEY_CHILDREN, childListItems)
-                            .andThen(Single.just(checkedInChildren));
-                })
-                .map(ChildListItemContainer::getNames)
+        return childrenManager.getCheckedInChildren()
+                .flatMap(children -> Observable.fromIterable(children)
+                        .map(child -> child.getFullName()).toList())
                 .doOnSuccess(item::setChildren)
                 .map(names -> item);
     }

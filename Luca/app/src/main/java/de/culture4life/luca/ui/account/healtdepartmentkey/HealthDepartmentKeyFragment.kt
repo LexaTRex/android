@@ -11,7 +11,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import de.culture4life.luca.R
 import de.culture4life.luca.databinding.FragmentHealthDepartmentKeyBinding
 import de.culture4life.luca.ui.BaseFragment
-import de.culture4life.luca.ui.addTo
+import de.culture4life.luca.util.addTo
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.schedulers.Schedulers

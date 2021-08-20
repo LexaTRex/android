@@ -80,4 +80,5 @@ class UpdatedTermsActivity : BaseActivity() {
         }
         viewModel.onErrorShown(error)
     }
+
 }

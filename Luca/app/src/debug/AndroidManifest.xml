@@ -1,0 +1,7 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="de.culture4life.luca">
+
+    <application
+        android:networkSecurityConfig="@xml/network_security_config" />
+
+</manifest>

@@ -29,6 +29,7 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.fragment.FragmentNavigator;
+import androidx.viewbinding.ViewBinding;
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.snackbar.Snackbar;
@@ -80,7 +81,14 @@ public abstract class BaseFragment<ViewModelType extends BaseViewModel> extends 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         viewDisposable = new CompositeDisposable();
-        return inflater.inflate(getLayoutResource(), container, false);
+        ViewBinding viewBinding = getViewBinding();
+        if (viewBinding != null) {
+            return viewBinding.getRoot();
+        } else if (getLayoutResource() != -1) {
+            return inflater.inflate(getLayoutResource(), container, false);
+        } else {
+            throw new IllegalStateException("Fragment needs to override either getViewBinding() or getLayoutResource()");
+        }
     }
 
     @CallSuper
@@ -143,8 +151,19 @@ public abstract class BaseFragment<ViewModelType extends BaseViewModel> extends 
         super.onStop();
     }
 
+    /**
+     * Overwrite this to return a ViewBinding instead of a layout resource.
+     * @return ViewBinding instance
+     */
+    @Nullable
+    protected ViewBinding getViewBinding() {
+        return null;
+    }
+
     @LayoutRes
-    protected abstract int getLayoutResource();
+    protected int getLayoutResource() {
+        return -1;
+    }
 
     protected abstract Class<ViewModelType> getViewModelClass();
 

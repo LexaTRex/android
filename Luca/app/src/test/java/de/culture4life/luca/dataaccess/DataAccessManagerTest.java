@@ -1,5 +1,15 @@
 package de.culture4life.luca.dataaccess;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+
 import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Assert;
@@ -14,6 +24,7 @@ import java.util.Objects;
 
 import de.culture4life.luca.LucaUnitTest;
 import de.culture4life.luca.checkin.CheckInManager;
+import de.culture4life.luca.children.ChildrenManager;
 import de.culture4life.luca.crypto.CryptoManager;
 import de.culture4life.luca.history.HistoryManager;
 import de.culture4life.luca.location.GeofenceManager;
@@ -23,43 +34,28 @@ import de.culture4life.luca.network.pojo.AccessedHashedTraceIdsData;
 import de.culture4life.luca.network.pojo.HealthDepartment;
 import de.culture4life.luca.notification.LucaNotificationManager;
 import de.culture4life.luca.preference.PreferencesManager;
+import de.culture4life.luca.registration.RegistrationManager;
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.core.Single;
-
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 
 @RunWith(AndroidJUnit4.class)
 @Config(sdk = 28)
 public class DataAccessManagerTest extends LucaUnitTest {
 
-    PreferencesManager preferencesManager;
     LucaNotificationManager notificationManager;
-    LocationManager locationManager;
-    NetworkManager networkManager;
-    GeofenceManager geofenceManager;
-    HistoryManager historyManager;
-    CryptoManager cryptoManager;
     CheckInManager checkInManager;
     DataAccessManager dataAccessManager;
 
     @Before
     public void setUp() {
-        preferencesManager = spy(new PreferencesManager());
+        PreferencesManager preferencesManager = new PreferencesManager();
+        NetworkManager networkManager = new NetworkManager();
+        CryptoManager cryptoManager = new CryptoManager(preferencesManager, networkManager);
+        RegistrationManager registrationManager = new RegistrationManager(preferencesManager, networkManager, cryptoManager);
+        ChildrenManager childrenManager = new ChildrenManager(preferencesManager, registrationManager);
+        HistoryManager historyManager = new HistoryManager(preferencesManager, childrenManager);
         notificationManager = spy(new LucaNotificationManager());
-        locationManager = spy(new LocationManager());
-        networkManager = spy(new NetworkManager());
-        geofenceManager = spy(new GeofenceManager());
-        historyManager = spy(new HistoryManager(preferencesManager));
-        cryptoManager = spy(new CryptoManager(preferencesManager, networkManager));
-        checkInManager = spy(new CheckInManager(preferencesManager, networkManager, geofenceManager, locationManager, historyManager, cryptoManager, notificationManager));
+        checkInManager = spy(new CheckInManager(preferencesManager, networkManager, new GeofenceManager(), new LocationManager(), historyManager, cryptoManager, notificationManager));
 
         dataAccessManager = spy(new DataAccessManager(preferencesManager, networkManager, notificationManager, checkInManager, historyManager, cryptoManager));
         dataAccessManager.initialize(application).blockingAwait();
@@ -483,6 +479,21 @@ public class DataAccessManagerTest extends LucaUnitTest {
                 .map(accessedData -> accessedData.getTraceData().size())
                 .test()
                 .assertValue(1);
+    }
+
+    @Test
+    public void updateIfNecessary_withCheckIns_callsUpdate() {
+        doReturn(Observable.empty()).when(dataAccessManager).fetchRecentlyAccessedTraceData();
+        doReturn(Observable.just("anything")).when(checkInManager).getArchivedTraceIds();
+        dataAccessManager.updateIfNecessary().blockingAwait();
+        verify(dataAccessManager, times(1)).update();
+    }
+
+    @Test
+    public void updateIfNecessary_withoutCheckIns_doesNotCallUpdate() {
+        doReturn(Observable.empty()).when(checkInManager).getArchivedTraceIds();
+        dataAccessManager.updateIfNecessary().blockingAwait();
+        verify(dataAccessManager, never()).update();
     }
 
 }

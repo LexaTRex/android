@@ -10,7 +10,6 @@ import de.culture4life.luca.ui.myluca.viewholders.SingleMyLucaItemViewHolder
 class MyLucaItemForViewPagerFragment :
     Fragment() {
 
-    private var positionInRecyclerView: Int? = null
     private lateinit var expandClickLister: MyLucaListAdapter.MyLucaListItemExpandListener
     private lateinit var deleteClickListener: MyLucaListAdapter.MyLucaListClickListener
     private lateinit var item: MyLucaListItem
@@ -34,13 +33,11 @@ class MyLucaItemForViewPagerFragment :
             item: MyLucaListItem,
             expandClickLister: MyLucaListAdapter.MyLucaListItemExpandListener,
             deleteClickListener: MyLucaListAdapter.MyLucaListClickListener,
-            positionInRecyclerView: Int,
         ): MyLucaItemForViewPagerFragment {
             return MyLucaItemForViewPagerFragment().apply {
                 this.expandClickLister = expandClickLister
                 this.deleteClickListener = deleteClickListener
                 this.item = item
-                this.positionInRecyclerView = positionInRecyclerView
             }
         }
     }

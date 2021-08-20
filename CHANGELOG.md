@@ -1,3 +1,10 @@
+# Release 1.13.0
+
+- Document import for children
+- Improvement of error messages
+
+With this update, you can also import documents for the children that have been added to the app. Further, we improved error messages for more ease of use. 
+
 # Release 1.12.0
 
 - Text and UI adjustments

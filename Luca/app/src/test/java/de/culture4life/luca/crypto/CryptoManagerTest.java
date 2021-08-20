@@ -1,8 +1,15 @@
 package de.culture4life.luca.crypto;
 
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.spy;
+import static de.culture4life.luca.crypto.AsymmetricCipherProviderTest.decodePrivateKey;
+import static de.culture4life.luca.crypto.AsymmetricCipherProviderTest.decodePublicKey;
+import static de.culture4life.luca.history.HistoryManager.SHARE_DATA_DURATION;
+
 import android.util.Base64;
 
 import androidx.annotation.NonNull;
+import androidx.test.core.app.ApplicationProvider;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.nexenio.rxkeystore.util.RxBase64;
@@ -13,7 +20,6 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
-import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
 import java.nio.charset.StandardCharsets;
@@ -30,12 +36,6 @@ import de.culture4life.luca.network.pojo.DailyKeyPairIssuer;
 import de.culture4life.luca.network.pojo.Issuer;
 import de.culture4life.luca.preference.PreferencesManager;
 import io.reactivex.rxjava3.core.Single;
-
-import static de.culture4life.luca.crypto.AsymmetricCipherProviderTest.decodePrivateKey;
-import static de.culture4life.luca.crypto.AsymmetricCipherProviderTest.decodePublicKey;
-import static de.culture4life.luca.history.HistoryManager.SHARE_DATA_DURATION;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.spy;
 
 @Config(sdk = 28)
 @RunWith(AndroidJUnit4.class)
@@ -77,7 +77,7 @@ public class CryptoManagerTest {
         PreferencesManager preferencesManager = new PreferencesManager();
         networkManager = spy(new NetworkManager());
         cryptoManager = spy(new CryptoManager(preferencesManager, networkManager));
-        cryptoManager.initialize(RuntimeEnvironment.systemContext).blockingAwait();
+        cryptoManager.initialize(ApplicationProvider.getApplicationContext()).blockingAwait();
     }
 
     private void mockNetworkResponses(DailyKeyPair dailyKeyPair, Issuer issuer) {

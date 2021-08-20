@@ -1,5 +1,7 @@
 package de.culture4life.luca.ui.myluca;
 
+import static java.lang.annotation.RetentionPolicy.SOURCE;
+
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.text.TextUtils;
@@ -23,9 +25,8 @@ import java.util.List;
 import java.util.Locale;
 
 import de.culture4life.luca.R;
+import de.culture4life.luca.document.Document;
 import io.reactivex.rxjava3.core.Single;
-
-import static java.lang.annotation.RetentionPolicy.SOURCE;
 
 public abstract class MyLucaListItem {
 
@@ -44,9 +45,12 @@ public abstract class MyLucaListItem {
     @Type
     protected final int type;
 
+    protected final Document document;
+
     protected final List<Pair<String, String>> topContent = new ArrayList<>();
     protected final List<Pair<String, String>> collapsedContent = new ArrayList<>();
 
+    protected String sectionHeader;
     protected String title;
     protected String provider;
     protected Bitmap barcode;
@@ -59,8 +63,9 @@ public abstract class MyLucaListItem {
     protected int imageResource;
     protected boolean isExpanded = false;
 
-    public MyLucaListItem(@Type int type) {
+    public MyLucaListItem(@Type int type, Document document) {
         this.type = type;
+        this.document = document;
     }
 
     protected static Single<Bitmap> generateQrCode(@NonNull String data) {
@@ -100,6 +105,18 @@ public abstract class MyLucaListItem {
         return type;
     }
 
+    public Document getDocument() {
+        return document;
+    }
+
+    public String getSectionHeader() {
+        return sectionHeader;
+    }
+
+    public void setSectionHeader(String sectionHeader) {
+        this.sectionHeader = sectionHeader;
+    }
+
     public String getTitle() {
         return title;
     }
@@ -132,11 +149,11 @@ public abstract class MyLucaListItem {
         return collapsedContent;
     }
 
-    protected void addTopContent(@NonNull String label, @NonNull String text) {
+    protected void addTopContent(@NonNull String label, @Nullable String text) {
         topContent.add(new Pair(label, text));
     }
 
-    protected void addCollapsedContent(@NonNull String label, @NonNull String text) {
+    protected void addCollapsedContent(@NonNull String label, @Nullable String text) {
         collapsedContent.add(new Pair(label, text));
     }
 
