@@ -1,3 +1,7 @@
+# Release 1.13.1
+
+This update fixes an issue with imported documents not being visible.
+
 # Release 1.13.0
 
 - Document import for children

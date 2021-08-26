@@ -12,8 +12,6 @@ import org.joda.time.DateTime;
 import java.util.List;
 import java.util.NoSuchElementException;
 
-import javax.annotation.Nonnull;
-
 import de.culture4life.luca.children.Child;
 import de.culture4life.luca.document.DocumentVerificationException;
 import de.culture4life.luca.registration.Person;
@@ -49,8 +47,8 @@ public abstract class DocumentProvider<DocumentType extends ProvidedDocument> {
 
         return Observable.mergeDelayError(
                 personsToValidate.map(personToValidate -> validateName(document, personToValidate)
-                    .andThen(setName(document, personToValidate))
-                    .andThen(Observable.just(personToValidate))
+                        .andThen(setName(document, personToValidate))
+                        .andThen(Observable.just(personToValidate))
                         .onErrorResumeWith(Observable.empty())
                 )
         )
@@ -88,8 +86,11 @@ public abstract class DocumentProvider<DocumentType extends ProvidedDocument> {
 
     protected Completable validateName(@NonNull DocumentType document, @NonNull Person person) {
         return Completable.fromAction(() -> {
-            compare(person.getFirstName(), document.getDocument().getFirstName());
-            compare(person.getLastName(), document.getDocument().getLastName());
+            if (!Person.Companion.compare(person.getFirstName(), document.getDocument().getFirstName())
+                    || !Person.Companion.compare(person.getLastName(), document.getDocument().getLastName())) {
+                throw new DocumentVerificationException(NAME_MISMATCH);
+            }
+
         }).andThen(validateTime(document.document.getTestingTimestamp()));
     }
 
@@ -112,25 +113,4 @@ public abstract class DocumentProvider<DocumentType extends ProvidedDocument> {
             }
         });
     }
-
-    private static void compare(@NonNull String s1, @Nonnull String s2) throws DocumentVerificationException {
-        s1 = removeAcademicTitles(s1);
-        s2 = removeAcademicTitles(s2);
-        if (!simplify(s1).equalsIgnoreCase(simplify(s2))) {
-            throw new DocumentVerificationException(NAME_MISMATCH);
-        }
-    }
-
-    protected static String removeAcademicTitles(String name) {
-        name = name.replaceAll("(?i)Prof\\. ", "");
-        name = name.replaceAll("(?i)Dr\\. ", "");
-        return name;
-    }
-
-    protected static String simplify(String name) {
-        name = name.toUpperCase();
-        name = name.replaceAll("[^\\x41-\\x5A]", "");
-        return name;
-    }
-
 }

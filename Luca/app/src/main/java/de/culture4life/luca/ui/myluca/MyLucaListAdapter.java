@@ -191,11 +191,18 @@ public class MyLucaListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
     protected static boolean isFrom(@NonNull MyLucaListItem item, @NonNull Person person) {
         String firstName = item.document.getFirstName();
         String lastName = item.document.getLastName();
-        boolean isSameName = person.getFirstName().equals(firstName) && person.getLastName().equals(lastName);
+
+        boolean isSameName = true;
+
+        if (firstName != null) {
+            isSameName = Person.Companion.compare(person.getFirstName(), firstName)
+                    && Person.Companion.compare(person.getLastName(), lastName);
+        }
+
         if (person instanceof Child) {
-            return isSameName;
+            return isSameName && firstName != null;
         } else {
-            return isSameName || firstName == null;
+            return isSameName;
         }
     }
 }
