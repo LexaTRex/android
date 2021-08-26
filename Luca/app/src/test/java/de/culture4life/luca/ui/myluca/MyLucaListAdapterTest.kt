@@ -49,8 +49,24 @@ class MyLucaListAdapterTest : LucaUnitTest() {
     }
 
     @Test
+    fun isFrom_personNameDifferentCase_returnsTrue() {
+        assertTrue(MyLucaListAdapter.isFrom(item, Person("eRiKa", "mUsTeRmAnN")))
+    }
+
+    @Test
+    fun isFrom_titlesAreFiltered_returnTrue() {
+        assertTrue(MyLucaListAdapter.isFrom(item, Person("Prof. Dr. Erika", "Mustermann")))
+    }
+
+    @Test
+    fun isFrom_specialCharsRemoved_returnTrue() {
+        assertTrue(MyLucaListAdapter.isFrom(item, Person("Erikâa", "Mustêermann")))
+    }
+
+    @Test
     fun sortAndPairItems_correctPerson_returnsHeaderAndItem() {
-        val items = MyLucaListAdapter.sortAndPairItems(listOf(item), listOf(Person("Erika", "Mustermann")))
+        val items =
+            MyLucaListAdapter.sortAndPairItems(listOf(item), listOf(Person("Erika", "Mustermann")))
         assertEquals(items[0].sectionHeader, "Erika Mustermann")
         assertEquals(items[1].items[0], item)
     }
@@ -66,7 +82,8 @@ class MyLucaListAdapterTest : LucaUnitTest() {
 
     @Test
     fun sortAndPairItems_wrongPerson_returnsEmptyList() {
-        val items = MyLucaListAdapter.sortAndPairItems(listOf(item), listOf(Person("Anyone", "Else")))
+        val items =
+            MyLucaListAdapter.sortAndPairItems(listOf(item), listOf(Person("Anyone", "Else")))
         assertEquals(0, items.size)
     }
 }
