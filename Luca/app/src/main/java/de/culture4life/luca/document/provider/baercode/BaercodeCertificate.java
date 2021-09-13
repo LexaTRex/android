@@ -63,7 +63,9 @@ class BaercodeCertificate {
         } else {
             stream = context.getAssets().open("le_root.crt");
         }
-        return createCertificate(stream);
+        X509Certificate certificate = createCertificate(stream);
+        stream.close();
+        return certificate;
     }
 
     public static void checkServerTrusted(@NonNull X509Certificate root, @NonNull List<X509Certificate> certificatesCollection) throws GeneralSecurityException, IOException {

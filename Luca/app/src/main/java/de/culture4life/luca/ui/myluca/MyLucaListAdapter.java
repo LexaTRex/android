@@ -5,6 +5,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
@@ -27,10 +28,6 @@ public class MyLucaListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
 
     public interface MyLucaListClickListener {
         void onDelete(@NonNull MyLucaListItem myLucaListItem);
-    }
-
-    public interface MyLucaListItemExpandListener {
-        void onExpand();
     }
 
     public static final int SINGLE_ITEM_VIEW_HOLDER = 0;
@@ -84,26 +81,14 @@ public class MyLucaListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
             holder.setListeners(expandClickListener, deleteClickListener);
             setLeftPaddingForChild(holder.getView(), itemsWrapper.isChildSection());
         } else if (viewHolder.getItemViewType() == MULTIPLE_ITEM_VIEW_HOLDER) {
-            MyLucaListItemExpandListener expandClickListener = () -> {
-                for (int i = 0; i < items.size(); i++) {
-                    MyLucaListItem item = items.get(i);
-                    item.toggleExpanded();
-                }
-                notifyItemChanged(position);
-            };
             Integer hashCode = items.hashCode();
-            MyLucaItemViewPager viewPagerAdapter = new MyLucaItemViewPager(
-                    this.fragment,
-                    items,
-                    expandClickListener,
-                    clickListener
-            );
+            MyLucaItemViewPager viewPagerAdapter = new MyLucaItemViewPager(this.fragment, items);
             MultipleMyLucaItemViewHolder multipleHolder = (MultipleMyLucaItemViewHolder) viewHolder;
             multipleHolder.getViewPager().setAdapter(viewPagerAdapter);
+            multipleHolder.getPageIndicator().setViewPager2(multipleHolder.getViewPager());
             ViewPager2.OnPageChangeCallback pageChangeCallback = new ViewPager2.OnPageChangeCallback() {
                 @Override
                 public void onPageSelected(int positionInViewPager) {
-                    multipleHolder.getPageIndicator().setSelected(positionInViewPager);
                     viewPagerPositionMap.put(hashCode, positionInViewPager);
                     super.onPageSelected(positionInViewPager);
                 }
@@ -112,7 +97,6 @@ public class MyLucaListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
             multipleHolder.getViewPager().registerOnPageChangeCallback(pageChangeCallback);
             int viewPagerStarPos = viewPagerPositionMap.containsKey(hashCode) ? viewPagerPositionMap.get(hashCode) : items.size() - 1;
             multipleHolder.getViewPager().setCurrentItem(viewPagerStarPos, false);
-            multipleHolder.getPageIndicator().setCount(items.size());
 
             setLeftPaddingForChild(multipleHolder.getViewPager(), itemsWrapper.isChildSection());
         } else if (viewHolder.getItemViewType() == SECTION_HEADER_ITEM_VIEW_HOLDER) {
@@ -142,6 +126,24 @@ public class MyLucaListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
         this.items.addAll(sortedList);
         notifyDataSetChanged();
         return sortedList;
+    }
+
+    @Nullable
+    public MyLucaListItemsWrapper getWrapperWith(@NonNull MyLucaListItem item) {
+        for (MyLucaListItemsWrapper wrapper : items) {
+            if (!wrapper.getItems().isEmpty()) {
+                if (wrapper.hasMultipleItems()) {
+                    for (MyLucaListItem wrapperItem : wrapper.getItems()) {
+                        if (wrapperItem.document.getId().equals(item.document.getId())) {
+                            return wrapper;
+                        }
+                    }
+                } else if (wrapper.getItems().get(0).document.getId().equals(item.document.getId())) {
+                    return wrapper;
+                }
+            }
+        }
+        return null;
     }
 
     @Override
@@ -205,4 +207,5 @@ public class MyLucaListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
             return isSameName;
         }
     }
+
 }

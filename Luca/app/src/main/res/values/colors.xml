@@ -6,11 +6,12 @@
 
     <color name="checked_in_light_green_gradient">#d3dec3</color>
 
-    <color name="light_button_pressed">#9badbf</color>
+    <color name="light_button_pressed">#80b5ff</color>
     <color name="dark_button_pressed">#444444</color>
 
     <color name="switch_track_checked">#819e57</color>
     <color name="switch_track_default">#727272</color>
+    <color name="switch_track_checked_light_background">#ffe2e2e2</color>
 
     <color name="account_button_background">#1F1F1F</color>
 
@@ -25,15 +26,19 @@
     <color name="document_outcome_unknown">#f3f5f7</color>
     <color name="appointment">#9badbf</color>
 
-    <color name="primaryColor">@color/luca_light_blue</color>
-    <color name="primaryLightColor">#f6ffff</color>
-    <color name="primaryDarkColor">#929da8</color>
+    <color name="camera_box_background">#ff2a2a2a</color>
+
+    <color name="primaryColor">#a0c8ff</color>
+    <color name="primaryLightColor">#d3fbff</color>
+    <color name="primaryDarkColor">#6e97cc</color>
     <color name="primaryTranslucentColor">#66c3ced9</color>
 
     <color name="secondaryColor">#1b1c1e</color>
     <color name="secondaryDarkColor">#000000</color>
 
     <color name="darkTranslucentColor">#55000000</color>
+
+    <color name="highlightColor">#fa824c</color>
 
     <!-- Material Design colors -->
 

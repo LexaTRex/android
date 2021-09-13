@@ -1,10 +1,12 @@
 package de.culture4life.luca.ui.myluca;
 
+import static de.culture4life.luca.ui.BaseQrCodeViewModel.BARCODE_DATA_KEY;
+
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Size;
 import android.view.View;
-import android.widget.TextView;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -17,20 +19,23 @@ import androidx.lifecycle.LifecycleOwner;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.viewbinding.ViewBinding;
 
-import com.google.android.material.button.MaterialButton;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.common.util.concurrent.ListenableFuture;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 
 import de.culture4life.luca.R;
+import de.culture4life.luca.dataaccess.AccessedTraceData;
 import de.culture4life.luca.databinding.FragmentMyLucaBinding;
+import de.culture4life.luca.databinding.TopSheetContainerBinding;
 import de.culture4life.luca.document.Document;
 import de.culture4life.luca.registration.Person;
 import de.culture4life.luca.ui.BaseFragment;
+import de.culture4life.luca.ui.accesseddata.AccessedDataListItem;
 import de.culture4life.luca.ui.dialog.BaseDialogFragment;
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.core.Completable;
@@ -39,8 +44,6 @@ import io.reactivex.rxjava3.core.Single;
 import io.reactivex.rxjava3.disposables.Disposable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 import timber.log.Timber;
-
-import static de.culture4life.luca.ui.BaseQrCodeViewModel.BARCODE_DATA_KEY;
 
 public class MyLucaFragment extends BaseFragment<MyLucaViewModel> implements MyLucaListAdapter.MyLucaListClickListener {
 
@@ -93,7 +96,7 @@ public class MyLucaFragment extends BaseFragment<MyLucaViewModel> implements MyL
                 .andThen(Completable.fromAction(() -> {
                     initializeMyLucaItemsViews();
                     initializeImportViews();
-                    initializeTimeSyncErrorViews();
+                    initializeBanners();
                 }));
     }
 
@@ -119,6 +122,21 @@ public class MyLucaFragment extends BaseFragment<MyLucaViewModel> implements MyL
             int contentVisibility = !listItems.isEmpty() ? View.VISIBLE : View.GONE;
             binding.emptyStateScrollView.setVisibility(emptyStateVisibility);
             binding.myLucaRecyclerView.setVisibility(contentVisibility);
+        });
+
+        observe(viewModel.getItemToDelete(), viewEvent -> {
+            if (!viewEvent.hasBeenHandled()) {
+                showDeleteDocumentDialog(viewEvent.getValueAndMarkAsHandled());
+            }
+        });
+        observe(viewModel.getItemToExpand(), viewEvent -> {
+            if (!viewEvent.hasBeenHandled()) {
+                MyLucaListItemsWrapper wrapper = myLucaListAdapter.getWrapperWith(viewEvent.getValueAndMarkAsHandled());
+                for (MyLucaListItem wrapperItem : wrapper.getItems()) {
+                    wrapperItem.toggleExpanded();
+                }
+                myLucaListAdapter.notifyDataSetChanged();
+            }
         });
     }
 
@@ -167,7 +185,7 @@ public class MyLucaFragment extends BaseFragment<MyLucaViewModel> implements MyL
                 new BaseDialogFragment(new MaterialAlertDialogBuilder(getContext())
                         .setTitle(R.string.document_import_check_in_redirect_title)
                         .setMessage(R.string.document_import_check_in_redirect_description)
-                        .setPositiveButton(R.string.action_continue, (dialogInterface, i) -> navigationController.navigate(R.id.qrCodeFragment, bundle))
+                        .setPositiveButton(R.string.action_continue, (dialogInterface, i) -> navigationController.navigate(R.id.checkInFragment, bundle))
                         .setNegativeButton(R.string.action_cancel, (dialogInterface, i) -> {
                             // do nothing
                         })).show();
@@ -192,20 +210,36 @@ public class MyLucaFragment extends BaseFragment<MyLucaViewModel> implements MyL
         });
     }
 
-    private void initializeTimeSyncErrorViews() {
-        View timeSyncErrorLayout = getView().findViewById(R.id.timeSyncErrorLayout);
-        TextView sheetDescriptionTextView = timeSyncErrorLayout.findViewById(R.id.sheetDescriptionTextView);
-        sheetDescriptionTextView.setText(R.string.time_error_description);
-        MaterialButton sheetActionButton = timeSyncErrorLayout.findViewById(R.id.sheetActionButton);
-        sheetActionButton.setText(R.string.time_error_action);
-        sheetActionButton.setOnClickListener(v -> {
-            Intent intent = new Intent(android.provider.Settings.ACTION_DATE_SETTINGS);
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            startActivity(intent);
-        });
-        observe(viewModel.getIsGenuineTime(), isGenuineTime -> {
-            timeSyncErrorLayout.setVisibility(isGenuineTime ? View.GONE : View.VISIBLE);
-        });
+    private void initializeBanners() {
+        observe(viewModel.getIsGenuineTime(), isGenuineTime -> refreshBanners(isGenuineTime, viewModel.getAccessNotificationsPerLevel().getValue()));
+        observe(viewModel.getAccessNotificationsPerLevel(), accessNotifications -> refreshBanners(viewModel.getIsGenuineTime().getValue(), accessNotifications));
+    }
+
+    private void refreshBanners(@NonNull Boolean isGenuineTime, @NonNull HashMap<Integer, AccessedDataListItem> accessNotifications) {
+        LinearLayout container = getView().findViewById(R.id.bannerLayout);
+        container.removeAllViews();
+
+        if (!isGenuineTime) {
+            TopSheetContainerBinding bannerBinding = TopSheetContainerBinding.inflate(getLayoutInflater(), container, true);
+            bannerBinding.sheetDescriptionTextView.setText(R.string.time_error_description);
+            bannerBinding.sheetActionButton.setText(R.string.time_error_action);
+            bannerBinding.sheetActionButton.setOnClickListener(v -> {
+                Intent intent = new Intent(android.provider.Settings.ACTION_DATE_SETTINGS);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(intent);
+            });
+        }
+
+        for (int warningLevel = 1; warningLevel <= AccessedTraceData.NUMBER_OF_WARNING_LEVELS; warningLevel++) {
+            if (accessNotifications.containsKey(warningLevel)) {
+                TopSheetContainerBinding bannerBinding = TopSheetContainerBinding.inflate(getLayoutInflater(), container, true);
+                bannerBinding.sheetActionButton.setText(R.string.accessed_data_banner_action_show);
+                bannerBinding.sheetIconImageView.setImageResource(R.drawable.ic_eye);
+                bannerBinding.sheetDescriptionTextView.setText(accessNotifications.get(warningLevel).getBannerText());
+                int finalWarningLevel = warningLevel;
+                bannerBinding.sheetActionButton.setOnClickListener(v -> viewModel.onShowAccessedDataRequested(finalWarningLevel));
+            }
+        }
     }
 
     private void toggleCameraPreview() {
@@ -233,6 +267,7 @@ public class MyLucaFragment extends BaseFragment<MyLucaViewModel> implements MyL
                     binding.cardView.setVisibility(View.VISIBLE);
                     binding.blackBackground.setVisibility(View.VISIBLE);
                     binding.myLucaRecyclerView.setVisibility(View.GONE);
+                    binding.bannerScrollView.setVisibility(View.GONE);
                     binding.emptyStateScrollView.setVisibility(View.GONE);
                     binding.primaryActionButton.setText(R.string.action_cancel);
                 })
@@ -253,6 +288,7 @@ public class MyLucaFragment extends BaseFragment<MyLucaViewModel> implements MyL
         binding.scanDocumentHintTextView.setVisibility(View.GONE);
         binding.cardView.setVisibility(View.GONE);
         binding.myLucaRecyclerView.setVisibility(View.VISIBLE);
+        binding.bannerScrollView.setVisibility(View.VISIBLE);
         binding.blackBackground.setVisibility(View.GONE);
         int emptyStateVisibility = myLucaListAdapter.getItemCount() == 0 ? View.VISIBLE : View.GONE;
         binding.emptyStateScrollView.setVisibility(emptyStateVisibility);

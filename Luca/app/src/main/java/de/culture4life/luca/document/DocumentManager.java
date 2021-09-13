@@ -33,15 +33,14 @@ import de.culture4life.luca.network.pojo.DocumentProviderData;
 import de.culture4life.luca.network.pojo.DocumentProviderDataList;
 import de.culture4life.luca.preference.PreferencesManager;
 import de.culture4life.luca.registration.Person;
+import de.culture4life.luca.registration.RegistrationData;
 import de.culture4life.luca.registration.RegistrationManager;
-import de.culture4life.luca.util.TimeUtil;
 import io.reactivex.rxjava3.core.BackpressureStrategy;
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Maybe;
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.core.Single;
 import io.reactivex.rxjava3.functions.Predicate;
-import io.reactivex.rxjava3.schedulers.Schedulers;
 import timber.log.Timber;
 
 public class DocumentManager extends Manager {
@@ -92,25 +91,40 @@ public class DocumentManager extends Manager {
                 .doOnComplete(() -> {
                     this.eudccDocumentProvider = new EudccDocumentProvider(context);
                     this.baercodeDocumentProvider = new BaercodeDocumentProvider(context);
-                    Completable.fromAction(() -> this.baercodeDocumentProvider.downloadRequiredFiles())
-                            .subscribeOn(Schedulers.io())
-                            .onErrorComplete()
-                            .subscribe();
                 });
     }
 
     public Single<Document> parseAndValidateEncodedDocument(@NonNull String encodedDocument) {
-        return Single.mergeDelayError(registrationManager.getOrCreateRegistrationData()
-                .flatMapPublisher(registrationData -> getDocumentProvidersFor(encodedDocument)
+        Single<Person> getPerson = registrationManager.getOrCreateRegistrationData()
+                .map(RegistrationData::getPerson);
+
+        Single<Children> getChildren = childrenManager.getChildren();
+
+        return Single.zip(getPerson, getChildren, (person, children) ->
+                Single.mergeDelayError(getDocumentProvidersFor(encodedDocument)
                         .doOnNext(documentProvider -> Timber.v("Attempting to parse using %s", documentProvider.getClass().getSimpleName()))
-                        .map(documentProvider -> {
-                            Person person = registrationData.getPerson();
-                            Children children = childrenManager.getChildren().blockingGet();
-                            return documentProvider.verifyParseAndValidate(encodedDocument, person, children)
-                                    .doOnError(throwable -> Timber.w("Parsing failed: %s", throwable.toString()))
-                                    .map(ProvidedDocument::getDocument);
-                        })
-                        .toFlowable(BackpressureStrategy.BUFFER)))
+                        .map(documentProvider -> documentProvider.verifyParseAndValidate(encodedDocument, person, children)
+                                .doOnError(throwable -> Timber.w("Parsing failed: %s", throwable.toString()))
+                                .map(ProvidedDocument::getDocument))
+                        .toFlowable(BackpressureStrategy.BUFFER))
+                        .firstOrError())
+                .flatMap(documentSingle -> documentSingle)
+                .onErrorResumeNext(throwable -> {
+                    if (throwable instanceof NoSuchElementException) {
+                        return Single.error(new DocumentParsingException("No parser available for encoded data"));
+                    } else {
+                        return Single.error(throwable);
+                    }
+                });
+    }
+
+    public Single<? extends ProvidedDocument> parseEncodedDocument(@NonNull String encodedDocument) {
+        return Single.mergeDelayError(getDocumentProvidersFor(encodedDocument)
+                .doOnNext(documentProvider -> Timber.v("Attempting to parse using %s", documentProvider.getClass().getSimpleName()))
+                .map(documentProvider -> documentProvider.verify(encodedDocument)
+                        .andThen(documentProvider.parse(encodedDocument))
+                        .doOnError(throwable -> Timber.w("Parsing failed: %s", throwable.toString())))
+                .toFlowable(BackpressureStrategy.BUFFER))
                 .firstOrError()
                 .onErrorResumeNext(throwable -> {
                     if (throwable instanceof NoSuchElementException) {
@@ -178,7 +192,6 @@ public class DocumentManager extends Manager {
         return networkManager.getLucaEndpointsV3()
                 .flatMapCompletable(lucaEndpointsV3 -> Single.zip(generateEncodedDocumentHash(document), generateOrRestoreDocumentTag(document), (hash, tag) -> {
                     JsonObject jsonObject = jsonObjectWith(hash, tag);
-                    jsonObject.addProperty("expireAt", TimeUtil.convertToUnixTimestamp(document.getExpirationTimestamp()).blockingGet());
                     return jsonObject;
                 }).flatMapCompletable(lucaEndpointsV3::redeemDocument))
                 .onErrorResumeNext(throwable -> {
@@ -260,17 +273,13 @@ public class DocumentManager extends Manager {
 
     private Observable<Document> restoreDocuments() {
         return preferencesManager.restoreOrDefault(KEY_DOCUMENTS, new Documents())
-                .doOnSubscribe(disposable -> Timber.d("Restoring documents"))
                 .doOnSuccess(restoredData -> this.documents = restoredData)
                 .flatMapObservable(Observable::fromIterable);
     }
 
     private Completable persistDocuments(@NonNull Documents documents) {
         return preferencesManager.persist(KEY_DOCUMENTS, documents)
-                .doOnSubscribe(disposable -> {
-                    Timber.d("Persisting " + documents.size() + " documents");
-                    this.documents = documents;
-                });
+                .doOnSubscribe(disposable -> this.documents = documents);
     }
 
     public Completable reImportDocuments() {
@@ -284,7 +293,7 @@ public class DocumentManager extends Manager {
                                 .flatMapCompletable(encodedDocument -> parseAndValidateEncodedDocument(encodedDocument)
                                         .doOnSuccess(document -> Timber.d("Re-importing document: %s", document))
                                         .flatMapCompletable(document -> redeemDocument(document)
-                                            .andThen(addDocument(document)))
+                                                .andThen(addDocument(document)))
                                         .doOnError(throwable -> Timber.w("Unable to re-import document: %s", throwable.toString()))
                                         .onErrorComplete())));
     }

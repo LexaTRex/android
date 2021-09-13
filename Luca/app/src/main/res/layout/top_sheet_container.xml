@@ -5,6 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="?attr/colorOnSurface"
+    android:layout_marginBottom="@dimen/spacing_small"
     android:padding="@dimen/spacing_default">
 
     <ImageView
@@ -21,7 +22,7 @@
     <TextView
         android:id="@+id/sheetDescriptionTextView"
         style="@style/MaterialAlertDialog.Luca.Body.Text"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/spacing_small"
         android:text="@string/dummy_paragraph"

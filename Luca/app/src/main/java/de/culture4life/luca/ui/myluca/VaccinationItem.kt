@@ -5,7 +5,7 @@ import androidx.core.content.ContextCompat
 import de.culture4life.luca.R
 import de.culture4life.luca.document.Document
 import de.culture4life.luca.util.TimeUtil
-import java.text.SimpleDateFormat
+import de.culture4life.luca.util.getReadableDate
 
 /**
  * Item shown on UI for a vaccination certificate
@@ -22,7 +22,7 @@ open class VaccinationItem(context: Context, document: Document) :
         setDescriptionAndColor(context, document)
         val time = context.getString(
             R.string.document_result_time,
-            getReadableTime(getDateFormatFor(context, document), document.resultTimestamp)
+            context.getReadableDate(document.resultTimestamp)
         )
         addTopContent(context.getString(R.string.vaccination_date_label), time)
 
@@ -31,7 +31,7 @@ open class VaccinationItem(context: Context, document: Document) :
         for (testProcedure in getTestProcedures(context, document)) {
             addCollapsedContent(testProcedure.name, testProcedure.date)
         }
-        val date = MyLucaListItem.getReadableDate(context, document.dateOfBirth)
+        val date = context.getReadableDate(document.dateOfBirth)
         addCollapsedContent(context.getString(R.string.birthday_label), date)
     }
 
@@ -82,13 +82,12 @@ open class VaccinationItem(context: Context, document: Document) :
     private fun getTestProcedures(context: Context, document: Document): List<TestProcedure> {
         val testProcedures = arrayListOf<TestProcedure>()
         document.procedures?.let { procedures ->
-            val dateFormat = getDateFormatFor(context, document)
             for (procedure in procedures) {
                 val label = context.getString(
                     R.string.document_vaccination_procedure,
                     procedure.doseNumber.toString()
                 )
-                val description = getProcedureDescription(context, procedure, dateFormat)
+                val description = getProcedureDescription(context, procedure)
                 testProcedures.add(TestProcedure(label, description))
             }
         }
@@ -97,8 +96,7 @@ open class VaccinationItem(context: Context, document: Document) :
 
     private fun getProcedureDescription(
         context: Context,
-        procedure: Document.Procedure,
-        dateFormat: SimpleDateFormat
+        procedure: Document.Procedure
     ): String {
         val procedureName = context.getString(
             when (procedure.type) {
@@ -113,8 +111,9 @@ open class VaccinationItem(context: Context, document: Document) :
         )
         val time = context.getString(
             R.string.document_result_time,
-            getReadableTime(dateFormat, procedure.timestamp)
+            context.getReadableDate(procedure.timestamp)
         )
         return time + "\n" + procedureName
     }
+
 }

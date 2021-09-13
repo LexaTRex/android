@@ -2,19 +2,14 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
-        android:id="@+id/qrCodeFragment"
-        android:icon="@drawable/ic_navigation_checkin"
-        android:title="@string/navigation_check_in" />
-
-    <item
         android:id="@+id/myLucaFragment"
         android:icon="@drawable/ic_navigation_my_luca"
         android:title="@string/navigation_my_luca" />
 
     <item
-        android:id="@+id/historyFragment"
-        android:icon="@drawable/ic_navigation_history"
-        android:title="@string/navigation_history" />
+        android:id="@+id/checkInFragment"
+        android:icon="@drawable/ic_navigation_checkin"
+        android:title="@string/navigation_check_in" />
 
     <item
         android:id="@+id/accountFragment"

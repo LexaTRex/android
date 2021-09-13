@@ -3,8 +3,10 @@ package de.culture4life.luca.ui.account
 import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.widget.PopupMenu
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import de.culture4life.luca.BuildConfig
 import de.culture4life.luca.R
@@ -50,6 +52,7 @@ class AccountFragment : BaseFragment<AccountViewModel>() {
             binding.deleteAccountTextView.setOnClickListener { showDeleteAccountDialog() }
             binding.faqTextView.setOnClickListener { application.openUrl(getString(R.string.url_faq)) }
             binding.supportTextView.setOnClickListener { viewModel.requestSupportMail() }
+            binding.dataRequestTextView.setOnClickListener { showDataRequestMenu() }
             binding.privacyTextView.setOnClickListener { application.openUrl(getString(R.string.url_privacy_policy)) }
             binding.termsTextView.setOnClickListener { application.openUrl(getString(R.string.url_terms_and_conditions)) }
             binding.imprintTextView.setOnClickListener { application.openUrl(getString(R.string.url_imprint)) }
@@ -60,6 +63,19 @@ class AccountFragment : BaseFragment<AccountViewModel>() {
         }
     }
 
+    override fun onMenuItemClick(item: MenuItem): Boolean {
+        when (item.itemId) {
+            R.id.tracingDataRequestMenuItem -> viewModel.exportTracingDataRequest(
+                getFileExportUri("luca-tracing-data.txt")
+            )
+            R.id.documentsDataRequestMenuItem -> viewModel.exportDocumentsDataRequest(
+                getFileExportUri("luca-documents-data.txt")
+            )
+            else -> return super.onMenuItemClick(item)
+        }
+        return true
+    }
+
     private fun showDeleteAccountDialog() {
         context?.also {
             BaseDialogFragment(MaterialAlertDialogBuilder(it)
@@ -68,6 +84,16 @@ class AccountFragment : BaseFragment<AccountViewModel>() {
                 .setPositiveButton(R.string.delete_account_dialog_action) { _, _ -> viewModel.deleteAccount() }
                 .setNegativeButton(R.string.action_cancel) { dialog, _ -> dialog.dismiss() })
                 .show()
+        }
+    }
+
+    private fun showDataRequestMenu() {
+        context?.also { context ->
+            PopupMenu(context, binding.dataRequestTextView).apply {
+                menuInflater.inflate(R.menu.data_request_menu, this.menu)
+                setOnMenuItemClickListener { item -> onMenuItemClick(item) }
+                show()
+            }
         }
     }
 
@@ -96,9 +122,12 @@ class AccountFragment : BaseFragment<AccountViewModel>() {
             BaseDialogFragment(MaterialAlertDialogBuilder(it)
                 .setTitle(R.string.gitlab_dialog_title)
                 .setMessage(R.string.gitlab_dialog_message)
-                .setPositiveButton(R.string.gitlab_dialog_action) { _, _ -> application.openUrl(getString(R.string.url_gitlab)) }
+                .setPositiveButton(R.string.gitlab_dialog_action) { _, _ ->
+                    application.openUrl(getString(R.string.url_gitlab))
+                }
                 .setNegativeButton(R.string.action_cancel) { dialog, _ -> dialog.dismiss() })
                 .show()
         }
     }
+
 }

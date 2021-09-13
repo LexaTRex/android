@@ -12,7 +12,6 @@
         android:layout_marginStart="@dimen/spacing_default"
         android:src="@drawable/ic_back"
         app:layout_constraintBottom_toTopOf="@id/headingSeparatorView"
-        app:layout_constraintEnd_toStartOf="@id/headingTextView"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:tint="?attr/colorOnSurface" />
@@ -20,9 +19,11 @@
     <TextView
         android:id="@+id/headingTextView"
         style="@style/TextAppearance.Luca.Headline2"
+        android:layout_width="wrap_content"
         android:layout_margin="@dimen/spacing_default"
         android:text="@string/key_health_department_title"
-        app:layout_constraintStart_toEndOf="@id/backImageView"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <View

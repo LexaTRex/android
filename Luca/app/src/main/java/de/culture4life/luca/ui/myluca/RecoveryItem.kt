@@ -5,12 +5,12 @@ import androidx.core.content.ContextCompat
 import de.culture4life.luca.R
 import de.culture4life.luca.document.Document
 import de.culture4life.luca.util.TimeUtil
+import de.culture4life.luca.util.getReadableDate
 
 /**
  * Item shown on UI for a Recovery certificate
  */
-class RecoveryItem(context: Context, document: Document) :
-    VaccinationItem(context, document) {
+class RecoveryItem(context: Context, document: Document) : VaccinationItem(context, document) {
 
     init {
         setTitleAndColor(context, document)
@@ -24,14 +24,14 @@ class RecoveryItem(context: Context, document: Document) :
         addTopContent(context.getString(R.string.document_created_before), createdBefore)
 
         collapsedContent.clear()
-        val time = MyLucaListItem.getReadableDate(context, document.testingTimestamp)
+        val time = context.getReadableDate(document.testingTimestamp)
         addCollapsedContent(
             context.getString(R.string.document_issued_by),
             "$time\n${document.labName}"
         )
-        val validUntil = MyLucaListItem.getReadableDate(context, document.expirationTimestamp)
+        val validUntil = context.getReadableDate(document.expirationTimestamp)
         addCollapsedContent(context.getString(R.string.document_valid_until), validUntil)
-        val date = MyLucaListItem.getReadableDate(context, document.dateOfBirth)
+        val date = context.getReadableDate(document.dateOfBirth)
         addCollapsedContent(context.getString(R.string.birthday_label), date)
     }
 
@@ -75,4 +75,5 @@ class RecoveryItem(context: Context, document: Document) :
             }
         }
     }
+
 }

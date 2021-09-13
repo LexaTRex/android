@@ -1,7 +1,5 @@
 package de.culture4life.luca;
 
-import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
-
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
@@ -60,6 +58,8 @@ import io.reactivex.rxjava3.plugins.RxJavaPlugins;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 import rxdogtag2.RxDogTag;
 import timber.log.Timber;
+
+import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 
 public class LucaApplication extends MultiDexApplication {
 

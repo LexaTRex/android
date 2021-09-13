@@ -20,6 +20,8 @@ import de.culture4life.luca.ui.dialog.BaseDialogFragment;
 import de.culture4life.luca.util.AccessibilityServiceUtil;
 import io.reactivex.rxjava3.core.Completable;
 
+import static de.culture4life.luca.ui.BaseQrCodeViewModel.BARCODE_DATA_KEY;
+
 public class MeetingFragment extends BaseFragment<MeetingViewModel> {
 
     private ImageView qrCodeImageView;
@@ -61,7 +63,7 @@ public class MeetingFragment extends BaseFragment<MeetingViewModel> {
                 .andThen(Completable.fromAction(() -> {
                     observe(viewModel.getIsHostingMeeting(), isHostingMeeting -> {
                         if (!isHostingMeeting) {
-                            safeNavigateFromNavController(R.id.action_meetingFragment_to_qrCodeFragment);
+                            safeNavigateFromNavController(R.id.action_meetingFragment_to_checkInFragment, viewModel.getBundle().getValue());
                         }
                         AccessibilityServiceUtil.speak(getContext(), getString(R.string.meeting_was_ended_hint));
                     });
@@ -79,14 +81,29 @@ public class MeetingFragment extends BaseFragment<MeetingViewModel> {
                             Toast.makeText(getContext(), R.string.venue_slider_clicked, Toast.LENGTH_SHORT).show();
                         }
                     });
-                    slideToActView.setReversed(true);
 
                     observe(viewModel.getIsLoading(), loading -> {
                         if (!loading) {
                             slideToActView.resetSlider();
                         }
                     });
+                    observe(viewModel.getBundle(), this::processBundle);
                 }));
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        Bundle arguments = getArguments();
+        if (arguments != null) {
+            viewModel.setBundle(arguments);
+        }
+    }
+
+    @Override
+    public void onStop() {
+        viewModel.setBundle(null);
+        super.onStop();
     }
 
     private void showMeetingDescriptionInfo() {
@@ -108,6 +125,28 @@ public class MeetingFragment extends BaseFragment<MeetingViewModel> {
                 .setPositiveButton(R.string.action_ok, (dialog, which) -> {
                     // do nothing
                 })).show();
+    }
+
+    private void processBundle(@Nullable Bundle bundle) {
+        if (bundle == null) {
+            return;
+        }
+
+        String barcode = bundle.getString(BARCODE_DATA_KEY);
+        if (barcode != null) {
+            // is supposed to check-in into different location
+            showLocationChangeDialog();
+        }
+    }
+
+    private void showLocationChangeDialog() {
+        MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(getContext())
+                .setTitle(R.string.venue_change_location_title)
+                .setMessage(R.string.meeting_change_location_description)
+                .setPositiveButton(R.string.action_change, (dialog, which) -> viewModel.changeLocation())
+                .setNegativeButton(R.string.action_cancel, (dialog, which) -> dialog.cancel())
+                .setOnCancelListener(dialogInterface -> viewModel.setBundle(null));
+        new BaseDialogFragment(builder).show();
     }
 
 }

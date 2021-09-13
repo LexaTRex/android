@@ -4,21 +4,19 @@ import com.google.gson.JsonObject;
 
 import java.util.List;
 
-import de.culture4life.luca.network.pojo.DailyKeyPair;
-import de.culture4life.luca.network.pojo.Issuer;
 import de.culture4life.luca.meeting.MeetingCreationResponse;
-import de.culture4life.luca.network.pojo.AccessedHashedTraceIdsDataList;
 import de.culture4life.luca.network.pojo.AdditionalCheckInPropertiesRequestData;
 import de.culture4life.luca.network.pojo.CheckInRequestData;
 import de.culture4life.luca.network.pojo.CheckOutRequestData;
+import de.culture4life.luca.network.pojo.DailyKeyPair;
 import de.culture4life.luca.network.pojo.DataTransferRequestData;
 import de.culture4life.luca.network.pojo.DocumentProviderDataList;
+import de.culture4life.luca.network.pojo.Issuer;
 import de.culture4life.luca.network.pojo.LocationResponseData;
 import de.culture4life.luca.network.pojo.TraceData;
 import de.culture4life.luca.network.pojo.TracesResponseData;
 import de.culture4life.luca.network.pojo.UserDeletionRequestData;
 import de.culture4life.luca.network.pojo.UserRegistrationRequestData;
-
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Single;
 import retrofit2.http.Body;
@@ -103,13 +101,6 @@ public interface LucaEndpointsV3 {
 
     @GET("scanners/{scannerId}")
     Single<JsonObject> getScanner(@Path("scannerId") String scannerId);
-
-    /*
-        Notifications
-     */
-
-    @GET("notifications/traces")
-    Single<AccessedHashedTraceIdsDataList> getAccessedTraces();
 
     /*
         Health Departments

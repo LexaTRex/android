@@ -9,6 +9,7 @@
         style="@style/TextAppearance.Luca.Headline2"
         android:layout_margin="@dimen/spacing_default"
         android:text="@string/navigation_account"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -51,21 +52,15 @@
                         android:id="@+id/editContactDataTextView"
                         style="@style/AccountTabButton.BottomStroke"
                         android:layout_width="match_parent"
-                        android:layout_height="56dp"
-                        android:text="@string/edit_contact_data"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent" />
+                        android:layout_height="wrap_content"
+                        android:text="@string/edit_contact_data" />
 
                     <TextView
                         android:id="@+id/deleteAccountTextView"
                         style="@style/AccountTabButton"
                         android:layout_width="match_parent"
-                        android:layout_height="56dp"
-                        android:text="@string/menu_delete_account"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@id/editContactDataTextView" />
+                        android:layout_height="wrap_content"
+                        android:text="@string/menu_delete_account" />
 
                 </LinearLayout>
 
@@ -94,91 +89,71 @@
                         android:id="@+id/faqTextView"
                         style="@style/AccountTabButton.BottomStroke"
                         android:layout_width="match_parent"
-                        android:layout_height="56dp"
-                        android:text="@string/menu_faq"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent" />
+                        android:layout_height="wrap_content"
+                        android:text="@string/menu_faq" />
 
                     <TextView
                         android:id="@+id/supportTextView"
                         style="@style/AccountTabButton.BottomStroke"
                         android:layout_width="match_parent"
-                        android:layout_height="56dp"
-                        android:text="@string/menu_support"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@id/editContactDataTextView" />
+                        android:layout_height="wrap_content"
+                        android:text="@string/menu_support" />
+
+                    <TextView
+                        android:id="@+id/dataRequestTextView"
+                        style="@style/AccountTabButton.BottomStroke"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/account_tab_data_request" />
 
                     <TextView
                         android:id="@+id/privacyTextView"
                         style="@style/AccountTabButton.BottomStroke"
                         android:layout_width="match_parent"
-                        android:layout_height="56dp"
-                        android:text="@string/menu_privacy_policy"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@id/editContactDataTextView" />
+                        android:layout_height="wrap_content"
+                        android:text="@string/menu_privacy_policy" />
 
                     <TextView
                         android:id="@+id/termsTextView"
                         style="@style/AccountTabButton.BottomStroke"
                         android:layout_width="match_parent"
-                        android:layout_height="56dp"
-                        android:text="@string/menu_terms_and_conditions"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@id/editContactDataTextView" />
+                        android:layout_height="wrap_content"
+                        android:text="@string/menu_terms_and_conditions" />
 
                     <TextView
                         android:id="@+id/imprintTextView"
                         style="@style/AccountTabButton.BottomStroke"
                         android:layout_width="match_parent"
-                        android:layout_height="56dp"
-                        android:text="@string/menu_imprint"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@id/editContactDataTextView" />
+                        android:layout_height="wrap_content"
+                        android:text="@string/menu_imprint" />
 
                     <TextView
                         android:id="@+id/healthDepartmentKeyTextView"
                         style="@style/AccountTabButton.BottomStroke"
                         android:layout_width="match_parent"
-                        android:layout_height="56dp"
-                        android:text="@string/account_tab_key_for_health_dep"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@id/editContactDataTextView" />
+                        android:layout_height="wrap_content"
+                        android:text="@string/account_tab_key_for_health_dep" />
 
                     <TextView
                         android:id="@+id/showAppDataTextView"
                         style="@style/AccountTabButton.BottomStroke"
                         android:layout_width="match_parent"
-                        android:layout_height="56dp"
-                        android:text="@string/menu_app_data"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@id/editContactDataTextView" />
+                        android:layout_height="wrap_content"
+                        android:text="@string/menu_app_data" />
 
                     <TextView
                         android:id="@+id/versionTextView"
                         style="@style/AccountTabButton.BottomStroke"
                         android:layout_width="match_parent"
-                        android:layout_height="56dp"
-                        android:text="@string/menu_version_details"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@id/editContactDataTextView" />
+                        android:layout_height="wrap_content"
+                        android:text="@string/menu_version_details" />
 
                     <TextView
                         android:id="@+id/gitlabTextView"
                         style="@style/AccountTabButton"
                         android:layout_width="match_parent"
-                        android:layout_height="56dp"
-                        android:text="@string/menu_gitlab"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@id/editContactDataTextView" />
+                        android:layout_height="wrap_content"
+                        android:text="@string/menu_gitlab" />
 
                 </LinearLayout>
 

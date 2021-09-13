@@ -222,13 +222,15 @@
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/spacing_default"
         android:contentDescription="@string/meeting_slider_content_description"
+        app:area_margin="0dp"
         app:bump_vibration="50"
         app:complete_icon="@drawable/ic_sync"
-        app:inner_color="@android:color/black"
+        app:inner_color="@android:color/white"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:outer_color="@android:color/white"
+        app:outer_color="#65ffffff"
+        app:slider_icon_color="@android:color/black"
         app:text="@string/meeting_slider_text"
         app:text_appearance="@style/TextAppearance.Luca.SlideToActView" />
 

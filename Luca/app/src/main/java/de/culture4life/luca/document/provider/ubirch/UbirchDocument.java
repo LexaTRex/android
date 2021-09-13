@@ -2,11 +2,11 @@ package de.culture4life.luca.document.provider.ubirch;
 
 import androidx.annotation.NonNull;
 
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
+
 import java.lang.reflect.Field;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Locale;
 import java.util.UUID;
 
 import de.culture4life.luca.document.Document;
@@ -16,7 +16,7 @@ import static de.culture4life.luca.document.provider.ubirch.UbirchDocumentProvid
 
 public class UbirchDocument extends ProvidedDocument {
 
-    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyyMMddHHmm", Locale.GERMANY);
+    private static final DateTimeFormatter DATE_FORMAT = DateTimeFormat.forPattern("yyyyMMddHHmm");
 
     String b;
     String d;
@@ -57,15 +57,11 @@ public class UbirchDocument extends ProvidedDocument {
         if ("PCR".equals(t)) {
             document.setType(Document.TYPE_PCR);
         } else {
-            document.setOutcome(Document.TYPE_UNKNOWN);
+            document.setOutcome(Document.OUTCOME_UNKNOWN);
         }
 
-        try {
-            Date testDate = DATE_FORMAT.parse(d);
-            document.setTestingTimestamp(testDate.getTime());
-        } catch (ParseException e) {
-            throw new IllegalArgumentException("Unable to parse test date: " + d);
-        }
+        Date testDate = DATE_FORMAT.parseDateTime(d).toDate();
+        document.setTestingTimestamp(testDate.getTime());
 
         document.setResultTimestamp(document.getTestingTimestamp());
         document.setImportTimestamp(System.currentTimeMillis());

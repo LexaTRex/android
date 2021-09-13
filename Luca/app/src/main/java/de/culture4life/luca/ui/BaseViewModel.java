@@ -1,7 +1,9 @@
 package de.culture4life.luca.ui;
 
+import static de.culture4life.luca.notification.LucaNotificationManager.NOTIFICATION_ID_EVENT;
+
 import android.app.Application;
-import android.content.ActivityNotFoundException;
+import android.net.Uri;
 
 import androidx.annotation.CallSuper;
 import androidx.annotation.IdRes;
@@ -16,6 +18,8 @@ import androidx.navigation.NavDestination;
 
 import com.tbruyelle.rxpermissions3.Permission;
 
+import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -37,8 +41,6 @@ import io.reactivex.rxjava3.disposables.CompositeDisposable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 import timber.log.Timber;
 
-import static de.culture4life.luca.notification.LucaNotificationManager.NOTIFICATION_ID_EVENT;
-
 public abstract class BaseViewModel extends AndroidViewModel {
 
     public static final String KEY_CAMERA_CONSENT_GIVEN = "camera_consent_given";
@@ -58,7 +60,6 @@ public abstract class BaseViewModel extends AndroidViewModel {
         super(application);
         this.application = (LucaApplication) application;
         this.preferencesManager = this.application.getPreferencesManager();
-        Timber.d("Created %s", this);
     }
 
     @Override
@@ -72,8 +73,7 @@ public abstract class BaseViewModel extends AndroidViewModel {
         return updateRequiredPermissions()
                 .andThen(preferencesManager.initialize(application))
                 .andThen(update(showCameraPreview, false))
-                .andThen(navigateForDeepLinkIfAvailable())
-                .doOnSubscribe(disposable -> Timber.d("Initializing %s", this));
+                .andThen(navigateForDeepLinkIfAvailable());
     }
 
     @CallSuper
@@ -213,7 +213,7 @@ public abstract class BaseViewModel extends AndroidViewModel {
         return application.getDeepLink()
                 .flatMap(url -> {
                     if (CheckInManager.isSelfCheckInUrl(url) || MeetingManager.isPrivateMeeting(url)) {
-                        return Maybe.just(R.id.qrCodeFragment);
+                        return Maybe.just(R.id.checkInFragment);
                     } else if (DocumentManager.isTestResult(url) || DocumentManager.isAppointment(url)) {
                         return Maybe.just(R.id.myLucaFragment);
                     } else {
@@ -257,6 +257,31 @@ public abstract class BaseViewModel extends AndroidViewModel {
                 .subscribeOn(Schedulers.io())
                 .subscribe()
         );
+    }
+
+    protected void export(Single<Uri> uri, Single<String> content) {
+        modelDisposable.add(Single.zip(uri, content, this::export)
+                .flatMapCompletable(completable -> completable)
+                .doOnSubscribe(disposable -> updateAsSideEffect(isLoading, true))
+                .doOnError(throwable -> {
+                    if (!(throwable instanceof UserCancelledException)) {
+                        Timber.w(throwable, "Unable to export data request: %s", throwable.toString());
+                        addError(createErrorBuilder(throwable).removeWhenShown().build());
+                    }
+                })
+                .onErrorComplete()
+                .doFinally(() -> updateAsSideEffect(isLoading, false))
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe());
+    }
+
+    private Completable export(Uri uri, String content) {
+        return Completable.fromAction(() -> {
+            OutputStream stream = application.getContentResolver().openOutputStream(uri);
+            stream.write(content.getBytes(StandardCharsets.UTF_8));
+        })
+                .doOnComplete(() -> Timber.d("Exported:\n%s", content));
     }
 
     @Override

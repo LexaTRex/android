@@ -1,7 +1,5 @@
 package de.culture4life.luca.ui.myluca;
 
-import static java.lang.annotation.RetentionPolicy.SOURCE;
-
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.text.TextUtils;
@@ -17,18 +15,18 @@ import com.google.zxing.EncodeHintType;
 
 import net.glxn.qrgen.android.QRCode;
 
+import java.io.Serializable;
 import java.lang.annotation.Retention;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 
 import de.culture4life.luca.R;
 import de.culture4life.luca.document.Document;
 import io.reactivex.rxjava3.core.Single;
 
-public abstract class MyLucaListItem {
+import static java.lang.annotation.RetentionPolicy.SOURCE;
+
+public abstract class MyLucaListItem implements Serializable {
 
     public static final int TYPE_UNKNOWN = 0;
     public static final int TYPE_TEST_RESULT = 1;
@@ -73,20 +71,6 @@ public abstract class MyLucaListItem {
                 .withSize(500, 500)
                 .withHint(EncodeHintType.MARGIN, 0)
                 .bitmap());
-    }
-
-    protected static String getReadableDate(@NonNull Context context, long timestamp) {
-        SimpleDateFormat dateFormat = new SimpleDateFormat(context.getString(R.string.date_format), Locale.GERMANY);
-        return getReadableTime(dateFormat, timestamp);
-    }
-
-    protected static String getReadableTime(@NonNull Context context, long timestamp) {
-        SimpleDateFormat timeFormat = new SimpleDateFormat(context.getString(R.string.time_format), Locale.GERMANY);
-        return getReadableTime(timeFormat, timestamp);
-    }
-
-    protected static String getReadableTime(@NonNull SimpleDateFormat readableDateFormat, long timestamp) {
-        return readableDateFormat.format(new Date(timestamp));
     }
 
     protected static String getReadableProvider(@NonNull Context context, @Nullable String provider) {

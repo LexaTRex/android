@@ -1,8 +1,8 @@
 buildscript {
-    ext.kotlin_version = '1.5.0'
+    ext.kotlin_version = '1.5.10'
     repositories {
         google()
-        jcenter()
+        mavenCentral()
         maven { url "https://plugins.gradle.org/m2/" }
     }
     dependencies {
@@ -10,13 +10,14 @@ buildscript {
         classpath 'com.github.triplet.gradle:play-publisher:3.4.0'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         classpath "org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:3.3"
+        classpath 'org.owasp:dependency-check-gradle:6.2.2'
     }
 }
 
 allprojects {
     repositories {
         google()
-        jcenter()
+        mavenCentral()
         maven { url 'https://jitpack.io' }
     }
 }

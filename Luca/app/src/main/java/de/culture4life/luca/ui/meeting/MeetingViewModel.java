@@ -2,6 +2,7 @@ package de.culture4life.luca.ui.meeting;
 
 import android.app.Application;
 import android.graphics.Bitmap;
+import android.os.Bundle;
 import android.util.Pair;
 
 import androidx.annotation.NonNull;
@@ -51,6 +52,7 @@ public class MeetingViewModel extends BaseViewModel {
     private final MutableLiveData<String> membersCount = new MutableLiveData<>("0/0");
     private final MutableLiveData<String> checkedInMemberNames = new MutableLiveData<>("");
     private final MutableLiveData<String> checkedOutMemberNames = new MutableLiveData<>("");
+    private final MutableLiveData<Bundle> bundle = new MutableLiveData<>();
 
     @Nullable
     private ViewError meetingError;
@@ -198,6 +200,10 @@ public class MeetingViewModel extends BaseViewModel {
                 .doFinally(() -> updateAsSideEffect(isLoading, false));
     }
 
+    protected void changeLocation() {
+        onMeetingEndRequested();
+    }
+
     public LiveData<Boolean> getIsHostingMeeting() {
         return isHostingMeeting;
     }
@@ -222,4 +228,11 @@ public class MeetingViewModel extends BaseViewModel {
         return checkedOutMemberNames;
     }
 
+    public LiveData<Bundle> getBundle() {
+        return bundle;
+    }
+
+    public void setBundle(@Nullable Bundle bundle) {
+        this.bundle.setValue(bundle);
+    }
 }

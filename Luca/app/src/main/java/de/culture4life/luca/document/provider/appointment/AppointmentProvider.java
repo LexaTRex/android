@@ -2,8 +2,6 @@ package de.culture4life.luca.document.provider.appointment;
 
 import androidx.annotation.NonNull;
 
-import org.jetbrains.annotations.NotNull;
-
 import de.culture4life.luca.document.DocumentManager;
 import de.culture4life.luca.document.DocumentParsingException;
 import de.culture4life.luca.document.provider.DocumentProvider;

@@ -7,6 +7,7 @@ import androidx.core.content.ContextCompat;
 
 import de.culture4life.luca.R;
 import de.culture4life.luca.document.Document;
+import de.culture4life.luca.util.TimeUtil;
 
 public class AppointmentItem extends TestResultItem {
 
@@ -17,7 +18,7 @@ public class AppointmentItem extends TestResultItem {
         this.color = ContextCompat.getColor(context, R.color.appointment);
         this.deleteButtonText = context.getString(R.string.delete_appointment_action);
         this.provider = null;
-        String time = context.getString(R.string.document_result_time, getReadableTime(getDateFormatFor(context, document), document.getResultTimestamp()));
+        String time = context.getString(R.string.document_result_time, TimeUtil.getReadableTime(context, document.getResultTimestamp()));
 
         topContent.clear();
         addTopContent(document.getLabName(), null);

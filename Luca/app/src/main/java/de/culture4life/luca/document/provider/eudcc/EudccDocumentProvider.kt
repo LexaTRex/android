@@ -6,15 +6,16 @@ import de.culture4life.luca.document.DocumentParsingException
 import de.culture4life.luca.document.provider.DocumentProvider
 import dgca.verifier.app.decoder.DefaultCertificateDecoder
 import dgca.verifier.app.decoder.DefaultCertificateDecoder.Companion.PREFIX
-import dgca.verifier.app.decoder.DefaultCertificateDecoder.Companion.decodeCose
-import dgca.verifier.app.decoder.DefaultCertificateDecoder.Companion.decompressBase45DecodedData
 import dgca.verifier.app.decoder.base45.Base45Decoder
+import dgca.verifier.app.decoder.decodeCose
+import dgca.verifier.app.decoder.decompressBase45DecodedData
 import io.reactivex.rxjava3.core.Single
 
 /**
  * Provider for the EU Digital COVID Certificate (EUDCC)
  */
-class EudccDocumentProvider(val context: Context) : DocumentProvider<EudccResult>() {
+@kotlin.ExperimentalUnsignedTypes
+class EudccDocumentProvider(val context: Context) : DocumentProvider<EudccDocument>() {
 
     private val base45Decoder = Base45Decoder()
     private val decoder = DefaultCertificateDecoder(base45Decoder)
@@ -32,12 +33,9 @@ class EudccDocumentProvider(val context: Context) : DocumentProvider<EudccResult
         }.onErrorReturn { false }
     }
 
-    override fun parse(encodedData: String): Single<EudccResult> {
+    override fun parse(encodedData: String): Single<EudccDocument> {
         return Single.fromCallable {
-            EudccResult(
-                encodedData,
-                decoder.decodeCertificate(encodedData)
-            )
+            EudccDocument(encodedData, decoder.decodeCertificate(encodedData))
         }
             .map { it.document.provider = context.getString(R.string.provider_name_eu_dcc); it }
             .onErrorResumeNext { throwable ->
@@ -47,4 +45,5 @@ class EudccDocumentProvider(val context: Context) : DocumentProvider<EudccResult
                 Single.error(DocumentParsingException(throwable))
             }
     }
+
 }

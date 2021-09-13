@@ -32,9 +32,6 @@ public class HistoryManager extends Manager {
     public static final long KEEP_DATA_DURATION = TimeUnit.DAYS.toMillis(KEEP_DATA_DAYS);
     public static final String KEY_HISTORY_ITEMS = "history_items_2";
 
-    @Deprecated
-    public static final String KEY_HISTORY_ITEMS_V1 = "history_items";
-
     private final PreferencesManager preferencesManager;
     private final ChildrenManager childrenManager;
 
@@ -52,14 +49,7 @@ public class HistoryManager extends Manager {
     @Override
     protected Completable doInitialize(@NonNull Context context) {
         return preferencesManager.initialize(context)
-                .andThen(migrateOldItems())
                 .andThen(deleteOldItems());
-    }
-
-    private Completable migrateOldItems() {
-        // migration is not needed anymore, as not yet migrated history items
-        // are older than 2 weeks by now
-        return preferencesManager.delete(KEY_HISTORY_ITEMS_V1);
     }
 
     public Completable addCheckInItem(@NonNull CheckInData checkInData) {
@@ -129,11 +119,11 @@ public class HistoryManager extends Manager {
     public Completable addTraceDataAccessedItem(@NonNull AccessedTraceData accessedTraceData) {
         return Single.fromCallable(() -> {
             TraceDataAccessedItem item = new TraceDataAccessedItem();
-            item.setHealthDepartmentId(accessedTraceData.getHealthDepartmentId());
+            item.setHealthDepartmentId(accessedTraceData.getHealthDepartment().getId());
             item.setTraceId(accessedTraceData.getTraceId());
             item.setRelatedId(item.getHealthDepartmentId() + ";" + item.getTraceId());
             item.setTimestamp(accessedTraceData.getAccessTimestamp());
-            item.setHealthDepartmentName(accessedTraceData.getHealthDepartmentName());
+            item.setHealthDepartmentName(accessedTraceData.getHealthDepartment().getName());
             item.setLocationName(accessedTraceData.getLocationName());
             item.setCheckInTimestamp(accessedTraceData.getCheckInTimestamp());
             item.setCheckOutTimestamp(accessedTraceData.getCheckOutTimestamp());
@@ -201,8 +191,7 @@ public class HistoryManager extends Manager {
         return preferencesManager.restoreOrDefault(KEY_HISTORY_ITEMS, new HistoryItemContainer())
                 .flatMapObservable(Observable::fromIterable)
                 .distinct(historyItem -> historyItem.getRelatedId() + historyItem.getType())
-                .sorted((first, second) -> Long.compare(second.getTimestamp(), first.getTimestamp()))
-                .doOnSubscribe(disposable -> Timber.d("Restoring items from preferences"));
+                .sorted((first, second) -> Long.compare(second.getTimestamp(), first.getTimestamp()));
     }
 
     private Completable persistItemsToPreferences(Observable<HistoryItem> historyItems) {

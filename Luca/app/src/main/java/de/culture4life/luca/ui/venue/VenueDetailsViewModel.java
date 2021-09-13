@@ -16,8 +16,6 @@ import androidx.lifecycle.MutableLiveData;
 
 import com.tbruyelle.rxpermissions3.Permission;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
@@ -34,6 +32,7 @@ import de.culture4life.luca.preference.PreferencesManager;
 import de.culture4life.luca.ui.BaseViewModel;
 import de.culture4life.luca.ui.ViewError;
 import de.culture4life.luca.ui.children.ChildrenFragment;
+import de.culture4life.luca.util.TimeUtil;
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.core.Single;
@@ -43,7 +42,6 @@ import timber.log.Timber;
 public class VenueDetailsViewModel extends BaseViewModel {
 
     public static final String KEY_LOCATION_CONSENT_GIVEN = "location_consent_given";
-    private final SimpleDateFormat readableDateFormat;
 
     private final PreferencesManager preferenceManager;
     private final ChildrenManager childrenManager;
@@ -54,18 +52,18 @@ public class VenueDetailsViewModel extends BaseViewModel {
     private final MutableLiveData<UUID> id = new MutableLiveData<>();
     private final MutableLiveData<String> title = new MutableLiveData<>();
     private final MutableLiveData<String> subtitle = new MutableLiveData<>();
-    private final MutableLiveData<String> description = new MutableLiveData<>();
     private final MutableLiveData<String> additionalDataTitle = new MutableLiveData<>();
     private final MutableLiveData<String> additionalDataValue = new MutableLiveData<>();
     private final MutableLiveData<Boolean> showAdditionalData = new MutableLiveData<>(false);
     private final MutableLiveData<String> checkInTime = new MutableLiveData<>();
     private final MutableLiveData<String> checkInDuration = new MutableLiveData<>();
     private final MutableLiveData<Boolean> isCheckedIn = new MutableLiveData<>(false);
-    private final MutableLiveData<Boolean> hasLocationRestriction = new MutableLiveData<>();
-    private final MutableLiveData<Boolean> isGeofencingSupported = new MutableLiveData<>();
+    private final MutableLiveData<Boolean> hasLocationRestriction = new MutableLiveData<>(false);
+    private final MutableLiveData<Boolean> isGeofencingSupported = new MutableLiveData<>(true);
     private final MutableLiveData<Boolean> shouldEnableAutomaticCheckOut = new MutableLiveData<>();
     private final MutableLiveData<Boolean> shouldEnableLocationServices = new MutableLiveData<>();
     private final MutableLiveData<Integer> childCounter = new MutableLiveData<>();
+    private final MutableLiveData<Bundle> bundle = new MutableLiveData<>();
 
     private boolean isLocationPermissionGranted = false;
     private boolean isBackgroundLocationPermissionGranted = false;
@@ -80,7 +78,6 @@ public class VenueDetailsViewModel extends BaseViewModel {
         checkInManager = this.application.getCheckInManager();
         geofenceManager = this.application.getGeofenceManager();
         locationManager = this.application.getLocationManager();
-        readableDateFormat = new SimpleDateFormat(application.getString(R.string.time_format), Locale.GERMANY);
     }
 
     @Override
@@ -92,8 +89,6 @@ public class VenueDetailsViewModel extends BaseViewModel {
                         geofenceManager.initialize(application),
                         locationManager.initialize(application)
                 ))
-                .andThen(geofenceManager.isGeofencingSupported()
-                        .flatMapCompletable(supported -> update(isGeofencingSupported, supported)))
                 .andThen(initializeAutomaticCheckout())
                 .andThen(checkInManager.isCheckedIn()
                         .flatMapCompletable(checkedIn -> update(isCheckedIn, checkedIn)))
@@ -123,6 +118,16 @@ public class VenueDetailsViewModel extends BaseViewModel {
                         return Completable.complete();
                     }
                 }).andThen(update(shouldEnableAutomaticCheckOut, automaticCheckoutEnabled)));
+    }
+
+    public Completable updateLocationServicesStatus() {
+        return geofenceManager.isGeofencingSupported()
+                .flatMapCompletable(supported -> {
+                    if (!supported) {
+                        disableAutomaticCheckout();
+                    }
+                    return update(isGeofencingSupported, supported);
+                });
     }
 
     private Completable updateChildCounter() {
@@ -165,7 +170,6 @@ public class VenueDetailsViewModel extends BaseViewModel {
         return checkInManager.getCheckInDataAndChanges()
                 .map(CheckInData::getTimestamp)
                 .switchMapCompletable(checkInTimestamp -> Completable.mergeArray(
-                        updateDescription(checkInTimestamp),
                         updateReadableCheckInTime(checkInTimestamp),
                         updateReadableCheckInDuration(checkInTimestamp)
                 ));
@@ -184,14 +188,10 @@ public class VenueDetailsViewModel extends BaseViewModel {
     }
 
     private Completable updateReadableCheckInTime(long timestamp) {
-        return Single.fromCallable(() -> application.getString(R.string.venue_checked_in_time, getReadableTime(timestamp)))
+        return Single.fromCallable(() -> TimeUtil.getReadableTime(application,timestamp))
                 .flatMapCompletable(readableTime -> update(checkInTime, readableTime));
     }
 
-    private Completable updateDescription(long timestamp) {
-        return Single.fromCallable(() -> application.getString(R.string.venue_description, getReadableTime(timestamp)))
-                .flatMapCompletable(updatedDescription -> update(description, updatedDescription));
-    }
 
     private Completable updateReadableCheckInDuration(long timestamp) {
         return Observable.interval(0, 1, TimeUnit.SECONDS)
@@ -347,6 +347,10 @@ public class VenueDetailsViewModel extends BaseViewModel {
             addError(errorBuilder.build());
             disableAutomaticCheckout();
         });
+    }
+
+    protected void changeLocation() {
+        onCheckOutRequested();
     }
 
     /*
@@ -509,10 +513,6 @@ public class VenueDetailsViewModel extends BaseViewModel {
         return title;
     }
 
-    public LiveData<String> getDescription() {
-        return description;
-    }
-
     public LiveData<String> getCheckInTime() {
         return checkInTime;
     }
@@ -553,8 +553,16 @@ public class VenueDetailsViewModel extends BaseViewModel {
         return shouldEnableLocationServices;
     }
 
-    public MutableLiveData<Integer> getChildCounter() {
+    public LiveData<Integer> getChildCounter() {
         return childCounter;
+    }
+
+    public LiveData<Bundle> getBundle() {
+        return bundle;
+    }
+
+    public void setBundle(@Nullable Bundle bundle) {
+        this.bundle.setValue(bundle);
     }
 
     public static String getReadableDuration(long duration) {
@@ -564,9 +572,4 @@ public class VenueDetailsViewModel extends BaseViewModel {
         seconds = (seconds % 3600) % 60;
         return String.format(Locale.GERMANY, "%02d:%02d:%02d", hours, minutes, seconds);
     }
-
-    private String getReadableTime(long timestamp) {
-        return readableDateFormat.format(new Date(timestamp));
-    }
-
 }

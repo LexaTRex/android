@@ -2,8 +2,6 @@ package de.culture4life.luca.network;
 
 import androidx.test.platform.app.InstrumentationRegistry;
 
-import com.google.gson.JsonObject;
-
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;

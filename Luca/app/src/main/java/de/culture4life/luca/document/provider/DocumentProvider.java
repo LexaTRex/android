@@ -1,10 +1,5 @@
 package de.culture4life.luca.document.provider;
 
-import static de.culture4life.luca.document.DocumentVerificationException.Reason.DATE_OF_BIRTH_TOO_OLD_FOR_CHILD;
-import static de.culture4life.luca.document.DocumentVerificationException.Reason.NAME_MISMATCH;
-import static de.culture4life.luca.document.DocumentVerificationException.Reason.TIMESTAMP_IN_FUTURE;
-import static de.culture4life.luca.document.DocumentVerificationException.Reason.UNKNOWN;
-
 import androidx.annotation.NonNull;
 
 import org.joda.time.DateTime;
@@ -19,6 +14,11 @@ import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.core.Single;
 import io.reactivex.rxjava3.exceptions.CompositeException;
+
+import static de.culture4life.luca.document.DocumentVerificationException.Reason.DATE_OF_BIRTH_TOO_OLD_FOR_CHILD;
+import static de.culture4life.luca.document.DocumentVerificationException.Reason.NAME_MISMATCH;
+import static de.culture4life.luca.document.DocumentVerificationException.Reason.TIMESTAMP_IN_FUTURE;
+import static de.culture4life.luca.document.DocumentVerificationException.Reason.UNKNOWN;
 
 public abstract class DocumentProvider<DocumentType extends ProvidedDocument> {
 
@@ -113,4 +113,5 @@ public abstract class DocumentProvider<DocumentType extends ProvidedDocument> {
             }
         });
     }
+
 }

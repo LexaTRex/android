@@ -13,6 +13,7 @@ class ChildrenManager(
     private val preferencesManager: PreferencesManager,
     private val registrationManager: RegistrationManager
 ) : Manager() {
+
     companion object {
         const val LEGACY_KEY_CHILDREN = "children"
         private const val KEY_CHILDREN = "children2"
@@ -140,18 +141,21 @@ class ChildrenManager(
      * Migrate from legacy to the new storage key and data model
      */
     fun migrate(): Completable {
-        return preferencesManager.restoreIfAvailable(LEGACY_KEY_CHILDREN, LegacyChildListItemContainer::class.java)
-            .map {
-                val lastName = registrationManager.getOrCreateRegistrationData().blockingGet().lastName ?: ""
-                it.map { childListItem -> Child.from(childListItem.name, lastName) }
+        return preferencesManager.restoreIfAvailable(
+            LEGACY_KEY_CHILDREN,
+            LegacyChildListItemContainer::class.java
+        ).map {
+            val lastName = registrationManager.getOrCreateRegistrationData()
+                .blockingGet().lastName ?: ""
+            it.map { childListItem -> Child.from(childListItem.name, lastName) }
+        }.flatMapCompletable {
+            if (it.isNotEmpty()) {
+                persistChildren(Children().apply { addAll(it) })
+                    .andThen(preferencesManager.delete(LEGACY_KEY_CHILDREN))
+            } else {
+                Completable.complete()
             }
-            .flatMapCompletable {
-                if (it.isNotEmpty()) {
-                    persistChildren(Children().apply { addAll(it) })
-                        .andThen(preferencesManager.delete(LEGACY_KEY_CHILDREN))
-                } else {
-                    Completable.complete()
-                }
-            }
+        }
     }
+
 }

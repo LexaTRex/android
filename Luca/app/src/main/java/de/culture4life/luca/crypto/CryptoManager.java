@@ -1,5 +1,8 @@
 package de.culture4life.luca.crypto;
 
+import static de.culture4life.luca.crypto.HashProvider.TRIMMED_HASH_LENGTH;
+import static de.culture4life.luca.util.SingleUtil.retryWhen;
+
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Build;
@@ -21,8 +24,6 @@ import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 import java.io.ByteArrayOutputStream;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
@@ -53,8 +54,8 @@ import de.culture4life.luca.network.endpoints.LucaEndpointsV3;
 import de.culture4life.luca.network.pojo.CheckInRequestData;
 import de.culture4life.luca.network.pojo.DailyKeyPairIssuer;
 import de.culture4life.luca.preference.PreferencesManager;
-import de.culture4life.luca.ui.qrcode.QrCodeData;
-import de.culture4life.luca.ui.qrcode.QrCodeViewModel;
+import de.culture4life.luca.ui.checkin.QrCodeData;
+import de.culture4life.luca.ui.checkin.CheckInViewModel;
 import de.culture4life.luca.util.SerializationUtil;
 import de.culture4life.luca.util.TimeUtil;
 import io.reactivex.rxjava3.core.Completable;
@@ -63,9 +64,6 @@ import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.core.Single;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 import timber.log.Timber;
-
-import static de.culture4life.luca.crypto.HashProvider.TRIMMED_HASH_LENGTH;
-import static de.culture4life.luca.util.SingleUtil.retryWhen;
 
 /**
  * Provides access to all cryptographic methods, handles Bouncy-Castle key store persistence.
@@ -84,21 +82,6 @@ public class CryptoManager extends Manager {
     public static final String ALIAS_MEETING_EPHEMERAL_KEY_PAIR = "meeting_ephemeral_key_pair";
     public static final String ALIAS_KEYSTORE_PASSWORD = "keystore_secret";
     public static final String ALIAS_SECRET_WRAPPING_KEY_PAIR = "secret_wrapping_key_pair";
-
-    @Deprecated
-    public static final String OLD_ROTATING_BACKEND_PUBLIC_KEY_ID_KEY = "rotating_backend_public_key_id";
-    @Deprecated
-    public static final String OLD_ROTATING_BACKEND_PUBLIC_KEY_POINT_KEY = "rotating_backend_public_key";
-    @Deprecated
-    public static final String OLD_BACKEND_MASTER_PUBLIC_KEY_ID_KEY = "backend_master_public_key_id";
-    @Deprecated
-    public static final String OLD_BACKEND_MASTER_PUBLIC_KEY_POINT_KEY = "backend_master_public_key";
-    @Deprecated
-    public static final String USER_DATA_SECRET_KEY_INSECURE = "user_data_secret";
-    @Deprecated
-    public static final String USER_TRACE_SECRET_KEY_INSECURE = "user_trace_secret";
-    @Deprecated
-    public static final String USER_TRACE_SECRET_KEY = "user_trace_secret_2";
 
     private static final byte[] DATA_ENCRYPTION_SECRET_SUFFIX = new byte[]{0x01};
     private static final byte[] DATA_AUTHENTICATION_SECRET_SUFFIX = new byte[]{0x02};
@@ -151,11 +134,7 @@ public class CryptoManager extends Manager {
                 networkManager.initialize(context)
         ).andThen(Completable.fromAction(() -> this.context = context))
                 .andThen(setupSecurityProviders())
-                .andThen(loadKeyStoreFromFile().onErrorComplete())
-                .andThen(Completable.mergeArray(
-                        migrateUserTracingSecret().onErrorComplete(),
-                        migrateDailyKeyPairPublicKey().onErrorComplete()
-                ));
+                .andThen(loadKeyStoreFromFile().onErrorComplete());
     }
 
     @Nullable
@@ -195,28 +174,6 @@ public class CryptoManager extends Manager {
     }
 
     /**
-     * In app versions before 1.4.8, the daily key pair public key was named "backend master key".
-     * To avoid the impression that there would be an all mighty "master key", it has been renamed.
-     * In app versions before 1.6.1, the daily key pair public key was named "rotating backend
-     * public key". To match with the security concept of luca, it has been renamed.
-     */
-    private Completable migrateDailyKeyPairPublicKey() {
-        Maybe<Integer> restoreId = preferencesManager.restoreIfAvailable(OLD_ROTATING_BACKEND_PUBLIC_KEY_ID_KEY, Integer.class);
-        Maybe<ECPublicKey> restoreKey = preferencesManager.restoreIfAvailable(OLD_ROTATING_BACKEND_PUBLIC_KEY_POINT_KEY, String.class)
-                .flatMapSingle(CryptoManager::decodeFromString)
-                .flatMapSingle(AsymmetricCipherProvider::decodePublicKey);
-
-        return Maybe.zip(restoreId, restoreKey, DailyKeyPairPublicKeyWrapper::new)
-                .flatMapCompletable(this::persistDailyKeyPairPublicKeyWrapper)
-                .andThen(Completable.mergeArray(
-                        preferencesManager.delete(OLD_ROTATING_BACKEND_PUBLIC_KEY_ID_KEY),
-                        preferencesManager.delete(OLD_ROTATING_BACKEND_PUBLIC_KEY_POINT_KEY),
-                        preferencesManager.delete(OLD_BACKEND_MASTER_PUBLIC_KEY_ID_KEY),
-                        preferencesManager.delete(OLD_BACKEND_MASTER_PUBLIC_KEY_POINT_KEY)
-                ));
-    }
-
-    /**
      * Load {@link #bouncyCastleKeyStore} from internal file, decrypt it using {@link
      * #androidKeyStore}-backed password.
      *
@@ -224,10 +181,9 @@ public class CryptoManager extends Manager {
      */
     private Completable loadKeyStoreFromFile() {
         return getKeyStorePasswordOrHardcodedValue()
-                .flatMapCompletable(password -> {
-                    FileInputStream inputStream = context.openFileInput(KEYSTORE_FILE_NAME);
-                    return bouncyCastleKeyStore.load(inputStream, password);
-                })
+                .flatMapCompletable(passwordChars -> Single.fromCallable(() -> context.openFileInput(KEYSTORE_FILE_NAME))
+                                .flatMapCompletable(inputStream -> bouncyCastleKeyStore.load(inputStream, passwordChars)
+                                        .doFinally(() -> inputStream.close())))
                 .doOnSubscribe(disposable -> Timber.d("Loading keystore from file"))
                 .doOnError(throwable -> Timber.w("Unable to load keystore from file: %s", throwable.toString()));
     }
@@ -239,10 +195,9 @@ public class CryptoManager extends Manager {
      */
     private Completable persistKeyStoreToFile() {
         return getKeyStorePassword()
-                .flatMapCompletable(password -> {
-                    FileOutputStream outputStream = context.openFileOutput(KEYSTORE_FILE_NAME, Context.MODE_PRIVATE);
-                    return bouncyCastleKeyStore.save(outputStream, password);
-                })
+                .flatMapCompletable(passwordChars -> Single.fromCallable(() -> context.openFileOutput(KEYSTORE_FILE_NAME, Context.MODE_PRIVATE))
+                        .flatMapCompletable(outputStream -> bouncyCastleKeyStore.save(outputStream, passwordChars)
+                                .doFinally(() -> outputStream.close())))
                 .doOnSubscribe(disposable -> Timber.d("Persisting keystore to file"))
                 .doOnError(throwable -> Timber.e("Unable to persist keystore to file: %s", throwable.toString()));
     }
@@ -253,22 +208,30 @@ public class CryptoManager extends Manager {
      * or the result of {@link #getKeyStorePassword()}. Should only be used when loading the key
      * store.
      */
-    private Single<String> getKeyStorePasswordOrHardcodedValue() {
+    private Single<char[]> getKeyStorePasswordOrHardcodedValue() {
         return preferencesManager.containsKey(ALIAS_KEYSTORE_PASSWORD)
-                .flatMap(hasPassword -> hasPassword ? getKeyStorePassword() : Single.just("luca"));
+                .flatMap(hasPassword -> hasPassword ? getKeyStorePassword() : Single.just("luca".toCharArray()));
     }
 
     /**
      * Fetch {@link #bouncyCastleKeyStore} password if available, otherwise generate new random
      * password and persist it using {@link #androidKeyStore}-backed {@link WrappedSecret}}.
      */
-    private Single<String> getKeyStorePassword() {
+    private Single<char[]> getKeyStorePassword() {
         return restoreWrappedSecretIfAvailable(ALIAS_KEYSTORE_PASSWORD)
                 .switchIfEmpty(generateSecureRandomData(128)
                         .doOnSuccess(bytes -> Timber.d("Generated new random key store password"))
                         .flatMap(randomData -> persistWrappedSecret(ALIAS_KEYSTORE_PASSWORD, randomData)
                                 .andThen(Single.just(randomData))))
-                .map(String::new);
+                .map(CryptoManager::convertToCharArray);
+    }
+
+    private static char[] convertToCharArray(@NonNull byte[] bytes) {
+        char[] chars = new char[bytes.length];
+        for (int i = 0; i < bytes.length; i++) {
+            chars[i] = (char) bytes[i];
+        }
+        return chars;
     }
 
     /*
@@ -441,18 +404,6 @@ public class CryptoManager extends Manager {
         });
     }
 
-    public Single<StringBuilder> generateDailyKeyPairString(@NonNull DailyKeyPairIssuer dailyKeyPairIssuer) {
-        return Single.fromCallable(() -> new StringBuilder()
-                .append("publicKey:\n")
-                .append(dailyKeyPairIssuer.getDailyKeyPair().getPublicKey() + "\n")
-                .append("signature:\n")
-                .append(dailyKeyPairIssuer.getDailyKeyPair().getSignature() + "\n")
-                .append("issuer:\n")
-                .append(dailyKeyPairIssuer.getIssuer().getName() + "\n")
-                .append("issuer signing key:\n")
-                .append(dailyKeyPairIssuer.getIssuer().getPublicHDSKP()));
-    }
-
     /**
      * Fetch {@link DailyKeyPairPublicKeyWrapper} from server, verify its authenticity and ensure
      * its less than 7 days old.
@@ -578,7 +529,7 @@ public class CryptoManager extends Manager {
      * Get or generate user ephemeral keypair used to encrypt user ID and secret during generation
      * of QR-codes.
      *
-     * @see QrCodeViewModel#generateQrCodeData()
+     * @see CheckInViewModel#generateQrCodeData()
      */
     public Single<KeyPair> getUserEphemeralKeyPair(@NonNull byte[] traceId) {
         return restoreUserEphemeralKeyPair(traceId)
@@ -694,17 +645,6 @@ public class CryptoManager extends Manager {
                         .map(dayIndex -> firstStartOfDayTimestamp - TimeUnit.DAYS.toMillis(dayIndex)));
     }
 
-    /**
-     * In app versions before 1.4.1, there was only one user tracing secret (no daily rotation).
-     * This method will migrate that secret to the new rotatable format, if available.
-     */
-    private Completable migrateUserTracingSecret() {
-        return restoreWrappedSecretIfAvailable(USER_TRACE_SECRET_KEY)
-                .flatMapCompletable(this::persistCurrentTracingSecret)
-                .andThen(preferencesManager.delete(USER_TRACE_SECRET_KEY))
-                .doOnComplete(() -> Timber.i("Migrated user tracing secret for daily rotation"));
-    }
-
     /*
         User data secret
      */
@@ -792,7 +732,7 @@ public class CryptoManager extends Manager {
 
     /**
      * Generate data authentication secret by appending {@link #DATA_AUTHENTICATION_SECRET_SUFFIX}
-     * to given baseSecret, hashing it and trimming it to a length of 16.
+     * to given baseSecret and hash it.
      */
     public Single<byte[]> generateDataAuthenticationSecret(@NonNull byte[] baseSecret) {
         return concatenate(baseSecret, DATA_AUTHENTICATION_SECRET_SUFFIX)
@@ -942,6 +882,7 @@ public class CryptoManager extends Manager {
         v.add(new ASN1Integer(new BigInteger(1, s)));
         derOutputStream.writeObject(new DERSequence(v));
 
+        derOutputStream.close();
         return byteArrayOutputStream.toByteArray();
     }
 

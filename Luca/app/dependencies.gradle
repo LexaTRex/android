@@ -1,5 +1,5 @@
 ext {
-    jackson_dataformat_cbor = "com.fasterxml.jackson.dataformat:jackson-dataformat-cbor:2.12.3"
+    jackson_dataformat_cbor = "com.fasterxml.jackson.dataformat:jackson-dataformat-cbor:2.12.4"
     bouncycastle = "org.bouncycastle:bcpkix-jdk15on:1.65"
 
     junit = "junit:junit:4.13.1"
