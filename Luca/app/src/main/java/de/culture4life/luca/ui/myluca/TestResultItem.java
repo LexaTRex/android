@@ -6,9 +6,6 @@ import androidx.annotation.ColorInt;
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 
-import java.text.SimpleDateFormat;
-import java.util.Locale;
-
 import de.culture4life.luca.R;
 import de.culture4life.luca.document.Document;
 import de.culture4life.luca.util.TimeUtil;
@@ -49,12 +46,12 @@ public class TestResultItem extends MyLucaListItem {
         addTopContent(context.getString(R.string.document_type_of_document_label), getReadableTestType(context, document));
         addTopContent(context.getString(R.string.document_created_before), duration);
 
-        String time = context.getString(R.string.document_result_time, getReadableTime(getDateFormatFor(context, document), document.getResultTimestamp()));
+        String time = context.getString(R.string.document_result_time, TimeUtil.getReadableTime(context, document.getResultTimestamp()));
         addCollapsedContent(context.getString(R.string.document_issued_by), time + "\n" + document.getLabName());
         addCollapsedContent(context.getString(R.string.document_lab_issuer), document.getLabDoctorName());
     }
 
-    static String getReadableTestType(@NonNull Context context, @NonNull Document document) {
+    public static String getReadableTestType(@NonNull Context context, @NonNull Document document) {
         switch (document.getType()) {
             case Document.TYPE_FAST: {
                 return context.getString(R.string.document_type_fast);
@@ -68,7 +65,7 @@ public class TestResultItem extends MyLucaListItem {
         }
     }
 
-    private static String getReadableOutcome(@NonNull Context context, @NonNull Document document) {
+    public static String getReadableOutcome(@NonNull Context context, @NonNull Document document) {
         switch (document.getOutcome()) {
             case Document.OUTCOME_POSITIVE: {
                 return context.getString(R.string.document_outcome_positive);
@@ -98,14 +95,6 @@ public class TestResultItem extends MyLucaListItem {
             default: {
                 return ContextCompat.getColor(context, R.color.document_outcome_unknown);
             }
-        }
-    }
-
-    protected static SimpleDateFormat getDateFormatFor(@NonNull Context context, @NonNull Document document) {
-        if (document.getType() == Document.TYPE_VACCINATION || document.getType() == Document.TYPE_RECOVERY) {
-            return new SimpleDateFormat("dd.MM.yyyy");
-        } else {
-            return new SimpleDateFormat(context.getString(R.string.time_format), Locale.GERMANY);
         }
     }
 

@@ -44,12 +44,13 @@ import de.culture4life.luca.network.NetworkManager;
 import de.culture4life.luca.network.pojo.AdditionalCheckInPropertiesRequestData;
 import de.culture4life.luca.network.pojo.CheckInRequestData;
 import de.culture4life.luca.network.pojo.CheckOutRequestData;
+import de.culture4life.luca.network.pojo.LocationResponseData;
 import de.culture4life.luca.network.pojo.TraceData;
 import de.culture4life.luca.notification.LucaNotificationManager;
 import de.culture4life.luca.preference.PreferencesManager;
 import de.culture4life.luca.ui.MainActivity;
-import de.culture4life.luca.ui.qrcode.QrCodeData;
-import de.culture4life.luca.ui.qrcode.QrCodeViewModel;
+import de.culture4life.luca.ui.checkin.CheckInViewModel;
+import de.culture4life.luca.ui.checkin.QrCodeData;
 import de.culture4life.luca.util.SerializationUtil;
 import de.culture4life.luca.util.TimeUtil;
 import io.reactivex.rxjava3.core.Completable;
@@ -492,11 +493,11 @@ public class CheckInManager extends Manager {
                     .flatMapObservable(geofenceManager::getGeofenceEvents)
                     .firstElement()
                     .ignoreElement()
-                    .andThen(performAutomaticCheckout()
-                            .doOnError(throwable -> Timber.w("Unable to perform automatic check-out: %s", throwable.toString()))
-                            .retryWhen(errors -> errors
-                                    .doOnNext(throwable -> Timber.v("Retrying automatic check-out in %d seconds", TimeUnit.MILLISECONDS.toSeconds(AUTOMATIC_CHECK_OUT_RETRY_DELAY)))
-                                    .delay(AUTOMATIC_CHECK_OUT_RETRY_DELAY, TimeUnit.MILLISECONDS, Schedulers.io())))
+                    .andThen(performAutomaticCheckout())
+                    .doOnError(throwable -> Timber.w("Unable to perform automatic check-out: %s", throwable.toString()))
+                    .retryWhen(errors -> errors
+                            .doOnNext(throwable -> Timber.v("Retrying automatic check-out in %d seconds", TimeUnit.MILLISECONDS.toSeconds(AUTOMATIC_CHECK_OUT_RETRY_DELAY)))
+                            .delay(AUTOMATIC_CHECK_OUT_RETRY_DELAY, TimeUnit.MILLISECONDS, Schedulers.io()))
                     .subscribeOn(Schedulers.io())
                     .subscribe();
             managerDisposable.add(automaticCheckoutDisposable);
@@ -875,7 +876,7 @@ public class CheckInManager extends Manager {
     }
 
     public static boolean isSelfCheckInUrl(@NonNull String url) {
-        return QrCodeViewModel.getScannerIdFromUrl(url)
+        return CheckInViewModel.getScannerIdFromUrl(url)
                 .map(uuid -> url.contains("luca-app.de/webapp/"))
                 .onErrorReturnItem(false)
                 .blockingGet();
@@ -896,6 +897,13 @@ public class CheckInManager extends Manager {
 
     public void setMeetingAdditionalData(@Nullable MeetingAdditionalData meetingAdditionalData) {
         this.meetingAdditionalData = meetingAdditionalData;
+    }
+
+    public Single<LocationResponseData> getLocationDataFromScannerId(@NonNull String scannerId) {
+        return networkManager.getLucaEndpointsV3()
+                .flatMap(lucaEndpointsV3 -> lucaEndpointsV3.getScanner(scannerId)
+                        .map(jsonObject -> jsonObject.get("locationId").getAsString())
+                        .flatMap(lucaEndpointsV3::getLocation));
     }
 
 }

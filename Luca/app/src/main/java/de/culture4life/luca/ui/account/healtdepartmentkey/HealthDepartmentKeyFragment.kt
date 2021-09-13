@@ -1,13 +1,9 @@
 package de.culture4life.luca.ui.account.healtdepartmentkey
 
-import android.content.Context
-import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.activity.result.ActivityResultLauncher
-import androidx.activity.result.contract.ActivityResultContracts
 import de.culture4life.luca.R
 import de.culture4life.luca.databinding.FragmentHealthDepartmentKeyBinding
 import de.culture4life.luca.ui.BaseFragment
@@ -15,8 +11,7 @@ import de.culture4life.luca.util.addTo
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.schedulers.Schedulers
-import java.text.SimpleDateFormat
-import java.util.*
+import org.joda.time.format.DateTimeFormat
 
 class HealthDepartmentKeyFragment : BaseFragment<HealthDepartmentKeyViewModel>() {
 
@@ -25,23 +20,6 @@ class HealthDepartmentKeyFragment : BaseFragment<HealthDepartmentKeyViewModel>()
     override fun getLayoutResource(): Int = R.layout.fragment_health_department_key
     override fun getViewModelClass(): Class<HealthDepartmentKeyViewModel> =
         HealthDepartmentKeyViewModel::class.java
-
-    var getActivityResult: ActivityResultLauncher<Intent>? = null
-
-    override fun onAttach(context: Context) {
-        super.onAttach(context)
-        getActivityResult =
-            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-                it.data?.data?.also { uri ->
-                    viewModel.writeContentToUri(uri)
-                        .subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .onErrorComplete()
-                        .subscribe()
-                        .addTo(viewDisposable)
-                }
-            }
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -80,19 +58,8 @@ class HealthDepartmentKeyFragment : BaseFragment<HealthDepartmentKeyViewModel>()
         })
 
         binding.saveKeyMaterialButton.setOnClickListener {
-            launchSaveAsIntent()
+            viewModel.exportDailyKey(getFileExportUri("luca-daily-key-chain.txt"))
         }
-    }
-
-    private fun launchSaveAsIntent() {
-        val intent = Intent().apply {
-            action = Intent.ACTION_CREATE_DOCUMENT
-            addCategory(Intent.CATEGORY_OPENABLE)
-            type = "text/plain"
-            putExtra(Intent.EXTRA_TITLE, "transferKeyChain.txt")
-        }
-
-        getActivityResult?.launch(intent)
     }
 
     private fun updateLoadingView(isLoading: Boolean) {
@@ -107,8 +74,8 @@ class HealthDepartmentKeyFragment : BaseFragment<HealthDepartmentKeyViewModel>()
 
     private fun updateCreatedAt(createdAt: Long) {
         val readableDateFormat =
-            SimpleDateFormat(application.getString(R.string.time_format), Locale.GERMANY)
-        binding.dateValueTextView.text = readableDateFormat.format(Date(createdAt * 1000))
+            DateTimeFormat.forPattern(application.getString(R.string.time_format))
+        binding.dateValueTextView.text = readableDateFormat.print(createdAt * 1000)
     }
 
     private fun updateIssuerName(name: String) {
@@ -122,4 +89,5 @@ class HealthDepartmentKeyFragment : BaseFragment<HealthDepartmentKeyViewModel>()
             binding.signedImageView.setImageResource(R.drawable.ic_key_unsigned)
         }
     }
+
 }

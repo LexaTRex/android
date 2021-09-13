@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ui.checkin.CheckInFragment">
+
+    <TextView
+        android:id="@+id/headingTextView"
+        style="@style/TextAppearance.Luca.Headline2"
+        android:layout_width="wrap_content"
+        android:layout_margin="@dimen/spacing_default"
+        android:text="@string/navigation_check_in"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/historyTextView"
+        style="@style/TextAppearance.Luca.Headline2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingStart="@dimen/spacing_default"
+        android:paddingTop="@dimen/spacing_large"
+        android:paddingEnd="@dimen/spacing_large"
+        android:paddingBottom="2dp"
+        android:text="@string/navigation_history"
+        android:textAllCaps="true"
+        android:textSize="@dimen/font_size_small"
+        app:layout_constraintBottom_toBottomOf="@id/headingTextView"
+        app:layout_constraintEnd_toEndOf="parent"
+        tools:ignore="RtlSymmetry" />
+
+
+    <ImageView
+        android:id="@+id/menuImageView"
+        style="@style/MenuImageView"
+        android:contentDescription="@string/menu_more_content_description"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@id/headingTextView"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@id/headingTextView" />
+
+    <View
+        android:id="@+id/headingSeparatorView"
+        style="@style/HeaderSeparatorView"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/headingTextView" />
+
+    <de.culture4life.luca.ui.checkin.BottomFadingEdgeScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:fadingEdgeLength="@dimen/spacing_large"
+        android:fillViewport="true"
+        android:requiresFadingEdge="vertical"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/headingSeparatorView">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/cameraContainerConstraintLayout"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_marginHorizontal="@dimen/spacing_default"
+                android:layout_marginTop="@dimen/spacing_default"
+                android:background="@drawable/bg_camera_box"
+                android:padding="3dp"
+                app:layout_constraintDimensionRatio="h,1:1"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    app:cardBackgroundColor="@color/camera_box_background"
+                    app:cardCornerRadius="8dp">
+
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent">
+
+                        <androidx.camera.view.PreviewView
+                            android:id="@+id/cameraPreviewView"
+                            android:layout_width="match_parent"
+                            android:layout_height="0dp"
+                            android:contentDescription="@string/qr_code_scanner"
+                            android:keepScreenOn="true"
+                            android:scaleType="fitCenter"
+                            android:visibility="gone"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent" />
+
+                        <LinearLayout
+                            android:id="@+id/requestCameraPermissionLinearLayout"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:contentDescription="@string/activate_camera"
+                            android:gravity="center"
+                            android:orientation="vertical"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent"
+                            app:layout_constraintWidth_percent="0.6">
+
+                            <ImageView
+                                android:id="@+id/requestCameraPermissionImageView"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:src="@drawable/ic_camera" />
+
+                            <TextView
+                                android:id="@+id/requestCameraPermissionTextView"
+                                style="@style/TextAppearance.Luca.Body1"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="@dimen/spacing_default"
+                                android:text="@string/activate_camera"
+                                android:textAlignment="center"
+                                app:layout_constraintEnd_toEndOf="parent"
+                                app:layout_constraintStart_toStartOf="parent"
+                                app:layout_constraintTop_toTopOf="parent" />
+
+                        </LinearLayout>
+                        <androidx.constraintlayout.widget.ConstraintLayout
+                            android:id="@+id/checkingInLoadingLayout"
+                            android:layout_width="0dp"
+                            android:layout_height="0dp"
+                            android:visibility="gone"
+                            android:background="#FFFFFF"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent">
+
+                            <ProgressBar
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:indeterminateTint="?attr/colorSurface"
+                                android:indeterminateTintMode="src_atop"
+                                app:layout_constraintBottom_toBottomOf="parent"
+                                app:layout_constraintEnd_toEndOf="parent"
+                                app:layout_constraintStart_toStartOf="parent"
+                                app:layout_constraintTop_toTopOf="parent" />
+
+                        </androidx.constraintlayout.widget.ConstraintLayout>
+                    </androidx.constraintlayout.widget.ConstraintLayout>
+
+                </com.google.android.material.card.MaterialCardView>
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <TextView
+                android:id="@+id/qrCodeCaptionTextView"
+                style="@style/TextAppearance.Luca.Body1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_default"
+                android:gravity="center"
+                android:text="@string/scan_qr_code"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/cameraContainerConstraintLayout" />
+
+            <ImageView
+                android:id="@+id/flashLightButtonImageView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="@dimen/spacing_default"
+                android:paddingEnd="@dimen/spacing_large"
+                android:src="@drawable/ic_flashlight_on"
+                android:visibility="gone"
+                app:layout_constraintBottom_toBottomOf="@id/qrCodeCaptionTextView"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="@id/qrCodeCaptionTextView"
+                app:tint="@color/primaryColor"
+                tools:ignore="RtlSymmetry" />
+
+            <Space
+                android:id="@+id/spaceBetweenCaptionAndQrCodeButton"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                app:layout_constraintBottom_toTopOf="@id/showQrCodeButton"
+                app:layout_constraintTop_toBottomOf="@id/qrCodeCaptionTextView" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/showQrCodeButton"
+                style="@style/Button.Luca.PrimaryActionButton"
+                android:layout_marginHorizontal="@dimen/spacing_default"
+                android:layout_marginTop="@dimen/spacing_default"
+                android:layout_marginBottom="@dimen/spacing_default"
+                android:text="@string/show_qr_code"
+                app:layout_constraintBottom_toTopOf="@id/createMeetingButton"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/spaceBetweenCaptionAndQrCodeButton" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/createMeetingButton"
+                style="@style/Button.Luca.SecondaryActionButton"
+                android:layout_marginHorizontal="@dimen/spacing_default"
+                android:layout_marginBottom="@dimen/spacing_default"
+                android:text="@string/meeting_create_action"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </de.culture4life.luca.ui.checkin.BottomFadingEdgeScrollView>
+</androidx.constraintlayout.widget.ConstraintLayout>

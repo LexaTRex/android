@@ -73,8 +73,8 @@ class SingleMyLucaItemViewHolder(val view: SingleLucaItemView) : RecyclerView.Vi
         }
         val labelView = labelAndTextView.findViewById<TextView>(R.id.labelTextView)
         val textView = labelAndTextView.findViewById<TextView>(R.id.valueTextView)
-        label?.let { labelView.text = it }
-        text?.let { textView.text = text }
+        labelView.text = label
+        textView.text = text
         setConstrainWidth(labelAndTextView, R.id.labelTextView, !TextUtils.isEmpty(text))
     }
 
@@ -109,5 +109,6 @@ class SingleMyLucaItemViewHolder(val view: SingleLucaItemView) : RecyclerView.Vi
             }
         }
     }
+
 }
 

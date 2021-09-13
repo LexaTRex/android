@@ -1,7 +1,6 @@
 package de.culture4life.luca.children
 
 import de.culture4life.luca.registration.Person
-import org.junit.Assert
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
 import org.junit.Test

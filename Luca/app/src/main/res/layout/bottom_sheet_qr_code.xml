@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:fadingEdgeLength="4dp"
+    android:requiresFadingEdge="vertical">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/secondaryColor"
+        android:paddingStart="?dialogPreferredPadding"
+        android:paddingEnd="?dialogPreferredPadding"
+        android:paddingBottom="@dimen/spacing_large">
+
+        <TextView
+            android:id="@+id/myQrCodeTextView"
+            style="@style/MaterialAlertDialog.Luca.Title.Text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_default"
+            android:text="@string/my_qr_code"
+            android:textColor="@android:color/white"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/myQrCodeDescriptionTextView"
+            style="@style/MaterialAlertDialog.Luca.Body.Text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_default"
+            android:text="@string/qr_code_description"
+            android:textColor="@android:color/white"
+            app:layout_constraintTop_toBottomOf="@id/myQrCodeTextView" />
+
+        <TextView
+            android:id="@+id/noNetworkWarningTextView"
+            style="@style/MaterialAlertDialog.Luca.Body.Text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_default"
+            android:text="@string/error_no_internet_connection_title"
+            android:textAlignment="center"
+            android:textColor="@android:color/white"
+            android:visibility="gone"
+            app:layout_constraintTop_toBottomOf="@id/myQrCodeTextView" />
+
+        <androidx.constraintlayout.widget.Barrier
+            android:id="@+id/barrierBetweenTextAndQrCode"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            app:barrierDirection="bottom"
+            app:constraint_referenced_ids="myQrCodeDescriptionTextView,noNetworkWarningTextView" />
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardView"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginTop="@dimen/spacing_large"
+            app:cardBackgroundColor="?attr/colorOnSurface"
+            app:cardCornerRadius="8dp"
+            app:layout_constraintDimensionRatio="1:1"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/barrierBetweenTextAndQrCode">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <ImageView
+                    android:id="@+id/qrCodeImageView"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:contentDescription="@string/qr_code"
+                    android:keepScreenOn="true"
+                    android:padding="@dimen/spacing_default"
+                    android:scaleType="fitCenter"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/loadingLayout"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:background="#CCFFFFFF"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent">
+
+                    <ProgressBar
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:indeterminateTint="?attr/colorSurface"
+                        android:indeterminateTintMode="src_atop"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+        </com.google.android.material.card.MaterialCardView>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</ScrollView>

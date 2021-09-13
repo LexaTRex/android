@@ -204,6 +204,7 @@ class DocumentProviderTest {
         DocumentProvider.validateChildAge(DateTime().minusYears(13).minusMonths(11).millis)
     }
 
+    @Test
     fun validateTime_inTheFuture_fails() {
         validateTime(System.currentTimeMillis() + 1000)
             .test().assertError(DocumentVerificationException::class.java)

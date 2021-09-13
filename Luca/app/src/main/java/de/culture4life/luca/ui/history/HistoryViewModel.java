@@ -1,17 +1,17 @@
 package de.culture4life.luca.ui.history;
 
 import android.app.Application;
+import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.core.util.Pair;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import de.culture4life.luca.R;
 import de.culture4life.luca.dataaccess.AccessedTraceData;
@@ -21,10 +21,13 @@ import de.culture4life.luca.history.DataSharedItem;
 import de.culture4life.luca.history.HistoryItem;
 import de.culture4life.luca.history.HistoryManager;
 import de.culture4life.luca.history.MeetingEndedItem;
-import de.culture4life.luca.preference.PreferencesManager;
 import de.culture4life.luca.ui.BaseViewModel;
 import de.culture4life.luca.ui.ViewError;
 import de.culture4life.luca.ui.ViewEvent;
+import de.culture4life.luca.ui.accesseddata.AccessedDataDetailFragment;
+import de.culture4life.luca.ui.accesseddata.AccessedDataFragment;
+import de.culture4life.luca.util.TimeUtil;
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Maybe;
 import io.reactivex.rxjava3.core.Observable;
@@ -32,6 +35,7 @@ import io.reactivex.rxjava3.schedulers.Schedulers;
 import timber.log.Timber;
 
 import static de.culture4life.luca.history.HistoryManager.createUnorderedList;
+import static de.culture4life.luca.ui.history.HistoryFragment.NO_WARNING_LEVEL_FILTER;
 
 public class HistoryViewModel extends BaseViewModel {
 
@@ -39,8 +43,6 @@ public class HistoryViewModel extends BaseViewModel {
 
     private final HistoryManager historyManager;
     private final DataAccessManager dataAccessManager;
-
-    private final SimpleDateFormat readableDateFormat;
 
     private final MutableLiveData<List<HistoryListItem>> historyItems = new MutableLiveData<>();
     private final MutableLiveData<ViewEvent<String>> tracingTanEvent = new MutableLiveData<>();
@@ -52,7 +54,6 @@ public class HistoryViewModel extends BaseViewModel {
         super(application);
         historyManager = this.application.getHistoryManager();
         dataAccessManager = this.application.getDataAccessManager();
-        readableDateFormat = new SimpleDateFormat(application.getString(R.string.time_format), Locale.GERMANY);
     }
 
     @Override
@@ -163,7 +164,8 @@ public class HistoryViewModel extends BaseViewModel {
 
     private Maybe<HistoryListItem> createHistoryViewItem(@NonNull Pair<HistoryItem, HistoryItem> historyItemPair) {
         return Maybe.zip(createHistoryViewItem(historyItemPair.first), createHistoryViewItem(historyItemPair.second), (start, end) -> {
-            HistoryListItem merged = new HistoryListItem(application);
+            end.setTime(TimeUtil.getReadableDurationWithPlural(end.getTimestamp() - start.getTimestamp(), application).blockingGet());
+            HistoryListItem merged = new HistoryListItem();
             merged.setTitle(end.getTitle());
             merged.setDescription(end.getDescription());
             merged.setAdditionalTitleDetails(end.getAdditionalTitleDetails());
@@ -172,15 +174,18 @@ public class HistoryViewModel extends BaseViewModel {
             merged.setTimestamp(end.getTimestamp());
             merged.setTitleIconResourceId(end.getTitleIconResourceId());
             merged.setDescriptionIconResourceId(end.getDescriptionIconResourceId());
+            merged.setRelatedId(end.getRelatedId());
+            merged.setAccessedTraceData(end.getAccessedTraceData());
             return merged;
         });
     }
 
     private Maybe<HistoryListItem> createHistoryViewItem(@NonNull HistoryItem historyItem) {
         return Maybe.fromCallable(() -> {
-            HistoryListItem item = new HistoryListItem(application);
+            HistoryListItem item = new HistoryListItem();
             item.setTimestamp(historyItem.getTimestamp());
-            item.setTime(application.getString(R.string.history_time, getReadableTime(historyItem.getTimestamp())));
+            item.setTime(application.getString(R.string.history_time, TimeUtil.getReadableTime(application, historyItem.getTimestamp())));
+            item.setRelatedId(historyItem.getRelatedId());
             switch (historyItem.getType()) {
                 case HistoryItem.TYPE_CHECK_IN: {
                     item.setTitle(historyItem.getDisplayName());
@@ -191,7 +196,10 @@ public class HistoryViewModel extends BaseViewModel {
 
                     item.setTitle(checkOutItem.getDisplayName());
 
-                    boolean accessed = dataAccessManager.hasBeenAccessed(checkOutItem.getRelatedId()).blockingGet();
+                    List<AccessedTraceData> accessedTraceData = dataAccessManager.getPreviouslyAccessedTraceData(checkOutItem.getRelatedId())
+                            .toList().blockingGet();
+                    boolean accessed = !accessedTraceData.isEmpty();
+                    item.setAccessedTraceData(accessedTraceData);
                     if (accessed) {
                         item.setAdditionalTitleDetails(application.getString(R.string.history_data_accessed_details));
                         item.setTitleIconResourceId(R.drawable.ic_eye);
@@ -293,14 +301,59 @@ public class HistoryViewModel extends BaseViewModel {
                 ));
     }
 
-    public void onShowAccessedDataRequested() {
-        if (isCurrentDestinationId(R.id.historyFragment)) {
-            navigationController.navigate(R.id.action_historyFragment_to_accessedDataFragment);
+    public static List<HistoryListItem> filterHistoryListItems(List<HistoryListItem> items, int warningLevelFilter) {
+        if (warningLevelFilter != NO_WARNING_LEVEL_FILTER) {
+            return items.stream()
+                    .filter(item -> item.containsWarningLevel(warningLevelFilter))
+                    .map(item -> filterAccessedTraceData(item, warningLevelFilter))
+                    .collect(Collectors.toList());
+        } else {
+            return items;
         }
     }
 
-    private String getReadableTime(long timestamp) {
-        return readableDateFormat.format(new Date(timestamp));
+    private static HistoryListItem filterAccessedTraceData(HistoryListItem item, int warningLevelFilter) {
+        item.setAccessedTraceData(item.getAccessedTraceData().stream()
+                .filter(traceData -> traceData.getWarningLevel() == warningLevelFilter)
+                .collect(Collectors.toList()));
+        return item;
+    }
+
+    private static List<AccessedTraceData> filterTraceData(List<AccessedTraceData> items, int warningLevelFilter) {
+        if (warningLevelFilter != NO_WARNING_LEVEL_FILTER) {
+            return items.stream()
+                    .filter(item -> item.getWarningLevel() == warningLevelFilter)
+                    .collect(Collectors.toList());
+        } else {
+            return items;
+        }
+    }
+
+    public void onShowAccessedDataRequested() {
+        onShowAccessedDataRequested(new ArrayList(), NO_WARNING_LEVEL_FILTER);
+    }
+
+    public void onShowAccessedDataRequested(@NonNull List<AccessedTraceData> accessedTraceData, int warningLevelFilter) {
+        Bundle bundle = new Bundle();
+        List<AccessedTraceData> filteredData = filterTraceData(accessedTraceData, warningLevelFilter);
+        if (!filteredData.isEmpty()) {
+            AccessedTraceData firstItem = filteredData.get(0);
+            if (filteredData.size() == 1) {
+                modelDisposable.add(dataAccessManager.createAccessDataListItem(filteredData.get(0))
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribeOn(Schedulers.io())
+                        .subscribe(dataListItem -> {
+                            if (isCurrentDestinationId(R.id.historyFragment)) {
+                                bundle.putSerializable(AccessedDataDetailFragment.KEY_ACCESSED_DATA_LIST_ITEM, dataListItem);
+                                navigationController.navigate(R.id.action_historyFragment_to_accessedDataDetailFragment, bundle);
+                            }
+                        }));
+            } else {
+                bundle.putString(AccessedDataFragment.KEY_TRACE_ID, firstItem.getTraceId());
+                bundle.putInt(HistoryFragment.KEY_WARNING_LEVEL_FILTER, warningLevelFilter);
+                navigationController.navigate(R.id.action_historyFragment_to_accessedDataFragment, bundle);
+            }
+        }
     }
 
     public LiveData<List<HistoryListItem>> getHistoryItems() {

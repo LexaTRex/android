@@ -41,4 +41,5 @@ class EudccSchemaValidator {
 
         return isValid
     }
+
 }

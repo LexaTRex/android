@@ -3,6 +3,7 @@ package de.culture4life.luca.ui.history;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
+import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,6 +14,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
@@ -24,22 +26,27 @@ import de.culture4life.luca.R;
 import de.culture4life.luca.dataaccess.AccessedTraceData;
 import de.culture4life.luca.history.HistoryManager;
 import de.culture4life.luca.ui.BaseFragment;
-import de.culture4life.luca.ui.UiUtil;
+import de.culture4life.luca.ui.MainActivity;
 import de.culture4life.luca.ui.dialog.BaseDialogFragment;
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Observable;
-
-import static androidx.core.view.ViewCompat.IMPORTANT_FOR_ACCESSIBILITY_NO;
+import io.reactivex.rxjava3.schedulers.Schedulers;
+import timber.log.Timber;
 
 public class HistoryFragment extends BaseFragment<HistoryViewModel> {
 
-    private ImageView accessedDataImageView;
+    public static final String KEY_WARNING_LEVEL_FILTER = "WarningLevel";
+    public static final int NO_WARNING_LEVEL_FILTER = -1;
+
     private TextView emptyTitleTextView;
     private TextView emptyDescriptionTextView;
+    private TextView headingTextView;
     private ImageView emptyImageView;
     private ListView historyListView;
     private HistoryListAdapter historyListAdapter;
     private MaterialButton shareHistoryButton;
+    private int warningLevelFilter = NO_WARNING_LEVEL_FILTER;
+    private ImageView deleteHistoryImageView;
 
     @Override
     protected int getLayoutResource() {
@@ -52,43 +59,77 @@ public class HistoryFragment extends BaseFragment<HistoryViewModel> {
     }
 
     @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        if (getArguments() != null) {
+            warningLevelFilter = getArguments().getInt(KEY_WARNING_LEVEL_FILTER, NO_WARNING_LEVEL_FILTER);
+        }
+    }
+
+    @Override
     protected Completable initializeViews() {
         return super.initializeViews()
                 .andThen(Completable.fromAction(() -> {
                     initializeHistoryItemsViews();
                     initializeShareHistoryViews();
                     initializeAccessedDataViews();
+                    initializeDeleteHistoryListener();
                     initializeEmptyStateViews();
                 }));
     }
 
-    private void initializeHistoryItemsViews() {
-        historyListView = getView().findViewById(R.id.historyListView);
-        View paddingView = new View(getContext());
-        paddingView.setMinimumHeight((int) UiUtil.convertDpToPixel(16, getContext()));
-        paddingView.setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);
-        historyListView.addHeaderView(paddingView);
+    private void initializeDeleteHistoryListener() {
+        deleteHistoryImageView = getView().findViewById(R.id.deleteHistoryImageView);
+        deleteHistoryImageView.setOnClickListener(v -> showClearHistoryConfirmationDialog());
+    }
 
-        historyListAdapter = new HistoryListAdapter(getContext(), historyListView.getId());
+    private void initializeHistoryItemsViews() {
+        headingTextView = getView().findViewById(R.id.headingTextView);
+        headingTextView.setText(getTitleFor(warningLevelFilter));
+        historyListView = getView().findViewById(R.id.historyListView);
+        historyListAdapter = new HistoryListAdapter(getContext(), historyListView.getId(), warningLevelFilter == NO_WARNING_LEVEL_FILTER);
         historyListAdapter.setItemClickHandler(new HistoryListAdapter.ItemClickHandler() {
             @Override
-            public void showAdditionalTitleDetails(@NonNull HistoryListItem item) {
-                showHistoryItemDetailsDialog(item, item.getAdditionalTitleDetails());
+            public void showAccessedDataDetails(@NonNull HistoryListItem item) {
+                viewModel.onShowAccessedDataRequested(item.getAccessedTraceData(), warningLevelFilter);
             }
 
             @Override
             public void showAdditionalDescriptionDetails(@NonNull HistoryListItem item) {
                 showHistoryItemDetailsDialog(item, item.getAdditionalDescriptionDetails());
             }
+
+            @Override
+            public void showTraceInformation(@NonNull HistoryListItem item) {
+                showHistoryItemDetailsDialog(item, item.getAdditionalTitleDetails());
+            }
         });
         historyListView.setAdapter(historyListAdapter);
-        observe(viewModel.getHistoryItems(), items -> historyListAdapter.setHistoryItems(items));
+        observe(viewModel.getHistoryItems(), items -> historyListAdapter.setHistoryItems(HistoryViewModel.filterHistoryListItems(items, warningLevelFilter)));
+    }
+
+    private int getTitleFor(int warningLevelFilter) {
+        switch (warningLevelFilter) {
+            case 1:
+                return R.string.accessed_data_dialog_title;
+            case 2:
+                return R.string.accessed_data_level_2_title;
+            case 3:
+                return R.string.accessed_data_level_3_title;
+            case 4:
+                return R.string.accessed_data_level_4_title;
+            default:
+                return R.string.navigation_history;
+        }
     }
 
     private void initializeShareHistoryViews() {
         shareHistoryButton = getView().findViewById(R.id.primaryActionButton);
         shareHistoryButton.setOnClickListener(button -> showShareHistorySelectionDialog());
-        observe(viewModel.getHistoryItems(), items -> shareHistoryButton.setVisibility(items.isEmpty() ? View.GONE : View.VISIBLE));
+        observe(viewModel.getHistoryItems(), items -> {
+            boolean hideButton = items.isEmpty() || warningLevelFilter != NO_WARNING_LEVEL_FILTER;
+            shareHistoryButton.setVisibility(hideButton ? View.GONE : View.VISIBLE);
+        });
         observe(viewModel.getTracingTanEvent(), tracingTanEvent -> {
             if (!tracingTanEvent.hasBeenHandled()) {
                 showShareHistoryTanDialog(tracingTanEvent.getValueAndMarkAsHandled());
@@ -97,13 +138,9 @@ public class HistoryFragment extends BaseFragment<HistoryViewModel> {
     }
 
     private void initializeAccessedDataViews() {
-        accessedDataImageView = getView().findViewById(R.id.accessedDataImageView);
-        accessedDataImageView.setOnClickListener(v -> viewModel.onShowAccessedDataRequested());
-
         observe(viewModel.getNewAccessedData(), accessedDataEvent -> {
             if (!accessedDataEvent.hasBeenHandled()) {
-                accessedDataImageView.setImageResource(R.drawable.ic_eye_notification);
-                accessedDataImageView.clearColorFilter();
+                ((MainActivity) getActivity()).updateHistoryBadge();
                 showAccessedDataDialog(accessedDataEvent.getValueAndMarkAsHandled());
             }
         });
@@ -123,7 +160,24 @@ public class HistoryFragment extends BaseFragment<HistoryViewModel> {
             emptyImageView.setVisibility(emptyStateVisibility);
             historyListView.setVisibility(contentVisibility);
             shareHistoryButton.setVisibility(contentVisibility);
+            deleteHistoryImageView.setVisibility(contentVisibility);
         });
+    }
+
+    private void showClearHistoryConfirmationDialog() {
+        new BaseDialogFragment(new MaterialAlertDialogBuilder(getContext())
+                .setTitle(R.string.history_clear_title)
+                .setMessage(R.string.history_clear_description)
+                .setPositiveButton(R.string.history_clear_action, (dialog, which) -> {
+                    application.getHistoryManager().clearItems()
+                            .subscribeOn(Schedulers.io())
+                            .subscribe(
+                                    () -> Timber.i("History cleared"),
+                                    throwable -> Timber.w("Unable to clear history: %s", throwable.toString())
+                            );
+                })
+                .setNegativeButton(R.string.action_cancel, (dialog, which) -> dialog.dismiss()))
+                .show();
     }
 
     private void showHistoryItemDetailsDialog(@NonNull HistoryListItem item, String additionalDetails) {
@@ -187,7 +241,7 @@ public class HistoryFragment extends BaseFragment<HistoryViewModel> {
     }
 
     private void showAccessedDataDialog(@NonNull List<AccessedTraceData> accessedTraceDataList) {
-        if (accessedTraceDataList.isEmpty()) {
+        if (accessedTraceDataList.isEmpty() || !hasWarningLevel1(accessedTraceDataList)) {
             return;
         }
         BaseDialogFragment dialogFragment = new BaseDialogFragment(new MaterialAlertDialogBuilder(getContext())
@@ -200,4 +254,15 @@ public class HistoryFragment extends BaseFragment<HistoryViewModel> {
         dialogFragment.show();
     }
 
+    private boolean hasWarningLevel1(@NonNull List<AccessedTraceData> accessedTraceDataList) {
+        boolean hasWarningLevel1 = false;
+        for (AccessedTraceData data : accessedTraceDataList) {
+            if (data.getWarningLevel() == 1) {
+                hasWarningLevel1 = true;
+                break;
+            }
+        }
+
+        return hasWarningLevel1;
+    }
 }

@@ -22,7 +22,7 @@
     <TextView
         android:id="@+id/itemTitleTextView"
         style="@style/TextAppearance.Luca.Body1"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/spacing_default"
         android:layout_marginTop="@dimen/spacing_default"
@@ -33,10 +33,21 @@
         android:textStyle="bold"
         app:fontFamily="@font/montserrat_bold"
         app:layout_constrainedWidth="true"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0"
+        app:layout_constraintEnd_toStartOf="@id/itemTimeTextView"
         app:layout_constraintStart_toEndOf="@id/dotView"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/itemTimeTextView"
+        style="@style/TextAppearance.Luca.Body2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/spacing_small"
+        android:text="@string/accessed_data_time"
+        android:textColor="@color/primaryColor"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="@id/itemTitleTextView"
+        app:layout_constraintTop_toTopOf="@id/itemTitleTextView" />
 
     <TextView
         android:id="@+id/itemDescriptionTextView"
@@ -46,28 +57,12 @@
         android:layout_marginTop="@dimen/spacing_small"
         android:layout_marginEnd="30dp"
         android:ellipsize="end"
-        android:maxLines="1"
+        android:maxLines="3"
         android:text="@string/accessed_data_description"
         app:layout_constrainedWidth="true"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0"
         app:layout_constraintStart_toStartOf="@id/itemTitleTextView"
         app:layout_constraintTop_toBottomOf="@id/itemTitleTextView" />
-
-    <TextView
-        android:id="@+id/itemTimeTextView"
-        style="@style/TextAppearance.Luca.Body2"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/spacing_small"
-        android:layout_marginEnd="30dp"
-        android:ellipsize="end"
-        android:paddingBottom="@dimen/spacing_default"
-        android:text="@string/accessed_data_time"
-        app:layout_constrainedWidth="true"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0"
-        app:layout_constraintStart_toStartOf="@id/itemTitleTextView"
-        app:layout_constraintTop_toBottomOf="@id/itemDescriptionTextView" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

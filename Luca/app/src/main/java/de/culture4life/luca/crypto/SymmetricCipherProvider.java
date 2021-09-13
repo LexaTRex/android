@@ -13,7 +13,7 @@ import javax.crypto.SecretKey;
 
 import de.culture4life.luca.network.pojo.ContactData;
 import de.culture4life.luca.network.pojo.TransferData;
-import de.culture4life.luca.ui.qrcode.QrCodeData;
+import de.culture4life.luca.ui.checkin.QrCodeData;
 import io.reactivex.rxjava3.core.Single;
 
 /**

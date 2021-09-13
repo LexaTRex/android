@@ -1,10 +1,13 @@
 package de.culture4life.luca.ui.venue;
 
+import static de.culture4life.luca.ui.BaseQrCodeViewModel.BARCODE_DATA_KEY;
+
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
+import android.os.Bundle;
 import android.provider.Settings;
 import android.view.View;
 import android.widget.ImageView;
@@ -25,6 +28,7 @@ import de.culture4life.luca.ui.ViewError;
 import de.culture4life.luca.ui.dialog.BaseDialogFragment;
 import de.culture4life.luca.util.AccessibilityServiceUtil;
 import five.star.me.FiveStarMe;
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 import timber.log.Timber;
@@ -35,12 +39,11 @@ public class VenueDetailsFragment extends BaseFragment<VenueDetailsViewModel> {
 
     private TextView subtitle;
     private TextView title;
-    private TextView descriptionTextView;
+    private TextView checkInTimeTextView;
     private TextView additionalDataTitleTextView;
     private TextView additionalDataValueTextView;
     private TextView childCounterTextView;
     private ImageView childAddingImageView;
-    private TextView checkInDurationHeadingTextView;
     private TextView checkInDurationTextView;
     private ImageView automaticCheckOutInfoImageView;
     private SwitchMaterial automaticCheckoutSwitch;
@@ -64,9 +67,19 @@ public class VenueDetailsFragment extends BaseFragment<VenueDetailsViewModel> {
         if (!viewModel.getIsCheckedIn().getValue()) {
             // navigation can be skipped if app is not open and user gets checked out by server or
             // via the notification
-            safeNavigateFromNavController(R.id.action_venueDetailFragment_to_qrCodeFragment);
+            safeNavigateFromNavController(R.id.action_venueDetailFragment_to_checkInFragment, viewModel.getBundle().getValue());
             AccessibilityServiceUtil.speak(getContext(), getString(R.string.venue_checked_out));
         }
+
+        Bundle arguments = getArguments();
+        if (arguments != null) {
+            viewModel.setBundle(arguments);
+        }
+        viewDisposable.add(viewModel.updateLocationServicesStatus()
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.io())
+                .doOnError(throwable -> Timber.w("Error updating location services status. " + throwable.getMessage()))
+                .subscribe());
     }
 
     @Override
@@ -82,8 +95,8 @@ public class VenueDetailsFragment extends BaseFragment<VenueDetailsViewModel> {
                     title = getView().findViewById(R.id.title);
                     observe(viewModel.getTitle(), value -> title.setText(value));
 
-                    descriptionTextView = getView().findViewById(R.id.subHeadingTextView);
-                    observe(viewModel.getDescription(), value -> descriptionTextView.setText(value));
+                    checkInTimeTextView = getView().findViewById(R.id.checkInTimeTextView);
+                    observe(viewModel.getCheckInTime(), value -> checkInTimeTextView.setText(getFormattedString(R.string.venue_checked_in_time, value)));
 
                     additionalDataTitleTextView = getView().findViewById(R.id.additionalDataTitleTextView);
                     observe(viewModel.getAdditionalDataTitle(), value -> additionalDataTitleTextView.setText(value));
@@ -105,14 +118,21 @@ public class VenueDetailsFragment extends BaseFragment<VenueDetailsViewModel> {
                     childAddingImageView = getView().findViewById(R.id.childAddingIconImageView);
                     childAddingImageView.setOnClickListener(view -> viewModel.openChildrenView());
 
-                    checkInDurationHeadingTextView = getView().findViewById(R.id.checkInDurationHeadingTextView);
 
                     checkInDurationTextView = getView().findViewById(R.id.checkInDurationTextView);
                     observe(viewModel.getCheckInDuration(), value -> checkInDurationTextView.setText(value));
 
                     initializeAutomaticCheckoutViews();
                     initializeSlideToActView();
+
+                    observe(viewModel.getBundle(), this::processBundle);
                 }));
+    }
+
+    @Override
+    public void onStop() {
+        viewModel.setBundle(null);
+        super.onStop();
     }
 
     private void initializeAutomaticCheckoutViews() {
@@ -177,13 +197,11 @@ public class VenueDetailsFragment extends BaseFragment<VenueDetailsViewModel> {
         }
 
         observe(viewModel.getIsCheckedIn(), isCheckedIn -> {
-            slideToActView.setReversed(isCheckedIn);
             slideToActView.setText(getString(isCheckedIn ? R.string.venue_check_out_action : R.string.venue_check_in_action));
             slideToActView.setContentDescription(getString(isCheckedIn ? R.string.venue_check_out_content_description : R.string.venue_check_in_content_description));
-            checkInDurationHeadingTextView.setVisibility(isCheckedIn ? View.VISIBLE : View.GONE);
             checkInDurationTextView.setVisibility(isCheckedIn ? View.VISIBLE : View.GONE);
             if (!isCheckedIn) {
-                safeNavigateFromNavController(R.id.action_venueDetailFragment_to_qrCodeFragment);
+                safeNavigateFromNavController(R.id.action_venueDetailFragment_to_checkInFragment, viewModel.getBundle().getValue());
                 AccessibilityServiceUtil.speak(getContext(), getString(R.string.venue_checked_out));
                 FiveStarMe.showRateDialogIfMeetsConditions(getActivity());
             }
@@ -237,6 +255,18 @@ public class VenueDetailsFragment extends BaseFragment<VenueDetailsViewModel> {
             showRequestLocationPermissionRationale(permission, false);
         } else {
             showLocationPermissionPermanentlyDeniedError(permission);
+        }
+    }
+
+    private void processBundle(@Nullable Bundle bundle) {
+        if (bundle == null) {
+            return;
+        }
+
+        String barcode = bundle.getString(BARCODE_DATA_KEY);
+        if (barcode != null) {
+            // is supposed to check-in into different location
+            showLocationChangeDialog();
         }
     }
 
@@ -300,6 +330,16 @@ public class VenueDetailsFragment extends BaseFragment<VenueDetailsViewModel> {
                 .setNegativeButton(R.string.action_cancel, (dialog, which) -> handleDeniedLocationAccess.onErrorComplete()
                         .doFinally(this::clearRequestResultActions)
                         .subscribe());
+        new BaseDialogFragment(builder).show();
+    }
+
+    private void showLocationChangeDialog() {
+        MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(getContext())
+                .setTitle(R.string.venue_change_location_title)
+                .setMessage(R.string.venue_change_location_description)
+                .setPositiveButton(R.string.action_change, (dialog, which) -> viewModel.changeLocation())
+                .setNegativeButton(R.string.action_cancel, (dialog, which) -> dialog.cancel())
+                .setOnCancelListener(dialogInterface -> viewModel.setBundle(null));
         new BaseDialogFragment(builder).show();
     }
 

@@ -1,5 +1,7 @@
 package de.culture4life.luca.notification;
 
+import static android.content.Context.NOTIFICATION_SERVICE;
+
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -23,12 +25,10 @@ import de.culture4life.luca.service.LucaService;
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Maybe;
 
-import static android.content.Context.NOTIFICATION_SERVICE;
-
 public class LucaNotificationManager extends Manager {
 
     public static final int NOTIFICATION_ID_STATUS = 1;
-    public static final int NOTIFICATION_ID_DATA_ACCESS = 2;
+    public static final int NOTIFICATION_ID_DATA_ACCESS = 2000;
     public static final int NOTIFICATION_ID_EVENT = 3;
     private static final String NOTIFICATION_CHANNEL_ID_PREFIX = "channel_";
     private static final String NOTIFICATION_CHANNEL_ID_STATUS = NOTIFICATION_CHANNEL_ID_PREFIX + NOTIFICATION_ID_STATUS;

@@ -1,3 +1,11 @@
+# Release 2.0.0
+
+- Check-in and history redesign
+- Introduction of new notifications
+
+We are proud to present luca 2.0. This update includes a major redesign of the check-in and history tab. This makes it easier for you to enjoy the features of luca, so that you can check in and use it even more intuitively.
+Further, with this update we introduce additional notifications with different levels.
+
 # Release 1.13.1
 
 This update fixes an issue with imported documents not being visible.

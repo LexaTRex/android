@@ -19,14 +19,17 @@ import de.culture4life.luca.BuildConfig;
 import de.culture4life.luca.LucaApplication;
 import de.culture4life.luca.Manager;
 import de.culture4life.luca.network.endpoints.LucaEndpointsV3;
+import de.culture4life.luca.network.endpoints.LucaEndpointsV4;
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Maybe;
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.core.Single;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 import io.reactivex.rxjava3.subjects.BehaviorSubject;
+import okhttp3.Cache;
 import okhttp3.CertificatePinner;
 import okhttp3.Credentials;
+import okhttp3.HttpUrl;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -39,15 +42,14 @@ import timber.log.Timber;
 
 public class NetworkManager extends Manager {
 
-    public static final String API_BASE_URL = BuildConfig.API_BASE_URL + "/api/v3/";
+    private static final int CACHE_SIZE = 1024 * 1024 * 10;
     private static final long DEFAULT_REQUEST_TIMEOUT = TimeUnit.SECONDS.toMillis(10);
     private static final String USER_AGENT = createUserAgent();
 
     private final RxJava3CallAdapterFactory rxAdapter;
 
-    private Gson gson;
-    private Retrofit retrofit;
     private LucaEndpointsV3 lucaEndpointsV3;
+    private LucaEndpointsV4 lucaEndpointsV4;
     private ConnectivityManager connectivityManager;
 
     private final BehaviorSubject<Boolean> connectivityStateSubject = BehaviorSubject.create();
@@ -70,22 +72,20 @@ public class NetworkManager extends Manager {
         unregisterConnectivityReceiver();
     }
 
-    private LucaEndpointsV3 createEndpoints() {
-        gson = new GsonBuilder()
+    private Retrofit createRetrofit(int version) {
+        Gson gson = new GsonBuilder()
                 .setLenient()
                 .setDateFormat("yyyy-MM-dd'T'HH:mm:ssZ")
                 .create();
 
         OkHttpClient okHttpClient = createOkHttpClient();
 
-        retrofit = new Retrofit.Builder()
-                .baseUrl(API_BASE_URL)
+        return new Retrofit.Builder()
+                .baseUrl(BuildConfig.API_BASE_URL + "/api/v" + version + "/")
                 .addConverterFactory(GsonConverterFactory.create(gson))
                 .addCallAdapterFactory(rxAdapter)
                 .client(okHttpClient)
                 .build();
-
-        return retrofit.create(LucaEndpointsV3.class);
     }
 
     @NonNull
@@ -103,13 +103,17 @@ public class NetworkManager extends Manager {
                     .proceed(chain.request());
         };
 
+        Interceptor cdnInterceptor = chain -> chain.proceed(replaceHostWithCdnIfRequired(chain.request()));
+
         CertificatePinner certificatePinner = new CertificatePinner.Builder()
                 .add("**.luca-app.de", "sha256/wjD2X9ht0iXPN2sSXiXd2aF6ar5cxHOmXZnnkAiwVpU=") // CN=*.luca-app.de,O=neXenio GmbH,L=Berlin,ST=Berlin,C=DE,2.5.4.5=#130c43534d303233353532353339
                 .build();
 
         OkHttpClient.Builder builder = new OkHttpClient.Builder()
                 .addInterceptor(userAgentInterceptor)
-                .addInterceptor(timeoutInterceptor);
+                .addInterceptor(timeoutInterceptor)
+                .addInterceptor(cdnInterceptor)
+                .cache(new Cache(context.getCacheDir(), CACHE_SIZE));
 
         if (BuildConfig.DEBUG) {
             HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor();
@@ -134,9 +138,18 @@ public class NetworkManager extends Manager {
     public Single<LucaEndpointsV3> getLucaEndpointsV3() {
         return Single.fromCallable(() -> {
             if (lucaEndpointsV3 == null) {
-                lucaEndpointsV3 = createEndpoints();
+                lucaEndpointsV3 = createRetrofit(3).create(LucaEndpointsV3.class);
             }
             return lucaEndpointsV3;
+        });
+    }
+
+    public Single<LucaEndpointsV4> getLucaEndpointsV4() {
+        return Single.fromCallable(() -> {
+            if (lucaEndpointsV4 == null) {
+                lucaEndpointsV4 = createRetrofit(4).create(LucaEndpointsV4.class);
+            }
+            return lucaEndpointsV4;
         });
     }
 
@@ -172,6 +185,29 @@ public class NetworkManager extends Manager {
             timeout = DEFAULT_REQUEST_TIMEOUT;
         }
         return timeout;
+    }
+
+    protected static boolean useCdn(@NonNull Request request) {
+        String path = request.url().encodedPath();
+        return path.contains("notifications") || path.contains("healthDepartments");
+    }
+
+    protected static Request replaceHostWithCdn(@NonNull Request request) {
+        String cdnHost = request.url().host().replaceFirst("app", "data");
+        HttpUrl cdnUrl = request.url().newBuilder()
+                .host(cdnHost)
+                .build();
+        return request.newBuilder()
+                .url(cdnUrl)
+                .build();
+    }
+
+    protected static Request replaceHostWithCdnIfRequired(@NonNull Request request) {
+        if (useCdn(request)) {
+            return replaceHostWithCdn(request);
+        } else {
+            return request;
+        }
     }
 
     public static boolean isHttpException(@NonNull Throwable throwable, int expectedStatusCode) {
@@ -214,4 +250,5 @@ public class NetworkManager extends Manager {
             connectivityStateSubject.onComplete();
         }
     }
+
 }

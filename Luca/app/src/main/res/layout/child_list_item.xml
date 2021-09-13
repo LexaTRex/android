@@ -1,20 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    tools:background="@color/checked_in_light_green_gradient">
 
     <LinearLayout
         android:id="@+id/childNameLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:orientation="horizontal"
         app:layout_constrainedWidth="true"
-        android:orientation="horizontal">
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
 
         <CheckBox
             android:id="@+id/includeChildCheckBox"
@@ -22,36 +23,31 @@
             android:layout_height="match_parent"
             android:layout_gravity="center_vertical"
             android:buttonTint="@color/secondaryColor"
-            android:contentDescription="@string/venue_children_check_in"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toStartOf="parent" />
+            android:contentDescription="@string/venue_children_check_in" />
 
         <TextView
             android:id="@+id/childNameTextView"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="@dimen/spacing_default"
             android:layout_marginTop="@dimen/spacing_default"
+            android:layout_marginEnd="@dimen/spacing_default"
             android:layout_marginBottom="@dimen/spacing_default"
             android:layout_weight="1"
-            android:layout_gravity="center_vertical"
             android:ellipsize="end"
+            android:fontFamily="@font/montserrat_bold"
             android:maxLines="1"
             android:text="@string/dummy_heading"
-            android:fontFamily="@font/montserrat_bold"
-            android:textSize="16sp"
-            android:textColor="@android:color/black" />
+            android:textColor="@android:color/black"
+            android:textSize="16sp" />
 
         <ImageView
             android:id="@+id/removeChildImageView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:padding="@dimen/spacing_default"
             android:layout_gravity="center_vertical"
-            android:scaleType="fitCenter"
-            android:src="@drawable/ic_delete_input"
             android:contentDescription="@string/item_delete_action"
-            app:tint="@color/secondaryColor" />
+            android:padding="@dimen/spacing_default"
+            android:src="@drawable/ic_delete_item" />
 
     </LinearLayout>
 

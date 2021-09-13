@@ -30,6 +30,7 @@
     <string name="action_enable">Aktivieren</string>
     <string name="action_add">Hinzufügen</string>
     <string name="action_copy">Kopieren</string>
+    <string name="action_change">Wechseln</string>
 
     <!-- Errors -->
     <string name="error_generic_title">Etwas lief schief</string>
@@ -137,6 +138,7 @@
     <string name="navigation_history">Historie</string>
     <string name="navigation_meeting">@string/meeting_heading</string>
     <string name="navigation_accessed_data">Datenzugriffe</string>
+    <string name="navigation_accessed_data_details">Datenzugriffsdetails</string>
     <string name="navigation_my_luca">@string/my_luca_heading</string>
     <string name="navigation_account">Account</string>
 
@@ -159,13 +161,15 @@
     <string name="menu_version_details">Versions Details</string>
     <string name="menu_delete_account">Account löschen</string>
 
-    <!-- Contact Data -->
+    <!-- Check in -->
+    <string name="scan_qr_code">QR-Code scannen</string>
     <string name="qr_code_description">Das ist dein QR-Code. Lass ihn an einem luca-Standort scannen, um dich einzuchecken.</string>
     <string name="scan_qr_code_description">Scanne den QR-Code eines luca-Standorts oder eines privaten Treffens, um dich einzuchecken.</string>
-    <string name="scan_qr_code">Selbst einchecken</string>
+    <string name="show_qr_code">Meinen QR-Code anzeigen</string>
+    <string name="my_qr_code">Mein QR-Code</string>
+    <string name="activate_camera">Drücken um Kamera zu aktivieren</string>
     <string name="camera_access_title">Kamera aktivieren</string>
     <string name="camera_access_description">luca benötigt Zugriff auf deine Kamera, um QR-Codes von Testergebnissen, Locations oder Privaten Meetings scannen zu können. Nur die Daten im QR-Code werden verarbeitet und keine anderen Daten werden gespeichert.</string>
-    <string name="close_qr_code_scanner">QR-Code-Scanner schließen</string>
     <string name="edit_contact_data">Kontaktdaten bearbeiten</string>
 
     <!-- Private Meeting -->
@@ -185,13 +189,15 @@
     <string name="meeting_slider_text">TREFFEN BEENDEN</string>
     <string name="meeting_slider_content_description">Treffen beenden Schalter</string>
     <string name="meeting_was_ended_hint">Das Treffen wurde beendet</string>
+    <string name="meeting_change_location_description">@string/venue_change_location_description</string>
 
     <string name="meeting_join_heading">Check-in privates Treffen</string>
     <string name="meeting_join_description">Wenn du fortfährst, checkst du dich bei einem privaten Treffen ein. Dabei wird dein Vor- und dein Nachname übermittelt.\n\nPrivate Treffen sind als Gedächtnisstütze für kleine Zusammenkünfte mit Freunden und Familie gedacht. Deshalb sehen Gastgeber:innen die Vor- und Nachnamen ihrer Gäste (und andersrum sehen Gäste die Vor- und Nachnamen ihrer Gastgeber:innen). Diese Daten stehen zwar in der Historie, können aber nicht mit Gesundheitsämtern geteilt werden.</string>
 
     <!-- Venues -->
     <string name="venue_heading">@string/dummy_heading</string>
-    <string name="venue_description">Du bist eingecheckt!\n\nCheck-in:\n<xliff:g example="18.08.2020 – 19:23" id="time">%1$s</xliff:g> Uhr</string>
+    <string name="venue_checked_in">Du bist eingecheckt!</string>
+    <string name="venue_check_in_time">Check-in:    <xliff:g example="18.08.2020 – 19:23" id="time">%1$s</xliff:g> <b>Uhr</b></string>
     <string name="venue_current_stay_timer_heading">Aktueller Aufenthalt</string>
 
     <string name="venue_property_table">Tisch</string>
@@ -201,19 +207,25 @@
     <string name="venue_check_in_content_description">Check-in Schalter</string>
     <string name="venue_check_out_action">AUSCHECKEN</string>
     <string name="venue_check_out_content_description">Check-out Schalter</string>
-    <string name="venue_checked_in_time">Eingecheckt seit:\n<xliff:g example="18.08.2020 – 19:23" id="time">%1$s</xliff:g> Uhr</string>
+    <string name="venue_checked_in_time">Check-in:  <b><xliff:g example="18.08.2020 – 19:23" id="time">%1$s</xliff:g> Uhr</b></string>
     <string name="venue_automatic_check_out">Automatisch auschecken</string>
-    <string name="venue_slider_clicked">Bitte den Pfeil nach links ziehen</string>
+    <string name="venue_slider_clicked">Bitte den Pfeil nach rechts ziehen</string>
     <string name="venue_checked_out">Du hast ausgecheckt</string>
     <string name="venue_check_in_document_redirect_title">Mit Import fortfahren?</string>
     <string name="venue_check_in_document_redirect_description">Hey, du scannst gerade den QR-Code eines Dokuments und nicht den eines luca-Standorts. Wenn du ein Dokument hinzufügen möchtest, klicke auf „WEITER“.</string>
+    <string name="venue_check_in_confirmation_title">Check-In</string>
+    <string name="venue_check_in_confirmation_description">Du willst dich bei <xliff:g example="neXenio Office" id="locationName">%1$s</xliff:g> einchecken?</string>
+    <string name="venue_check_in_confirmation_dont_show_again">Nicht mehr anzeigen</string>
+    <string name="venue_change_location_title">Location wechseln?</string>
+    <string name="venue_change_location_description">Du bist bereits eingecheckt. Möchtest du die Location wechseln?</string>
 
     <string name="venue_children_title">Kinder einchecken</string>
     <string name="add_children_title">Kinder hinzufügen</string>
-    <string name="venue_children_empty_list_description">Du kannst Kinder (bis 14&#160;Jahre) deiner App hinzufügen, um ihre Dokumente importieren und sie mit dir einchecken zu können.\n\nBitte achte dabei auf die Korrektheit der Angaben. Die Informationen werden nicht an das Gesundheitsamt weitergegeben, sie dienen lediglich der Gedankenstütze.</string>
+    <string name="venue_children_empty_list_description">Wähle die Kinder aus, die gerade mit dir eingecheckt sind. Die Auswahl wird nicht gespeichert und muss bei jedem Check-in neu ausgewählt werden.</string>
     <string name="venue_children_list_description">Du kannst Kinder (bis 14&#160;Jahre) deiner App hinzufügen, um ihre Dokumente importieren und sie mit dir einchecken zu können. Die Informationen werden nicht an das Gesundheitsamt weitergegeben, sie dienen lediglich der Gedankenstütze.</string>
     <string name="venue_children_add_description">Bitte gib den vollständigen Namen deines Kindes an. Dokumente können nur hinzugefügt werden, wenn die Namen übereinstimmen.</string>
     <string name="venue_children_add">Kind hinzufügen</string>
+    <string name="venue_children_add_another_child">Weiteres Kind hinzufügen</string>
     <string name="venue_children_add_validation_error">Bitte einen gültigen Namen eingeben</string>
     <string name="venue_children_add_error_title">Kind konnte nicht hinzugefügt werden</string>
     <string name="venue_children_remove_error_title">Kind konnte nicht entfernt werden</string>
@@ -281,15 +293,34 @@
     <string name="history_children_title">Kinder: <xliff:g example="1" id="count">%1$d</xliff:g></string>
 
     <!-- Accessed Data -->
-    <string name="accessed_data_heading">Datenanfragen</string>
+    <string name="accessed_data_heading">Meldungen</string>
     <string name="accessed_data_empty_title">@string/history_empty_title</string>
     <string name="accessed_data_empty_description">Keine Datenanfragen durch Gesundheitsämter innerhalb der letzten 14&#160;Tage.</string>
     <string name="accessed_data_title"><xliff:g example="Health department Berlin Mitte" id="healthDepartmentName">%1$s</xliff:g></string>
     <string name="accessed_data_description"><xliff:g example="neXenio Office" id="locationName">%1$s</xliff:g></string>
     <string name="accessed_data_dialog_title">Neue Datenanfrage</string>
     <string name="accessed_data_dialog_description">Ein oder mehrere Gesundheitsämter haben im Rahmen einer Datenanfrage deine Kontaktdaten erhalten.\n\nIm Rahmen einer Kontaktnachverfolgung wurden deine Kontaktdaten von einem oder mehreren Gesundheitsämtern entschlüsselt. Diese werten gerade aus, ob ein Risiko besteht und werden sich möglicherweise bei dir melden.\n\nBitte handle verantwortungsvoll.</string>
+    <string name="accessed_data_banner_text">Du hast eine neue Datenanfrage.</string>
     <string name="accessed_data_dialog_action_show">Alle Datenanfragen</string>
     <string name="accessed_data_dialog_action_dismiss">@string/action_ok</string>
+    <string name="accessed_data_banner_action_show">Anzeigen</string>
+    <string name="accessed_data_level_1_title">Hinweis: Mögliches Infektionsrisiko</string>
+    <string name="accessed_data_level_1_description">Ein oder mehrere Gesundheitsämter haben im Rahmen einer Datenanfrage deine Kontaktdaten erhalten.</string>
+    <string name="accessed_data_level_1_detailed_description">Im Rahmen einer Kontaktnachverfolgung wurden deine Kontaktdaten von einem oder mehreren Gesundheitsämtern entschlüsselt. Diese werten gerade aus, ob ein Risiko besteht und werden sich möglicherweise bei dir melden.\n\nBitte handle verantwortungsvoll.</string>
+    <string name="accessed_data_level_1_banner_text">Du hast eine neue Datenanfrage.</string>
+    <string name="accessed_data_level_2_title">Mögliches Infektionsrisiko</string>
+    <string name="accessed_data_level_2_description">Du warst zeitgleich mit einer Person in einem luca-Standort eingecheckt, die später positiv auf das Coronavirus (SARS-CoV-2) getestet wurde.</string>
+    <string name="accessed_data_level_2_detailed_description">Bitte handle verantwortungsvoll, reduziere deine Kontakte und melde dich gegebenenfalls beim Gesundheitsamt – vor allem, wenn bei dir Symptome auftreten. Das Gesundheitsamt empfiehlt dir, einen Schnelltest zu machen.</string>
+    <string name="accessed_data_level_2_banner_text">Achtung! Es besteht ein mögliches Infektionsrisiko.</string>
+    <string name="accessed_data_level_3_title">Erhöhtes Infektionsrisiko</string>
+    <string name="accessed_data_level_3_description">Du warst zeitgleich mit einer Person in einem luca-Standort eingecheckt, die später positiv auf das Coronavirus (SARS-CoV-2) getestet wurde. Ein Gesundheitsamt hat die Situation vor Ort ausgewertet und geht von einem erhöhten Infektionsrisiko für dich aus.</string>
+    <string name="accessed_data_level_3_detailed_description">@string/accessed_data_level_2_detailed_description</string>
+    <string name="accessed_data_level_3_banner_text">Achtung! Es besteht ein erhöhtes Infektionsrisiko.</string>
+    <string name="accessed_data_level_4_title">Mehrfache Datenanfrage</string>
+    <string name="accessed_data_level_4_description">Du warst in einem luca-Standort eingecheckt, in dem mehr als ein Gesundheitsamt Daten entschlüsselt hat. Das bedeutet möglicherweise, dass sich dort mehrere Personen aufgehalten haben, die später positiv auf das Coronavirus (SARS-CoV-2) getestet wurden. Es besteht das Risiko, dass es sich um ein erhöhtes Infektionsgeschehen handelt.</string>
+    <string name="accessed_data_level_4_detailed_description">Bitte handle verantwortungsvoll, reduziere deine Kontakte und melde dich gegebenenfalls beim für dich zuständigen Gesundheitsamt – vor allem, wenn bei dir Symptome auftreten. Vielleicht hast du auch die Möglichkeit, einen Test zu machen.\n\nDieser Hinweis wurde automatisiert von luca ausgelöst.</string>
+    <string name="accessed_data_level_4_banner_text">Achtung! Du warst in einen luca-Standort eingecheckt, in dem mehr als ein Gesundheitsamt Daten entschlüsselt hat.</string>
+
 
     <!-- My Luca -->
     <string name="my_luca_heading">Mein luca</string>
@@ -302,7 +333,7 @@
     <string name="document_import_anyway_action">Trotzdem importieren</string>
     <string name="document_import_hint">Scanne den QR-Code deines Dokuments, um dieses zur App hinzuzufügen.</string>
     <string name="document_import_success_message">Das Dokument wurde importiert</string>
-    <string name="document_import_consent">Hiermit erkläre ich mein Einverständnis gemäß Art. 9 (2) a) in Verbindung mit Art. 6 (1) 1 a) DSGVO zum Übermitteln einer pseudonymisierten Kennung im Zuge der lokalen Hinterlegung meines COVID-Tests, meines Genesen- oder Impfausweises in der luca App. Dies dient ausschließlich der Vorbeugung von Missbrauch, indem ein Dokument durch unterschiedliche Personen genutzt wird. Daher ist ein mehrfaches Importieren nicht möglich. Die Kennung eines Genesen- / Impfausweises wird durch die lokale Löschung des Dokuments in der App entfernt.</string>
+    <string name="document_import_consent">Hiermit erkläre ich mein Einverständnis gemäß Art. 9 (2) a) in Verbindung mit Art. 6 (1) 1 a) DSGVO zur Verarbeitung meiner Daten im Zuge der lokalen Hinterlegung meines COVID-Tests, meines Genesen- oder Impfausweises in der luca App. Die in dem Dokument hinterlegten Daten können mit meinen Angaben zu meinem Vor- und Nachnamen in der luca App abgeglichen werden. Ebenfalls bin ich einverstanden, dass eine pseudonymisierte Kennung auf dem luca Server hinterlegt wird. Dies dient ausschließlich der Vorbeugung von Missbrauch, sodass ein Dokument nicht durch unterschiedliche Personen genutzt werden kann. Die individuelle Kennung des Dokuments wird nach 72 Stunden ab Hinterlegung automatisch aus dem luca System gelöscht.</string>
     <string name="document_import_error_title">Das Dokument konnte nicht importiert werden</string>
     <string name="document_import_error_name_mismatch_description">Es konnte nicht validiert werden, dass dieses Dokument für dich erstellt wurde. Bitte prüfe, ob dein Name richtig in der App hinterlegt ist.</string>
     <string name="document_import_error_name_mismatch_including_children_description">Es konnte nicht validiert werden, dass dieses Dokument für dich oder deine Kinder erstellt wurde. Bitte prüfe, ob die Namen richtig in der App hinterlegt sind.</string>
@@ -386,7 +417,7 @@
     <string name="update_required_description">Deine luca App ist veraltet, bitte installiere die aktuelle Version.</string>
 
     <!-- Time -->
-    <string name="time_format">dd.MM.yyyy HH:mm</string>
+    <string name="time_format">dd.MM.yyyy – HH:mm</string>
     <string name="date_format">dd.MM.yyyy</string>
     <string name="time_seconds">Sekunden</string>
     <string name="time_minutes">Minuten</string>
@@ -409,6 +440,10 @@
         <item formatted="true" quantity="other">%d Tagen</item>
     </plurals>
 
+    <!-- Account tab -->
+    <string name="account_tab_key_for_health_dep">Schlüssel für Gesundheitsämter</string>
+    <string name="account_tab_data_request">Daten anfragen</string>
+
     <!-- Version details -->
     <string name="version_details_dialog_title">App Version</string>
     <string name="version_details_dialog_message">Du benutzt aktuell die Android App Version <xliff:g example="1.0.0" id="version_name">%1$s</xliff:g> (Release <xliff:g example="42" id="version_code">%2$d</xliff:g>).\n\nDen Quellcode findest du auf GitLab mit dem Commit Hash <xliff:g example="843cbaf2d9840624defe303c0c854385ee69d23f" id="commit_hash">%3$s</xliff:g>.</string>
@@ -424,16 +459,92 @@
     <string name="delete_account_dialog_message">Löschst du deinen Account, kannst du keine neuen Check-ins vornehmen und auf deine Historie zugreifen.\n\nDaten, die durch einen Check-in bei einem Betreiber verschlüsselt hinterlegt wurden, werden gemäß der Corona/COVID-19 Infektionsschutzverordnung nach 4 Wochen gelöscht.\n\nNach der Löschung des Accounts kannst du noch bis zu 4 Wochen nach dem letzten Check-in von dem Gesundheitsamt benachrichtigt werden.</string>
     <string name="delete_account_dialog_action">Löschen</string>
 
-    <!-- Updated Terms -->
-    <string name="updated_terms_description">Wir aktualisieren unsere Nutzungsbedingungen und Datenschutzerklärung.</string>
-    <string name="updated_terms_info">Tippe auf „ZUSTIMMEN”, um die aktualisierten <b><a href="https://www.luca-app.de/app-terms-and-conditions-2/">Nutzungsbedingungen</a></b> und die <b><a href="https://www.luca-app.de/app-privacy-policy/">Datenschutzerklärung</a></b> zu akzeptieren.</string>
-    <string name="updated_terms_button_agree">ZUSTIMMEN</string>
-    <string name="updated_terms_changes_action">Änderungen</string>
+    <!-- Data request -->
+    <string name="data_request_tracing_title">Kontaktnachverfolgung</string>
+    <string name="data_request_tracing_content_prefix">Deine Daten, die für die Kontaktnachverfolgung erhoben und verarbeitet wurden, sind lokal in deiner App und verschlüsselt auf dem luca-Server gespeichert. Der luca-Server wird von der Deutschen Telekom AG gehostet. Zertifizierung zu dieser finden Sie unter: https://open-telekom-cloud.com/de/sicherheit/datenschutz-compliance. Ebenfalls stellt die Bundesdruckerei Gruppe GmbH weitere IT-Infrastrukturleistungen, die eine sichere Übermittlung deiner Daten an die Gesundheitsämter ermöglichen. Unser Unterauftragnehmer neXenio GmbH übernimmt die Softwareentwicklung, Softwarewartungs- und Softwarebetriebsleistungen. Sowohl wir als auch die nexenio GmbH können zu keinem Zeitpunkt deine Daten entschlüsseln und in der Klarform einsehen. Bei der Registrierung verifizieren wir deine Telefonnummer durch automatisierten SMS-Versand. Hierfür erfolgt die Übermittlung der Telefonnummer an unsere SMS-Versanddienstleister:innen. Die aktuellen Empfänger kannst du unserer aktuellen Datenschutzerklärung entnehmen: https://www.luca-app.de/app-privacy-policy/\n\nNur du kannst deine Daten innerhalb deiner App einsehen, bearbeiten und löschen. Wenn du bereits bei einer luca Location eingecheckt und ein Gesundheitsamt diese bei der Betreiber:in angefragt hat, werden die zweifach verschlüsselten Daten von der Betreiber:in und anschließend von dem Gesundheitsamt entschlüsselt. Nur das Gesundheitsamt kann auf die entschlüsselten Daten im Zuge der Kontaktnachverfolgung zugreifen und deine Daten einsehen. Deine Daten geben wir mit Ausnahme der Gesundheitsämter (Rechtsgrundlage Art. 6 Abs. 1 lit. c DSGVO in Verbindung mit der jeweiligen Landesverordnung zur Bekämpfung von COVID-19 Infektionen, Infektionsschutzgesetz) grundsätzlich nicht an Dritte weiter.</string>
+    <string name="data_request_tracing_content_suffix">Alle Informationen über die Verarbeitungen, Zwecke, Rechtsgrundlagen und Löschfristen findest du in unserer Datenschutzerklärung: https://www.luca–app.de/app–privacy-policy/. Deine Daten werden nicht in Drittländer übermittelt. Automatisierte Entscheidungsfindungen sowie Profiling gemäß Art. 22 DSGVO werden von uns sowie den Auftragnehmern des luca Systems nicht getätigt.\n\nMöchtest du eine Auskunft über deine Daten erhalten, die wir durch deine eigene Kontaktaufnahme (z. B. bei Supportanfragen) bei uns als Klardaten von dir erhalten haben, wende dich bitte an unser Privacy Team unter privacy@culture4life.de. Bitte teile uns auch weitere Hinweise mit, die uns ermöglichen, dich zu identifizieren und dazugehörige Daten bei uns zu recherchieren. Wenn du mit uns über Social Media in Kontakt warst, sind weitere Hinweise wie deine E-Mail-Adresse oder dein Pseudonym, das du in den Social-Media-Kanälen verwendest, wichtig um dir die Auskunft erteilen zu können.\n\nDu hast gemäß Art. 77 DSGVO das Recht, dich bei der Aufsichtsbehörde zu beschweren, wenn du der Ansicht bist, dass die Verarbeitung deiner personenbezogenen Daten nicht rechtmäßig erfolgt. Die Anschrift der für unser Unternehmen zuständigen Aufsichtsbehörde lautet: Berliner Beauftragte für Datenschutz und Informationsfreiheit, Friedrichstr. 219, 10969 Berlin, Tel.: 030/13889-0, E-Mail: mailbox@datenschutz-berlin.de.</string>
+    <string name="data_request_documents_title">COVID Zertifikate</string>
+    <string name="data_request_documents_content_prefix">Innerhalb deiner luca App hast du die Möglichkeit ein Testergebnis, ein Impf- oder Genesenausweis zu hinterlegen. Deine dort hinterlegten und an die luca App übertragenen Daten verlassen dein Smartphone nicht. Deine Daten sind nur lokal in deiner App auf deinem Smartphone gespeichert. Eine Übermittlung an unsere Server, an den Betreiber oder an die Gesundheitsämter findet nicht statt. Deine Daten werden nicht an Dritte weitergegeben.\n\nIn der App werden nur die notwendigen Informationen zum Identitätsabgleich (Vor- und Nachname, Geburtsdatum, Impfdatum, Aussteller und Impfstoff) angezeigt. Weitere Daten können in dem Test oder Ausweisdokument enthalten sein, werden dir innerhalb der App jedoch nicht angezeigt. Alle in dem QR Code enthaltene Daten sind hier gelistet. Zur Vorbeugung von Missbrauch, sodass das Dokument nicht mehrfach von unterschiedlichen Personen in der luca App hinterlegt werden kann, wird von deiner luca App eine pseudonymisierte Kennung erstellt und an das luca System übertragen. Nur diese Kennung wird im luca System gespeichert. Diese können wir dir nicht zuordnen.</string>
+    <string name="data_request_documents_content_suffix">@string/data_request_tracing_content_suffix</string>
+    <string name="data_request_storage_location">Speicherort</string>
+    <string name="data_request_storage_location_local">Lokales Gerät</string>
+    <string name="data_request_storage_location_server">luca Server</string>
+    <string name="data_request_storage_location_local_and_server">Lokales Gerät und luca Server</string>
+    <string name="data_request_storage_period">Speicherdauer</string>
+    <string name="data_request_storage_period_contact_data">Löschung erfolgt 28 Tage nach der Löschung des Accounts oder jährlich am Ende jedes Jahres</string>
+    <string name="data_request_storage_period_location_data">28 Tage</string>
+    <string name="data_request_storage_period_document_data">Löschung erfolgt durch Löschung in der App oder sobald Gültigkeit überschritten ist</string>
 
-    <!-- Account tab -->
-    <string name="account_tab_key_for_health_dep">Schlüssel für Gesundheitsämter</string>
+    <string name="data_request_contact_data_title">Kontaktdaten</string>
+    <string name="data_request_contact_data_name">Name</string>
+    <string name="data_request_contact_data_address">Adresse</string>
+    <string name="data_request_contact_data_phone_number">Telefonnummer</string>
+    <string name="data_request_contact_data_mail">E-Mail Adresse</string>
 
-    <!-- key for health department view -->
+    <string name="data_request_location_data_title">Aufenthaltsdaten</string>
+    <string name="data_request_check_in_name">Location</string>
+    <string name="data_request_check_in_time">Check-in Zeit</string>
+    <string name="data_request_check_in_duration">Dauer</string>
+    <string name="data_request_check_in_trace_id">Trace ID</string>
+    <string name="data_request_check_in_children">Kinder</string>
+    <string name="data_request_check_in_guests">Gäste</string>
+    <string name="data_request_check_in_additional_data">Extra Daten (<xliff:g example="Table number" id="additionalDataKey">%1$s</xliff:g>)</string>
+    <string name="data_request_check_in_data_accessed">Anfragen von Gesundheitsämtern</string>
+
+    <string name="data_request_document_name">Name</string>
+    <string name="data_request_document_birthdate">Geburtsdatum</string>
+    <string name="data_request_document_type">Zertifikatstyp</string>
+    <string name="data_request_document_type_green_certificate">Green Certificate</string>
+    <string name="data_request_document_type_vaccination">Impfzertifikat</string>
+    <string name="data_request_document_type_test">Testzertifikat</string>
+    <string name="data_request_document_type_recovery">Genesenenzertifikat</string>
+    <string name="data_request_document_type_appointment">Termin</string>
+    <string name="data_request_document_hash">Kennnummer</string>
+    <string name="data_request_document_data">QR-Code Daten (enthält deine Daten in kodierter Form)</string>
+
+    <string name="data_request_green_cert_vaccination_tg">Disease or agent targeted "tg"</string>
+    <string name="data_request_green_cert_vaccination_vp">Vaccine or prophylaxis "vp"</string>
+    <string name="data_request_green_cert_vaccination_mp">Vaccine medicinal product "mp"</string>
+    <string name="data_request_green_cert_vaccination_ma">Marketing Authorization Holder - if no MAH present, then manufacturer "ma"</string>
+    <string name="data_request_green_cert_vaccination_dn">Dose Number "dn"</string>
+    <string name="data_request_green_cert_vaccination_sd">Total Series of Doses "sd"</string>
+    <string name="data_request_green_cert_vaccination_dt">ISO8601 complete date: Date of Vaccination "dt"</string>
+    <string name="data_request_green_cert_vaccination_co">Country of Vaccination "co"</string>
+    <string name="data_request_green_cert_vaccination_is">Certificate Issuer "is"</string>
+    <string name="data_request_green_cert_vaccination_ci">Unique Certificate Identifier, UVCI "ci"</string>
+    <string name="data_request_green_cert_recovery_tg">@string/data_request_green_cert_vaccination_tg</string>
+    <string name="data_request_green_cert_recovery_fr">ISO 8601 complete date of first positive NAA test result "fr"</string>
+    <string name="data_request_green_cert_recovery_co">Country of Vaccination "co"</string>
+    <string name="data_request_green_cert_recovery_df">ISO 8601 complete date: Certificate Valid From "df"</string>
+    <string name="data_request_green_cert_recovery_du">ISO 8601 complete date: Certificate Valid Until "du"</string>
+    <string name="data_request_green_cert_recovery_is">@string/data_request_green_cert_vaccination_is</string>
+    <string name="data_request_green_cert_recovery_ci">@string/data_request_green_cert_vaccination_ci</string>
+    <string name="data_request_green_cert_test_tg">Targeted disease "tg"</string>
+    <string name="data_request_green_cert_test_tt">Type of test "tt"</string>
+    <string name="data_request_green_cert_test_nm">NAA Test Name "nm"</string>
+    <string name="data_request_green_cert_test_ma">RAT Test name and manufacturer "ma"</string>
+    <string name="data_request_green_cert_test_sc">Date/Time of Sample Collection "sc"</string>
+    <string name="data_request_green_cert_test_dr">Date/Time of Test Result "dr"</string>
+    <string name="data_request_green_cert_test_tr">Test Result "tr"</string>
+    <string name="data_request_green_cert_test_tc">Testing Centre "tc"</string>
+    <string name="data_request_green_cert_test_co">Country of Test "co"</string>
+    <string name="data_request_green_cert_test_is">@string/data_request_green_cert_vaccination_is</string>
+    <string name="data_request_green_cert_test_ci">@string/data_request_green_cert_vaccination_ci</string>
+
+    <string name="data_request_test_type">Test Typ</string>
+    <string name="data_request_test_result">Resultat</string>
+    <string name="data_request_test_date">Datum</string>
+    <string name="data_request_test_provider">Aussteller</string>
+    <string name="data_request_test_lab">Labor</string>
+    <string name="data_request_test_doctor">Arzt</string>
+
+    <string name="data_request_appointment_type">@string/data_request_test_type</string>
+    <string name="data_request_appointment_lab">@string/data_request_test_lab</string>
+    <string name="data_request_appointment_date">@string/data_request_test_date</string>
+    <string name="data_request_appointment_address">Adresse</string>
+    <string name="data_request_appointment_qr_code">QR-Code</string>
+
+    <!-- Key for health departments -->
     <string name="key_health_department_title">Tagesschlüssel</string>
     <string name="key_health_department_transfer_key">Tagesschlüssel</string>
     <string name="key_health_department_date">@string/document_issued_at</string>
@@ -441,5 +552,11 @@
     <string name="key_health_department_signed">Signiert:</string>
     <string name="key_health_department_download_cert">Zertifikatskette herunterladen</string>
     <string name="key_health_department_description">Jeden Tag wird von einem der Gesundheitsämter, die luca nutzen, ein neuer Tagesschlüssel erstellt. Diesen Schlüssel benötigen alle Gesundheitsämter für die Entschlüsselung von Check-in-Datensätzen. Hier kannst du sehen, welches Gesundheitsamt den aktuellen Schlüssel erstellt hat.</string>
+
+    <!-- Updated terms -->
+    <string name="updated_terms_description">Wir aktualisieren unsere Nutzungsbedingungen und Datenschutzerklärung.</string>
+    <string name="updated_terms_info">Tippe auf „ZUSTIMMEN”, um die aktualisierten <b><a href="https://www.luca-app.de/app-terms-and-conditions-2/">Nutzungsbedingungen</a></b> und die <b><a href="https://www.luca-app.de/app-privacy-policy/">Datenschutzerklärung</a></b> zu akzeptieren.</string>
+    <string name="updated_terms_button_agree">ZUSTIMMEN</string>
+    <string name="updated_terms_changes_action">Änderungen</string>
 
 </resources>

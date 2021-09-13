@@ -22,7 +22,7 @@ abstract class BaseQrCodeViewModel(application: Application) : BaseViewModel(app
     protected var notificationManager: LucaNotificationManager =
         this.application.notificationManager
 
-    private val scanner = BarcodeScanning.getClient()
+    private val scanner by lazy { BarcodeScanning.getClient() }
 
     private var imageProcessingDisposable: Disposable? = null
 
@@ -52,7 +52,7 @@ abstract class BaseQrCodeViewModel(application: Application) : BaseViewModel(app
         return Maybe.fromCallable { imageProxy.image }
             .filter { canProcessImage() }
             .map { image ->
-                InputImage.fromMediaImage(image, imageProxy.imageInfo.rotationDegrees)
+                InputImage.fromMediaImage(image!!, imageProxy.imageInfo.rotationDegrees)
             }
             .flatMapObservable { image -> detectBarcodes(image) }
             .flatMapMaybe { barcode -> Maybe.fromCallable { barcode.rawValue } }
@@ -75,4 +75,5 @@ abstract class BaseQrCodeViewModel(application: Application) : BaseViewModel(app
     companion object {
         const val BARCODE_DATA_KEY = "barcode_data"
     }
+
 }

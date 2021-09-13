@@ -34,7 +34,7 @@ class ObservableUtilTest {
             .test()
             .assertError(IllegalStateException::class.java)
 
-        assertEquals(1 + retries, subscriptions);
+        assertEquals(1 + retries, subscriptions)
     }
 
     @Test

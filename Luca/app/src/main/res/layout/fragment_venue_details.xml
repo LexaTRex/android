@@ -46,31 +46,31 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:paddingEnd="@dimen/spacing_default"
-        tools:text="1"
         android:textColor="@android:color/black"
         android:textSize="@dimen/font_size_default"
         android:textStyle="bold"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="@id/childAddingIconImageView"
         app:layout_constraintEnd_toStartOf="@id/childAddingIconImageView"
-        app:layout_constraintTop_toTopOf="@id/childAddingIconImageView" />
+        app:layout_constraintTop_toTopOf="@id/childAddingIconImageView"
+        tools:text="1" />
 
     <ImageView
         android:id="@+id/childAddingIconImageView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:paddingEnd="@dimen/spacing_default"
-        android:paddingTop="@dimen/spacing_default"
-        android:paddingBottom="@dimen/spacing_default"
         android:layout_marginEnd="@dimen/spacing_default"
         android:contentDescription="@string/venue_children_add"
+        android:paddingTop="@dimen/spacing_default"
+        android:paddingEnd="@dimen/spacing_default"
+        android:paddingBottom="@dimen/spacing_default"
         android:scaleType="fitCenter"
         android:src="@drawable/ic_add_child"
-        app:tint="@android:color/black"
         app:layout_constraintBottom_toBottomOf="@id/headingTextViewsLayout"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="1"
-        app:layout_constraintTop_toTopOf="@id/headingTextViewsLayout" />
+        app:layout_constraintTop_toTopOf="@id/headingTextViewsLayout"
+        app:tint="@android:color/black" />
 
     <View
         android:id="@+id/headingSeparatorView"
@@ -82,12 +82,22 @@
     <TextView
         android:id="@+id/subHeadingTextView"
         style="@style/TextAppearance.Luca.Headline3"
-        android:text="@string/venue_description"
+        android:text="@string/venue_checked_in"
         android:textColor="@android:color/black"
-        app:layout_constraintBottom_toTopOf="@+id/checkInDurationHeadingTextView"
+        android:textSize="@dimen/font_size_default_larger"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/headingSeparatorView"
+        app:layout_constraintVertical_bias="0" />
+
+    <TextView
+        android:id="@+id/checkInTimeTextView"
+        style="@style/TextAppearance.Luca.Headline3"
+        android:text="@string/venue_check_in_time"
+        android:textColor="@android:color/black"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/subHeadingTextView"
         app:layout_constraintVertical_bias="0" />
 
 
@@ -105,7 +115,7 @@
         android:textColor="@android:color/black"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/subHeadingTextView" />
+        app:layout_constraintTop_toBottomOf="@id/checkInTimeTextView" />
 
     <TextView
         android:id="@+id/additionalDataValueTextView"
@@ -123,19 +133,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/additionalDataTitleTextView" />
 
-    <TextView
-        android:id="@+id/checkInDurationHeadingTextView"
-        style="@style/TextAppearance.Luca.Body2"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/spacing_default"
-        android:layout_marginEnd="@dimen/spacing_default"
-        android:gravity="center"
-        android:text="@string/venue_current_stay_timer_heading"
-        android:textColor="@android:color/black"
-        app:layout_constraintBottom_toTopOf="@id/checkInDurationTextView"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
 
     <TextView
         android:id="@+id/checkInDurationTextView"
@@ -147,9 +144,8 @@
         android:gravity="center"
         android:text="00:00:00"
         android:textColor="@android:color/black"
-        android:textSize="@dimen/font_size_xlarge"
+        android:textSize="@dimen/font_size_xxlarge"
         android:typeface="monospace"
-        app:layout_constraintBottom_toTopOf="@id/checkoutActionWrapper"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/additionalDataValueTextView"
@@ -171,7 +167,6 @@
             android:labelFor="@id/automaticCheckoutToggle"
             android:text="@string/venue_automatic_check_out"
             android:textColor="@android:color/black"
-            android:visibility="gone"
             app:layout_constrainedWidth="true"
             app:layout_constraintBottom_toBottomOf="@id/automaticCheckoutToggle"
             app:layout_constraintEnd_toStartOf="@id/automaticCheckoutToggle"
@@ -181,19 +176,16 @@
 
         <ImageView
             android:id="@+id/automaticCheckoutInfoImageView"
-            android:layout_width="20dp"
-            android:layout_height="20dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/spacing_default"
             android:accessibilityTraversalAfter="@id/automaticCheckoutToggle"
-            android:alpha="0.5"
             android:contentDescription="@string/additional_details_content_description"
             android:scaleType="fitCenter"
-            android:src="@drawable/ic_information_outline"
-            android:visibility="gone"
+            android:src="@drawable/ic_information"
             app:layout_constraintBottom_toBottomOf="@id/automaticCheckoutToggle"
             app:layout_constraintStart_toEndOf="@id/automaticCheckOutTextView"
-            app:layout_constraintTop_toTopOf="@id/automaticCheckoutToggle"
-            app:tint="@android:color/black" />
+            app:layout_constraintTop_toTopOf="@id/automaticCheckoutToggle" />
 
         <com.google.android.material.switchmaterial.SwitchMaterial
             android:id="@+id/automaticCheckoutToggle"
@@ -207,8 +199,8 @@
             app:layout_constraintBottom_toTopOf="@id/slideToActView"
             app:layout_constraintEnd_toEndOf="@id/slideToActView"
             app:switchPadding="@dimen/spacing_large"
-            app:thumbTint="@drawable/selector_switch_thumb"
-            app:trackTint="@drawable/selector_switch_track" />
+            app:thumbTint="@drawable/selector_switch_thumb_on_light_background"
+            app:trackTint="@drawable/selector_switch_track_on_light_background" />
 
         <com.ncorti.slidetoact.SlideToActView
             android:id="@+id/slideToActView"
@@ -216,14 +208,16 @@
             android:layout_height="wrap_content"
             android:layout_margin="@dimen/spacing_large"
             android:contentDescription="@string/venue_check_out_content_description"
+            app:area_margin="0dp"
             app:bump_vibration="50"
             app:complete_icon="@drawable/ic_sync"
-            app:inner_color="@android:color/black"
+            app:inner_color="@android:color/white"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:outer_color="@android:color/white"
-            app:text="@string/venue_check_in_action"
+            app:outer_color="#65ffffff"
+            app:slider_icon_color="@android:color/black"
+            app:text="@string/venue_check_out_action"
             app:text_appearance="@style/TextAppearance.Luca.SlideToActView" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>

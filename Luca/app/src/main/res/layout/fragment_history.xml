@@ -11,23 +11,18 @@
         style="@style/TextAppearance.Luca.Headline2"
         android:layout_margin="@dimen/spacing_default"
         android:text="@string/navigation_history"
-        app:layout_constraintEnd_toStartOf="@id/accessedDataImageView"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <ImageView
-        android:id="@+id/accessedDataImageView"
-        style="@style/MenuImageView"
-        android:contentDescription="@string/accessed_data_heading"
-        android:src="@drawable/ic_eye"
-        app:layout_constraintBottom_toBottomOf="@id/headingTextView"
-        app:layout_constraintEnd_toStartOf="@id/menuImageView"
-        app:layout_constraintTop_toTopOf="@id/headingTextView" />
-
-    <ImageView
-        android:id="@+id/menuImageView"
-        style="@style/MenuImageView"
+        android:id="@+id/deleteHistoryImageView"
+        android:layout_width="24dp"
+        android:layout_height="0dp"
+        android:layout_marginEnd="@dimen/spacing_default"
         android:contentDescription="@string/menu_more_content_description"
+        android:src="@drawable/ic_bin_icon_white"
+        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="@id/headingTextView"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@id/headingTextView" />
@@ -43,6 +38,7 @@
         android:id="@+id/emptyTitleTextView"
         style="@style/EmptyStateTitleTextView"
         android:text="@string/history_empty_title"
+        android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/headingSeparatorView" />
@@ -50,6 +46,7 @@
     <TextView
         android:id="@+id/emptyDescriptionTextView"
         style="@style/EmptyStateDescriptionTextView"
+        android:visibility="gone"
         tools:text="@string/history_empty_description"
         app:layout_constraintEnd_toEndOf="@id/emptyTitleTextView"
         app:layout_constraintStart_toStartOf="@id/emptyTitleTextView"
@@ -58,11 +55,12 @@
     <ImageView
         android:id="@+id/emptyImageView"
         style="@style/EmptyStateImageView"
+        android:visibility="gone"
         app:layout_constraintBottom_toTopOf="@id/primaryActionButton"
         app:layout_constraintEnd_toEndOf="@id/emptyDescriptionTextView"
         app:layout_constraintStart_toStartOf="@id/emptyDescriptionTextView"
         app:layout_constraintTop_toBottomOf="@id/emptyDescriptionTextView"
-        app:layout_constraintVertical_bias="0.25" />
+        app:layout_constraintVertical_bias="0.35" />
 
     <ListView
         android:id="@+id/historyListView"
@@ -74,6 +72,7 @@
         android:fadingEdgeLength="@dimen/spacing_large"
         android:listSelector="@android:color/transparent"
         android:requiresFadingEdge="vertical"
+        android:visibility="gone"
         app:layout_constraintBottom_toTopOf="@id/primaryActionButton"
         app:layout_constraintTop_toBottomOf="@id/headingSeparatorView"
         tools:listitem="@layout/history_list_item" />
@@ -83,6 +82,7 @@
         style="@style/Button.Luca.PrimaryActionButton"
         android:layout_margin="@dimen/spacing_default"
         android:text="@string/history_share"
+        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />

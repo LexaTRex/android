@@ -7,6 +7,7 @@ import de.culture4life.luca.network.pojo.DailyKeyPairIssuer
 import de.culture4life.luca.ui.BaseViewModel
 import de.culture4life.luca.ui.ViewError
 import io.reactivex.rxjava3.core.Completable
+import io.reactivex.rxjava3.core.Single
 
 class HealthDepartmentKeyViewModel(app: Application) : BaseViewModel(app) {
 
@@ -39,31 +40,27 @@ class HealthDepartmentKeyViewModel(app: Application) : BaseViewModel(app) {
         }
     }
 
-    fun writeContentToUri(target: Uri): Completable {
-        return currentDailyKeyPairIssuer?.let { dailyKeyPairIssuer ->
-            application.cryptoManager.generateDailyKeyPairString(dailyKeyPairIssuer)
-                .flatMapCompletable { writeTextCompletable(target, it) }
-                .doOnError {
-                    addError(
-                        ViewError.Builder(application)
-                            .withCause(it)
-                            .removeWhenShown()
-                            .build()
-                    )
-                }
-        } ?: Completable.error(IllegalStateException("dailyKeyPair can not be null"))
-    }
-
-    private fun writeTextCompletable(target: Uri, string: StringBuilder): Completable {
-        return Completable.fromAction {
-            application.contentResolver?.openOutputStream(target)?.use {
-                it.write(string.toString().toByteArray())
+    fun exportDailyKey(uri: Single<Uri>) {
+        val content = Single.fromCallable { currentDailyKeyPairIssuer!! }
+            .map { dailyKeyPairIssuer ->
+                StringBuilder()
+                    .append("Public key:\n")
+                    .append(dailyKeyPairIssuer.dailyKeyPair.publicKey + "\n\n")
+                    .append("Signature:\n")
+                    .append(dailyKeyPairIssuer.dailyKeyPair.signature + "\n\n")
+                    .append("Issuer:\n")
+                    .append(dailyKeyPairIssuer.issuer.name + "\n\n")
+                    .append("Issuer signing key:\n")
+                    .append(dailyKeyPairIssuer.issuer.publicHDSKP)
+                    .toString()
             }
-        }
+
+        export(uri, content)
     }
 
     private fun setDailyKeyPairIssuer(dailyKeyPairIssuer: DailyKeyPairIssuer) {
         currentDailyKeyPairIssuer = dailyKeyPairIssuer
         dailyKeyPairLiveData.postValue(currentDailyKeyPairIssuer)
     }
+
 }

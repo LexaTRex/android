@@ -1,5 +1,7 @@
 package de.culture4life.luca.location;
 
+import static android.location.LocationManager.PROVIDERS_CHANGED_ACTION;
+
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -9,6 +11,7 @@ import android.content.IntentFilter;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresPermission;
+import androidx.core.location.LocationManagerCompat;
 
 import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.GeofencingClient;
@@ -33,8 +36,6 @@ import io.reactivex.rxjava3.core.Single;
 import io.reactivex.rxjava3.processors.PublishProcessor;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 import timber.log.Timber;
-
-import static android.location.LocationManager.PROVIDERS_CHANGED_ACTION;
 
 public class GeofenceManager extends Manager {
 
@@ -86,13 +87,18 @@ public class GeofenceManager extends Manager {
         });
     }
 
+    private boolean isLocationEnabled(Context context) {
+        android.location.LocationManager locationManager = (android.location.LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
+        return locationManager != null && LocationManagerCompat.isLocationEnabled(locationManager);
+    }
+
     /**
      * The Google Play Services are required for the current geofencing implementation, which are
      * not available on every device.
      */
     public Single<Boolean> isGeofencingSupported() {
         return Maybe.fromCallable(() -> geofenceClient)
-                .map(geofencingClient -> true)
+                .map(geofencingClient -> isLocationEnabled(context))
                 .defaultIfEmpty(false);
     }
 

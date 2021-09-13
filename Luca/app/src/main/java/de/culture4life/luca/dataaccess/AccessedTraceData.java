@@ -3,6 +3,8 @@ package de.culture4life.luca.dataaccess;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
+import de.culture4life.luca.network.pojo.NotifyingHealthDepartment;
+
 /**
  * Model storing recent trace IDs and their computed {@link #hashedTraceId}, allowing the Guest app
  * to match them to hashed trace IDs accessed by a health department. This allows users to be
@@ -14,6 +16,11 @@ import com.google.gson.annotations.SerializedName;
  */
 public class AccessedTraceData {
 
+    /**
+     * The number of available warning levels, starting from 1
+     */
+    public static final int NUMBER_OF_WARNING_LEVELS = 4;
+
     @Expose
     @SerializedName("hashedTracingId")
     private String hashedTraceId;
@@ -23,16 +30,16 @@ public class AccessedTraceData {
     private String traceId;
 
     @Expose
+    @SerializedName("warningLevel")
+    private int warningLevel;
+
+    @Expose
     @SerializedName("locationName")
     private String locationName;
 
     @Expose
-    @SerializedName("healthDepartmentId")
-    private String healthDepartmentId;
-
-    @Expose
-    @SerializedName("healthDepartmentName")
-    private String healthDepartmentName;
+    @SerializedName("healthDepartment")
+    private NotifyingHealthDepartment healthDepartment;
 
     @Expose
     @SerializedName("accessTimestamp")
@@ -45,6 +52,10 @@ public class AccessedTraceData {
     @Expose
     @SerializedName("checkOutTimestamp")
     private long checkOutTimestamp;
+
+    @Expose
+    @SerializedName("isNew")
+    private boolean isNew;
 
     public String getHashedTraceId() {
         return hashedTraceId;
@@ -62,6 +73,14 @@ public class AccessedTraceData {
         this.traceId = traceId;
     }
 
+    public int getWarningLevel() {
+        return warningLevel;
+    }
+
+    public void setWarningLevel(int warningLevel) {
+        this.warningLevel = warningLevel;
+    }
+
     public String getLocationName() {
         return locationName;
     }
@@ -70,20 +89,12 @@ public class AccessedTraceData {
         this.locationName = locationName;
     }
 
-    public String getHealthDepartmentId() {
-        return healthDepartmentId;
+    public NotifyingHealthDepartment getHealthDepartment() {
+        return healthDepartment;
     }
 
-    public void setHealthDepartmentId(String healthDepartmentId) {
-        this.healthDepartmentId = healthDepartmentId;
-    }
-
-    public String getHealthDepartmentName() {
-        return healthDepartmentName;
-    }
-
-    public void setHealthDepartmentName(String healthDepartmentName) {
-        this.healthDepartmentName = healthDepartmentName;
+    public void setHealthDepartment(NotifyingHealthDepartment healthDepartment) {
+        this.healthDepartment = healthDepartment;
     }
 
     public long getAccessTimestamp() {
@@ -110,17 +121,26 @@ public class AccessedTraceData {
         this.checkOutTimestamp = checkOutTimestamp;
     }
 
+    public void setIsNew(boolean isNew) {
+        this.isNew = isNew;
+    }
+
+    public boolean getIsNew() {
+        return isNew;
+    }
+
     @Override
     public String toString() {
         return "AccessedTraceData{" +
                 "hashedTraceId='" + hashedTraceId + '\'' +
                 ", traceId='" + traceId + '\'' +
+                ", warningLevel=" + warningLevel +
                 ", locationName='" + locationName + '\'' +
-                ", healthDepartmentId='" + healthDepartmentId + '\'' +
-                ", healthDepartmentName='" + healthDepartmentName + '\'' +
+                ", healthDepartment=" + healthDepartment +
                 ", accessTimestamp=" + accessTimestamp +
                 ", checkInTimestamp=" + checkInTimestamp +
                 ", checkOutTimestamp=" + checkOutTimestamp +
+                ", isNew=" + isNew +
                 '}';
     }
 

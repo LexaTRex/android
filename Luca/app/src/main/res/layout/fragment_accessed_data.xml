@@ -4,32 +4,45 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="de.culture4life.luca.ui.history.HistoryFragment">
+    tools:context=".ui.accesseddata.AccessedDataFragment">
 
-    <TextView
-        android:id="@+id/headingTextView"
-        style="@style/TextAppearance.Luca.Headline2"
-        android:layout_margin="@dimen/spacing_default"
-        android:text="@string/accessed_data_heading"
-        app:layout_constraintEnd_toEndOf="parent"
+    <LinearLayout
+        android:id="@+id/headingTextViewsLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/spacing_small"
+        android:layout_marginTop="@dimen/spacing_default"
+        android:layout_marginEnd="32dp"
+        android:orientation="horizontal"
+        app:layout_constraintHorizontal_bias="0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:id="@+id/headingTextView"
+            style="@style/TextAppearance.Luca.Headline2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:text="@string/accessed_data_heading" />
+
+    </LinearLayout>
 
     <ImageView
         android:id="@+id/menuImageView"
         style="@style/MenuImageView"
         android:contentDescription="@string/menu_more_content_description"
         android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="@id/headingTextView"
+        app:layout_constraintBottom_toBottomOf="@id/headingTextViewsLayout"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@id/headingTextView" />
+        app:layout_constraintTop_toTopOf="@id/headingTextViewsLayout" />
 
     <View
         android:id="@+id/headingSeparatorView"
         style="@style/HeaderSeparatorView"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/headingTextView" />
+        app:layout_constraintTop_toBottomOf="@id/headingTextViewsLayout" />
 
     <TextView
         android:id="@+id/emptyTitleTextView"

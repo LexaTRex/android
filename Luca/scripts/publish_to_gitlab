@@ -12,6 +12,7 @@ echo "Pushing version $VERSION from branch $CURRENT_BRANCH to Gitlab master"
 sleep 3
 
 cd ..
+git branch -D $DEPLOYMENT_BRANCH
 git remote remove public-origin
 git remote add public-origin $GITLAB_REPO
 git pull public-origin master:$DEPLOYMENT_BRANCH

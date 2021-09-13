@@ -5,9 +5,12 @@
     <dimen name="spacing_large">16dp</dimen>
     <dimen name="font_size_small">12sp</dimen>
     <dimen name="font_size_default">14sp</dimen>
+    <dimen name="font_size_default_larger">16sp</dimen>
     <dimen name="font_size_large">20sp</dimen>
     <dimen name="font_size_xlarge">40sp</dimen>
+    <dimen name="font_size_xxlarge">50sp</dimen>
     <dimen name="qr_card_size">160dp</dimen>
+    <dimen name="camera_box_size">320dp</dimen>
 
     <dimen name="my_luca_list_item_column_percentage">0.4</dimen>
 </resources>

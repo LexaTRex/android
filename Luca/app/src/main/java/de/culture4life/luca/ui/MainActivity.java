@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.view.View;
 
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.navigation.ui.AppBarConfiguration;
@@ -18,8 +19,10 @@ import de.culture4life.luca.R;
 import de.culture4life.luca.notification.LucaNotificationManager;
 import de.culture4life.luca.ui.registration.RegistrationActivity;
 import five.star.me.FiveStarMe;
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Single;
+import io.reactivex.rxjava3.schedulers.Schedulers;
 import timber.log.Timber;
 
 public class MainActivity extends BaseActivity {
@@ -36,15 +39,17 @@ public class MainActivity extends BaseActivity {
         setupKeyboardListener();
         processIntent(getIntent());
 
-        FiveStarMe.with(this)
+        Completable.fromAction(() -> FiveStarMe.with(this)
                 .setInstallDays(2)
                 .setLaunchTimes(7)
-                .monitor();
+                .monitor())
+            .subscribeOn(Schedulers.io())
+            .subscribe();
     }
 
     private void initializeNavigation() {
         AppBarConfiguration appBarConfiguration = new AppBarConfiguration.Builder(
-                R.id.qrCodeFragment, R.id.myLucaFragment, R.id.historyFragment, R.id.accountFragment
+                R.id.checkInFragment, R.id.myLucaFragment, R.id.accountFragment
         ).build();
         NavHostFragment navHostFragment = (NavHostFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.navigationHostFragment);
@@ -57,10 +62,10 @@ public class MainActivity extends BaseActivity {
         bottomNavigationView.setOnNavigationItemSelectedListener(item -> {
             int currentDestinationId = navigationController.getCurrentDestination().getId();
             if (currentDestinationId != item.getItemId()) {
-                if (item.getItemId() == R.id.qrCodeFragment) {
-                    int destinationId = getCheckInScreenDestinationId().blockingGet();
-                    if (currentDestinationId != destinationId) {
-                        navigationController.navigate(destinationId);
+                if (item.getItemId() == R.id.checkInFragment) {
+                    int checkInDestinationId = getCheckInScreenDestinationId().blockingGet();
+                    if (currentDestinationId != checkInDestinationId) {
+                        NavigationUI.onNavDestinationSelected(item, navigationController);
                     }
                 } else {
                     NavigationUI.onNavDestinationSelected(item, navigationController);
@@ -116,6 +121,7 @@ public class MainActivity extends BaseActivity {
     protected void onResume() {
         super.onResume();
         showRegistrationIfRequired();
+        updateHistoryBadge();
     }
 
     private void showRegistrationIfRequired() {
@@ -146,9 +152,31 @@ public class MainActivity extends BaseActivity {
             } else if (isHostingMeeting) {
                 return R.id.meetingFragment;
             } else {
-                return R.id.qrCodeFragment;
+                return R.id.checkInFragment;
             }
         });
+    }
+
+    /**
+     * Refresh the history badge indicator for access notifications
+     */
+    public void updateHistoryBadge() {
+        activityDisposable.add(application.getDataAccessManager()
+                .initialize(application)
+                .andThen(application.getDataAccessManager().hasNewNotifications())
+                .onErrorReturnItem(false)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(this::setHistoryBadge)
+        );
+    }
+
+    private void setHistoryBadge(boolean enabled) {
+        if (enabled) {
+            bottomNavigationView.getOrCreateBadge(R.id.historyFragment).setBackgroundColor(ContextCompat.getColor(this, R.color.highlightColor));
+        } else {
+            bottomNavigationView.removeBadge(R.id.historyFragment);
+        }
     }
 
 }

@@ -6,8 +6,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
 
-import java.net.UnknownHostException;
-
 import de.culture4life.luca.R;
 import de.culture4life.luca.util.ThrowableUtil;
 import hu.akarnokd.rxjava3.debug.RxJavaAssemblyException;
@@ -140,7 +138,7 @@ public class ViewError {
     private static String createTitle(@NonNull Throwable throwable, @NonNull Context context) {
         if (isGenericException(throwable)) {
             return context.getString(R.string.error_generic_title);
-        } else if (ThrowableUtil.isCause(UnknownHostException.class, throwable)) {
+        } else if (ThrowableUtil.isNetworkError(throwable)) {
             return context.getString(R.string.error_no_internet_connection_title);
         } else {
             String type = throwable.getClass().getSimpleName();
@@ -149,7 +147,7 @@ public class ViewError {
     }
 
     private static String createDescription(@NonNull Throwable throwable, @NonNull Context context) {
-        if (ThrowableUtil.isCause(UnknownHostException.class, throwable)) {
+        if (ThrowableUtil.isNetworkError(throwable)) {
             return context.getString(R.string.error_no_internet_connection_description);
         } else {
             String description = getMessagesFromThrowableAndCauses(throwable);

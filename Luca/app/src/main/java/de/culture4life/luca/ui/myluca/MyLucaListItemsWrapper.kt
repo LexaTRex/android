@@ -8,9 +8,19 @@ data class MyLucaListItemsWrapper(
     val sectionHeader: String? = null,
     var isChildSection: Boolean = false
 ) {
-    constructor(sectionHeader: String, isChildSection: Boolean) : this(listOf(), 0, sectionHeader, isChildSection)
 
-    constructor(item: MyLucaListItem, isChildSection: Boolean) : this(listOf(item), item.timestamp, isChildSection = isChildSection)
+    constructor(sectionHeader: String, isChildSection: Boolean) : this(
+        listOf(),
+        0,
+        sectionHeader,
+        isChildSection
+    )
+
+    constructor(item: MyLucaListItem, isChildSection: Boolean) : this(
+        listOf(item),
+        item.timestamp,
+        isChildSection = isChildSection
+    )
 
     constructor(items: List<MyLucaListItem>, isChildSection: Boolean) : this(
         items.sortedBy { it.resultTimestamp },
@@ -25,4 +35,5 @@ data class MyLucaListItemsWrapper(
     fun sectionDrawable(): Int {
         return if (isChildSection) R.drawable.ic_child else 0
     }
+
 }

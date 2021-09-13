@@ -1,5 +1,7 @@
 package de.culture4life.luca.dataaccess;
 
+import androidx.annotation.NonNull;
+
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
@@ -29,6 +31,15 @@ public class AccessedData {
 
     public void addData(List<AccessedTraceData> traceIds) {
         this.traceData.addAll(traceIds);
+    }
+
+    public AccessedData markAsNotNew(@NonNull String traceId, int warningLevel) {
+        for (AccessedTraceData accessedTraceData : getTraceData()) {
+            if (accessedTraceData.getTraceId().equals(traceId) && accessedTraceData.getWarningLevel() == warningLevel) {
+                accessedTraceData.setIsNew(false);
+            }
+        }
+        return this;
     }
 
     @Override

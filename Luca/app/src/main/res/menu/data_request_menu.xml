@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/tracingDataRequestMenuItem"
+        android:title="@string/data_request_tracing_title"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/documentsDataRequestMenuItem"
+        android:title="@string/data_request_documents_title"
+        app:showAsAction="never" />
+
+</menu>

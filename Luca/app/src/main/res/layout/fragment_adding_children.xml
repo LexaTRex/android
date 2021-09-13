@@ -1,14 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    android:id="@+id/layout"
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/checked_in_light_green_gradient">
 
-    <LinearLayout
+    <RelativeLayout
         android:id="@+id/headingTextViewsLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -25,15 +24,15 @@
             android:id="@+id/backImageView"
             android:layout_width="32dp"
             android:layout_height="32dp"
-            android:padding="4dp"
-            android:layout_gravity="center"
+            android:layout_centerVertical="true"
             android:layout_marginEnd="@dimen/spacing_small"
             android:contentDescription="@string/action_finish"
+            android:padding="4dp"
             android:scaleType="fitCenter"
             android:src="@drawable/ic_back" />
 
         <TextView
-            android:id="@+id/title"
+            android:id="@+id/headingTextView"
             style="@style/TextAppearance.Luca.Headline2"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -41,7 +40,7 @@
             android:text="@string/venue_children_title"
             android:textColor="@android:color/black" />
 
-    </LinearLayout>
+    </RelativeLayout>
 
     <View
         android:id="@+id/headingSeparatorView"
@@ -52,7 +51,7 @@
 
     <TextView
         android:id="@+id/childAddingDescriptionTextView"
-        style="@style/TextAppearance.Luca.Headline3"
+        style="@style/TextAppearance.Luca.Body1"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/spacing_default"
@@ -61,6 +60,19 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/headingSeparatorView" />
+
+    <ImageView
+        android:id="@+id/emptyImageView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/g_child"
+        android:visibility="gone"
+        app:layout_constrainedHeight="true"
+        app:layout_constraintBottom_toTopOf="@id/primaryActionButton"
+        app:layout_constraintEnd_toEndOf="@id/childAddingDescriptionTextView"
+        app:layout_constraintStart_toStartOf="@id/childAddingDescriptionTextView"
+        app:layout_constraintTop_toBottomOf="@id/childAddingDescriptionTextView"
+        app:layout_constraintVertical_bias="0.25" />
 
     <ListView
         android:id="@+id/childListView"
@@ -80,16 +92,12 @@
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/primaryActionButton"
-        style="@style/Button.Luca.SecondaryActionButton"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="@dimen/spacing_large"
+        style="@style/Button.Luca.PrimaryActionButtonLight"
+        android:layout_margin="@dimen/spacing_default"
         android:contentDescription="@string/venue_children_add"
         android:text="@string/venue_children_add"
-        android:textColor="@android:color/black"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:strokeColor="@android:color/black" />
+        app:layout_constraintStart_toStartOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

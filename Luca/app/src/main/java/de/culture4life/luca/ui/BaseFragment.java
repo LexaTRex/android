@@ -1,7 +1,10 @@
 package de.culture4life.luca.ui;
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.StrictMode;
 import android.text.SpannedString;
@@ -14,6 +17,9 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.CallSuper;
 import androidx.annotation.IdRes;
 import androidx.annotation.LayoutRes;
@@ -36,10 +42,11 @@ import com.google.android.material.snackbar.Snackbar;
 import com.tbruyelle.rxpermissions3.Permission;
 import com.tbruyelle.rxpermissions3.RxPermissions;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-import de.culture4life.luca.BuildConfig;
 import de.culture4life.luca.LucaApplication;
 import de.culture4life.luca.R;
 import de.culture4life.luca.ui.dialog.BaseDialogFragment;
@@ -48,10 +55,13 @@ import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.core.Single;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
-import io.reactivex.rxjava3.schedulers.Schedulers;
+import io.reactivex.rxjava3.subjects.PublishSubject;
 import timber.log.Timber;
 
 public abstract class BaseFragment<ViewModelType extends BaseViewModel> extends Fragment {
+
+    protected final PublishSubject<ActivityResult> activityResults = PublishSubject.create();
+    protected ActivityResultLauncher<Intent> getActivityResult;
 
     protected LucaApplication application;
 
@@ -125,6 +135,12 @@ public abstract class BaseFragment<ViewModelType extends BaseViewModel> extends 
         StrictMode.setThreadPolicy(previousThreadPolicy);
     }
 
+    @Override
+    public void onAttach(@NonNull @NotNull Context context) {
+        super.onAttach(context);
+        getActivityResult = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), activityResults::onNext);
+    }
+
     @CallSuper
     @Override
     public void onStart() {
@@ -153,6 +169,7 @@ public abstract class BaseFragment<ViewModelType extends BaseViewModel> extends 
 
     /**
      * Overwrite this to return a ViewBinding instead of a layout resource.
+     *
      * @return ViewBinding instance
      */
     @Nullable
@@ -216,32 +233,13 @@ public abstract class BaseFragment<ViewModelType extends BaseViewModel> extends 
         });
     }
 
-    @SuppressWarnings("SameReturnValue")
     protected boolean onMenuItemClick(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.clearHistoryMenuItem: {
-                new BaseDialogFragment(new MaterialAlertDialogBuilder(getContext())
-                        .setTitle(R.string.history_clear_title)
-                        .setMessage(R.string.history_clear_description)
-                        .setPositiveButton(R.string.history_clear_action, (dialog, which) -> {
-                            application.getHistoryManager().clearItems()
-                                    .subscribeOn(Schedulers.io())
-                                    .subscribe(
-                                            () -> Timber.i("History cleared"),
-                                            throwable -> Timber.w("Unable to clear history: %s", throwable.toString())
-                                    );
-                        })
-                        .setNegativeButton(R.string.action_cancel, (dialog, which) -> dialog.dismiss()))
-                        .show();
-                break;
-            }
-
             default: {
                 Timber.w("Unknown menu item selected: %s", item.getTitle());
                 return false;
             }
         }
-        return true;
     }
 
     protected <ValueType> void observe(@NonNull LiveData<ValueType> liveData, @NonNull Observer<ValueType> observer) {
@@ -283,7 +281,6 @@ public abstract class BaseFragment<ViewModelType extends BaseViewModel> extends 
     }
 
     protected void indicateNoErrors() {
-        Timber.d("indicateNoErrors() called");
         if (errorSnackbar != null) {
             errorSnackbar.dismiss();
         }
@@ -374,24 +371,6 @@ public abstract class BaseFragment<ViewModelType extends BaseViewModel> extends 
         imm.hideSoftInputFromWindow(view.getRootView().getWindowToken(), 0);
     }
 
-    private void showVersionDetailsDialog() {
-        String commitHash = BuildConfig.COMMIT_HASH;
-        if (commitHash.length() > 8 && !commitHash.startsWith("<")) {
-            commitHash = commitHash.substring(0, 8);
-        }
-        String message = getString(
-                R.string.version_details_dialog_message,
-                BuildConfig.VERSION_NAME,
-                BuildConfig.VERSION_CODE,
-                commitHash
-        );
-        new BaseDialogFragment(new MaterialAlertDialogBuilder(getContext())
-                .setTitle(R.string.version_details_dialog_title)
-                .setMessage(message)
-                .setPositiveButton(R.string.version_details_dialog_action, (dialog, which) -> dialog.dismiss()))
-                .show();
-    }
-
     protected Completable getCameraPermission() {
         return rxPermissions.request(Manifest.permission.CAMERA)
                 .flatMapCompletable(granted -> {
@@ -402,6 +381,10 @@ public abstract class BaseFragment<ViewModelType extends BaseViewModel> extends 
                         return Completable.error(new IllegalStateException("Camera permission missing"));
                     }
                 });
+    }
+
+    protected Boolean checkIfCameraPermissionWasGranted() {
+        return rxPermissions.isGranted(Manifest.permission.CAMERA);
     }
 
     protected void showCameraDialog(boolean directToSettings) {
@@ -441,11 +424,29 @@ public abstract class BaseFragment<ViewModelType extends BaseViewModel> extends 
     }
 
     protected void safeNavigateFromNavController(@IdRes int destination) {
+        safeNavigateFromNavController(destination, null);
+    }
+
+    protected void safeNavigateFromNavController(@IdRes int destination, @Nullable Bundle bundle) {
         FragmentNavigator.Destination currentDestination = (FragmentNavigator.Destination) navigationController.getCurrentDestination();
         boolean isCurrentDestination = getClass().getName().equals(currentDestination.getClassName());
         if (isCurrentDestination) {
-            navigationController.navigate(destination);
+            navigationController.navigate(destination, bundle);
         }
+    }
+
+    protected Single<Uri> getFileExportUri(@NonNull String fileName) {
+        return Observable.defer(() -> {
+            Intent createFileIntent = new ActivityResultContracts.CreateDocument()
+                    .createIntent(getContext(), fileName);
+            createFileIntent.addCategory(Intent.CATEGORY_OPENABLE);
+            createFileIntent.setType("text/plain");
+            getActivityResult.launch(createFileIntent);
+            return activityResults;
+        }).firstOrError()
+                .filter(activityResult -> activityResult.getResultCode() == Activity.RESULT_OK)
+                .map(activityResult -> activityResult.getData().getData())
+                .switchIfEmpty(Single.error(new UserCancelledException()));
     }
 
     public CharSequence getFormattedString(@StringRes int id, Object... args) {

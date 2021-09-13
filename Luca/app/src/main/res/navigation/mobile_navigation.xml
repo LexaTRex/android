@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/mainNavigation"
-    app:startDestination="@+id/myLucaFragment">
+    app:startDestination="@+id/checkInFragment">
 
     <fragment
         android:id="@+id/myLucaFragment"
@@ -14,28 +14,38 @@
         <action
             android:id="@+id/action_myLucaFragment_to_childrenFragment"
             app:destination="@id/childrenFragment" />
+        <action
+            android:id="@+id/action_myLucaFragment_to_historyFragment"
+            app:destination="@id/historyFragment" />
+        <action
+            android:id="@+id/action_myLucaFragment_to_accessedDataDetailFragment"
+            app:destination="@id/accessedDataDetailFragment" />
 
     </fragment>
 
     <fragment
-        android:id="@+id/qrCodeFragment"
-        android:name="de.culture4life.luca.ui.qrcode.QrCodeFragment"
+        android:id="@+id/checkInFragment"
+        android:name="de.culture4life.luca.ui.checkin.CheckInFragment"
         android:label="@string/navigation_contact_data"
-        tools:layout="@layout/fragment_qr_code">
+        tools:layout="@layout/fragment_check_in">
 
         <action
-            android:id="@+id/action_qrCodeFragment_to_venueDetailFragment"
+            android:id="@+id/action_checkInFragment_to_venueDetailFragment"
             app:destination="@id/venueDetailFragment" />
 
         <action
-            android:id="@+id/action_qrCodeFragment_to_venueDetailFragmentCheckedIn"
+            android:id="@+id/action_checkInFragment_to_history"
+            app:destination="@id/historyFragment" />
+
+        <action
+            android:id="@+id/action_checkInFragment_to_venueDetailFragmentCheckedIn"
             app:destination="@id/venueDetailFragment"
             app:launchSingleTop="true"
             app:popUpTo="@id/mainNavigation"
             app:popUpToInclusive="true" />
 
         <action
-            android:id="@+id/action_qrCodeFragment_to_meetingFragment"
+            android:id="@+id/action_checkInFragment_to_meetingFragment"
             app:destination="@id/meetingFragment"
             app:launchSingleTop="true"
             app:popUpTo="@id/mainNavigation"
@@ -49,8 +59,8 @@
         android:label="@string/navigation_venue_details"
         tools:layout="@layout/fragment_venue_details">
         <action
-            android:id="@+id/action_venueDetailFragment_to_qrCodeFragment"
-            app:destination="@id/qrCodeFragment"
+            android:id="@+id/action_venueDetailFragment_to_checkInFragment"
+            app:destination="@id/checkInFragment"
             app:launchSingleTop="true"
             app:popUpTo="@id/mainNavigation"
             app:popUpToInclusive="true" />
@@ -72,8 +82,8 @@
         android:label="@string/navigation_meeting"
         tools:layout="@layout/fragment_meeting">
         <action
-            android:id="@+id/action_meetingFragment_to_qrCodeFragment"
-            app:destination="@id/qrCodeFragment"
+            android:id="@+id/action_meetingFragment_to_checkInFragment"
+            app:destination="@id/checkInFragment"
             app:launchSingleTop="true"
             app:popUpTo="@id/mainNavigation"
             app:popUpToInclusive="true" />
@@ -87,13 +97,26 @@
         <action
             android:id="@+id/action_historyFragment_to_accessedDataFragment"
             app:destination="@id/accessedDataFragment" />
+        <action
+            android:id="@+id/action_historyFragment_to_accessedDataDetailFragment"
+            app:destination="@id/accessedDataDetailFragment" />
     </fragment>
 
     <fragment
         android:id="@+id/accessedDataFragment"
         android:name="de.culture4life.luca.ui.accesseddata.AccessedDataFragment"
         android:label="@string/navigation_accessed_data"
-        tools:layout="@layout/fragment_accessed_data" />
+        tools:layout="@layout/fragment_accessed_data" >
+        <action
+            android:id="@+id/action_accessedDataFragment_to_accessedDataDetailFragment"
+            app:destination="@id/accessedDataDetailFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/accessedDataDetailFragment"
+        android:name="de.culture4life.luca.ui.accesseddata.AccessedDataDetailFragment"
+        android:label="@string/navigation_accessed_data_details"
+        tools:layout="@layout/fragment_accessed_data_detail" />
 
     <fragment
         android:id="@+id/childrenFragment"
@@ -109,7 +132,8 @@
     <fragment
         android:id="@+id/accountFragment"
         android:name="de.culture4life.luca.ui.account.AccountFragment"
-        android:label="AccountFragment">
+        android:label="AccountFragment"
+        tools:layout="@layout/fragment_account" >
         <action
             android:id="@+id/action_accountFragment_to_healthDepartmentKeyFragment"
             app:destination="@id/healthDepartmentKeyFragment" />
@@ -118,7 +142,7 @@
     <fragment
         android:id="@+id/healthDepartmentKeyFragment"
         android:name="de.culture4life.luca.ui.account.healtdepartmentkey.HealthDepartmentKeyFragment"
-        android:label="HealthDepartmentKeyFragment" >
-    </fragment>
+        android:label="HealthDepartmentKeyFragment"
+        tools:layout="@layout/fragment_health_department_key" />
 
 </navigation>

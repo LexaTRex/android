@@ -29,7 +29,7 @@ class GenuinityManager(
         return Completable.mergeArray(
             preferencesManager.initialize(context),
             networkManager.initialize(context)
-        ).andThen(invokeServerTimeOffsetUpdateIfRequired().delaySubscription(3, TimeUnit.SECONDS))
+        ).andThen(invokeServerTimeOffsetUpdateIfRequired())
     }
 
     private fun invokeServerTimeOffsetUpdateIfRequired(): Completable {
@@ -44,6 +44,7 @@ class GenuinityManager(
         return Completable.fromAction {
             managerDisposable.add(
                 fetchServerTimeOffset()
+                    .delaySubscription(3, TimeUnit.SECONDS)
                     .subscribeOn(Schedulers.io())
                     .onErrorComplete()
                     .subscribe()

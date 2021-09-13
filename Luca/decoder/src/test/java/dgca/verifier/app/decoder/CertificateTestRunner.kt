@@ -5,6 +5,7 @@ import dgca.verifier.app.decoder.base45.Base45Service
 import dgca.verifier.app.decoder.base45.DefaultBase45Service
 import dgca.verifier.app.decoder.cbor.CborService
 import dgca.verifier.app.decoder.cbor.DefaultCborService
+import dgca.verifier.app.decoder.cbor.GreenCertificateMapper
 import dgca.verifier.app.decoder.compression.CompressorService
 import dgca.verifier.app.decoder.compression.DefaultCompressorService
 import dgca.verifier.app.decoder.cose.CoseService
@@ -18,9 +19,7 @@ import dgca.verifier.app.decoder.prefixvalidation.PrefixValidationService
 import dgca.verifier.app.decoder.schema.DefaultSchemaValidator
 import dgca.verifier.app.decoder.schema.SchemaValidator
 import dgca.verifier.app.decoder.services.X509
-import org.hamcrest.CoreMatchers.equalTo
-import org.hamcrest.CoreMatchers.notNullValue
-import org.hamcrest.CoreMatchers.nullValue
+import org.hamcrest.CoreMatchers.*
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.equalToIgnoringCase
 import org.hamcrest.Matchers.not
@@ -39,6 +38,7 @@ class CertificateTestRunner {
     private lateinit var cryptoService: CryptoService
     private lateinit var coseService: CoseService
     private lateinit var schemaValidator: SchemaValidator
+    private lateinit var greenCertificateMapper: GreenCertificateMapper
     private lateinit var cborService: CborService
 
     @BeforeEach
@@ -49,7 +49,7 @@ class CertificateTestRunner {
         cryptoService = VerificationCryptoService(X509())
         coseService = DefaultCoseService()
         schemaValidator = DefaultSchemaValidator()
-        cborService = DefaultCborService()
+        cborService = DefaultCborService(greenCertificateMapper)
     }
 
     @ParameterizedTest
@@ -63,7 +63,7 @@ class CertificateTestRunner {
         val qrCode = case.base45WithPrefix ?: ""
         val base45 = prefixValidationService.decode(qrCode, verificationResult)
         val compressedCose = base45Service.decode(base45, verificationResult)
-        val cose = compressorService.decode(compressedCose, verificationResult)
+        val cose: ByteArray = compressorService.decode(compressedCose, verificationResult)!!
         val coseData = coseService.decode(cose, verificationResult)
         if (coseData != null) {
             schemaValidator.validate(coseData.cbor, verificationResult)

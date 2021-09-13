@@ -155,4 +155,9 @@ public class RegistrationData {
     public Person getPerson() {
         return new Person(getFirstName(), getLastName());
     }
+
+    public String getAddress() {
+        return getStreet() + " " + getHouseNumber() + ", " + getPostalCode() + " " + getCity();
+    }
+
 }

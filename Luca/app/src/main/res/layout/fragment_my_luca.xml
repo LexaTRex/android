@@ -11,8 +11,9 @@
         android:id="@+id/headingTextView"
         style="@style/TextAppearance.Luca.Headline2"
         android:layout_margin="@dimen/spacing_default"
+        android:layout_width="wrap_content"
         android:text="@string/navigation_my_luca"
-        app:layout_constraintEnd_toStartOf="@id/childAddingIconImageView"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -20,7 +21,7 @@
         android:id="@+id/childCounterTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:paddingEnd="@dimen/spacing_default"
+        android:paddingEnd="@dimen/spacing_small"
         android:textColor="@android:color/white"
         android:textSize="@dimen/font_size_default"
         android:textStyle="bold"
@@ -36,7 +37,8 @@
         android:src="@drawable/ic_add_child"
         app:layout_constraintBottom_toBottomOf="@id/bookAppointmentImageView"
         app:layout_constraintEnd_toStartOf="@id/bookAppointmentImageView"
-        app:layout_constraintHorizontal_bias="1"
+        app:layout_constraintHorizontal_bias="0.7"
+        app:layout_constraintStart_toEndOf="@id/headingTextView"
         app:layout_constraintTop_toTopOf="@id/bookAppointmentImageView"
         app:tint="@android:color/white" />
 
@@ -65,14 +67,24 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/headingTextView" />
 
-    <include
-        android:id="@+id/timeSyncErrorLayout"
-        layout="@layout/top_sheet_container"
+    <ScrollView
+        android:id="@+id/bannerScrollView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:requiresFadingEdge="vertical"
+        android:visibility="gone"
+        app:layout_constrainedHeight="true"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/headingSeparatorView" />
+        app:layout_constraintTop_toBottomOf="@id/headingSeparatorView">
+
+        <LinearLayout
+            android:id="@+id/bannerLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" />
+
+    </ScrollView>
 
     <ScrollView
         android:id="@+id/emptyStateScrollView"
@@ -80,11 +92,11 @@
         android:layout_height="0dp"
         android:paddingBottom="@dimen/spacing_small"
         android:requiresFadingEdge="vertical"
-        android:visibility="visible"
+        android:visibility="gone"
         app:layout_constraintBottom_toTopOf="@id/primaryActionButton"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/timeSyncErrorLayout">
+        app:layout_constraintTop_toBottomOf="@id/bannerScrollView">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
@@ -128,8 +140,9 @@
         android:fadingEdgeLength="@dimen/spacing_large"
         android:listSelector="@android:color/transparent"
         android:requiresFadingEdge="vertical"
+        android:visibility="gone"
         app:layout_constraintBottom_toTopOf="@id/primaryActionButton"
-        app:layout_constraintTop_toBottomOf="@id/timeSyncErrorLayout"
+        app:layout_constraintTop_toBottomOf="@id/bannerScrollView"
         tools:listitem="@layout/my_luca_list_item" />
 
     <View
@@ -151,6 +164,7 @@
         android:background="@android:color/black"
         android:padding="@dimen/spacing_large"
         android:text="@string/document_import_hint"
+        android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/headingSeparatorView" />
@@ -162,6 +176,7 @@
         android:layout_marginStart="@dimen/spacing_large"
         android:layout_marginEnd="@dimen/spacing_large"
         android:layout_marginBottom="@dimen/spacing_large"
+        android:visibility="gone"
         app:cardBackgroundColor="?attr/colorOnSurface"
         app:cardCornerRadius="8dp"
         app:layout_constraintBottom_toTopOf="@id/primaryActionButton"

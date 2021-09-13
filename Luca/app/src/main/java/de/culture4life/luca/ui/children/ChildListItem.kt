@@ -6,7 +6,9 @@ data class ChildListItem(
     val child: Child,
     var isCheckedIn: Boolean
 ) {
+
     fun toggleIsChecked() {
         isCheckedIn = !isCheckedIn
     }
+
 }

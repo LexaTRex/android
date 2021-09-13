@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal"
+    android:paddingStart="16dp"
+    android:paddingEnd="16dp"
+    android:visibility="visible">
+
+    <com.google.android.material.checkbox.MaterialCheckBox
+        android:id="@+id/dontAskAgainCheckbox"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:buttonTint="?attr/colorOnSurface"
+        android:visibility="visible"/>
+
+    <TextView
+        android:id="@+id/dontAskTextView"
+        style="@style/TextAppearance.Luca.Body2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:labelFor="@id/dontAskAgainCheckbox"
+        android:text="@string/venue_check_in_confirmation_dont_show_again"
+        android:textColor="?attr/colorOnSurface"
+        android:textColorLink="?attr/colorOnSurface" />
+
+</LinearLayout>

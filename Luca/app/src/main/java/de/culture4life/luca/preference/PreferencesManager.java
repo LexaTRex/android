@@ -9,13 +9,8 @@ import com.nexenio.rxpreferences.provider.BasePreferencesProvider;
 import com.nexenio.rxpreferences.provider.EncryptedSharedPreferencesProvider;
 import com.nexenio.rxpreferences.provider.InMemoryPreferencesProvider;
 import com.nexenio.rxpreferences.provider.PreferencesProvider;
-import com.nexenio.rxpreferences.provider.TrayPreferencesProvider;
 import com.nexenio.rxpreferences.serializer.GsonSerializer;
 
-import net.grandcentrix.tray.TrayPreferences;
-import net.grandcentrix.tray.core.TrayStorage;
-
-import de.culture4life.luca.BuildConfig;
 import de.culture4life.luca.LucaApplication;
 import de.culture4life.luca.Manager;
 import de.culture4life.luca.crypto.TraceIdWrapper;
@@ -56,20 +51,7 @@ public class PreferencesManager extends Manager implements PreferencesProvider {
     }
 
     private Completable migratePreferencesIfRequired() {
-        return Single.defer(() -> getInitializedField(provider))
-                .flatMapCompletable(preferencesProvider -> preferencesProvider.restoreOrDefault(LAST_MIGRATION_VERSION_CODE_KEY, 0)
-                        .filter(lastMigrationVersionCode -> lastMigrationVersionCode < 58 && !LucaApplication.isRunningUnitTests())
-                        .flatMapCompletable(this::migratePreferences));
-    }
-
-    private Completable migratePreferences(int lastMigrationVersionCode) {
-        return Single.fromCallable(() -> {
-            TrayPreferences trayPreferences = new TrayPreferences(context, context.getPackageName(), VERSION, TrayStorage.Type.DEVICE);
-            TrayPreferencesProvider trayPreferencesProvider = new TrayPreferencesProvider(trayPreferences);
-            trayPreferencesProvider.setSerializer(SERIALIZER);
-            return trayPreferencesProvider;
-        }).flatMapCompletable(trayPreferencesProvider -> PreferencesMigrationUtil.migrate(trayPreferencesProvider, provider))
-                .andThen(provider.persist(LAST_MIGRATION_VERSION_CODE_KEY, BuildConfig.VERSION_CODE));
+        return Completable.complete();
     }
 
     private Single<PreferencesProvider> getInitializedProvider() {

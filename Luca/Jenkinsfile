@@ -143,7 +143,7 @@ pipeline {
                         GENERAL_PARAMS="-PCOMMIT_HASH=$QUOTE$COMMIT_HASH$QUOTE"
                         LOCAL_KEYSTORE_FILE=$(basename $KEYSTORE_FILE)
                         KEYSTORE_PARAMS="-PC4L_SIGNING_STORE_FILE=$LOCAL_KEYSTORE_FILE -PC4L_SIGNING_KEY_PASSWORD=$C4L_SIGNING_KEY_PASSWORD -PC4L_SIGNING_KEY_ALIAS=$C4L_SIGNING_KEY_ALIAS -PC4L_SIGNING_STORE_PASSWORD=$C4L_SIGNING_STORE_PASSWORD"
-                        CMD="cd /Luca/app; ./../gradlew :app:assembleProduction $GENERAL_PARAMS $KEYSTORE_PARAMS"
+                        CMD="cd /Luca/app; ./../gradlew dependencyCheckAnalyze :app:assembleProduction $GENERAL_PARAMS $KEYSTORE_PARAMS"
                         docker run --rm -u $(id -u):$(id -g) -v `pwd`:/Luca -v $KEYSTORE_FILE:/Luca/app/$LOCAL_KEYSTORE_FILE ${CONTAINER} bash -c "$CMD"
                     '''
                 }
@@ -177,7 +177,7 @@ pipeline {
         stage('Archive') {
             steps {
                 sh "./Luca/scripts/rename_output_files"
-                archiveArtifacts artifacts: 'Luca/app/build/outputs/apk/**/*.apk, Luca/app/build/outputs/bundle/**/*.aab', excludes: 'Luca/app/build/outputs/apk/**/*-androidTest.apk', fingerprint: true
+                archiveArtifacts artifacts: 'Luca/app/build/outputs/apk/**/*.apk, Luca/app/build/outputs/bundle/**/*.aab, Luca/app/build/reports/dependency-check-report.html', excludes: 'Luca/app/build/outputs/apk/**/*-androidTest.apk', fingerprint: true
             }
         }
     }

@@ -4,6 +4,7 @@ import android.graphics.Color
 import android.os.Bundle
 import android.view.View
 import androidx.core.content.ContextCompat
+import androidx.core.view.isVisible
 import androidx.viewbinding.ViewBinding
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import de.culture4life.luca.R
@@ -16,6 +17,7 @@ import io.reactivex.rxjava3.schedulers.Schedulers
 
 class ChildrenFragment : BaseFragment<ChildrenViewModel>(),
     AddChildDialogFragment.AddChildListener {
+
     private var bottomSheet: AddChildDialogFragment? = null
     private lateinit var binding: FragmentAddingChildrenBinding
     private lateinit var childListAdapter: ChildListAdapter
@@ -41,10 +43,11 @@ class ChildrenFragment : BaseFragment<ChildrenViewModel>(),
             with(binding) {
                 layout.setBackgroundColor(Color.BLACK)
                 backImageView.setColorFilter(Color.WHITE)
-                title.setTextColor(Color.WHITE)
+                headingTextView.setTextColor(Color.WHITE)
                 childAddingDescriptionTextView.setTextColor(Color.WHITE)
-                primaryActionButton.setTextColor(ContextCompat.getColor(requireContext(), R.color.primaryColor))
-                primaryActionButton.setStrokeColorResource(R.color.primaryColor)
+                primaryActionButton.backgroundTintList =
+                    ContextCompat.getColorStateList(requireContext(), R.color.primaryColor)
+                emptyImageView.setImageResource(R.drawable.g_child_light)
             }
         }
     }
@@ -71,7 +74,14 @@ class ChildrenFragment : BaseFragment<ChildrenViewModel>(),
     }
 
     private fun initializeChildItemsViews() {
-        childListAdapter = ChildListAdapter(requireContext(), binding.childListView.id, viewModel, darkStyle) { showRemoveChildDialog(it) }
+        childListAdapter = ChildListAdapter(
+            requireContext(),
+            binding.childListView.id,
+            viewModel,
+            darkStyle,
+            { showRemoveChildDialog(it) },
+            { showAddChildDialog() }
+        )
         binding.childListView.adapter = childListAdapter
         View(context).let { paddingView ->
             paddingView.minimumHeight = UiUtil.convertDpToPixel(16f, context).toInt()
@@ -92,8 +102,8 @@ class ChildrenFragment : BaseFragment<ChildrenViewModel>(),
         MaterialAlertDialogBuilder(requireContext())
             .setTitle(R.string.venue_children_remove_confirmation_title)
             .setMessage(R.string.venue_children_remove_confirmation_description)
-            .setNegativeButton(R.string.action_no) { dialog, which -> }
-            .setPositiveButton(R.string.action_yes) { dialog, which ->
+            .setNegativeButton(R.string.action_no) { _, _ -> }
+            .setPositiveButton(R.string.action_yes) { _, _ ->
                 viewModel.removeChild(child)
                     .onErrorComplete()
                     .subscribeOn(Schedulers.io())
@@ -104,9 +114,11 @@ class ChildrenFragment : BaseFragment<ChildrenViewModel>(),
 
     private fun updateChildItemsList(children: ChildListItemContainer) {
         with(binding) {
-            title.setText(R.string.add_children_title)
+            headingTextView.setText(R.string.add_children_title)
             childAddingDescriptionTextView.setText(if (children.isEmpty()) R.string.venue_children_empty_list_description else R.string.venue_children_list_description)
-            childListView.visibility = if (children.isEmpty()) View.GONE else View.VISIBLE
+            childListView.isVisible = !children.isEmpty()
+            emptyImageView.isVisible = children.isEmpty()
+            primaryActionButton.isVisible = children.isEmpty()
         }
         childListAdapter.setChildItems(children)
     }
@@ -122,4 +134,5 @@ class ChildrenFragment : BaseFragment<ChildrenViewModel>(),
                 .doFinally { bottomSheet?.dismiss() }
                 .subscribe())
     }
+
 }
