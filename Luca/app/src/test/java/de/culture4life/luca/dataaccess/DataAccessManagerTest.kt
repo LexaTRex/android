@@ -57,6 +57,7 @@ class DataAccessManagerTest : LucaUnitTest() {
     private val previouslyAccessedTraceData = AccessedTraceData().apply {
         isNew = true
         traceId = "qiqA2+SpnoioxRMWb7IDsw=="
+        hashedTraceId = "HASH_VALUE_FOR_WARNING_LEVEL_1"
         warningLevel = 1
     }
 
@@ -241,6 +242,23 @@ class DataAccessManagerTest : LucaUnitTest() {
     fun fetchNewRecentlyAccessedTraceData_someNewDataAccessed_emitsNewAccessedData() {
         val newAccessedTraceData = AccessedTraceData().apply {
             traceId = "LLJMzA/HqlS77qkpUGNJrA=="
+            hashedTraceId = "SOME_HASH_VALUE"
+        }
+        Mockito.`when`(dataAccessManager.fetchRecentlyAccessedTraceData())
+            .thenReturn(Observable.just(previouslyAccessedTraceData, newAccessedTraceData))
+        Mockito.`when`(dataAccessManager.previouslyAccessedTraceData).thenReturn(Observable.just(previouslyAccessedTraceData))
+        dataAccessManager.fetchNewRecentlyAccessedTraceData()
+            .test()
+            .assertValues(newAccessedTraceData)
+            .assertComplete()
+    }
+
+    @Test
+    fun fetchNewRecentlyAccessedTraceData_newWarningLevelForSameTraceId_emitsNewAccessedData() {
+        val newAccessedTraceData = AccessedTraceData().apply {
+            traceId = "qiqA2+SpnoioxRMWb7IDsw=="
+            hashedTraceId = "HASH_VALUE_FOR_WARNING_LEVEL_2"
+            warningLevel = 2
         }
         Mockito.`when`(dataAccessManager.fetchRecentlyAccessedTraceData())
             .thenReturn(Observable.just(previouslyAccessedTraceData, newAccessedTraceData))

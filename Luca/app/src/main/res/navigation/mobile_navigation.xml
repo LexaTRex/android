@@ -3,13 +3,13 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/mainNavigation"
-    app:startDestination="@+id/checkInFragment">
+    app:startDestination="@+id/myLucaFragment">
 
     <fragment
         android:id="@+id/myLucaFragment"
         android:name="de.culture4life.luca.ui.myluca.MyLucaFragment"
         android:label="@string/navigation_my_luca"
-        tools:layout="@layout/fragment_my_luca" >
+        tools:layout="@layout/fragment_my_luca">
 
         <action
             android:id="@+id/action_myLucaFragment_to_childrenFragment"
@@ -106,7 +106,7 @@
         android:id="@+id/accessedDataFragment"
         android:name="de.culture4life.luca.ui.accesseddata.AccessedDataFragment"
         android:label="@string/navigation_accessed_data"
-        tools:layout="@layout/fragment_accessed_data" >
+        tools:layout="@layout/fragment_accessed_data">
         <action
             android:id="@+id/action_accessedDataFragment_to_accessedDataDetailFragment"
             app:destination="@id/accessedDataDetailFragment" />
@@ -133,7 +133,7 @@
         android:id="@+id/accountFragment"
         android:name="de.culture4life.luca.ui.account.AccountFragment"
         android:label="AccountFragment"
-        tools:layout="@layout/fragment_account" >
+        tools:layout="@layout/fragment_account">
         <action
             android:id="@+id/action_accountFragment_to_healthDepartmentKeyFragment"
             app:destination="@id/healthDepartmentKeyFragment" />

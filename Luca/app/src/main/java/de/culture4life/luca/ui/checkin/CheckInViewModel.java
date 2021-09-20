@@ -62,11 +62,13 @@ public class CheckInViewModel extends BaseQrCodeViewModel {
 
     private static final UUID DEBUGGING_SCANNER_ID = UUID.fromString("1444c1a2-1922-4c11-813d-710d9f901227");
     private static final long CHECK_IN_POLLING_INTERVAL = TimeUnit.SECONDS.toMillis(3);
+    private static final String KEY_SKIP_CHECK_IN_CONFIRMATION = "dont_ask_confirmation";
 
     private final RegistrationManager registrationManager;
     private final CheckInManager checkInManager;
     private final CryptoManager cryptoManager;
     private final MeetingManager meetingManager;
+    private final NetworkManager networkManager;
 
     private final MutableLiveData<Bitmap> qrCode = new MutableLiveData<>();
     private final MutableLiveData<String> name = new MutableLiveData<>();
@@ -81,8 +83,6 @@ public class CheckInViewModel extends BaseQrCodeViewModel {
     private final MutableLiveData<Bundle> bundle = new MutableLiveData<>();
     private final MutableLiveData<ViewEvent<Pair<String, String>>> confirmCheckin = new MutableLiveData<>();
 
-    private static final String KEY_DONT_ASK_CONFIRMATION = "dont_ask_confirmation";
-
     private MyLucaViewModel myLucaViewModel;
 
     private UUID userId;
@@ -96,6 +96,7 @@ public class CheckInViewModel extends BaseQrCodeViewModel {
         this.checkInManager = this.application.getCheckInManager();
         this.cryptoManager = this.application.getCryptoManager();
         this.meetingManager = this.application.getMeetingManager();
+        this.networkManager = this.application.getNetworkManager();
     }
 
     public void setupViewModelReference(FragmentActivity activity) {
@@ -113,11 +114,16 @@ public class CheckInViewModel extends BaseQrCodeViewModel {
                         registrationManager.initialize(application),
                         checkInManager.initialize(application),
                         cryptoManager.initialize(application),
-                        meetingManager.initialize(application)
+                        meetingManager.initialize(application),
+                        networkManager.initialize(application)
                 ))
-                .andThen(application.getPreferencesManager().restore(USER_ID_KEY, UUID.class)
+                .andThen(preferencesManager.restore(USER_ID_KEY, UUID.class)
                         .doOnSuccess(uuid -> this.userId = uuid)
                         .ignoreElement())
+                .andThen(Completable.fromAction(() -> modelDisposable.add(isCameraConsentGiven()
+                        .flatMapCompletable(cameraConsentGiven -> update(showCameraPreview, cameraConsentGiven))
+                        .delaySubscription(100, TimeUnit.MILLISECONDS)
+                        .subscribe())))
                 .doOnComplete(this::handleApplicationDeepLinkIfAvailable);
     }
 
@@ -133,7 +139,7 @@ public class CheckInViewModel extends BaseQrCodeViewModel {
     }
 
     private Completable observeNetworkChanges() {
-        return application.getNetworkManager().getConnectivityStateAndChanges()
+        return networkManager.getConnectivityStateAndChanges()
                 .flatMapCompletable(isNetworkConnected -> update(networkAvailable, isNetworkConnected));
     }
 
@@ -312,8 +318,9 @@ public class CheckInViewModel extends BaseQrCodeViewModel {
     }
 
     /*
-            QR code scanning
-         */
+        QR code scanning
+    */
+
     @Override
     protected boolean canProcessImage() {
         if (deepLinkError != null && errors.getValue().contains(deepLinkError)) {
@@ -429,22 +436,22 @@ public class CheckInViewModel extends BaseQrCodeViewModel {
     }
 
     private Completable handleSelfCheckInDeepLinkConfirmIfNecessary(@NonNull String url) {
-        return application.getPreferencesManager().restoreOrDefault(KEY_DONT_ASK_CONFIRMATION, false)
-                .flatMapCompletable(dontAskConfirm -> {
-                    if (dontAskConfirm) {
+        return preferencesManager.restoreOrDefault(KEY_SKIP_CHECK_IN_CONFIRMATION, false)
+                .flatMapCompletable(skipConfirmation -> {
+                    if (skipConfirmation) {
                         return handleSelfCheckInDeepLink(url);
                     } else {
                         return getScannerIdFromUrl(url)
                                 .flatMap(uuid -> checkInManager.getLocationDataFromScannerId(uuid.toString()))
                                 .flatMapCompletable(locationResponseData ->
-                                        update(confirmCheckin, new ViewEvent(new Pair(url, locationResponseData.getGroupName())))
+                                        update(confirmCheckin, new ViewEvent<>(new Pair<>(url, locationResponseData.getGroupName())))
                                 );
                     }
                 });
     }
 
-    public Completable persistDontAskForConfirmation(boolean dontConfirmAgain) {
-        return application.getPreferencesManager().persist(KEY_DONT_ASK_CONFIRMATION, dontConfirmAgain);
+    public Completable persistSkipCheckInConfirmation(boolean skipCheckInConfirmation) {
+        return preferencesManager.persist(KEY_SKIP_CHECK_IN_CONFIRMATION, skipCheckInConfirmation);
     }
 
     public Completable handleSelfCheckInDeepLink(@NonNull String url) {
@@ -452,7 +459,11 @@ public class CheckInViewModel extends BaseQrCodeViewModel {
         Single<String> additionalData = getAdditionalDataFromUrlIfAvailable(url).defaultIfEmpty("");
 
         return Single.zip(scannerId, additionalData, Pair::new)
-                .flatMapCompletable(scannerIdAndAdditionalData -> performSelfCheckIn(scannerIdAndAdditionalData.first, scannerIdAndAdditionalData.second, false));
+                .flatMapCompletable(scannerIdAndAdditionalData -> performSelfCheckIn(
+                        scannerIdAndAdditionalData.first,
+                        scannerIdAndAdditionalData.second,
+                        false
+                ));
     }
 
     private Completable performSelfCheckIn(UUID scannerId, @Nullable String additionalData, boolean requirePrivateMeeting) {
@@ -465,7 +476,8 @@ public class CheckInViewModel extends BaseQrCodeViewModel {
                         return Completable.complete();
                     }
                 }))
-                .andThen(Completable.fromAction(() -> uploadAdditionalDataIfAvailableAsSideEffect(scannerId, additionalData)));
+                .andThen(Completable.fromAction(() -> uploadAdditionalDataIfAvailableAsSideEffect(scannerId, additionalData)))
+                .doOnSubscribe(disposable -> updateAsSideEffect(isLoading, true));
     }
 
     private void uploadAdditionalDataIfAvailableAsSideEffect(@NonNull UUID scannerId, @Nullable String additionalData) {
@@ -505,10 +517,8 @@ public class CheckInViewModel extends BaseQrCodeViewModel {
 
     public void onPrivateMeetingJoinApproved(@NonNull String url) {
         modelDisposable.add(handleMeetingCheckInDeepLinkAfterApproval(url)
-                .doOnSubscribe(disposable -> updateAsSideEffect(privateMeetingUrl, null))
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
                 .doOnSubscribe(disposable -> {
+                    updateAsSideEffect(privateMeetingUrl, null);
                     updateAsSideEffect(isLoading, true);
                     removeError(meetingError);
                 })
@@ -525,6 +535,8 @@ public class CheckInViewModel extends BaseQrCodeViewModel {
                     addError(meetingError);
                 })
                 .doFinally(() -> updateAsSideEffect(isLoading, false))
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
                         () -> Timber.i("Joined private meeting"),
                         throwable -> Timber.w("Unable to join private meeting: %s", throwable.toString())
@@ -536,7 +548,7 @@ public class CheckInViewModel extends BaseQrCodeViewModel {
     }
 
     public void onPrivateMeetingCreationRequested() {
-        modelDisposable.add(createMeeting()
+        modelDisposable.add(createPrivateMeeting()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
@@ -550,7 +562,7 @@ public class CheckInViewModel extends BaseQrCodeViewModel {
                 ));
     }
 
-    private Completable createMeeting() {
+    private Completable createPrivateMeeting() {
         return meetingManager.createPrivateMeeting()
                 .doOnSubscribe(disposable -> {
                     Timber.d("Creating meeting");

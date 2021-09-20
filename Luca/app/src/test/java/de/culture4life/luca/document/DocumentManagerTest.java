@@ -1,18 +1,5 @@
 package de.culture4life.luca.document;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assume.assumeTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static de.culture4life.luca.document.provider.appointment.AppointmentProviderTest.VALID_APPOINTMENT;
-import static de.culture4life.luca.document.provider.opentestcheck.OpenTestCheckDocumentProviderTest.EXPIRED_TEST_RESULT_TICKET_IO;
-import static de.culture4life.luca.document.provider.opentestcheck.OpenTestCheckDocumentProviderTest.UNVERIFIED_TEST_RESULT;
-import static de.culture4life.luca.document.provider.opentestcheck.OpenTestCheckDocumentProviderTest.VALID_TEST_RESULT_TICKET_IO;
-
 import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Before;
@@ -43,6 +30,19 @@ import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Maybe;
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.core.Single;
+
+import static de.culture4life.luca.document.provider.appointment.AppointmentProviderTest.VALID_APPOINTMENT;
+import static de.culture4life.luca.document.provider.opentestcheck.OpenTestCheckDocumentProviderTest.EXPIRED_TEST_RESULT_TICKET_IO;
+import static de.culture4life.luca.document.provider.opentestcheck.OpenTestCheckDocumentProviderTest.UNVERIFIED_TEST_RESULT;
+import static de.culture4life.luca.document.provider.opentestcheck.OpenTestCheckDocumentProviderTest.VALID_TEST_RESULT_TICKET_IO;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assume.assumeTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 @Config(sdk = 28)
 @RunWith(AndroidJUnit4.class)
@@ -120,6 +120,7 @@ public class DocumentManagerTest extends LucaUnitTest {
     @Test
     public void reimportDocuments_validDocuments_reImportsDocuments() {
         assumeTrue("Only run on debug where we ignore the expiry time", BuildConfig.DEBUG);
+        doReturn(Completable.complete()).when(documentManager).redeemDocument(any());
         doReturn(Completable.complete()).when(documentManager).unredeemDocument(any());
         RegistrationData registrationData = new RegistrationData();
         registrationData.setFirstName("any");
@@ -145,6 +146,7 @@ public class DocumentManagerTest extends LucaUnitTest {
     @Test
     public void reimportDocuments_validDocumentOfChild_reImportsIt() {
         assumeTrue("Only run on debug where we ignore the expiry time", BuildConfig.DEBUG);
+        doReturn(Completable.complete()).when(documentManager).redeemDocument(any());
         doReturn(Completable.complete()).when(documentManager).unredeemDocument(any());
         RegistrationData registrationData = new RegistrationData();
         registrationData.setFirstName("Any");

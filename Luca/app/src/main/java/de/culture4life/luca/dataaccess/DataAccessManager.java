@@ -339,11 +339,11 @@ public class DataAccessManager extends Manager {
      */
     public Observable<AccessedTraceData> fetchNewRecentlyAccessedTraceData() {
         return getPreviouslyAccessedTraceData()
-                .map(AccessedTraceData::getTraceId)
+                .map(AccessedTraceData::getHashedTraceId)
                 .toList()
-                .doOnSuccess(previouslyAccessedTraceIds -> Timber.d("Previously accessed trace IDs: %s", previouslyAccessedTraceIds))
-                .flatMapObservable(previouslyAccessedTraceIds -> fetchRecentlyAccessedTraceData()
-                        .filter(accessedTraceData -> !previouslyAccessedTraceIds.contains(accessedTraceData.getTraceId())));
+                .doOnSuccess(previouslyAccessedHashTraceIds -> Timber.d("Previously accessed hashed trace IDs: %s", previouslyAccessedHashTraceIds))
+                .flatMapObservable(previouslyAccessedHashTraceIds -> fetchRecentlyAccessedTraceData()
+                        .filter(accessedTraceData -> !previouslyAccessedHashTraceIds.contains(accessedTraceData.getHashedTraceId())));
     }
 
     /**

@@ -7,6 +7,7 @@ import androidx.annotation.Nullable;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import de.culture4life.luca.Manager;
 import de.culture4life.luca.checkin.CheckInData;
@@ -230,6 +231,10 @@ public class HistoryManager extends Manager {
         }
         stringBuilder.deleteCharAt(stringBuilder.length() - 1); // remove last line break
         return stringBuilder.toString();
+    }
+
+    public static String createCsv(@NonNull List<String> items) {
+        return items.stream().collect(Collectors.joining(", "));
     }
 
 }

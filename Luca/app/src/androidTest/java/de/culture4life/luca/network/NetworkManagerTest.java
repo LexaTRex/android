@@ -1,46 +1,44 @@
 package de.culture4life.luca.network;
 
-import androidx.test.platform.app.InstrumentationRegistry;
-
-import org.junit.Assert;
+import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Test;
 
 import de.culture4life.luca.BuildConfig;
-import de.culture4life.luca.LucaApplication;
+import de.culture4life.luca.LucaInstrumentationTest;
 import de.culture4life.luca.network.endpoints.LucaEndpointsV3;
 import de.culture4life.luca.network.pojo.DailyKeyPair;
 import de.culture4life.luca.network.pojo.UserDeletionRequestData;
 import retrofit2.HttpException;
 
-public class NetworkManagerTest {
+public class NetworkManagerTest extends LucaInstrumentationTest {
 
-    private LucaApplication application;
     private NetworkManager networkManager;
     private LucaEndpointsV3 lucaEndpoints;
 
     @Before
     public void setup() {
-        application = (LucaApplication) InstrumentationRegistry.getInstrumentation().getTargetContext().getApplicationContext();
-        application.getCryptoManager().initialize(application).blockingAwait();
-        networkManager = application.getNetworkManager();
-        networkManager.doInitialize(application).blockingAwait();
+        networkManager = getInitializedManager(application.getNetworkManager());
         lucaEndpoints = networkManager.getLucaEndpointsV3().blockingGet();
     }
 
     @Test
-    public void getDailyKeyPairPublicKey_call_isSuccessful() {
-        DailyKeyPair response = lucaEndpoints.getDailyKeyPair().blockingGet();
-        Assert.assertFalse(response.getPublicKey().isEmpty());
+    public void getDailyKeyPairPublicKey_call_isSuccessful() throws InterruptedException {
+        lucaEndpoints.getDailyKeyPair()
+                .map(DailyKeyPair::getPublicKey)
+                .map(String::isEmpty)
+                .test().await()
+                .assertValue(false);
     }
 
-    @Test(expected = HttpException.class)
-    public void deleteUser_invalidRequestBody_fails() {
-        if (BuildConfig.DEBUG) {
-            UserDeletionRequestData data = new UserDeletionRequestData("...");
-            lucaEndpoints.deleteUser("9a5c8715-2810-4e17-a3c9-0c8190507dd5", data)
-                    .blockingAwait();
-        }
+    @Test
+    public void deleteUser_invalidRequestBody_fails() throws InterruptedException {
+        Assume.assumeTrue(BuildConfig.DEBUG);
+        initializeManager(application.getCryptoManager());
+        UserDeletionRequestData data = new UserDeletionRequestData("...");
+        lucaEndpoints.deleteUser("9a5c8715-2810-4e17-a3c9-0c8190507dd5", data)
+                .test().await()
+                .assertError(HttpException.class);
     }
 
 }

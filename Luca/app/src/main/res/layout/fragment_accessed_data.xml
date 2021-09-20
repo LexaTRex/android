@@ -48,6 +48,7 @@
         android:id="@+id/emptyTitleTextView"
         style="@style/EmptyStateTitleTextView"
         android:text="@string/accessed_data_empty_title"
+        android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/headingSeparatorView" />
@@ -56,6 +57,7 @@
         android:id="@+id/emptyDescriptionTextView"
         style="@style/EmptyStateDescriptionTextView"
         android:text="@string/accessed_data_empty_description"
+        android:visibility="gone"
         app:layout_constraintEnd_toEndOf="@id/emptyTitleTextView"
         app:layout_constraintStart_toStartOf="@id/emptyTitleTextView"
         app:layout_constraintTop_toBottomOf="@id/emptyTitleTextView" />
@@ -63,6 +65,7 @@
     <ImageView
         android:id="@+id/emptyImageView"
         style="@style/EmptyStateImageView"
+        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="@id/emptyDescriptionTextView"
         app:layout_constraintStart_toStartOf="@id/emptyDescriptionTextView"

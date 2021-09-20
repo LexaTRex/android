@@ -1,9 +1,6 @@
 package de.culture4life.luca.preference;
 
-import android.content.Context;
-
 import androidx.test.ext.junit.runners.AndroidJUnit4;
-import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.nexenio.rxpreferences.provider.EncryptedSharedPreferencesProvider;
 
@@ -12,10 +9,11 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.util.HashMap;
-import java.util.List;
+
+import de.culture4life.luca.LucaInstrumentationTest;
 
 @RunWith(AndroidJUnit4.class)
-public class EncryptedSharedPreferencesProviderTest {
+public class EncryptedSharedPreferencesProviderTest extends LucaInstrumentationTest {
 
     private static final String TEST_KEY = "test key";
     private static final HashMap<String, String> TEST_DATA = new HashMap<>();
@@ -24,21 +22,23 @@ public class EncryptedSharedPreferencesProviderTest {
 
     @Before
     public void setUp() {
-        Context context = InstrumentationRegistry.getInstrumentation().getTargetContext();
-        provider = new EncryptedSharedPreferencesProvider(context);
+        provider = new EncryptedSharedPreferencesProvider(application);
         TEST_DATA.put("a", "b");
     }
 
     @Test
     public void containsKey_notExisting_returnsFalse() {
-        provider.containsKey("not existing").test().assertValue(false);
+        provider.containsKey("not existing")
+                .test()
+                .assertValue(false);
     }
 
     @Test
     public void containsKey_existingKey_returnsTrue() {
         provider.persist(TEST_KEY, TEST_DATA)
                 .andThen(provider.containsKey(TEST_KEY))
-                .test().assertValue(true);
+                .test()
+                .assertValue(true);
     }
 
     @Test
@@ -46,7 +46,8 @@ public class EncryptedSharedPreferencesProviderTest {
         provider.persist(TEST_KEY, TEST_DATA)
                 .andThen(provider.restore(TEST_KEY, TEST_DATA.getClass()))
                 .map(testData -> testData.get("a"))
-                .test().assertValue(TEST_DATA.get("a"));
+                .test()
+                .assertValue(TEST_DATA.get("a"));
     }
 
     @Test
@@ -54,7 +55,8 @@ public class EncryptedSharedPreferencesProviderTest {
         provider.persist(TEST_KEY, TEST_DATA)
                 .andThen(provider.delete(TEST_KEY))
                 .andThen(provider.containsKey(TEST_KEY))
-                .test().assertValue(false);
+                .test()
+                .assertValue(false);
     }
 
     @Test
@@ -63,9 +65,9 @@ public class EncryptedSharedPreferencesProviderTest {
                 .andThen(provider.persist("another key", "whatever"))
                 .andThen(provider.deleteAll())
                 .andThen(provider.getKeys())
-                .toList()
-                .map(List::size)
-                .test().assertValue(0);
+                .isEmpty()
+                .test()
+                .assertValue(true);
     }
 
 }

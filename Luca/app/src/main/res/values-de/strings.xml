@@ -202,6 +202,7 @@
 
     <string name="venue_property_table">Tisch</string>
     <string name="venue_property_patient_name">Name des Patienten</string>
+    <string name="venue_property_meeting_name">Name</string>
 
     <string name="venue_check_in_action">EINCHECKEN</string>
     <string name="venue_check_in_content_description">Check-in Schalter</string>
@@ -243,7 +244,7 @@
     <string name="venue_check_out_error_generic">Du konntest nicht ausgecheckt werden. Bitte prüfe deine Internetverbindung.</string>
 
     <string name="auto_checkout_info_title">Automatischer Check-out</string>
-    <string name="auto_checkout_info_description">Wenn du diese Funktion aktivierst, wirst du automatisch ausgecheckt, sobald du den Standort verlässt, bei dem du gerade eingecheckt bist.\n\nDazu muss luca auf deinen Standort zugreifen können. Sobald du ausgecheckt wirst, die Standortdienste deaktivierst oder dein Handy neu startest, wird diese Funktion deaktiviert.</string>
+    <string name="auto_checkout_info_description">Wenn du diese Funktion aktivierst, wirst du automatisch ausgecheckt, sobald du den Standort verlässt, bei dem du gerade eingecheckt bist.\n\nDazu muss luca auf deinen Standort zugreifen können. Bei Aktivierung wird der automatische Check-out als Voreinstellung übernommen. Alternativ kannst du ihn beim nächsten Check-in deaktivieren.</string>
     <string name="auto_checkout_location_access_title">Standortzugriff aktivieren</string>
     <string name="auto_checkout_location_access_description">Die Funktion des automatischen Check-outs nutzt Geofencing. Wenn ein luca-Standort diese Funktion verwendet, kannst du durch die Nutzung der Standortdienste deines Handys automatisch auschecken, selbst wenn die App geschlossen ist. Dies erfolgt nur aufgrund deiner Einwilligung gem. Art. 6 (1) 1 a) DSGVO (mehr: <a href="https://www.luca-app.de/app-privacy-policy/">Datenschutzerklärung - App</a>. Natürlich kannst du dich auch jederzeit manuell auschecken.</string>
     <string name="auto_checkout_background_location_access_title">@string/auto_checkout_location_access_title</string>
@@ -279,18 +280,17 @@
     <string name="history_check_out_details">Trace ID: <xliff:g example="NQqYEFIVbxqh5FFRxbfD5A==" id="traceId">%1$s</xliff:g></string>
     <string name="history_meeting_started_title">@string/history_meeting_ended_title</string>
     <string name="history_meeting_ended_title">Privates Treffen</string>
-    <string name="history_meeting_ended_description"><xliff:g example="- John Doe\n- Jane Doe" id="members">%1$s</xliff:g></string>
-    <string name="history_meeting_not_empty_description">Gäste: <xliff:g example="3" id="guestsCount">%1$d</xliff:g></string>
+    <string name="history_meeting_ended_description"><xliff:g example="- John Doe\n- Jane Doe" id="guests">%1$s</xliff:g></string>
+    <string name="history_meeting_not_empty_description">Gäste: <xliff:g example="John Doe, Jane Doe" id="guests">%1$s</xliff:g></string>
     <string name="history_meeting_empty_description">Kein Gast wurde eingecheckt</string>
     <string name="history_data_cleared_title">Historie geleert</string>
     <string name="history_data_cleared_description">Alle Einträge wurden von diesem Gerät entfernt.</string>
-    <string name="history_data_accessed_details">Im Rahmen einer Kontaktnachverfolgung wurden die Daten dieses Check-Ins von einem Gesundheitsamt entschlüsselt.</string>
     <string name="history_data_shared_title">Daten freigegeben</string>
     <string name="history_data_shared_description">Du hast deine Kontaktdaten und Historie der letzten <xliff:g example="14" id="count">%1$d</xliff:g>&#160;Tage für das Gesundheitsamt freigegeben.</string>
     <string name="history_clear_title">Möchtest du deine Historie wirklich leeren?</string>
     <string name="history_clear_description">Vergangene Einträge werden in deiner App nicht mehr angezeigt, bleiben aber noch bis zu 28&#160;Tage im System und werden bei einer Datenfreigabe mit dem Gesundheitsamt geteilt.</string>
     <string name="history_clear_action">Leeren</string>
-    <string name="history_children_title">Kinder: <xliff:g example="1" id="count">%1$d</xliff:g></string>
+    <string name="history_children_title">Kinder: <xliff:g example="John Doe, Jane Doe" id="children">%1$s</xliff:g></string>
 
     <!-- Accessed Data -->
     <string name="accessed_data_heading">Meldungen</string>

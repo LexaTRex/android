@@ -6,7 +6,6 @@ import androidx.annotation.NonNull;
 
 import com.google.gson.GsonBuilder;
 import com.nexenio.rxpreferences.provider.BasePreferencesProvider;
-import com.nexenio.rxpreferences.provider.EncryptedSharedPreferencesProvider;
 import com.nexenio.rxpreferences.provider.InMemoryPreferencesProvider;
 import com.nexenio.rxpreferences.provider.PreferencesProvider;
 import com.nexenio.rxpreferences.serializer.GsonSerializer;
@@ -19,12 +18,9 @@ import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Maybe;
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.core.Single;
-import timber.log.Timber;
 
 public class PreferencesManager extends Manager implements PreferencesProvider {
 
-    private static final int VERSION = 1;
-    public static final String LAST_MIGRATION_VERSION_CODE_KEY = "last_migration_version_code";
     public static final GsonSerializer SERIALIZER = new GsonSerializer(new GsonBuilder()
             .setPrettyPrinting()
             .excludeFieldsWithoutExposeAnnotation()
@@ -45,13 +41,7 @@ public class PreferencesManager extends Manager implements PreferencesProvider {
             }
             preferencesProvider.setSerializer(SERIALIZER);
             this.provider = preferencesProvider;
-        }).andThen(migratePreferencesIfRequired()
-                .doOnError(throwable -> Timber.e(throwable, "Unable to migrate preferences"))
-                .onErrorComplete());
-    }
-
-    private Completable migratePreferencesIfRequired() {
-        return Completable.complete();
+        });
     }
 
     private Single<PreferencesProvider> getInitializedProvider() {
@@ -127,7 +117,14 @@ public class PreferencesManager extends Manager implements PreferencesProvider {
     @Override
     public Completable deleteAll() {
         return getInitializedProvider()
-                .flatMapCompletable(PreferencesProvider::deleteAll);
+                .flatMapCompletable(preferencesProvider -> preferencesProvider.deleteAll()
+                        .andThen(Completable.defer(() -> {
+                            if (preferencesProvider instanceof EncryptedSharedPreferencesProvider) {
+                                return ((EncryptedSharedPreferencesProvider) preferencesProvider).deletePreferencesFile(context);
+                            } else {
+                                return Completable.complete();
+                            }
+                        })));
     }
 
 }
