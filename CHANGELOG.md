@@ -1,3 +1,7 @@
+# Release 2.0.1
+
+Prominent disclosure before asking for camera permission
+
 # Release 2.0.0
 
 - Check-in and history redesign

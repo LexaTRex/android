@@ -85,7 +85,8 @@ class CheckInFragment : BaseFragment<CheckInViewModel>() {
     private fun checkCameraPermission() {
         if (cameraPreviewDisposable != null) return
         val isCameraPermissionGranted = checkIfCameraPermissionWasGranted()
-        if (isCameraPermissionGranted) showCameraPreview()
+        val shouldCameraBeActive = viewModel.showCameraPreview.value == true
+        if (isCameraPermissionGranted && shouldCameraBeActive) showCameraPreviewOrConsent()
     }
 
     private fun initializeObservers() {
@@ -133,7 +134,7 @@ class CheckInFragment : BaseFragment<CheckInViewModel>() {
                     .apply {
                         onDismissListener =
                             DialogInterface.OnDismissListener {
-                                showCameraPreview()
+                                showCameraPreviewOrConsent()
                             }
                     }
                     .show()
@@ -158,15 +159,21 @@ class CheckInFragment : BaseFragment<CheckInViewModel>() {
                 }
             }
         }
-
         observe(viewModel.bundle) { bundle: Bundle? -> processBundle(bundle) }
+        observe(viewModel.showCameraPreview) { isActive: Boolean ->
+            if (isActive) {
+                showCameraPreview()
+            } else {
+                hideCameraPreview()
+            }
+        }
     }
 
     private fun setOnClickListeners() {
         binding.showQrCodeButton.setOnClickListener { showQrCodeBottomSheet() }
         binding.createMeetingButton.setOnClickListener { showCreatePrivateMeetingDialog() }
         binding.requestCameraPermissionLinearLayout.setOnClickListener {
-            showCameraPreview()
+            showCameraPreviewOrConsent()
         }
         binding.flashLightButtonImageView.setOnClickListener { toggleFlashlight() }
         binding.historyTextView.setOnClickListener {
@@ -182,6 +189,18 @@ class CheckInFragment : BaseFragment<CheckInViewModel>() {
     private fun setTorchEnabled(isEnabled: Boolean) {
         camera?.cameraControl?.enableTorch(isEnabled)
         binding.flashLightButtonImageView.setImageResource(if (isEnabled) R.drawable.ic_flashlight_off else R.drawable.ic_flashlight_on)
+    }
+
+    private fun showCameraPreviewOrConsent() {
+        viewDisposable.add(viewModel.isCameraConsentGiven
+            .subscribe { isCameraConsentGiven: Boolean ->
+                if (isCameraConsentGiven) {
+                    showCameraPreview()
+                } else {
+                    showCameraDialog(false)
+                }
+            }
+        )
     }
 
     private fun showCameraPreview() {
@@ -394,10 +413,9 @@ class CheckInFragment : BaseFragment<CheckInViewModel>() {
             )
             .setNegativeButton(R.string.action_cancel) { dialog, _ ->
                 if (viewModel.isCurrentDestinationId(R.id.checkInFragment)) {
-                    showCameraPreview()
+                    showCameraPreviewOrConsent()
                 }
                 isCheckinDialogVisible = false
-
                 dialog.cancel()
             }
             .setPositiveButton(R.string.action_confirm) { _, _ ->

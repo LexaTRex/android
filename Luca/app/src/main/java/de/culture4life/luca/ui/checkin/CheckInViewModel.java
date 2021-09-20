@@ -118,6 +118,10 @@ public class CheckInViewModel extends BaseQrCodeViewModel {
                 .andThen(application.getPreferencesManager().restore(USER_ID_KEY, UUID.class)
                         .doOnSuccess(uuid -> this.userId = uuid)
                         .ignoreElement())
+                .andThen(Completable.fromAction(() -> modelDisposable.add(isCameraConsentGiven()
+                        .flatMapCompletable(cameraConsentGiven -> update(showCameraPreview, cameraConsentGiven))
+                        .delaySubscription(100, TimeUnit.MILLISECONDS)
+                        .subscribe())))
                 .doOnComplete(this::handleApplicationDeepLinkIfAvailable);
     }
 
