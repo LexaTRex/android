@@ -14,4 +14,19 @@ public class LucaInstrumentationTest {
         return (LucaApplication) InstrumentationRegistry.getInstrumentation().getTargetContext().getApplicationContext();
     }
 
+    protected <ManagerType extends Manager> ManagerType getInitializedManager(ManagerType manager) {
+        initializeManager(manager);
+        return manager;
+    }
+
+    protected <ManagerType extends Manager> void initializeManager(ManagerType manager) {
+        manager.initialize(application).blockingAwait();
+    }
+
+    protected <ManagerType extends Manager> void initializeManagers(ManagerType... managers) {
+        for (ManagerType manager : managers) {
+            initializeManager(manager);
+        }
+    }
+
 }

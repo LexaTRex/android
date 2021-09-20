@@ -2,7 +2,6 @@ package de.culture4life.luca.ui.accesseddata
 
 import android.app.Application
 import androidx.lifecycle.MutableLiveData
-import de.culture4life.luca.dataaccess.AccessedData
 import de.culture4life.luca.ui.BaseViewModel
 import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.schedulers.Schedulers
@@ -27,12 +26,13 @@ class AccessedDataViewModel(application: Application) : BaseViewModel(applicatio
     private fun invokeAccessedDataUpdate(): Completable {
         return Completable.fromAction {
             modelDisposable.add(updateAccessedDataItems()
+                .doOnSubscribe { updateAsSideEffect(isLoading, true) }
+                .doFinally { updateAsSideEffect(isLoading, false) }
                 .subscribeOn(Schedulers.io())
                 .subscribe(
-                    { Timber.i("Updated accessed data") }
-                ) { throwable ->
-                    Timber.w("Unable to update accessed data: %s", throwable.toString())
-                })
+                    { Timber.i("Updated accessed data") },
+                    { throwable -> Timber.w("Unable to update accessed data: %s", throwable.toString()) }
+                ))
         }
     }
 

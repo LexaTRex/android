@@ -78,7 +78,17 @@ public class RegistrationManager extends Manager {
                 .toSingle()
                 .flatMapCompletable(userId -> createDeletionData(userId)
                         .flatMapCompletable(data -> networkManager.getLucaEndpointsV3()
-                                .flatMapCompletable(endpoint -> endpoint.deleteUser(userId.toString(), data))));
+                                .flatMapCompletable(endpoint -> endpoint.deleteUser(userId.toString(), data))
+                                .onErrorResumeNext(throwable -> {
+                                    if (NetworkManager.isHttpException(throwable, 403)) {
+                                        // The deletion failed because the signature verification failed.
+                                        // However, this is an unrecoverable error that prevents the user
+                                        // from deleting the account manually, thus we treat it as success.
+                                        return Completable.complete();
+                                    } else {
+                                        return Completable.error(throwable);
+                                    }
+                                })));
     }
 
     protected Single<UserDeletionRequestData> createDeletionData(@NonNull UUID userIdParam) {
@@ -88,6 +98,7 @@ public class RegistrationManager extends Manager {
                 .flatMap(data -> cryptoManager.getGuestKeyPairPrivateKey()
                         .flatMap(userMasterPrivateKey -> cryptoManager.getSignatureProvider().sign(data, userMasterPrivateKey))
                         .flatMap(SerializationUtil::serializeToBase64)
+                        .onErrorReturnItem("")
                         .map(UserDeletionRequestData::new)
                 );
     }

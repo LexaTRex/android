@@ -43,8 +43,8 @@ public class MainActivity extends BaseActivity {
                 .setInstallDays(2)
                 .setLaunchTimes(7)
                 .monitor())
-            .subscribeOn(Schedulers.io())
-            .subscribe();
+                .subscribeOn(Schedulers.io())
+                .subscribe();
     }
 
     private void initializeNavigation() {

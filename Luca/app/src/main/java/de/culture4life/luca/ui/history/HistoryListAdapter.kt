@@ -42,6 +42,8 @@ class HistoryListAdapter(context: Context, resource: Int, private val showTimeLi
             R.layout.history_list_item, container, false
         )
 
+        view.setOnClickListener(null)
+
         val item = getItem(position)!!
         val dotView = view.findViewById<View>(R.id.dotView)
         val topLineView = view.findViewById<View>(R.id.topLineView)
@@ -57,6 +59,7 @@ class HistoryListAdapter(context: Context, resource: Int, private val showTimeLi
         titleTextView.text = item.title
         descriptionTextView.text = item.description
         descriptionTextView.visibility = if (item.description != null) View.VISIBLE else View.GONE
+
         with(titleImageView) {
             if (item.additionalTitleDetails != null) {
                 setImageResource(item.titleIconResourceId)
@@ -72,7 +75,6 @@ class HistoryListAdapter(context: Context, resource: Int, private val showTimeLi
                 }
             } else {
                 visibility = View.GONE
-                view.setOnClickListener(null)
             }
         }
         with(descriptionImageView) {
@@ -94,7 +96,7 @@ class HistoryListAdapter(context: Context, resource: Int, private val showTimeLi
         val isNew = item.accessedTraceData.any { it.isNew }
         val color = ContextCompat.getColor(
             context,
-            if (isNew) R.color.highlightColor else android.R.color.white
+            if (isNew) R.color.highlightColor else R.color.primaryColor
         )
         titleTextView.setTextColor(color)
         dotView.background.setTint(color)

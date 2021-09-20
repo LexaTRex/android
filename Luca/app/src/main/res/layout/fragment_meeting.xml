@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/luca_light_blue"
-    tools:context="de.culture4life.luca.ui.qrcode.QrCodeFragment">
+    tools:context=".ui.meeting.MeetingFragment">
 
     <TextView
         android:id="@+id/headingTextView"

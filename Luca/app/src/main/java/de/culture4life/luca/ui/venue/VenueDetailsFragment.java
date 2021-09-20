@@ -78,7 +78,7 @@ public class VenueDetailsFragment extends BaseFragment<VenueDetailsViewModel> {
         viewDisposable.add(viewModel.updateLocationServicesStatus()
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeOn(Schedulers.io())
-                .doOnError(throwable -> Timber.w("Error updating location services status. " + throwable.getMessage()))
+                .doOnError(throwable -> Timber.w("Error updating location services status. %s", throwable.getMessage()))
                 .subscribe());
     }
 
@@ -162,6 +162,8 @@ public class VenueDetailsFragment extends BaseFragment<VenueDetailsViewModel> {
             }
         });
 
+        automaticCheckoutSwitch.setOnClickListener(view -> viewModel.setAutomaticCheckoutActiveAsDefault(automaticCheckoutSwitch.isChecked()));
+
         observe(viewModel.getShouldEnableAutomaticCheckOut(), isActive -> automaticCheckoutSwitch.setChecked(isActive));
 
         observe(viewModel.getShouldEnableLocationServices(), shouldEnable -> {
@@ -215,10 +217,11 @@ public class VenueDetailsFragment extends BaseFragment<VenueDetailsViewModel> {
     }
 
     private void updateAutoCheckoutViewsVisibility() {
-        boolean enable = viewModel.getHasLocationRestriction().getValue() && viewModel.getIsGeofencingSupported().getValue();
+        boolean hasLocationRestriction = viewModel.getHasLocationRestriction().getValue();
+        boolean enable = hasLocationRestriction && viewModel.getIsGeofencingSupported().getValue();
         getView().findViewById(R.id.automaticCheckOutTextView).setVisibility(enable ? View.VISIBLE : View.GONE);
         getView().findViewById(R.id.automaticCheckoutInfoImageView).setVisibility(enable ? View.VISIBLE : View.GONE);
-        automaticCheckoutSwitch.setVisibility(enable ? View.VISIBLE : View.GONE);
+        automaticCheckoutSwitch.setVisibility(hasLocationRestriction ? View.VISIBLE : View.GONE);
     }
 
     @Override

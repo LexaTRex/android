@@ -100,6 +100,7 @@ public class MyLucaViewModel extends BaseQrCodeViewModel {
                         childrenManager.initialize(application),
                         dataAccessManager.initialize(application)
                 ))
+                .andThen(update(showCameraPreview, false))
                 .andThen(updateUserName())
                 .andThen(invokeListUpdate())
                 .andThen(invokeIsGenuineTimeUpdate())

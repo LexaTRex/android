@@ -34,7 +34,8 @@ import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 import timber.log.Timber;
 
-import static de.culture4life.luca.history.HistoryManager.createUnorderedList;
+import static de.culture4life.luca.history.HistoryManager.createCsv;
+import static de.culture4life.luca.history.HistoryManager.createOrderedList;
 import static de.culture4life.luca.ui.history.HistoryFragment.NO_WARNING_LEVEL_FILTER;
 
 public class HistoryViewModel extends BaseViewModel {
@@ -200,13 +201,8 @@ public class HistoryViewModel extends BaseViewModel {
                             .toList().blockingGet();
                     boolean accessed = !accessedTraceData.isEmpty();
                     item.setAccessedTraceData(accessedTraceData);
-                    if (accessed) {
-                        item.setAdditionalTitleDetails(application.getString(R.string.history_data_accessed_details));
-                        item.setTitleIconResourceId(R.drawable.ic_eye);
-                    } else {
-                        item.setAdditionalTitleDetails(application.getString(R.string.history_check_out_details, checkOutItem.getRelatedId()));
-                        item.setTitleIconResourceId(R.drawable.ic_information_outline);
-                    }
+                    item.setAdditionalTitleDetails(application.getString(R.string.history_check_out_details, checkOutItem.getRelatedId()));
+                    item.setTitleIconResourceId(accessed ? R.drawable.ic_eye : R.drawable.ic_information_outline);
 
                     List<String> children = checkOutItem.getChildren();
                     if (children != null && !children.isEmpty()) {
@@ -216,9 +212,11 @@ public class HistoryViewModel extends BaseViewModel {
                             builder = builder.append(currentDescription)
                                     .append(System.lineSeparator());
                         }
-                        builder = builder.append(application.getString(R.string.history_children_title, children.size()));
+                        String childrenCsv = createCsv(children);
+                        builder = builder.append(application.getString(R.string.history_children_title, childrenCsv));
                         item.setDescription(builder.toString());
-                        item.setAdditionalDescriptionDetails(application.getString(R.string.history_children_description, HistoryManager.createOrderedList(children)));
+                        String childrenList = createOrderedList(children);
+                        item.setAdditionalDescriptionDetails(application.getString(R.string.history_children_description, childrenList));
                         item.setDescriptionIconResourceId(R.drawable.ic_information_outline);
                     }
                     break;
@@ -233,14 +231,11 @@ public class HistoryViewModel extends BaseViewModel {
                     if (meetingEndedItem.getGuests().isEmpty()) {
                         item.setDescription(application.getString(R.string.history_meeting_empty_description));
                     } else {
-                        int guestsCount = meetingEndedItem.getGuests().size();
-                        item.setDescription(application.getString(R.string.history_meeting_not_empty_description, guestsCount));
-                        String guestList = createUnorderedList(meetingEndedItem.getGuests());
-                        if (guestList.isEmpty()) {
-                            guestList = getApplication().getString(R.string.history_meeting_empty_description);
-                        }
-                        item.setAdditionalTitleDetails(application.getString(R.string.history_meeting_ended_description, guestList));
-                        item.setTitleIconResourceId(R.drawable.ic_information_outline);
+                        String guestCsv = createCsv(meetingEndedItem.getGuests());
+                        item.setDescription(application.getString(R.string.history_meeting_not_empty_description, guestCsv));
+                        String guestList = createOrderedList(meetingEndedItem.getGuests());
+                        item.setAdditionalDescriptionDetails(application.getString(R.string.history_meeting_ended_description, guestList));
+                        item.setDescriptionIconResourceId(R.drawable.ic_information_outline);
                     }
                     break;
                 }

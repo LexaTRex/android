@@ -103,7 +103,7 @@
         app:layout_constraintBottom_toBottomOf="@id/itemTitleTextView"
         app:layout_constraintStart_toEndOf="@id/itemTitleTextView"
         app:layout_constraintTop_toTopOf="@id/itemTitleTextView"
-        app:tint="?attr/colorOnSurface" />
+        app:tint="@color/primaryColor" />
 
     <ImageView
         android:id="@+id/itemDescriptionImageView"
@@ -118,7 +118,7 @@
         app:layout_constraintBottom_toBottomOf="@id/itemDescriptionTextView"
         app:layout_constraintStart_toEndOf="@id/itemDescriptionTextView"
         app:layout_constraintTop_toTopOf="@id/itemDescriptionTextView"
-        app:tint="?attr/colorOnSurface" />
+        app:tint="@color/primaryColor" />
 
     <ImageView
         android:id="@+id/itemImageView"
@@ -132,6 +132,6 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:tint="?attr/colorOnSurface" />
+        app:tint="@color/primaryColor" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

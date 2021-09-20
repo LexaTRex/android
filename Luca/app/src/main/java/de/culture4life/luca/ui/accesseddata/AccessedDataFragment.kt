@@ -2,7 +2,6 @@ package de.culture4life.luca.ui.accesseddata
 
 import android.os.Bundle
 import android.view.View
-import androidx.navigation.fragment.FragmentNavigator
 import androidx.viewbinding.ViewBinding
 import de.culture4life.luca.R
 import de.culture4life.luca.databinding.FragmentAccessedDataBinding
@@ -41,21 +40,14 @@ class AccessedDataFragment : BaseFragment<AccessedDataViewModel>() {
         val traceId = arguments?.getString(KEY_TRACE_ID) ?: ""
         val warningLevel = arguments?.getInt(HistoryFragment.KEY_WARNING_LEVEL_FILTER, NO_WARNING_LEVEL_FILTER) ?: NO_WARNING_LEVEL_FILTER
         with(binding) {
-            accessedDataListAdapter = AccessedDataListAdapter(
-                requireContext(), accessedDataListView.id
-            )
+            accessedDataListAdapter = AccessedDataListAdapter(requireContext(), accessedDataListView.id)
             accessedDataListView.adapter = accessedDataListAdapter
             accessedDataListView.setOnItemClickListener { _, _, position, _ ->
-                val item = accessedDataListAdapter.getItem(
-                    position - accessedDataListView.headerViewsCount
-                )
+                val item = accessedDataListAdapter.getItem(position - accessedDataListView.headerViewsCount)
                 val bundle = Bundle().apply {
                     putSerializable(AccessedDataDetailFragment.KEY_ACCESSED_DATA_LIST_ITEM, item)
                 }
-                safeNavigateFromNavController(
-                    R.id.action_accessedDataFragment_to_accessedDataDetailFragment,
-                    bundle
-                )
+                safeNavigateFromNavController(R.id.action_accessedDataFragment_to_accessedDataDetailFragment, bundle)
             }
             observe(viewModel.accessedDataItems) { allItems ->
                 val items = allItems

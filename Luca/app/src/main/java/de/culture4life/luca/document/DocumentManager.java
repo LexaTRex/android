@@ -186,9 +186,6 @@ public class DocumentManager extends Manager {
      * @param document document object to redeem
      */
     public Completable redeemDocument(@NonNull Document document) {
-        if (BuildConfig.DEBUG) {
-            return Completable.complete();
-        }
         return networkManager.getLucaEndpointsV3()
                 .flatMapCompletable(lucaEndpointsV3 -> Single.zip(generateEncodedDocumentHash(document), generateOrRestoreDocumentTag(document), (hash, tag) -> {
                     JsonObject jsonObject = jsonObjectWith(hash, tag);

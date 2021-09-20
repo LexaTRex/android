@@ -72,7 +72,6 @@ public abstract class BaseViewModel extends AndroidViewModel {
     public Completable initialize() {
         return updateRequiredPermissions()
                 .andThen(preferencesManager.initialize(application))
-                .andThen(update(showCameraPreview, false))
                 .andThen(navigateForDeepLinkIfAvailable());
     }
 

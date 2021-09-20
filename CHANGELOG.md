@@ -1,3 +1,10 @@
+# Release 2.0.2
+
+- Bug fixes
+- UX improvements
+
+This update includes bug fixes related to the check-in as well as some UX improvements.
+
 # Release 2.0.0
 
 - Check-in and history redesign

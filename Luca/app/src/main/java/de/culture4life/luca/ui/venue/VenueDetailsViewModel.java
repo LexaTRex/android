@@ -14,6 +14,9 @@ import androidx.core.app.ActivityCompat;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonNull;
+import com.google.gson.JsonPrimitive;
 import com.tbruyelle.rxpermissions3.Permission;
 
 import java.util.List;
@@ -42,6 +45,7 @@ import timber.log.Timber;
 public class VenueDetailsViewModel extends BaseViewModel {
 
     public static final String KEY_LOCATION_CONSENT_GIVEN = "location_consent_given";
+    public static final String KEY_AUTOMATIC_CHECKOUT_ENABLED = "automatic_checkout_enabled";
 
     private final PreferencesManager preferenceManager;
     private final ChildrenManager childrenManager;
@@ -89,6 +93,8 @@ public class VenueDetailsViewModel extends BaseViewModel {
                         geofenceManager.initialize(application),
                         locationManager.initialize(application)
                 ))
+                .andThen(geofenceManager.isGeofencingSupported()
+                        .flatMapCompletable(supported -> update(isGeofencingSupported, supported)))
                 .andThen(initializeAutomaticCheckout())
                 .andThen(checkInManager.isCheckedIn()
                         .flatMapCompletable(checkedIn -> update(isCheckedIn, checkedIn)))
@@ -110,23 +116,24 @@ public class VenueDetailsViewModel extends BaseViewModel {
     }
 
     private Completable initializeAutomaticCheckout() {
-        return checkInManager.isAutomaticCheckoutEnabled()
-                .flatMapCompletable(automaticCheckoutEnabled -> Completable.defer(() -> {
-                    if (automaticCheckoutEnabled) {
+        return Single.zip(checkInManager.isAutomaticCheckoutEnabled(), preferenceManager.restoreOrDefault(KEY_AUTOMATIC_CHECKOUT_ENABLED, false),
+                (isGeofenceActive, automaticCheckoutEnabled) -> Completable.defer(() -> {
+                    if (isGeofenceActive) {
                         return startObservingAutomaticCheckOutErrors();
                     } else {
                         return Completable.complete();
                     }
-                }).andThen(update(shouldEnableAutomaticCheckOut, automaticCheckoutEnabled)));
+                }).andThen(update(shouldEnableAutomaticCheckOut, isGeofenceActive || automaticCheckoutEnabled)))
+                .flatMapCompletable(method -> method);
     }
 
     public Completable updateLocationServicesStatus() {
-        return geofenceManager.isGeofencingSupported()
-                .flatMapCompletable(supported -> {
-                    if (!supported) {
+        return Single.fromCallable(this::isLocationServiceEnabled)
+                .flatMapCompletable(enabled -> {
+                    if (!enabled) {
                         disableAutomaticCheckout();
                     }
-                    return update(isGeofencingSupported, supported);
+                    return update(shouldEnableLocationServices, !enabled);
                 });
     }
 
@@ -182,13 +189,13 @@ public class VenueDetailsViewModel extends BaseViewModel {
                     updateAsSideEffect(showAdditionalData, !properties.keySet().isEmpty());
                     for (String key : properties.keySet()) {
                         updateAsSideEffect(additionalDataTitle, getAdditionalDataTitle(key));
-                        updateAsSideEffect(additionalDataValue, properties.get(key).toString());
+                        updateAsSideEffect(additionalDataValue, getAdditionalDataValue(properties.get(key)));
                     }
                 }));
     }
 
     private Completable updateReadableCheckInTime(long timestamp) {
-        return Single.fromCallable(() -> TimeUtil.getReadableTime(application,timestamp))
+        return Single.fromCallable(() -> TimeUtil.getReadableTime(application, timestamp))
                 .flatMapCompletable(readableTime -> update(checkInTime, readableTime));
     }
 
@@ -303,7 +310,6 @@ public class VenueDetailsViewModel extends BaseViewModel {
         if (checkInManager.isAutomaticCheckoutEnabled().blockingGet() || !enableAutomaticCheckoutActivation()) {
             return;
         }
-
         modelDisposable.add(checkInManager.enableAutomaticCheckOut()
                 .andThen(update(shouldEnableAutomaticCheckOut, true))
                 .andThen(startObservingAutomaticCheckOutErrors())
@@ -491,10 +497,24 @@ public class VenueDetailsViewModel extends BaseViewModel {
             readableProperty = application.getString(R.string.venue_property_table);
         } else if (property.equals("patient")) {
             readableProperty = application.getString(R.string.venue_property_patient_name);
+        } else if (property.equals("ln")) {
+            readableProperty = application.getString(R.string.venue_property_meeting_name);
         } else {
             readableProperty = property.substring(0, 1).toUpperCase() + property.substring(1);
         }
         return readableProperty + ":";
+    }
+
+    private String getAdditionalDataValue(@Nullable JsonElement jsonElement) {
+        if (jsonElement == null || jsonElement instanceof JsonNull) {
+            return application.getString(R.string.unknown);
+        } else if (jsonElement.isJsonPrimitive()) {
+            JsonPrimitive jsonPrimitive = jsonElement.getAsJsonPrimitive();
+            if (jsonPrimitive.isString()) {
+                return jsonPrimitive.getAsString();
+            }
+        }
+        return jsonElement.toString();
     }
 
     /*
@@ -565,6 +585,13 @@ public class VenueDetailsViewModel extends BaseViewModel {
         this.bundle.setValue(bundle);
     }
 
+    public void setAutomaticCheckoutActiveAsDefault(boolean shouldBeActive) {
+        preferenceManager.persist(KEY_AUTOMATIC_CHECKOUT_ENABLED, shouldBeActive)
+                .onErrorComplete()
+                .subscribeOn(Schedulers.io())
+                .subscribe();
+    }
+
     public static String getReadableDuration(long duration) {
         long seconds = Math.abs(duration / 1000);
         long hours = seconds / 3600;
@@ -572,4 +599,5 @@ public class VenueDetailsViewModel extends BaseViewModel {
         seconds = (seconds % 3600) % 60;
         return String.format(Locale.GERMANY, "%02d:%02d:%02d", hours, minutes, seconds);
     }
+
 }

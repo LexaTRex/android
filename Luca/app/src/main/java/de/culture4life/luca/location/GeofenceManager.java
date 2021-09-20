@@ -87,18 +87,13 @@ public class GeofenceManager extends Manager {
         });
     }
 
-    private boolean isLocationEnabled(Context context) {
-        android.location.LocationManager locationManager = (android.location.LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
-        return locationManager != null && LocationManagerCompat.isLocationEnabled(locationManager);
-    }
-
     /**
      * The Google Play Services are required for the current geofencing implementation, which are
      * not available on every device.
      */
     public Single<Boolean> isGeofencingSupported() {
         return Maybe.fromCallable(() -> geofenceClient)
-                .map(geofencingClient -> isLocationEnabled(context))
+                .map(geofencingClient -> true)
                 .defaultIfEmpty(false);
     }
 

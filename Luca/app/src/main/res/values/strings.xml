@@ -204,6 +204,7 @@
 
     <string name="venue_property_table">Table</string>
     <string name="venue_property_patient_name">Patient name</string>
+    <string name="venue_property_meeting_name">Name</string>
 
     <string name="venue_check_in_action">CHECK IN</string>
     <string name="venue_check_in_content_description">Check-in button</string>
@@ -245,7 +246,7 @@
     <string name="venue_check_out_error_generic">Unable to check you out right now. Please make sure that you are connected to the internet.</string>
 
     <string name="auto_checkout_info_title">Automatic check-out</string>
-    <string name="auto_checkout_info_description">Activating this feature will check you out automatically as soon as you leave the location you\'re currently checked in at.\n\nLuca needs to have access to your location for this to work. Checking out, disabling location services or restarting your device will disable this feature.</string>
+    <string name="auto_checkout_info_description">Activating this feature will check you out automatically as soon as you leave the location that you\'re checked in at.\n\nluca needs to have access to your location for this to work. When activated, automatic check-out is set by default, but you can deactivate it during your next check-in.</string>
     <string name="auto_checkout_location_access_title">Enable location access</string>
     <string name="auto_checkout_location_access_description">This automatic checkout feature uses geofencing. If supported by a luca-location, you can check out automatically using you phone\'s location service, even when the app is closed. This is only done with your consent under art. 6 (1) 1 a) GDPR (more: <a href="https://www.luca-app.de/app-privacy-policy/">data privacy - app</a>). However, you can still check out manually at any time.</string>
     <string name="auto_checkout_background_location_access_title">@string/auto_checkout_location_access_title</string>
@@ -282,19 +283,18 @@
     <string name="history_check_out_details">Trace ID: <xliff:g example="NQqYEFIVbxqh5FFRxbfD5A==" id="traceId">%1$s</xliff:g></string>
     <string name="history_meeting_started_title">@string/history_meeting_ended_title</string>
     <string name="history_meeting_ended_title">Private meeting</string>
-    <string name="history_meeting_ended_description"><xliff:g example="- John Doe\n- Jane Doe" id="members">%1$s</xliff:g></string>
-    <string name="history_meeting_not_empty_description">Guests: <xliff:g example="3" id="guestsCount">%1$d</xliff:g></string>
+    <string name="history_meeting_ended_description"><xliff:g example="- John Doe\n- Jane Doe" id="guests">%1$s</xliff:g></string>
+    <string name="history_meeting_not_empty_description">Guests: <xliff:g example="John Doe, Jane Doe" id="guests">%1$s</xliff:g></string>
     <string name="history_meeting_empty_description">No guests checked in</string>
     <string name="history_data_cleared_title">History cleared</string>
     <string name="history_data_cleared_description">All entries have been removed from this device.</string>
-    <string name="history_data_accessed_details">While contact tracing, a health department has accessed the data from this check-in.</string>
     <string name="history_data_shared_title">Data shared</string>
     <string name="history_data_shared_description">You released your contact data and the last <xliff:g example="14" id="count">%1$d</xliff:g>&#160;days of your history for the health authorities.</string>
     <string name="history_clear_title">Do you really want to clear your history?</string>
     <string name="history_clear_description">Past entries won\'t be displayed in your app anymore, but will stay in the system for up to 28&#160;days and will be shared with the health authorities if you share your data.</string>
     <string name="history_clear_action">Clear</string>
-    <string name="history_children_title">Children: <xliff:g example="1" id="count">%1$d</xliff:g></string>
-    <string name="history_children_description" translatable="false"><xliff:g example="- John Doe\n- Jane Doe" id="members">%1$s</xliff:g></string>
+    <string name="history_children_title">Children: <xliff:g example="John Doe, Jane Doe" id="children">%1$s</xliff:g></string>
+    <string name="history_children_description" translatable="false"><xliff:g example="- John Doe\n- Jane Doe" id="children">%1$s</xliff:g></string>
 
 
     <!-- Accessed Data -->

@@ -361,9 +361,8 @@ public class LucaApplication extends MultiDexApplication {
     public Completable deleteAccount() {
         return documentManager.unredeemAndDeleteAllDocuments()
                 .andThen(registrationManager.deleteRegistrationOnBackend())
-                .andThen(registrationManager.deleteRegistrationData())
-                .andThen(cryptoManager.deleteAllKeyStoreEntries())
-                .andThen(preferencesManager.deleteAll());
+                .andThen(preferencesManager.deleteAll())
+                .andThen(cryptoManager.deleteAllKeyStoreEntries());
     }
 
     public Completable handleDeepLink(Uri uri) {

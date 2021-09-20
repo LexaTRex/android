@@ -1,22 +1,12 @@
 package de.culture4life.luca.util;
 
-import androidx.test.platform.app.InstrumentationRegistry;
-
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import de.culture4life.luca.LucaApplication;
+import de.culture4life.luca.LucaInstrumentationTest;
 
-public class AccessibilityServiceUtilTest {
-
-    private LucaApplication application;
-
-    @Before
-    public void setup() {
-        application = (LucaApplication) InstrumentationRegistry.getInstrumentation().getTargetContext().getApplicationContext();
-    }
+public class AccessibilityServiceUtilTest extends LucaInstrumentationTest {
 
     @Test
     @Ignore("Enable only temporarily when your device has talkBack enabled")

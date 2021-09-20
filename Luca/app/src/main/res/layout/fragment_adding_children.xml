@@ -7,47 +7,40 @@
     android:layout_height="match_parent"
     android:background="@color/checked_in_light_green_gradient">
 
-    <RelativeLayout
-        android:id="@+id/headingTextViewsLayout"
+    <ImageView
+        android:id="@+id/backImageView"
+        android:layout_width="24dp"
+        android:layout_height="0dp"
+        android:layout_centerVertical="true"
+        android:layout_marginStart="@dimen/spacing_default"
+        android:contentDescription="@string/action_finish"
+        android:padding="4dp"
+        android:scaleType="fitCenter"
+        android:src="@drawable/ic_back"
+        app:layout_constraintBottom_toBottomOf="@id/headingTextView"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/headingTextView" />
+
+    <TextView
+        android:id="@+id/headingTextView"
+        style="@style/TextAppearance.Luca.Headline2"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/spacing_small"
-        android:layout_marginTop="@dimen/spacing_default"
-        android:layout_marginEnd="32dp"
-        android:orientation="horizontal"
-        app:layout_constrainedWidth="true"
-        app:layout_constraintHorizontal_bias="0"
+        android:layout_gravity="center_vertical"
+        android:layout_margin="@dimen/spacing_default"
+        android:paddingStart="32dp"
+        android:text="@string/venue_children_title"
+        android:textColor="@android:color/black"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
-
-        <ImageView
-            android:id="@+id/backImageView"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
-            android:layout_centerVertical="true"
-            android:layout_marginEnd="@dimen/spacing_small"
-            android:contentDescription="@string/action_finish"
-            android:padding="4dp"
-            android:scaleType="fitCenter"
-            android:src="@drawable/ic_back" />
-
-        <TextView
-            android:id="@+id/headingTextView"
-            style="@style/TextAppearance.Luca.Headline2"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:text="@string/venue_children_title"
-            android:textColor="@android:color/black" />
-
-    </RelativeLayout>
+        app:layout_constraintTop_toTopOf="parent"
+        tools:ignore="RtlSymmetry" />
 
     <View
         android:id="@+id/headingSeparatorView"
         style="@style/HeaderSeparatorView"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/headingTextViewsLayout" />
+        app:layout_constraintTop_toBottomOf="@id/headingTextView" />
 
     <TextView
         android:id="@+id/childAddingDescriptionTextView"
@@ -72,7 +65,8 @@
         app:layout_constraintEnd_toEndOf="@id/childAddingDescriptionTextView"
         app:layout_constraintStart_toStartOf="@id/childAddingDescriptionTextView"
         app:layout_constraintTop_toBottomOf="@id/childAddingDescriptionTextView"
-        app:layout_constraintVertical_bias="0.25" />
+        app:layout_constraintVertical_bias="0.25"
+        tools:ignore="ContentDescription" />
 
     <ListView
         android:id="@+id/childListView"
