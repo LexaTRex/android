@@ -7,6 +7,7 @@ import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
 
 import de.culture4life.luca.R;
+import de.culture4life.luca.crypto.DailyKeyUnavailableException;
 import de.culture4life.luca.util.ThrowableUtil;
 import hu.akarnokd.rxjava3.debug.RxJavaAssemblyException;
 import io.reactivex.rxjava3.core.Completable;
@@ -140,6 +141,8 @@ public class ViewError {
             return context.getString(R.string.error_generic_title);
         } else if (ThrowableUtil.isNetworkError(throwable)) {
             return context.getString(R.string.error_no_internet_connection_title);
+        } else if (ThrowableUtil.isCause(DailyKeyUnavailableException.class, throwable)) {
+            return context.getString(R.string.error_no_daily_key_available_title);
         } else {
             String type = throwable.getClass().getSimpleName();
             return context.getString(R.string.error_specific_title, type);
@@ -149,6 +152,8 @@ public class ViewError {
     private static String createDescription(@NonNull Throwable throwable, @NonNull Context context) {
         if (ThrowableUtil.isNetworkError(throwable)) {
             return context.getString(R.string.error_no_internet_connection_description);
+        } else if (ThrowableUtil.isCause(DailyKeyUnavailableException.class, throwable)) {
+            return context.getString(R.string.error_no_daily_key_available_description);
         } else {
             String description = getMessagesFromThrowableAndCauses(throwable);
             if (description != null) {
@@ -162,7 +167,7 @@ public class ViewError {
     @Nullable
     private static String getMessagesFromThrowableAndCauses(@NonNull Throwable throwable) {
         if (throwable instanceof RxJavaAssemblyException) {
-            // these donn't have any meaningful messages
+            // these don't have any meaningful messages
             return null;
         }
         String message = throwable.getLocalizedMessage();

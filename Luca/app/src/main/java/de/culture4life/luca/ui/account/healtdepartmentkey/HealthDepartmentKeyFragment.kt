@@ -1,9 +1,7 @@
 package de.culture4life.luca.ui.account.healtdepartmentkey
 
-import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
+import androidx.viewbinding.ViewBinding
 import de.culture4life.luca.R
 import de.culture4life.luca.databinding.FragmentHealthDepartmentKeyBinding
 import de.culture4life.luca.ui.BaseFragment
@@ -17,19 +15,13 @@ class HealthDepartmentKeyFragment : BaseFragment<HealthDepartmentKeyViewModel>()
 
     private lateinit var binding: FragmentHealthDepartmentKeyBinding
 
-    override fun getLayoutResource(): Int = R.layout.fragment_health_department_key
+    override fun getViewBinding(): ViewBinding? {
+        binding = FragmentHealthDepartmentKeyBinding.inflate(layoutInflater)
+        return binding;
+    }
+
     override fun getViewModelClass(): Class<HealthDepartmentKeyViewModel> =
         HealthDepartmentKeyViewModel::class.java
-
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        val view = super.onCreateView(inflater, container, savedInstanceState)
-        binding = FragmentHealthDepartmentKeyBinding.bind(view)
-        return binding.root
-    }
 
     override fun initializeViews(): Completable {
         return super.initializeViews().andThen {

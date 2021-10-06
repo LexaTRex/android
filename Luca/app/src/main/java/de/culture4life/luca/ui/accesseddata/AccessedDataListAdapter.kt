@@ -8,6 +8,7 @@ import android.widget.ArrayAdapter
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import de.culture4life.luca.R
+import de.culture4life.luca.databinding.AccessedDataListItemBinding
 
 class AccessedDataListAdapter(context: Context, resource: Int) :
     ArrayAdapter<AccessedDataListItem>(context, resource) {
@@ -37,21 +38,17 @@ class AccessedDataListAdapter(context: Context, resource: Int) :
 
     override fun getView(position: Int, convertView: View?, container: ViewGroup): View {
         val view = convertView ?: layoutInflater.inflate(R.layout.accessed_data_list_item, container, false)
-
-        val titleTextView = view.findViewById<TextView>(R.id.itemTitleTextView)
-        val descriptionTextView = view.findViewById<TextView>(R.id.itemDescriptionTextView)
-        val timeTextView = view.findViewById<TextView>(R.id.itemTimeTextView)
-        val dotView = view.findViewById<View>(R.id.dotView)
+        val binding = AccessedDataListItemBinding.bind(view)
 
         getItem(position)?.let { item ->
-            titleTextView.text = item.title
-            descriptionTextView.text = item.message
-            timeTextView.text = item.accessTime
+            binding.itemTitleTextView.text = item.title
+            binding.itemDescriptionTextView.text = item.message
+            binding.itemTimeTextView.text = item.accessTime
             val color = ContextCompat.getColor(
                 context,
                 if (item.isNew) R.color.highlightColor else android.R.color.white
             )
-            dotView.background.setTint(color)
+            binding.dotView.background.setTint(color)
         }
         return view
     }

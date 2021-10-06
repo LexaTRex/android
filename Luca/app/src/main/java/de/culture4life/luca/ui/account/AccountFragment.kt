@@ -7,10 +7,10 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.widget.PopupMenu
+import androidx.viewbinding.ViewBinding
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import de.culture4life.luca.BuildConfig
 import de.culture4life.luca.R
-import de.culture4life.luca.R.layout
 import de.culture4life.luca.databinding.FragmentAccountBinding
 import de.culture4life.luca.ui.BaseFragment
 import de.culture4life.luca.ui.dialog.BaseDialogFragment
@@ -19,7 +19,11 @@ import io.reactivex.rxjava3.core.Completable
 
 class AccountFragment : BaseFragment<AccountViewModel>() {
 
-    override fun getLayoutResource(): Int = layout.fragment_account
+    override fun getViewBinding(): ViewBinding {
+        binding = FragmentAccountBinding.inflate(layoutInflater)
+        return binding
+    }
+
     override fun getViewModelClass(): Class<AccountViewModel> = AccountViewModel::class.java
 
     private lateinit var binding: FragmentAccountBinding
@@ -42,25 +46,23 @@ class AccountFragment : BaseFragment<AccountViewModel>() {
     }
 
     private fun initializeOnClickListeners() {
-        view?.also {
-            binding.editContactDataTextView.setOnClickListener {
-                val intent = Intent(activity, RegistrationActivity::class.java)
-                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
-                startActivity(intent)
-            }
-
-            binding.deleteAccountTextView.setOnClickListener { showDeleteAccountDialog() }
-            binding.faqTextView.setOnClickListener { application.openUrl(getString(R.string.url_faq)) }
-            binding.supportTextView.setOnClickListener { viewModel.requestSupportMail() }
-            binding.dataRequestTextView.setOnClickListener { showDataRequestMenu() }
-            binding.privacyTextView.setOnClickListener { application.openUrl(getString(R.string.url_privacy_policy)) }
-            binding.termsTextView.setOnClickListener { application.openUrl(getString(R.string.url_terms_and_conditions)) }
-            binding.imprintTextView.setOnClickListener { application.openUrl(getString(R.string.url_imprint)) }
-            binding.showAppDataTextView.setOnClickListener { application.openAppSettings() }
-            binding.versionTextView.setOnClickListener { showVersionDetailsDialog() }
-            binding.gitlabTextView.setOnClickListener { showGitlabDialog() }
-            binding.healthDepartmentKeyTextView.setOnClickListener { viewModel.openHealthDepartmentKeyView() }
+        binding.editContactDataTextView.setOnClickListener {
+            val intent = Intent(activity, RegistrationActivity::class.java)
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
+            startActivity(intent)
         }
+
+        binding.deleteAccountTextView.setOnClickListener { showDeleteAccountDialog() }
+        binding.faqTextView.setOnClickListener { application.openUrl(getString(R.string.url_faq)) }
+        binding.supportTextView.setOnClickListener { viewModel.requestSupportMail() }
+        binding.dataRequestTextView.setOnClickListener { showDataRequestMenu() }
+        binding.privacyTextView.setOnClickListener { application.openUrl(getString(R.string.url_privacy_policy)) }
+        binding.termsTextView.setOnClickListener { application.openUrl(getString(R.string.url_terms_and_conditions)) }
+        binding.imprintTextView.setOnClickListener { application.openUrl(getString(R.string.url_imprint)) }
+        binding.showAppDataTextView.setOnClickListener { application.openAppSettings() }
+        binding.versionTextView.setOnClickListener { showVersionDetailsDialog() }
+        binding.gitlabTextView.setOnClickListener { showGitlabDialog() }
+        binding.healthDepartmentKeyTextView.setOnClickListener { viewModel.openHealthDepartmentKeyView() }
     }
 
     override fun onMenuItemClick(item: MenuItem): Boolean {

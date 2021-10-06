@@ -10,10 +10,11 @@ import android.widget.TextView;
 
 import androidx.core.content.ContextCompat;
 
-import com.google.android.material.button.MaterialButton;
 import com.google.android.material.checkbox.MaterialCheckBox;
 
 import de.culture4life.luca.R;
+import de.culture4life.luca.databinding.FragmentOnboardingInfoBinding;
+import de.culture4life.luca.databinding.FragmentOnboardingWelcomeBinding;
 import de.culture4life.luca.ui.BaseActivity;
 import de.culture4life.luca.ui.registration.RegistrationActivity;
 import de.culture4life.luca.ui.terms.UpdatedTermsUtil;
@@ -22,27 +23,27 @@ public class OnboardingActivity extends BaseActivity {
 
     public static final String WELCOME_SCREEN_SEEN_KEY = "welcome_screen_seen";
 
-    private MaterialButton primaryActionButton;
-    private MaterialCheckBox termsCheckBox;
-    private TextView termsTextView;
-    private TextView privacyTextView;
-    private Drawable errorDrawable;
+    private FragmentOnboardingWelcomeBinding welcomeBinding;
+    private FragmentOnboardingInfoBinding infoBinding;
     private int errorTint;
     private int normalTint;
+    private Drawable errorDrawable;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        welcomeBinding = FragmentOnboardingWelcomeBinding.inflate(getLayoutInflater());
+        infoBinding = FragmentOnboardingInfoBinding.inflate(getLayoutInflater());
+
         showWelcomeScreen();
         hideActionBar();
     }
 
     private void showWelcomeScreen() {
-        setContentView(R.layout.fragment_onboarding_welcome);
+        setContentView(welcomeBinding.getRoot());
 
-        primaryActionButton = findViewById(R.id.primaryActionButton);
-        primaryActionButton.setOnClickListener(view -> {
-            if (termsCheckBox.isChecked()) {
+        welcomeBinding.primaryActionButton.setOnClickListener(view -> {
+            if (welcomeBinding.termsCheckBox.isChecked()) {
                 activityDisposable.add(application.getPreferencesManager()
                         .persist(WELCOME_SCREEN_SEEN_KEY, true)
                         .andThen(UpdatedTermsUtil.Companion.markTermsAsAccepted(application))
@@ -54,22 +55,17 @@ public class OnboardingActivity extends BaseActivity {
         });
 
         CompoundButton.OnCheckedChangeListener checkBoxListener = (view, isChecked) -> {
-            if (termsCheckBox.isChecked()) {
-                setErrorFor(termsCheckBox, termsTextView, false);
+            if (welcomeBinding.termsCheckBox.isChecked()) {
+                setErrorFor(welcomeBinding.termsCheckBox, welcomeBinding.termsTextView, false);
             }
         };
 
-        termsCheckBox = findViewById(R.id.termsCheckBox);
-        termsCheckBox.setOnCheckedChangeListener(checkBoxListener);
-
-        termsTextView = findViewById(R.id.termsTextView);
-        termsTextView.setMovementMethod(LinkMovementMethod.getInstance());
-
-        privacyTextView = findViewById(R.id.privacyTextView);
-        privacyTextView.setMovementMethod(LinkMovementMethod.getInstance());
+        welcomeBinding.termsCheckBox.setOnCheckedChangeListener(checkBoxListener);
+        welcomeBinding.termsTextView.setMovementMethod(LinkMovementMethod.getInstance());
+        welcomeBinding.privacyTextView.setMovementMethod(LinkMovementMethod.getInstance());
 
         errorTint = getResources().getColor(R.color.material_red_300);
-        normalTint = termsCheckBox.getButtonTintList().getDefaultColor();
+        normalTint = welcomeBinding.termsCheckBox.getButtonTintList().getDefaultColor();
         errorDrawable = ContextCompat.getDrawable(this, R.drawable.ic_error_outline);
         errorDrawable.setTint(errorTint);
     }
@@ -80,13 +76,12 @@ public class OnboardingActivity extends BaseActivity {
     }
 
     private void showCheckboxErrors() {
-        setErrorFor(termsCheckBox, termsTextView, !termsCheckBox.isChecked());
+        setErrorFor(welcomeBinding.termsCheckBox, welcomeBinding.termsTextView, !welcomeBinding.termsCheckBox.isChecked());
     }
 
     private void showInfoScreen() {
-        setContentView(R.layout.fragment_onboarding_info);
-        primaryActionButton = findViewById(R.id.primaryActionButton);
-        primaryActionButton.setOnClickListener(view -> showRegistration());
+        setContentView(infoBinding.getRoot());
+        infoBinding.primaryActionButton.setOnClickListener(view -> showRegistration());
     }
 
     private void showRegistration() {

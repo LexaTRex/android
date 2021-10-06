@@ -86,6 +86,11 @@
         <item name="android:textFontWeight" tools:targetApi="p">400</item>
     </style>
 
+    <style name="TextAppearance.Luca.Body1.BlackBold" parent="TextAppearance.Luca.Body1">
+        <item name="android:textColor">@android:color/black</item>
+        <item name="fontFamily">@font/montserrat_bold</item>
+    </style>
+
     <style name="TextAppearance.Luca.Body2" parent="TextAppearance.Luca.Body1">
         <item name="android:textSize">@dimen/font_size_small</item>
         <item name="android:fontWeight" tools:targetApi="o">300</item>
@@ -315,6 +320,18 @@
     </style>
 
     <!--  Misc  -->
+
+    <style name="BackButtonImageView">
+        <item name="android:layout_width">24dp</item>
+        <item name="android:layout_height">24dp</item>
+        <item name="android:layout_marginStart">@dimen/spacing_default</item>
+        <item name="layout_constraintStart_toStartOf">parent</item>
+        <item name="layout_constraintTop_toTopOf">parent</item>
+        <item name="layout_constraintBottom_toTopOf">@id/headingSeparatorView</item>
+        <item name="tint">?attr/colorOnSurface</item>
+        <item name="android:src">@drawable/ic_back</item>
+        <item name="android:scaleType">centerInside</item>
+    </style>
 
     <style name="HeaderSeparatorView">
         <item name="android:layout_width">match_parent</item>

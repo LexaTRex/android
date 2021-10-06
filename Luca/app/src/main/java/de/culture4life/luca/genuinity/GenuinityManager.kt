@@ -13,7 +13,7 @@ import timber.log.Timber
 import java.util.concurrent.TimeUnit
 import kotlin.math.abs
 
-class GenuinityManager(
+open class GenuinityManager(
     val preferencesManager: PreferencesManager,
     val networkManager: NetworkManager
 ) : Manager() {
@@ -32,7 +32,7 @@ class GenuinityManager(
         ).andThen(invokeServerTimeOffsetUpdateIfRequired())
     }
 
-    private fun invokeServerTimeOffsetUpdateIfRequired(): Completable {
+    fun invokeServerTimeOffsetUpdateIfRequired(): Completable {
         return Completable.fromAction {
             if (timestampOffset == null) {
                 invokeServerTimeOffsetUpdate()
@@ -52,7 +52,18 @@ class GenuinityManager(
         }
     }
 
-    fun isGenuineTime(): Single<Boolean> {
+    fun assertIsGenuineTime(): Completable {
+        return isGenuineTime()
+            .flatMapCompletable {
+                if (it) {
+                    Completable.complete()
+                } else {
+                    Completable.error(NoGenuineTimeException())
+                }
+            }
+    }
+
+    open fun isGenuineTime(): Single<Boolean> {
         return getOrFetchOrRestoreServerTimeOffset()
             .map { it < MAXIMUM_SERVER_TIME_OFFSET }
             .onErrorReturnItem(false)
@@ -81,11 +92,15 @@ class GenuinityManager(
         return preferencesManager.restore(KEY_SERVER_TIME_OFFSET, Long::class.java)
     }
 
-    private fun fetchServerTimeOffset(): Single<Long> {
+    open fun fetchServerTime(): Single<Long> {
         return networkManager.lucaEndpointsV3
             .flatMap { it.serverTime }
             .map { it["unix"].asLong }
             .flatMap { TimeUtil.convertFromUnixTimestamp(it) }
+    }
+
+    private fun fetchServerTimeOffset(): Single<Long> {
+        return fetchServerTime()
             .map { abs(System.currentTimeMillis() - it) }
             .doOnSuccess {
                 timestampOffset = it

@@ -99,10 +99,10 @@
                             app:layout_constraintTop_toTopOf="parent" />
 
                         <LinearLayout
-                            android:id="@+id/requestCameraPermissionLinearLayout"
+                            android:id="@+id/startCameraLinearLayout"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:contentDescription="@string/activate_camera"
+                            android:contentDescription="@string/check_in_activate_camera_action"
                             android:gravity="center"
                             android:orientation="vertical"
                             app:layout_constraintBottom_toBottomOf="parent"
@@ -112,18 +112,18 @@
                             app:layout_constraintWidth_percent="0.6">
 
                             <ImageView
-                                android:id="@+id/requestCameraPermissionImageView"
+                                android:id="@+id/startCameraImageView"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:src="@drawable/ic_camera" />
 
                             <TextView
-                                android:id="@+id/requestCameraPermissionTextView"
+                                android:id="@+id/startCameraTextView"
                                 style="@style/TextAppearance.Luca.Body1"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="@dimen/spacing_default"
-                                android:text="@string/activate_camera"
+                                android:text="@string/check_in_activate_camera_action"
                                 android:textAlignment="center"
                                 app:layout_constraintEnd_toEndOf="parent"
                                 app:layout_constraintStart_toStartOf="parent"
@@ -165,7 +165,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/spacing_default"
                 android:gravity="center"
-                android:text="@string/scan_qr_code"
+                android:text="@string/check_in_scan_qr_code_action"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/cameraContainerConstraintLayout" />
@@ -197,7 +197,7 @@
                 android:layout_marginHorizontal="@dimen/spacing_default"
                 android:layout_marginTop="@dimen/spacing_default"
                 android:layout_marginBottom="@dimen/spacing_default"
-                android:text="@string/show_qr_code"
+                android:text="@string/check_in_show_your_qr_code_action"
                 app:layout_constraintBottom_toTopOf="@id/createMeetingButton"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"

@@ -64,12 +64,12 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/spacing_small"
-        android:layout_marginEnd="34dp"
+        android:layout_marginEnd="@dimen/spacing_small"
         android:ellipsize="end"
         android:maxLines="10"
         android:text="@string/history_data_cleared_description"
         app:layout_constrainedWidth="true"
-        app:layout_constraintEnd_toStartOf="@id/itemDescriptionImageView"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0"
         app:layout_constraintStart_toStartOf="@id/itemTitleTextView"
         app:layout_constraintTop_toBottomOf="@id/itemTitleTextView" />
@@ -103,21 +103,6 @@
         app:layout_constraintBottom_toBottomOf="@id/itemTitleTextView"
         app:layout_constraintStart_toEndOf="@id/itemTitleTextView"
         app:layout_constraintTop_toTopOf="@id/itemTitleTextView"
-        app:tint="@color/primaryColor" />
-
-    <ImageView
-        android:id="@+id/itemDescriptionImageView"
-        android:layout_width="20dp"
-        android:layout_height="20dp"
-        android:layout_marginStart="8dp"
-        android:contentDescription="@string/additional_details_content_description"
-        android:padding="0dp"
-        android:scaleType="fitCenter"
-        android:src="@drawable/ic_information_outline"
-        android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="@id/itemDescriptionTextView"
-        app:layout_constraintStart_toEndOf="@id/itemDescriptionTextView"
-        app:layout_constraintTop_toTopOf="@id/itemDescriptionTextView"
         app:tint="@color/primaryColor" />
 
     <ImageView

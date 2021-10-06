@@ -2,52 +2,37 @@ package de.culture4life.luca.ui.checkin
 
 
 import android.content.ActivityNotFoundException
-import android.content.DialogInterface
 import android.content.Intent
 import android.os.Bundle
-import android.util.Size
 import android.view.ContextThemeWrapper
 import android.view.View
 import android.widget.CheckBox
-import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
-import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
+import androidx.navigation.NavDestination
 import androidx.viewbinding.ViewBinding
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import de.culture4life.luca.BuildConfig
 import de.culture4life.luca.R
 import de.culture4life.luca.databinding.FragmentCheckInBinding
-import de.culture4life.luca.ui.BaseFragment
+import de.culture4life.luca.ui.BaseQrCodeFragment
 import de.culture4life.luca.ui.BaseQrCodeViewModel.Companion.BARCODE_DATA_KEY
 import de.culture4life.luca.ui.dialog.BaseDialogFragment
 import de.culture4life.luca.ui.registration.RegistrationActivity
+import de.culture4life.luca.util.addTo
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Completable
-import io.reactivex.rxjava3.core.Maybe
-import io.reactivex.rxjava3.core.Single
-import io.reactivex.rxjava3.disposables.Disposable
-import io.reactivex.rxjava3.schedulers.Schedulers
-import timber.log.Timber
-import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
 
-class CheckInFragment : BaseFragment<CheckInViewModel>() {
+class CheckInFragment : BaseQrCodeFragment<CheckInViewModel>(), NavController.OnDestinationChangedListener {
 
-    private var cameraProvider: ProcessCameraProvider? = null
-    private var camera: Camera? = null
-    private var cameraPreviewDisposable: Disposable? = null
-    private var isCheckInDialogVisible = false
     private var qrCodeBottomSheet: QrCodeBottomSheetFragment? = null
-    private val destinationChangedListener = NavController.OnDestinationChangedListener { _, _, _ ->
-        qrCodeBottomSheet?.dismiss()
-    }
-    private lateinit var binding: FragmentCheckInBinding
     private lateinit var qrCodeBottomSheetViewModel: QrCodeBottomSheetViewModel
+    private lateinit var binding: FragmentCheckInBinding
 
     override fun getViewBinding(): ViewBinding {
         binding = FragmentCheckInBinding.inflate(layoutInflater)
@@ -70,98 +55,86 @@ class CheckInFragment : BaseFragment<CheckInViewModel>() {
 
     override fun initializeViews(): Completable {
         return super.initializeViews()
+            .andThen(initializeQrCodeBottomSheet())
+            .andThen(initializeMiscellaneous())
+    }
+
+    override fun initializeCameraPreview(): Completable {
+        return super.initializeCameraPreview()
             .andThen(Completable.fromAction {
-                initializeObservers()
-                setOnClickListeners()
+                cameraPreviewView = binding.cameraPreviewView
+                binding.cameraContainerConstraintLayout.setOnClickListener {
+                    showCameraPreview(requestConsent = true, requestPermission = true)
+                }
+                binding.flashLightButtonImageView.setOnClickListener { toggleTorch() }
             })
     }
 
-    private fun initializeObservers() {
-        observe(viewModel.qrCode) { bm ->
-            qrCodeBottomSheet?.setQrCodeBitmap(bm)
-        }
-
-        observe(viewModel.isNetworkAvailable) { value ->
-            qrCodeBottomSheet?.setNoNetworkWarningVisible(!value)
-        }
-        observe(viewModel.isLoading) { isLoading ->
-            qrCodeBottomSheet?.setIsLoading(isLoading)
-            binding.checkingInLoadingLayout.isVisible = isLoading
-        }
-        observe(viewModel.isContactDataMissing) { contactDataMissing ->
-            if (contactDataMissing) {
-                showContactDataDialog()
+    private fun initializeQrCodeBottomSheet(): Completable {
+        return Completable.fromAction {
+            binding.showQrCodeButton.setOnClickListener { showQrCodeBottomSheet() }
+            observe(viewModel.qrCode) {
+                qrCodeBottomSheet?.setQrCodeBitmap(it)
             }
-        }
-        observe(viewModel.isUpdateRequired) { updateRequired ->
-            if (updateRequired) {
-                showUpdateDialog()
-            }
-        }
-        observe(viewModel.privateMeetingUrl) { privateMeetingUrl ->
-            if (privateMeetingUrl != null) {
-                showJoinPrivateMeetingDialog(privateMeetingUrl)
-            }
-        }
-        observe(viewModel.possibleDocumentData) { barcodeDataEvent ->
-            if (!barcodeDataEvent.hasBeenHandled()) {
-                hideCameraPreview()
-                val bundle = Bundle()
-                val barcodeData = barcodeDataEvent.valueAndMarkAsHandled
-                bundle.putString(BARCODE_DATA_KEY, barcodeData)
-                BaseDialogFragment(MaterialAlertDialogBuilder(requireContext())
-                    .setTitle(R.string.venue_check_in_document_redirect_title)
-                    .setMessage(R.string.venue_check_in_document_redirect_description)
-                    .setPositiveButton(R.string.action_continue) { _, _ ->
-                        safeNavigateFromNavController(R.id.myLucaFragment, bundle)
+            observe(qrCodeBottomSheetViewModel.onBottomSheetClosed) {
+                if (!it.hasBeenHandled()) {
+                    it.setHandled(true)
+                    if (isAdded) {
+                        showCameraPreview(requestConsent = false, requestPermission = false)
                     }
-                    .setNegativeButton(R.string.action_cancel) { _, _ -> })
-                    .apply {
-                        onDismissListener = DialogInterface.OnDismissListener { showCameraPreviewOrConsent() }
-                    }
-                    .show()
-            }
-        }
-        observe(viewModel.confirmCheckIn) { viewEvent ->
-            if (!viewEvent.hasBeenHandled()) {
-                hideCameraPreview()
-                val urlAndName = viewEvent.valueAndMarkAsHandled
-                showConfirmCheckInDialog(urlAndName.first, urlAndName.second)
-            }
-        }
-        observe(qrCodeBottomSheetViewModel.onBottomSheetClosed) {
-            if (it.valueAndMarkAsHandled) {
-                if (isAdded && checkIfCameraPermissionWasGranted()) {
-                    setCameraPreviewVisible(true)
                 }
             }
-        }
-        observe(qrCodeBottomSheetViewModel.onDebuggingCheckInRequested) {
-            if (it.valueAndMarkAsHandled) {
-                if (BuildConfig.DEBUG) {
-                    viewModel.onDebuggingCheckInRequested()
+            observe(qrCodeBottomSheetViewModel.onDebuggingCheckInRequested) {
+                if (!it.hasBeenHandled()) {
+                    it.setHandled(true)
+                    if (BuildConfig.DEBUG) {
+                        viewModel.onDebuggingCheckInRequested()
+                    }
                 }
-            }
-        }
-        observe(viewModel.bundle) { bundle: Bundle? -> processBundle(bundle) }
-        observe(viewModel.showCameraPreview) { isActive: Boolean ->
-            if (isActive) {
-                showCameraPreview()
-            } else {
-                hideCameraPreview()
             }
         }
     }
 
-    private fun setOnClickListeners() {
-        binding.showQrCodeButton.setOnClickListener { showQrCodeBottomSheet() }
-        binding.createMeetingButton.setOnClickListener { showCreatePrivateMeetingDialog() }
-        binding.requestCameraPermissionLinearLayout.setOnClickListener {
-            showCameraPreviewOrConsent()
-        }
-        binding.flashLightButtonImageView.setOnClickListener { toggleTorch() }
-        binding.historyTextView.setOnClickListener {
-            safeNavigateFromNavController(R.id.action_checkInFragment_to_history)
+    private fun initializeMiscellaneous(): Completable {
+        return Completable.fromAction {
+            observe(viewModel.bundle) { processBundle(it) }
+            observe(viewModel.possibleDocumentData) {
+                if (!it.hasBeenHandled()) {
+                    showImportDocumentDialog(it.valueAndMarkAsHandled)
+                }
+            }
+            observe(viewModel.isLoading) {
+                qrCodeBottomSheet?.setIsLoading(it)
+                binding.checkingInLoadingLayout.isVisible = it
+            }
+            observe(viewModel.isNetworkAvailable) {
+                qrCodeBottomSheet?.setNoNetworkWarningVisible(!it)
+            }
+            observe(viewModel.isUpdateRequired) {
+                if (it) {
+                    showUpdateRequiredDialog()
+                }
+            }
+            observe(viewModel.isContactDataMissing) {
+                if (it) {
+                    showContactDataMissingDialog()
+                }
+            }
+            binding.createMeetingButton.setOnClickListener { showCreatePrivateMeetingDialog() }
+            observe(viewModel.confirmPrivateMeeting) {
+                if (!it.hasBeenHandled()) {
+                    showJoinPrivateMeetingDialog(it.valueAndMarkAsHandled)
+                }
+            }
+            binding.historyTextView.setOnClickListener {
+                safeNavigateFromNavController(R.id.action_checkInFragment_to_history)
+            }
+            observe(viewModel.confirmCheckIn) {
+                if (!it.hasBeenHandled()) {
+                    val urlAndName = it.valueAndMarkAsHandled
+                    showConfirmCheckInDialog(urlAndName.first, urlAndName.second)
+                }
+            }
         }
     }
 
@@ -176,14 +149,11 @@ class CheckInFragment : BaseFragment<CheckInViewModel>() {
         viewModel.checkIfContactDataMissing()
         viewModel.checkIfHostingMeeting()
         arguments?.let { bundle -> viewModel.setBundle(bundle) }
-        navigationController.addOnDestinationChangedListener(destinationChangedListener)
-        if (!isCheckInDialogVisible) {
-            checkCameraPermission()
-        }
+        navigationController.addOnDestinationChangedListener(this)
     }
 
     override fun onPause() {
-        navigationController.removeOnDestinationChangedListener(destinationChangedListener)
+        navigationController.removeOnDestinationChangedListener(this)
         super.onPause()
     }
 
@@ -192,22 +162,26 @@ class CheckInFragment : BaseFragment<CheckInViewModel>() {
         super.onStop()
     }
 
+    override fun onDestinationChanged(controller: NavController, destination: NavDestination, arguments: Bundle?) {
+        qrCodeBottomSheet?.dismiss()
+    }
+
     private fun processBundle(bundle: Bundle?) {
         if (bundle == null) {
             return
         }
         bundle.getString(BARCODE_DATA_KEY)?.let { barcode ->
-            viewDisposable.add(
-                viewModel.processBarcode(barcode)
-                    .delaySubscription(500, TimeUnit.MILLISECONDS) // avoid processing if checked in
-                    .onErrorComplete()
-                    .subscribe()
-            )
+            viewModel.processBarcode(barcode)
+                .delaySubscription(500, TimeUnit.MILLISECONDS) // avoid processing if checked in
+                .doOnComplete { viewModel.setBundle(null) }
+                .onErrorComplete()
+                .subscribe()
+                .addTo(viewDisposable)
         }
     }
 
     private fun showQrCodeBottomSheet() {
-        setCameraPreviewVisible(false)
+        hideCameraPreview()
         parentFragmentManager.let {
             qrCodeBottomSheet = QrCodeBottomSheetFragment.newInstance(
                 qrCodeBitmap = viewModel.qrCode.value,
@@ -219,40 +193,26 @@ class CheckInFragment : BaseFragment<CheckInViewModel>() {
         }
     }
 
-    private fun showContactDataDialog() {
+    private fun showConfirmCheckInDialog(url: String, locationName: String) {
+        hideCameraPreview()
+        val skipCheckInConfirmationView = View.inflate(
+            ContextThemeWrapper(context, R.style.ThemeOverlay_Luca_AlertDialog),
+            R.layout.layout_dont_ask_again,
+            null
+        )
+        val skipCheckInConfirmationCheckBox = skipCheckInConfirmationView.findViewById<CheckBox>(R.id.dontAskAgainCheckbox)
         BaseDialogFragment(MaterialAlertDialogBuilder(requireContext())
-            .setTitle(R.string.registration_missing_info)
-            .setMessage(R.string.registration_address_mandatory)
-            .setPositiveButton(R.string.action_ok) { _, _ ->
-                val intent = Intent(application, RegistrationActivity::class.java)
-                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
-                application.startActivity(intent)
-            })
-            .apply {
-                isCancelable = false
-                show()
+            .setTitle(R.string.venue_check_in_confirmation_title)
+            .setView(skipCheckInConfirmationView)
+            .setMessage(getString(R.string.venue_check_in_confirmation_description, locationName))
+            .setPositiveButton(R.string.action_confirm) { _, _ ->
+                viewModel.onCheckInConfirmationApproved(url, skipCheckInConfirmationCheckBox.isChecked)
             }
-    }
-
-    private fun showUpdateDialog() {
-        unbindCameraPreview()
-        BaseDialogFragment(MaterialAlertDialogBuilder(requireContext())
-            .setTitle(R.string.update_required_title)
-            .setMessage(R.string.update_required_description)
-            .setPositiveButton(R.string.action_update) { _, _ ->
-                try {
-                    application.openUrl(
-                        "market://details?id=" + BuildConfig.APPLICATION_ID.replace(
-                            ".debug",
-                            ""
-                        )
-                    )
-                } catch (e: ActivityNotFoundException) {
-                    application.openUrl("https://luca-app.de")
-                }
-            })
+            .setNegativeButton(R.string.action_cancel) { _, _ -> })
             .apply {
-                isCancelable = false
+                setOnDismissListener {
+                    viewModel.onCheckInConfirmationDismissed(url, skipCheckInConfirmationCheckBox.isChecked)
+                }
                 show()
             }
     }
@@ -265,67 +225,83 @@ class CheckInFragment : BaseFragment<CheckInViewModel>() {
             .setPositiveButton(R.string.action_ok) { _, _ ->
                 viewModel.onPrivateMeetingJoinApproved(privateMeetingUrl)
             }
-            .setNegativeButton(R.string.action_cancel) { _, _ ->
-                if (viewModel.isCurrentDestinationId(R.id.checkInFragment)) {
-                    showCameraPreviewOrConsent()
-                }
-
-                viewModel.onPrivateMeetingJoinDismissed(privateMeetingUrl)
-            })
+            .setNegativeButton(R.string.action_cancel) { _, _ -> })
             .apply {
-                isCancelable = false
+                setOnDismissListener { viewModel.onPrivateMeetingJoinDismissed(privateMeetingUrl) }
                 show()
             }
     }
 
     private fun showCreatePrivateMeetingDialog() {
+        hideCameraPreview()
         BaseDialogFragment(MaterialAlertDialogBuilder(requireContext())
             .setTitle(R.string.meeting_create_modal_heading)
             .setMessage(R.string.meeting_create_modal_description)
-            .setPositiveButton(R.string.meeting_create_modal_action) { _, _ -> viewModel.onPrivateMeetingCreationRequested() }
-            .setNegativeButton(R.string.action_cancel) { dialog, _ -> dialog.cancel() })
-            .show()
+            .setPositiveButton(R.string.meeting_create_modal_action) { _, _ ->
+                viewModel.onPrivateMeetingCreationRequested()
+            }
+            .setNegativeButton(R.string.action_cancel) { _, _ -> })
+            .apply {
+                setOnDismissListener { viewModel.onPrivateMeetingCreationDismissed() }
+                show()
+            }
     }
 
-    private fun showConfirmCheckInDialog(url: String, locationName: String) {
-        isCheckInDialogVisible = true
-        val dontAskAgainView = View.inflate(
-            ContextThemeWrapper(context, R.style.ThemeOverlay_Luca_AlertDialog),
-            R.layout.layout_confirm_checkin_dont_ask,
-            null
-        )
+    private fun showImportDocumentDialog(documentData: String) {
+        hideCameraPreview()
         BaseDialogFragment(MaterialAlertDialogBuilder(requireContext())
-            .setTitle(R.string.venue_check_in_confirmation_title)
-            .setView(dontAskAgainView)
-            .setMessage(getString(R.string.venue_check_in_confirmation_description, locationName))
-            .setNegativeButton(R.string.action_cancel) { dialog, _ ->
-                if (viewModel.isCurrentDestinationId(R.id.checkInFragment)) {
-                    showCameraPreviewOrConsent()
+            .setTitle(R.string.venue_check_in_document_redirect_title)
+            .setMessage(R.string.venue_check_in_document_redirect_description)
+            .setPositiveButton(R.string.action_continue) { _, _ ->
+                val bundle = Bundle()
+                bundle.putString(BARCODE_DATA_KEY, documentData)
+                safeNavigateFromNavController(R.id.myLucaFragment, bundle)
+            }
+            .setNegativeButton(R.string.action_cancel) { _, _ -> })
+            .apply {
+                setOnDismissListener {
+                    viewModel.onImportDocumentConfirmationDismissed()
                 }
-                dialog.cancel()
+                show()
             }
-            .setPositiveButton(R.string.action_confirm) { _, _ ->
-                viewDisposable.add(
-                    Completable.defer {
-                        if (viewModel.isCurrentDestinationId(R.id.checkInFragment)) {
-                            val dontAskAgainCheckbox = dontAskAgainView.findViewById<CheckBox>(R.id.dontAskAgainCheckbox)
-                            Completable.mergeArray(
-                                viewModel.persistSkipCheckInConfirmation(dontAskAgainCheckbox.isChecked),
-                                viewModel.handleSelfCheckInDeepLink(url)
-                            )
-                        } else {
-                            Completable.complete()
-                        }
-                    }
-                        .onErrorComplete()
-                        .subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe()
-                )
-            }
-            .setOnDismissListener { isCheckInDialogVisible = false })
+    }
+
+    private fun showContactDataMissingDialog() {
+        hideCameraPreview()
+        BaseDialogFragment(MaterialAlertDialogBuilder(requireContext())
+            .setTitle(R.string.registration_missing_info)
+            .setMessage(R.string.registration_address_mandatory)
+            .setPositiveButton(R.string.action_ok) { _, _ ->
+                val intent = Intent(application, RegistrationActivity::class.java)
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
+                application.startActivity(intent)
+            })
             .apply {
                 isCancelable = false
+                setOnDismissListener {
+                    viewModel.onContactDataMissingDialogDismissed()
+                }
+                show()
+            }
+    }
+
+    private fun showUpdateRequiredDialog() {
+        hideCameraPreview()
+        BaseDialogFragment(MaterialAlertDialogBuilder(requireContext())
+            .setTitle(R.string.update_required_title)
+            .setMessage(R.string.update_required_description)
+            .setPositiveButton(R.string.action_update) { _, _ ->
+                try {
+                    application.openUrl("market://details?id=de.culture4life.luca")
+                } catch (e: ActivityNotFoundException) {
+                    application.openUrl("https://luca-app.de")
+                }
+            })
+            .apply {
+                isCancelable = false
+                setOnDismissListener {
+                    viewModel.onUpdateRequiredDialogDismissed()
+                }
                 show()
             }
     }
@@ -334,86 +310,13 @@ class CheckInFragment : BaseFragment<CheckInViewModel>() {
         Camera
      */
 
-    private fun showCameraPreviewOrConsent() {
-        viewDisposable.add(viewModel.isCameraConsentGiven
-            .subscribe { isCameraConsentGiven: Boolean ->
-                if (isCameraConsentGiven) {
-                    showCameraPreview()
-                } else {
-                    showCameraDialog(false)
-                }
-            }
-        )
-    }
-
-    private fun showCameraPreview() {
-        cameraPreviewDisposable = cameraPermission
-            .doOnComplete { setCameraPreviewVisible(true) }
-            .andThen(startCameraPreview())
-            .doOnError { throwable ->
-                Timber.w("Unable to show camera preview: %s", throwable.toString())
-                setCameraPreviewVisible(false)
-            }
-            .doFinally { hideCameraPreview() }
-            .onErrorComplete()
-            .subscribe()
-        viewDisposable.add(cameraPreviewDisposable)
-    }
-
-    fun startCameraPreview(): Completable {
-        return Maybe.fromCallable { cameraProvider }
-            .switchIfEmpty(Single.create { emitter ->
-                val cameraProviderFuture = ProcessCameraProvider.getInstance(
-                    requireContext()
-                )
-                cameraProviderFuture.addListener({
-                    try {
-                        cameraProvider = cameraProviderFuture.get()
-                        emitter.onSuccess(cameraProvider)
-                    } catch (e: Exception) {
-                        emitter.onError(e)
-                    }
-                }, ContextCompat.getMainExecutor(context))
-            })
-            .flatMapCompletable { cameraProvider ->
-                Completable.create { emitter ->
-                    cameraProvider?.let { bindCameraPreview(it) }
-                    emitter.setCancellable { unbindCameraPreview() }
-                }
-            }
-    }
-
-    private fun bindCameraPreview(cameraProvider: ProcessCameraProvider) {
-        val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
-        val preview = Preview.Builder().build()
-        val imageAnalysis = ImageAnalysis.Builder()
-            .setTargetResolution(Size(2048, 2048))
-            .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
-            .build()
-        imageAnalysis.setAnalyzer(Executors.newSingleThreadExecutor(), viewModel)
-        preview.setSurfaceProvider(binding.cameraPreviewView.surfaceProvider)
-        camera = cameraProvider.bindToLifecycle(
-            requireContext() as LifecycleOwner,
-            cameraSelector,
-            imageAnalysis,
-            preview
-        )
+    override fun bindCameraPreview(cameraProvider: ProcessCameraProvider) {
+        super.bindCameraPreview(cameraProvider)
         binding.flashLightButtonImageView.isVisible = camera?.cameraInfo?.hasFlashUnit() == true
     }
 
-    private fun unbindCameraPreview() {
-        cameraProvider?.unbindAll()
-        cameraProvider = null
-        setTorchEnabled(false)
-    }
-
-    private fun hideCameraPreview() {
-        cameraPreviewDisposable?.dispose()
-        cameraPreviewDisposable = null
-        setCameraPreviewVisible(false)
-    }
-
-    private fun setCameraPreviewVisible(isVisible: Boolean) {
+    override fun setCameraPreviewVisible(isVisible: Boolean) {
+        super.setCameraPreviewVisible(isVisible)
         binding.cameraContainerConstraintLayout.background = ContextCompat.getDrawable(
             requireContext(),
             if (isVisible) {
@@ -422,25 +325,11 @@ class CheckInFragment : BaseFragment<CheckInViewModel>() {
                 R.drawable.bg_camera_box
             }
         )
-        binding.cameraPreviewView.isVisible = isVisible
-        binding.requestCameraPermissionTextView.isVisible = !checkIfCameraPermissionWasGranted()
-        binding.requestCameraPermissionLinearLayout.isVisible = !isVisible
+        binding.startCameraLinearLayout.isVisible = !isVisible
     }
 
-    private fun checkCameraPermission() {
-        if (cameraPreviewDisposable != null) return
-        val isCameraPermissionGranted = checkIfCameraPermissionWasGranted()
-        val shouldCameraBeActive = viewModel.showCameraPreview.value == true
-        if (isCameraPermissionGranted && shouldCameraBeActive) showCameraPreviewOrConsent()
-    }
-
-    private fun toggleTorch() {
-        val torchIsEnabled = camera?.cameraInfo?.torchState?.value == TorchState.ON
-        setTorchEnabled(!torchIsEnabled)
-    }
-
-    private fun setTorchEnabled(isEnabled: Boolean) {
-        camera?.cameraControl?.enableTorch(isEnabled)
+    override fun setTorchEnabled(isEnabled: Boolean) {
+        super.setTorchEnabled(isEnabled)
         binding.flashLightButtonImageView.setImageResource(
             if (isEnabled) {
                 R.drawable.ic_flashlight_off

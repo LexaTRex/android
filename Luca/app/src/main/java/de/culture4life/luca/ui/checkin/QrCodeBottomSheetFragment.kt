@@ -22,7 +22,6 @@ import de.culture4life.luca.databinding.BottomSheetQrCodeBinding
 class QrCodeBottomSheetFragment : BottomSheetDialogFragment() {
 
     private lateinit var sharedViewModel: QrCodeBottomSheetViewModel
-
     private lateinit var binding: BottomSheetQrCodeBinding
     private var qrCodeBitmap: Bitmap? = null
     private var isLoading = false
@@ -31,13 +30,17 @@ class QrCodeBottomSheetFragment : BottomSheetDialogFragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setStyle(DialogFragment.STYLE_NORMAL, R.style.BottomSheetStyle)
-        sharedViewModel =
-            ViewModelProvider(requireActivity()).get(QrCodeBottomSheetViewModel::class.java)
+        sharedViewModel = ViewModelProvider(requireActivity()).get(QrCodeBottomSheetViewModel::class.java)
     }
 
-    override fun onDismiss(dialog: DialogInterface) {
-        super.onDismiss(dialog)
-        sharedViewModel.onQrCodeBottomSheetClosed()
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        binding = BottomSheetQrCodeBinding.inflate(inflater)
+        initializeViews()
+        return binding.root
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
@@ -54,14 +57,9 @@ class QrCodeBottomSheetFragment : BottomSheetDialogFragment() {
         return dialog
     }
 
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        binding = BottomSheetQrCodeBinding.inflate(inflater)
-        initializeViews()
-        return binding.root
+    override fun onDismiss(dialog: DialogInterface) {
+        sharedViewModel.onQrCodeBottomSheetClosed()
+        super.onDismiss(dialog)
     }
 
     private fun initializeViews() {

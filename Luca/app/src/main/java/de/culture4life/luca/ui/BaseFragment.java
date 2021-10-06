@@ -1,6 +1,5 @@
 package de.culture4life.luca.ui;
 
-import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -101,15 +100,15 @@ public abstract class BaseFragment<ViewModelType extends BaseViewModel> extends 
         }
     }
 
-    @CallSuper
     @Override
-    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
         baseActivity = (BaseActivity) getActivity();
         application = (LucaApplication) baseActivity.getApplication();
         rxPermissions = new RxPermissions(this);
         try {
-            navigationController = Navigation.findNavController(getView());
+            navigationController = Navigation.findNavController(view);
         } catch (Exception e) {
             Timber.w("No navigation controller available");
         }
@@ -128,7 +127,7 @@ public abstract class BaseFragment<ViewModelType extends BaseViewModel> extends 
                 .doOnComplete(() -> this.initialized = true)
                 .subscribe(
                         () -> Timber.d("Initialized %s with %s", this, viewModel),
-                        throwable -> Timber.e("Unable to initialize %s with %s: %s", this, viewModel, throwable.toString())
+                        throwable -> Timber.e(throwable, "Unable to initialize %s with %s: %s", this, viewModel, throwable.toString())
                 );
 
         // re-enable previous thread policy
@@ -149,6 +148,7 @@ public abstract class BaseFragment<ViewModelType extends BaseViewModel> extends 
         observeRequiredPermissions();
         viewDisposable = new CompositeDisposable();
         viewDisposable.add(waitUntilInitializationCompleted()
+                .andThen(viewModel.processArguments(getArguments()))
                 .andThen(viewModel.keepDataUpdated())
                 .doOnSubscribe(disposable -> Timber.d("Keeping data updated for %s", this))
                 .doOnError(throwable -> Timber.w(throwable, "Unable to keep data updated for %s", this))
@@ -369,58 +369,6 @@ public abstract class BaseFragment<ViewModelType extends BaseViewModel> extends 
         }
         InputMethodManager imm = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.hideSoftInputFromWindow(view.getRootView().getWindowToken(), 0);
-    }
-
-    protected Completable getCameraPermission() {
-        return rxPermissions.request(Manifest.permission.CAMERA)
-                .flatMapCompletable(granted -> {
-                    if (granted) {
-                        return Completable.complete();
-                    } else {
-                        showCameraPermissionPermanentlyDeniedError();
-                        return Completable.error(new IllegalStateException("Camera permission missing"));
-                    }
-                });
-    }
-
-    protected Boolean checkIfCameraPermissionWasGranted() {
-        return rxPermissions.isGranted(Manifest.permission.CAMERA);
-    }
-
-    protected void showCameraDialog(boolean directToSettings) {
-        MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(getContext())
-                .setTitle(R.string.camera_access_title)
-                .setMessage(R.string.camera_access_description)
-                .setNegativeButton(R.string.action_cancel, (dialog, which) -> dialog.cancel());
-
-        if (directToSettings) {
-            builder = builder.setPositiveButton(R.string.action_settings, (dialog, which) -> {
-                application.openAppSettings();
-                dialog.dismiss();
-            });
-        } else {
-            builder = builder.setPositiveButton(R.string.action_enable, (dialog, which) -> {
-                viewModel.setCameraConsentAccepted();
-                viewModel.showCameraPreview(true);
-                dialog.dismiss();
-            });
-        }
-        new BaseDialogFragment(builder).show();
-    }
-
-    protected void showCameraPermissionPermanentlyDeniedError() {
-        Context context = getContext();
-        if (context == null) {
-            return;
-        }
-        ViewError viewError = new ViewError.Builder(context)
-                .withTitle(getString(R.string.missing_permission_arg, getString(R.string.permission_name_camera)))
-                .withDescription(getString(R.string.missing_permission_arg, getString(R.string.permission_name_camera)))
-                .withResolveLabel(getString(R.string.action_resolve))
-                .withResolveAction(Completable.fromAction(() -> showCameraDialog(true)))
-                .build();
-
-        showErrorAsSnackbar(viewError);
     }
 
     protected void safeNavigateFromNavController(@IdRes int destination) {

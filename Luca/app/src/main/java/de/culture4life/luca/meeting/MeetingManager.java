@@ -272,7 +272,7 @@ public class MeetingManager extends Manager {
     public static String getReadableGuestName(@NonNull MeetingGuestData guestData) {
         String name;
         if (guestData.getFirstName() != null) {
-            name = guestData.getFirstName() + " " + guestData.getLastName();
+            name = guestData.getFirstName();
         } else {
             // this can happen if the guest already checked in but
             // hasn't uploaded the additional data (containing the name) yet

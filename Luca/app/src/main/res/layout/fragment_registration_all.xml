@@ -144,7 +144,9 @@
                     android:alpha="0.75"
                     android:text="@string/registration_address_info" />
 
-                <include layout="@layout/fragment_street_house_number" />
+                <include
+                    android:id="@+id/addressLayout"
+                    layout="@layout/fragment_street_house_number" />
 
                 <de.culture4life.luca.ui.registration.RegistrationTextInputLayout
                     android:id="@+id/postalCodeLayout"

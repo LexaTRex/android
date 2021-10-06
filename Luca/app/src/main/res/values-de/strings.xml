@@ -41,11 +41,12 @@
     <string name="error_no_network_connection">Keine Netzwerkverbindung</string>
     <string name="error_check_in_failed">Check-in fehlgeschlagen</string>
     <string name="error_location_not_found">Ein Check-in ist hier nicht mehr möglich.</string>
-    <string name="error_qr_code_broken">QR-Code fehlerhaft. Bitte versuche es mit einem anderen.</string>
     <string name="error_certificate_pinning_title">Unerwartete Server Zertifikate</string>
     <string name="error_certificate_pinning_description">Wegen nicht vertrauenswürdigen Zertifikaten konnte keine sichere Verbindung zu den luca Servern hergestellt werden.\n\nBitte wechsle dein Netzwerk und vergewissere dich, dass du die aktuellste App Version nutzt.</string>
     <string name="error_no_internet_connection_title">Keine Internetverbindung</string>
     <string name="error_no_internet_connection_description">Der Vorgang konnte nicht durchgeführt werden. Bitte verbinde dich mit dem Internet und versuche es erneut.</string>
+    <string name="error_no_daily_key_available_title">Check-in nicht möglich</string>
+    <string name="error_no_daily_key_available_description">Du kannst aktuell nicht einchecken. Überprüfe deine Internetverbindung und versuche es erneut. Bitte kontaktiere uns, sollte der Check-in weiterhin nicht funktionieren.</string>
 
     <!-- Statuses -->
     <string name="status_check_out_in_progress">Du wirst ausgecheckt…</string>
@@ -137,6 +138,7 @@
     <string name="navigation_venue_details">@string/navigation_venue_list</string>
     <string name="navigation_history">Historie</string>
     <string name="navigation_meeting">@string/meeting_heading</string>
+    <string name="navigation_meeting_detail">@string/meeting_details_title</string>
     <string name="navigation_accessed_data">Datenzugriffe</string>
     <string name="navigation_accessed_data_details">Datenzugriffsdetails</string>
     <string name="navigation_my_luca">@string/my_luca_heading</string>
@@ -162,23 +164,22 @@
     <string name="menu_delete_account">Account löschen</string>
 
     <!-- Check in -->
-    <string name="scan_qr_code">QR-Code scannen</string>
-    <string name="qr_code_description">Das ist dein QR-Code. Lass ihn an einem luca-Standort scannen, um dich einzuchecken.</string>
-    <string name="scan_qr_code_description">Scanne den QR-Code eines luca-Standorts oder eines privaten Treffens, um dich einzuchecken.</string>
-    <string name="show_qr_code">Meinen QR-Code anzeigen</string>
-    <string name="my_qr_code">Mein QR-Code</string>
-    <string name="activate_camera">Drücken um Kamera zu aktivieren</string>
-    <string name="camera_access_title">Kamera aktivieren</string>
-    <string name="camera_access_description">luca benötigt Zugriff auf deine Kamera, um QR-Codes von Testergebnissen, Locations oder Privaten Meetings scannen zu können. Nur die Daten im QR-Code werden verarbeitet und keine anderen Daten werden gespeichert.</string>
-    <string name="edit_contact_data">Kontaktdaten bearbeiten</string>
+    <string name="check_in_scan_qr_code_action">QR-Code scannen</string>
+    <string name="check_in_show_your_qr_code_description">Das ist dein QR-Code. Lass ihn an einem luca-Standort scannen, um dich einzuchecken.</string>
+    <string name="check_in_scan_qr_code_description">Scanne den QR-Code eines luca-Standorts oder eines privaten Treffens, um dich einzuchecken.</string>
+    <string name="check_in_show_your_qr_code_action">Meinen QR-Code anzeigen</string>
+    <string name="check_in_show_your_qr_code_title">Mein QR-Code</string>
+    <string name="check_in_activate_camera_action">Drücken um Kamera zu aktivieren</string>
+    <string name="check_in_enable_camera_access_title">Kamera aktivieren</string>
+    <string name="check_in_enable_camera_access_description">luca benötigt Zugriff auf deine Kamera, um QR-Codes von Testergebnissen, Locations oder Privaten Meetings scannen zu können. Nur die Daten im QR-Code werden verarbeitet und keine anderen Daten werden gespeichert.</string>
+    <string name="check_in_invalid_deeplink_error">Der von dir gescannte QR-Code ist kein valider Check-in Link.\n\nInhalt des QR-Codes:\n<xliff:g example="https://www.luca-app.de/" id="deeplink">%1$s</xliff:g></string>
 
     <!-- Private Meeting -->
     <string name="meeting_heading">Privates Treffen</string>
     <string name="meeting_description">Lass deine Freunde und Familie den QR-Code scannen, um sie bei deinem Treffen einzuchecken.</string>
     <string name="meeting_description_info">Private Treffen sind für kleine Zusammenkünfte mit Freunden und Familie gedacht. Sie sind nur Gedächtnisstützen und werden nicht mit dem Gesundheitsamt geteilt. Deshalb werden hier Vor- und Nachnamen von dir und deinen Gästen angezeigt.</string>
     <string name="meeting_duration_heading">Dauer</string>
-    <string name="meeting_members_heading">Teilnehmer</string>
-    <string name="meeting_members_info"><xliff:g example="2/4" id="count">%1$s</xliff:g>\n\nEingecheckt:\n<xliff:g example="- John Doe\n- Jane Doe" id="checkedIn">%2$s</xliff:g>\n\nAusgecheckt:\n<xliff:g example="- John Doe\n- Jane Doe" id="checkedOut">%3$s</xliff:g></string>
+    <string name="meeting_guests_label">Teilnehmer</string>
     <string name="meeting_create_action">Privates Treffen erstellen</string>
     <string name="meeting_create_modal_action">Starten</string>
     <string name="meeting_create_modal_heading">Privates Treffen erstellen</string>
@@ -190,9 +191,14 @@
     <string name="meeting_slider_content_description">Treffen beenden Schalter</string>
     <string name="meeting_was_ended_hint">Das Treffen wurde beendet</string>
     <string name="meeting_change_location_description">@string/venue_change_location_description</string>
+    <string name="meeting_information_title">Information</string>
 
     <string name="meeting_join_heading">Check-in privates Treffen</string>
     <string name="meeting_join_description">Wenn du fortfährst, checkst du dich bei einem privaten Treffen ein. Dabei wird dein Vor- und dein Nachname übermittelt.\n\nPrivate Treffen sind als Gedächtnisstütze für kleine Zusammenkünfte mit Freunden und Familie gedacht. Deshalb sehen Gastgeber:innen die Vor- und Nachnamen ihrer Gäste (und andersrum sehen Gäste die Vor- und Nachnamen ihrer Gastgeber:innen). Diese Daten stehen zwar in der Historie, können aber nicht mit Gesundheitsämtern geteilt werden.</string>
+
+    <string name="meeting_details_title">Details</string>
+    <string name="meeting_details_start_time">Start</string>
+    <string name="meeting_details_guests">Gäste: <xliff:g example="1" id="count">%1$d</xliff:g></string>
 
     <!-- Venues -->
     <string name="venue_heading">@string/dummy_heading</string>
@@ -321,7 +327,6 @@
     <string name="accessed_data_level_4_detailed_description">Bitte handle verantwortungsvoll, reduziere deine Kontakte und melde dich gegebenenfalls beim für dich zuständigen Gesundheitsamt – vor allem, wenn bei dir Symptome auftreten. Vielleicht hast du auch die Möglichkeit, einen Test zu machen.\n\nDieser Hinweis wurde automatisiert von luca ausgelöst.</string>
     <string name="accessed_data_level_4_banner_text">Achtung! Du warst in einen luca-Standort eingecheckt, in dem mehr als ein Gesundheitsamt Daten entschlüsselt hat.</string>
 
-
     <!-- My Luca -->
     <string name="my_luca_heading">Mein luca</string>
     <string name="my_luca_empty_title">Willkommen bei „Mein luca“</string>
@@ -441,6 +446,7 @@
     </plurals>
 
     <!-- Account tab -->
+    <string name="account_tab_edit_contact_data">Kontaktdaten bearbeiten</string>
     <string name="account_tab_key_for_health_dep">Schlüssel für Gesundheitsämter</string>
     <string name="account_tab_data_request">Daten anfragen</string>
 

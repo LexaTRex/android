@@ -1,8 +1,5 @@
 package de.culture4life.luca.crypto;
 
-import com.google.gson.annotations.Expose;
-import com.google.gson.annotations.SerializedName;
-
 import java.security.interfaces.ECPublicKey;
 
 import de.culture4life.luca.checkin.CheckInData;
@@ -12,20 +9,14 @@ import de.culture4life.luca.checkin.CheckInData;
  */
 public class DailyKeyPairPublicKeyWrapper {
 
-    @SerializedName("id")
-    @Expose
     private int id;
-
-    @SerializedName("publicKey")
-    @Expose
     private ECPublicKey publicKey;
+    private long creationTimestamp;
 
-    public DailyKeyPairPublicKeyWrapper() {
-    }
-
-    public DailyKeyPairPublicKeyWrapper(int id, ECPublicKey publicKey) {
+    public DailyKeyPairPublicKeyWrapper(int id, ECPublicKey publicKey, long creationTimestamp) {
         this.id = id;
         this.publicKey = publicKey;
+        this.creationTimestamp = creationTimestamp;
     }
 
     public int getId() {
@@ -44,11 +35,20 @@ public class DailyKeyPairPublicKeyWrapper {
         this.publicKey = publicKey;
     }
 
+    public long getCreationTimestamp() {
+        return creationTimestamp;
+    }
+
+    public void setCreationTimestamp(long creationTimestamp) {
+        this.creationTimestamp = creationTimestamp;
+    }
+
     @Override
     public String toString() {
         return "DailyKeyPairPublicKeyWrapper{" +
                 "id=" + id +
                 ", publicKey=" + publicKey +
+                ", creationTimestamp=" + creationTimestamp +
                 '}';
     }
 

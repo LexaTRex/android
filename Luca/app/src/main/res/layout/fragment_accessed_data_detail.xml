@@ -4,36 +4,29 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.accesseddata.AccessedDataDetailFragment">
+    tools:context=".ui.MainActivity">
 
-    <LinearLayout
-        android:id="@+id/headingTextViewsLayout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/spacing_small"
-        android:layout_marginTop="@dimen/spacing_default"
-        android:layout_marginEnd="32dp"
-        android:orientation="horizontal"
-        app:layout_constraintHorizontal_bias="0"
+    <ImageView
+        android:id="@+id/backImageView"
+        style="@style/BackButtonImageView"
+        tools:ignore="MissingConstraints" />
+
+    <TextView
+        android:id="@+id/headingTextView"
+        style="@style/TextAppearance.Luca.Headline2"
+        android:layout_width="wrap_content"
+        android:layout_margin="@dimen/spacing_default"
+        android:text="@string/navigation_accessed_data"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
-
-        <TextView
-            android:id="@+id/headingTextView"
-            style="@style/TextAppearance.Luca.Headline2"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            tools:text="Datenanfrage" />
-
-    </LinearLayout>
+        app:layout_constraintTop_toTopOf="parent" />
 
     <View
         android:id="@+id/headingSeparatorView"
         style="@style/HeaderSeparatorView"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/headingTextViewsLayout" />
+        app:layout_constraintTop_toBottomOf="@id/headingTextView" />
 
     <ScrollView
         android:layout_width="match_parent"
@@ -47,8 +40,8 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="@dimen/spacing_default"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:padding="@dimen/spacing_default">
 
             <TextView
                 android:id="@+id/healthDepartmentTextView"
@@ -59,7 +52,7 @@
                 android:fontFamily="@font/montserrat_bold"
                 android:textSize="24sp"
                 android:textStyle="bold"
-                tools:text="Gesundheitsamt Berlin Mitte" />
+                tools:text="@string/accessed_data_title" />
 
             <TextView
                 android:id="@+id/locationTextView"
@@ -70,7 +63,7 @@
                 android:fontFamily="@font/montserrat_bold"
                 android:textSize="24sp"
                 android:textStyle="bold"
-                tools:text="Restaurant Schnitzler" />
+                tools:text="@string/accessed_data_description" />
 
             <TextView
                 android:id="@+id/timeTextView"
@@ -79,7 +72,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="@dimen/spacing_default"
                 android:fontFamily="@font/montserrat_regular"
-                tools:text="23.08.2020 16.00 Uhr –\n24.05.2020 22.00 Uhr" />
+                tools:text="@string/accessed_data_time" />
 
             <TextView
                 android:id="@+id/descriptionTextView"

@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/mainNavigation"
-    app:startDestination="@+id/myLucaFragment">
+    app:startDestination="@+id/checkInFragment">
 
     <fragment
         android:id="@+id/myLucaFragment"
@@ -87,7 +87,22 @@
             app:launchSingleTop="true"
             app:popUpTo="@id/mainNavigation"
             app:popUpToInclusive="true" />
+        <action
+            android:id="@+id/action_meetingFragment_to_meetingDetailFragment"
+            app:destination="@id/meetingDetailFragment" />
     </fragment>
+
+    <fragment
+        android:id="@+id/meetingDetailFragment"
+        android:name="de.culture4life.luca.ui.meeting.MeetingDetailFragment"
+        android:label="@string/navigation_meeting_detail"
+        tools:layout="@layout/fragment_meeting_detail" />
+
+    <fragment
+        android:id="@+id/meetingHistoryDetailFragment"
+        android:name="de.culture4life.luca.ui.history.MeetingHistoryDetailFragment"
+        android:label="@string/navigation_meeting_detail"
+        tools:layout="@layout/fragment_meeting_history_detail" />
 
     <fragment
         android:id="@+id/historyFragment"
@@ -100,6 +115,9 @@
         <action
             android:id="@+id/action_historyFragment_to_accessedDataDetailFragment"
             app:destination="@id/accessedDataDetailFragment" />
+        <action
+            android:id="@+id/action_historyFragment_to_meetingHistoryDetailFragment"
+            app:destination="@id/meetingHistoryDetailFragment" />
     </fragment>
 
     <fragment

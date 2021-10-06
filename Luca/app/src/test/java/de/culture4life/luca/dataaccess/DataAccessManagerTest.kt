@@ -5,6 +5,7 @@ import de.culture4life.luca.LucaUnitTest
 import de.culture4life.luca.checkin.CheckInManager
 import de.culture4life.luca.children.ChildrenManager
 import de.culture4life.luca.crypto.CryptoManager
+import de.culture4life.luca.genuinity.GenuinityManager
 import de.culture4life.luca.history.HistoryManager
 import de.culture4life.luca.location.GeofenceManager
 import de.culture4life.luca.location.LocationManager
@@ -27,9 +28,11 @@ import java.util.concurrent.TimeUnit
 @RunWith(AndroidJUnit4::class)
 @Config(sdk = [28])
 class DataAccessManagerTest : LucaUnitTest() {
+
     private val preferencesManager = PreferencesManager()
     private val networkManager = NetworkManager()
-    private val cryptoManager = CryptoManager(preferencesManager, networkManager)
+    private val genuinityManager = GenuinityManager(preferencesManager, networkManager)
+    private val cryptoManager = CryptoManager(preferencesManager, networkManager, genuinityManager)
     private val registrationManager = RegistrationManager(preferencesManager, networkManager, cryptoManager)
     private val childrenManager = ChildrenManager(preferencesManager, registrationManager)
     private val historyManager = HistoryManager(preferencesManager, childrenManager)
@@ -513,4 +516,5 @@ class DataAccessManagerTest : LucaUnitTest() {
             .andThen(dataAccessManager.hasNewNotifications())
             .test().assertValue(true)
     }
+
 }

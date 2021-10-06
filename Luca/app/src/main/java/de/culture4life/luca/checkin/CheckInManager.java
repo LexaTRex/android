@@ -1,5 +1,15 @@
 package de.culture4life.luca.checkin;
 
+import static android.Manifest.permission.ACCESS_COARSE_LOCATION;
+import static android.Manifest.permission.ACCESS_FINE_LOCATION;
+import static de.culture4life.luca.crypto.HashProvider.TRIMMED_HASH_LENGTH;
+import static de.culture4life.luca.history.HistoryManager.KEEP_DATA_DURATION;
+import static de.culture4life.luca.location.GeofenceManager.MAXIMUM_GEOFENCE_RADIUS;
+import static de.culture4life.luca.location.GeofenceManager.MINIMUM_GEOFENCE_RADIUS;
+import static de.culture4life.luca.location.GeofenceManager.UPDATE_INTERVAL_DEFAULT;
+import static de.culture4life.luca.notification.LucaNotificationManager.NOTIFICATION_ID_EVENT;
+import static de.culture4life.luca.util.SerializationUtil.serializeToBase64;
+
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.location.Location;
@@ -8,6 +18,11 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresPermission;
 import androidx.core.app.NotificationCompat;
+import androidx.work.Constraints;
+import androidx.work.NetworkType;
+import androidx.work.PeriodicWorkRequest;
+import androidx.work.WorkManager;
+import androidx.work.WorkRequest;
 
 import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.GeofencingRequest;
@@ -61,16 +76,6 @@ import io.reactivex.rxjava3.disposables.Disposable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 import timber.log.Timber;
 
-import static android.Manifest.permission.ACCESS_COARSE_LOCATION;
-import static android.Manifest.permission.ACCESS_FINE_LOCATION;
-import static de.culture4life.luca.crypto.HashProvider.TRIMMED_HASH_LENGTH;
-import static de.culture4life.luca.history.HistoryManager.KEEP_DATA_DURATION;
-import static de.culture4life.luca.location.GeofenceManager.MAXIMUM_GEOFENCE_RADIUS;
-import static de.culture4life.luca.location.GeofenceManager.MINIMUM_GEOFENCE_RADIUS;
-import static de.culture4life.luca.location.GeofenceManager.UPDATE_INTERVAL_DEFAULT;
-import static de.culture4life.luca.notification.LucaNotificationManager.NOTIFICATION_ID_EVENT;
-import static de.culture4life.luca.util.SerializationUtil.serializeToBase64;
-
 /**
  * Facilitates check-in to a venues either by having a shown barcode scanned or scanning a printed
  * QR-code.
@@ -82,16 +87,20 @@ import static de.culture4life.luca.util.SerializationUtil.serializeToBase64;
  */
 public class CheckInManager extends Manager {
 
-    public static final String KEY_CHECKED_IN_TRACE_ID = "checked_in_trace_id";
-    public static final String KEY_CHECKED_IN_VENUE_ID = "checked_in_venue_id";
-    public static final String KEY_CHECK_IN_TIMESTAMP = "check_in_timestamp";
-    public static final String KEY_CHECK_IN_DATA = "check_in_data_2";
-    public static final String KEY_ARCHIVED_CHECK_IN_DATA = "archived_check_in_data";
-    public static final String KEY_ADDITIONAL_CHECK_IN_PROPERTIES_DATA = "additional_check_in_properties";
+    private static final String KEY_CHECK_IN_DATA = "check_in_data_2";
+    private static final String KEY_ARCHIVED_CHECK_IN_DATA = "archived_check_in_data";
+    private static final String KEY_ADDITIONAL_CHECK_IN_PROPERTIES_DATA = "additional_check_in_properties";
+    private static final String KEY_LAST_CHECK_IN_DATA_UPDATE_TIMESTAMP = "last_check_in_data_update_timestamp";
+
+    private static final String CHECK_IN_DATA_UPDATE_TAG = "check_in_update";
+    private static final long CHECK_IN_DATA_UPDATE_INTERVAL = BuildConfig.DEBUG ? PeriodicWorkRequest.MIN_PERIODIC_INTERVAL_MILLIS : TimeUnit.HOURS.toMillis(6);
+    private static final long CHECK_IN_DATA_UPDATE_FLEX_PERIOD = BuildConfig.DEBUG ? PeriodicWorkRequest.MIN_PERIODIC_FLEX_MILLIS : TimeUnit.HOURS.toMillis(1);
+    private static final long CHECK_IN_DATA_UPDATE_INITIAL_DELAY = TimeUnit.SECONDS.toMillis(10);
 
     private static final long MINIMUM_CHECK_IN_DURATION = TimeUnit.MINUTES.toMillis(2);
     private static final long LOCATION_REQUEST_TIMEOUT = TimeUnit.SECONDS.toMillis(3);
     private static final int RECENT_TRACE_IDS_LIMIT = (int) TimeUnit.HOURS.toMinutes(6);
+    private static final long MAXIMUM_YOUNGER_TRACE_ID_AGE = TimeUnit.MINUTES.toMillis(2);
     private static final long CHECK_OUT_POLLING_INTERVAL = TimeUnit.MINUTES.toMillis(1);
     private static final long AUTOMATIC_CHECK_OUT_RETRY_DELAY = BuildConfig.DEBUG ? TimeUnit.SECONDS.toMillis(15) : TimeUnit.MINUTES.toMillis(2);
 
@@ -121,6 +130,8 @@ public class CheckInManager extends Manager {
     @Nullable
     private Disposable automaticCheckoutDisposable;
 
+    private WorkManager workManager;
+
     public CheckInManager(@NonNull PreferencesManager preferencesManager, @NonNull NetworkManager networkManager, @NonNull GeofenceManager geofenceManager, @NonNull LocationManager locationManager, @NonNull HistoryManager historyManager, @NonNull CryptoManager cryptoManager, @NonNull LucaNotificationManager notificationManager) {
         this.preferencesManager = preferencesManager;
         this.networkManager = networkManager;
@@ -145,14 +156,115 @@ public class CheckInManager extends Manager {
                 notificationManager.initialize(context)
         ).andThen(Completable.mergeArray(
                 deleteOldArchivedCheckInData(),
-                Completable.fromAction(() ->
-                        managerDisposable.add(getCheckInDataAndChanges()
-                                .doOnNext(updatedCheckInData -> {
-                                    Timber.d("Check-in data updated: %s", updatedCheckInData);
-                                    this.checkInData = updatedCheckInData;
-                                })
-                                .subscribe()))
-        ));
+                preferencesManager.restoreIfAvailable(KEY_CHECK_IN_DATA, CheckInData.class)
+                        .doOnSuccess(restoredCheckInData -> this.checkInData = restoredCheckInData)
+                        .ignoreElement(),
+                Completable.fromAction(() -> {
+                    if (!LucaApplication.isRunningUnitTests()) {
+                        this.workManager = WorkManager.getInstance(context);
+                    }
+                })
+        )).andThen(initializeCheckInDataUpdates());
+    }
+
+    /*
+        Check-in data updates
+     */
+
+    private Completable initializeCheckInDataUpdates() {
+        return Completable.fromAction(() -> managerDisposable.add(startUpdatingCheckInDataInRegularIntervals()
+                .delaySubscription(CHECK_IN_DATA_UPDATE_INITIAL_DELAY, TimeUnit.MILLISECONDS, Schedulers.io())
+                .doOnError(throwable -> Timber.e("Unable to start updating in regular intervals: %s", throwable.toString()))
+                .onErrorComplete()
+                .subscribe()));
+    }
+
+    private Completable startUpdatingCheckInDataInRegularIntervals() {
+        return getNextRecommendedCheckInDataUpdateDelay()
+                .flatMapCompletable(initialDelay -> Completable.fromAction(() -> {
+                    if (workManager == null) {
+                        managerDisposable.add(updateCheckInDataIfNecessary(CHECK_IN_DATA_UPDATE_INTERVAL, true)
+                                .delaySubscription(initialDelay, TimeUnit.MILLISECONDS)
+                                .subscribeOn(Schedulers.io())
+                                .subscribe());
+                    } else {
+                        Constraints constraints = new Constraints.Builder()
+                                .setRequiredNetworkType(NetworkType.CONNECTED)
+                                .build();
+
+                        WorkRequest updateWorkRequest = new PeriodicWorkRequest.Builder(
+                                CheckInUpdateWorker.class,
+                                CHECK_IN_DATA_UPDATE_INTERVAL, TimeUnit.MILLISECONDS,
+                                CHECK_IN_DATA_UPDATE_FLEX_PERIOD, TimeUnit.MILLISECONDS
+                        ).setInitialDelay(initialDelay, TimeUnit.MILLISECONDS)
+                                .setConstraints(constraints)
+                                .addTag(CHECK_IN_DATA_UPDATE_TAG)
+                                .build();
+
+                        workManager.cancelAllWorkByTag(CHECK_IN_DATA_UPDATE_TAG);
+                        workManager.enqueue(updateWorkRequest);
+                        Timber.d("Update work request submitted to work manager");
+                    }
+                }));
+    }
+
+    /**
+     * Checking in using a scanner doesn't require the device to be online, nevertheless the backend
+     * is polled regularly in an attempt to provide visual feedback of a successful check-in.
+     *
+     * @param interval to poll backend at (millis)
+     * @see <a href="https://luca-app.de/securityoverview/processes/guest_app_checkin.html#qr-code-scanning-feedback">Security
+     * Overview: QR Code Scanning Feedback</a>
+     */
+    public Completable updateCheckInDataIfNecessary(long interval, boolean useOlderTraceIds) {
+        return Observable.interval(0, interval, TimeUnit.MILLISECONDS, Schedulers.io())
+                .flatMapCompletable(tick -> updateCheckInDataIfNecessary(useOlderTraceIds)
+                        .onErrorComplete())
+                .doOnSubscribe(disposable -> Timber.d(
+                        "Starting to request check-in data updates. interval = [%d], useOlderTraceIds = [%b]",
+                        interval, useOlderTraceIds
+                ))
+                .doFinally(() -> Timber.d(
+                        "Stopped requesting check-in data updates. interval = [%d], useOlderTraceIds = [%b]",
+                        interval, useOlderTraceIds
+                ));
+    }
+
+    public Completable updateCheckInDataIfNecessary(boolean useOlderTraceIds) {
+        return hasRecentTraceIds(useOlderTraceIds)
+                .flatMapCompletable(hasRecentTraceIds ->
+                        hasRecentTraceIds ? updateCheckInData(useOlderTraceIds) : Completable.complete());
+    }
+
+    public Completable updateCheckInData(boolean useOlderTraceIds) {
+        return fetchCheckInDataFromBackend(useOlderTraceIds)
+                .filter(current -> {
+                    if (checkInData != null) {
+                        return !checkInData.getTraceId().equals(current.getTraceId());
+                    } else {
+                        return true;
+                    }
+                })
+                .flatMapCompletable(this::processCheckIn)
+                .andThen(preferencesManager.persist(KEY_LAST_CHECK_IN_DATA_UPDATE_TIMESTAMP, System.currentTimeMillis()))
+                .doOnSubscribe(disposable -> Timber.v("Updating check-in data. useOlderTraceIds = [%b]", useOlderTraceIds))
+                .doOnComplete(() -> Timber.v("Check-in data update complete"))
+                .doOnError(throwable -> Timber.w("Check-in data update failed: %s", throwable.toString()));
+    }
+
+    public Single<Long> getDurationSinceLastCheckInDataUpdate() {
+        return preferencesManager.restoreOrDefault(KEY_LAST_CHECK_IN_DATA_UPDATE_TIMESTAMP, 0L)
+                .map(lastUpdateTimestamp -> System.currentTimeMillis() - lastUpdateTimestamp);
+    }
+
+    public Single<Long> getNextRecommendedCheckInDataUpdateDelay() {
+        return getDurationSinceLastCheckInDataUpdate()
+                .map(durationSinceLastUpdate -> CHECK_IN_DATA_UPDATE_INTERVAL - durationSinceLastUpdate)
+                .map(recommendedDelay -> Math.max(0, recommendedDelay))
+                .doOnSuccess(recommendedDelay -> {
+                    String readableDelay = TimeUtil.getReadableDurationWithPlural(recommendedDelay, context).blockingGet();
+                    Timber.v("Recommended update delay: %s", readableDelay);
+                });
     }
 
     /*
@@ -171,9 +283,7 @@ public class CheckInManager extends Manager {
                 .andThen(generateCheckInData(qrCodeData, scannerId)
                         .flatMapCompletable(checkInRequestData -> networkManager.getLucaEndpointsV3()
                                 .flatMapCompletable(lucaEndpointsV3 -> lucaEndpointsV3.checkIn(checkInRequestData))))
-                .andThen(getCheckInDataFromBackend()
-                        .switchIfEmpty(Single.error(new IllegalStateException("No check-in data available at backend after checking in"))))
-                .flatMapCompletable(this::processCheckIn);
+                .andThen(updateCheckInData(false));
     }
 
     /**
@@ -310,11 +420,17 @@ public class CheckInManager extends Manager {
                 });
     }
 
+    public Single<Boolean> isCheckedInToPrivateMeeting() {
+        return getCheckInDataIfAvailable()
+                .map(CheckInData::isPrivateMeeting)
+                .defaultIfEmpty(false);
+    }
+
     public Completable assertCheckedInToPrivateMeeting() {
         return assertCheckedIn()
-                .andThen(getCheckInDataIfAvailable())
-                .flatMapCompletable(checkInData -> {
-                    if (checkInData.isPrivateMeeting()) {
+                .andThen(isCheckedInToPrivateMeeting())
+                .flatMapCompletable(inPrivateMeeting -> {
+                    if (inPrivateMeeting) {
                         return Completable.complete();
                     } else {
                         return Completable.error(new IllegalStateException("Check-in data does not belong to a private meeting"));
@@ -328,8 +444,8 @@ public class CheckInManager extends Manager {
                 .distinctUntilChanged();
     }
 
-    public Single<Boolean> isCheckedInAtBackend() {
-        return getTraceDataFromBackend()
+    public Single<Boolean> isCheckedInAtBackend(boolean useOlderTraceIds) {
+        return getTraceDataFromBackend(useOlderTraceIds)
                 .flatMap(traceData -> TimeUtil.convertFromUnixTimestamp(traceData.getCheckOutTimestamp())
                         .toMaybe()
                         .map(checkoutTimestamp -> checkoutTimestamp == 0 || checkoutTimestamp > System.currentTimeMillis()))
@@ -590,7 +706,7 @@ public class CheckInManager extends Manager {
     }
 
     public Completable checkOutIfNotCheckedInAtBackend() {
-        return isCheckedInAtBackend()
+        return isCheckedInAtBackend(false)
                 .filter(isCheckedIn -> !isCheckedIn)
                 .flatMapCompletable(isCheckedOut -> processCheckOut());
     }
@@ -683,38 +799,8 @@ public class CheckInManager extends Manager {
                 .doOnNext(checkInData -> Timber.v("Check-in data updated from preferences: %s", checkInData));
     }
 
-    /**
-     * Checking in using a scanner doesn't require the device to be online, nevertheless the backend
-     * is polled regularly in an attempt to provide visual feedback of a successful check-in.
-     *
-     * @param interval to poll backend at (millis)
-     * @return Completable to finalize check-in {@link #processCheckIn(CheckInData)}
-     * @see <a href="https://luca-app.de/securityoverview/processes/guest_app_checkin.html#qr-code-scanning-feedback">Security
-     * Overview: QR Code Scanning Feedback</a>
-     */
-    public Completable requestCheckInDataUpdates(long interval) {
-        return pollCheckInData(interval)
-                .distinctUntilChanged((previous, current) -> {
-                    if (checkInData != null) {
-                        return checkInData.getTraceId().equals(current.getTraceId());
-                    } else {
-                        return previous.getTraceId().equals(current.getTraceId());
-                    }
-                })
-                .flatMapCompletable(this::processCheckIn)
-                .doOnSubscribe(disposable -> Timber.d("Starting to request check-in data updates"))
-                .doFinally(() -> Timber.d("Stopped requesting check-in data updates"));
-    }
-
-    private Observable<CheckInData> pollCheckInData(long interval) {
-        return Observable.interval(0, interval, TimeUnit.MILLISECONDS, Schedulers.io())
-                .flatMapMaybe(tick -> getCheckInDataFromBackend()
-                        .doOnError(throwable -> Timber.w("Unable to get check-in data: %s", throwable.toString()))
-                        .onErrorComplete());
-    }
-
-    private Maybe<CheckInData> getCheckInDataFromBackend() {
-        return getTraceDataFromBackend()
+    private Maybe<CheckInData> fetchCheckInDataFromBackend(boolean useOlderTraceIds) {
+        return getTraceDataFromBackend(useOlderTraceIds)
                 .flatMap(traceData -> {
                     if (traceData.isCheckedOut()) {
                         return Maybe.empty();
@@ -748,15 +834,16 @@ public class CheckInManager extends Manager {
                             }).toMaybe();
 
                 })
-                .doOnSubscribe(disposable -> Timber.d("Requesting check-in data from backend"));
+                .doOnSubscribe(disposable -> Timber.v("Requesting check-in data from backend"));
     }
 
     private Completable persistCheckInData(CheckInData newCheckInData) {
-        return preferencesManager.persist(KEY_CHECK_IN_DATA, newCheckInData);
+        return preferencesManager.persist(KEY_CHECK_IN_DATA, newCheckInData)
+                .doOnSubscribe(disposable -> Timber.d("Persisting check-in data: %s", newCheckInData));
     }
 
     private Completable removeCheckInDataIfCheckedOut() {
-        return isCheckedInAtBackend()
+        return isCheckedInAtBackend(false)
                 .flatMapCompletable(isCheckedIn -> {
                     if (!isCheckedIn) {
                         return removeCheckInData();
@@ -769,11 +856,8 @@ public class CheckInManager extends Manager {
 
     private Completable removeCheckInData() {
         return Completable.mergeArray(
-                cryptoManager.deleteTraceData(),
-                preferencesManager.delete(KEY_CHECK_IN_DATA),
-                preferencesManager.delete(KEY_CHECKED_IN_TRACE_ID),
-                preferencesManager.delete(KEY_CHECKED_IN_VENUE_ID),
-                preferencesManager.delete(KEY_CHECK_IN_TIMESTAMP)
+                deleteRecentTraceIds(),
+                preferencesManager.delete(KEY_CHECK_IN_DATA)
         ).andThen(Completable.fromAction(() -> checkInData = null))
                 .doOnComplete(() -> Timber.d("Removed check-in data"));
     }
@@ -782,22 +866,22 @@ public class CheckInManager extends Manager {
         Trace data
      */
 
+    private Maybe<TraceData> getTraceDataFromBackend(boolean useOlderTraceIds) {
+        return getTraceDataForCheckedInTraceIdFromBackend()
+                .switchIfEmpty(getTraceDataForRecentTraceIdsFromBackend(useOlderTraceIds));
+    }
+
     private Maybe<TraceData> getTraceDataForCheckedInTraceIdFromBackend() {
         return getCheckedInTraceId()
                 .flatMap(this::getTraceDataFromBackend);
     }
 
-    private Maybe<TraceData> getTraceDataForRecentTraceIdsFromBackend() {
-        return getRecentTraceIds()
+    private Maybe<TraceData> getTraceDataForRecentTraceIdsFromBackend(boolean useOlderTraceIds) {
+        return getRecentTraceIds(useOlderTraceIds)
                 .takeLast(RECENT_TRACE_IDS_LIMIT)
                 .toList()
                 .flatMapObservable(this::getTraceDataFromBackend)
                 .lastElement();
-    }
-
-    private Maybe<TraceData> getTraceDataFromBackend() {
-        return getTraceDataForCheckedInTraceIdFromBackend()
-                .switchIfEmpty(getTraceDataForRecentTraceIdsFromBackend());
     }
 
     private Maybe<TraceData> getTraceDataFromBackend(@NonNull byte[] traceId) {
@@ -810,6 +894,7 @@ public class CheckInManager extends Manager {
         return Observable.fromIterable(traceIds)
                 .flatMapSingle(SerializationUtil::serializeToBase64)
                 .toList()
+                .filter(serializedTraceIds -> !serializedTraceIds.isEmpty())
                 .map(serializedTraceIds -> {
                     JsonArray jsonArray = new JsonArray(serializedTraceIds.size());
                     for (String serializedTraceId : serializedTraceIds) {
@@ -819,15 +904,34 @@ public class CheckInManager extends Manager {
                     jsonObject.add("traceIds", jsonArray);
                     return jsonObject;
                 })
-                .flatMap(jsonObject -> networkManager.getLucaEndpointsV3()
+                .flatMapSingle(jsonObject -> networkManager.getLucaEndpointsV3()
                         .flatMap(lucaEndpointsV3 -> lucaEndpointsV3.getTraces(jsonObject)))
                 .flatMapObservable(Observable::fromIterable)
                 .sorted((first, second) -> Long.compare(first.getCheckInTimestamp(), second.getCheckInTimestamp()));
     }
 
-    private Observable<byte[]> getRecentTraceIds() {
+    public Single<Boolean> hasRecentTraceIds(boolean useOlderTraceIds) {
+        return getRecentTraceIds(useOlderTraceIds)
+                .isEmpty()
+                .map(isEmpty -> !isEmpty);
+    }
+
+    private Observable<byte[]> getRecentTraceIds(boolean useOlderTraceIds) {
         return cryptoManager.getTraceIdWrappers()
+                .filter(traceIdWrapper -> {
+                    long creationTimestamp = TimeUtil.convertFromUnixTimestamp(traceIdWrapper.getTimestamp()).blockingGet();
+                    long age = System.currentTimeMillis() - creationTimestamp;
+                    if (useOlderTraceIds) {
+                        return age > MAXIMUM_YOUNGER_TRACE_ID_AGE;
+                    } else {
+                        return age <= MAXIMUM_YOUNGER_TRACE_ID_AGE;
+                    }
+                })
                 .map(TraceIdWrapper::getTraceId);
+    }
+
+    public Completable deleteRecentTraceIds() {
+        return cryptoManager.deleteTraceData();
     }
 
     public Observable<String> getArchivedTraceIds() {
@@ -838,11 +942,6 @@ public class CheckInManager extends Manager {
     /*
         Archive
      */
-
-    public Completable addCurrentCheckInDataToArchive() {
-        return getCheckInDataIfAvailable()
-                .flatMapCompletable(this::addCheckInDataToArchive);
-    }
 
     public Completable addCheckInDataToArchive(@NonNull CheckInData checkInData) {
         return getArchivedCheckInData()
