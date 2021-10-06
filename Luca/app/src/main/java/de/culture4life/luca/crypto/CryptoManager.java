@@ -1,8 +1,5 @@
 package de.culture4life.luca.crypto;
 
-import static de.culture4life.luca.crypto.HashProvider.TRIMMED_HASH_LENGTH;
-import static de.culture4life.luca.util.SingleUtil.retryWhen;
-
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Build;
@@ -48,14 +45,15 @@ import javax.crypto.spec.SecretKeySpec;
 
 import de.culture4life.luca.Manager;
 import de.culture4life.luca.checkin.CheckInManager;
+import de.culture4life.luca.genuinity.GenuinityManager;
 import de.culture4life.luca.meeting.MeetingGuestData;
 import de.culture4life.luca.network.NetworkManager;
 import de.culture4life.luca.network.endpoints.LucaEndpointsV3;
 import de.culture4life.luca.network.pojo.CheckInRequestData;
 import de.culture4life.luca.network.pojo.DailyKeyPairIssuer;
 import de.culture4life.luca.preference.PreferencesManager;
-import de.culture4life.luca.ui.checkin.QrCodeData;
 import de.culture4life.luca.ui.checkin.CheckInViewModel;
+import de.culture4life.luca.ui.checkin.QrCodeData;
 import de.culture4life.luca.util.SerializationUtil;
 import de.culture4life.luca.util.TimeUtil;
 import io.reactivex.rxjava3.core.Completable;
@@ -65,6 +63,9 @@ import io.reactivex.rxjava3.core.Single;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 import timber.log.Timber;
 
+import static de.culture4life.luca.crypto.HashProvider.TRIMMED_HASH_LENGTH;
+import static de.culture4life.luca.util.SingleUtil.retryWhen;
+
 /**
  * Provides access to all cryptographic methods, handles Bouncy-Castle key store persistence.
  */
@@ -73,6 +74,7 @@ public class CryptoManager extends Manager {
     public static final String KEYSTORE_FILE_NAME = "keys.ks";
     public static final String DAILY_KEY_PAIR_PUBLIC_KEY_ID_KEY = "daily_key_pair_public_key_id";
     public static final String DAILY_KEY_PAIR_PUBLIC_KEY_POINT_KEY = "daily_key_pair_public_key";
+    public static final String DAILY_KEY_PAIR_CREATION_TIMESTAMP_KEY = "daily_key_pair_creation_timestamp";
     public static final String DATA_SECRET_KEY = "user_data_secret_2";
     public static final String TRACE_ID_WRAPPERS_KEY = "tracing_id_wrappers";
     public static final String TRACING_SECRET_KEY_PREFIX = "tracing_secret_";
@@ -88,6 +90,7 @@ public class CryptoManager extends Manager {
 
     private final PreferencesManager preferencesManager;
     private final NetworkManager networkManager;
+    private final GenuinityManager genuinityManager;
 
     private final RxKeyStore androidKeyStore;
     private final RxKeyStore bouncyCastleKeyStore;
@@ -107,9 +110,10 @@ public class CryptoManager extends Manager {
     private DailyKeyPairPublicKeyWrapper dailyKeyPairPublicKeyWrapper;
 
     @SuppressLint("NewApi")
-    public CryptoManager(@NonNull PreferencesManager preferencesManager, @NonNull NetworkManager networkManager) {
+    public CryptoManager(@NonNull PreferencesManager preferencesManager, @NonNull NetworkManager networkManager, @NonNull GenuinityManager genuinityManager) {
         this.preferencesManager = preferencesManager;
         this.networkManager = networkManager;
+        this.genuinityManager = genuinityManager;
 
         androidKeyStore = new RxKeyStore(RxKeyStore.TYPE_ANDROID, getAndroidKeyStoreProviderName());
         bouncyCastleKeyStore = new RxKeyStore(RxKeyStore.TYPE_BKS, RxKeyStore.PROVIDER_BOUNCY_CASTLE);
@@ -131,7 +135,8 @@ public class CryptoManager extends Manager {
     protected Completable doInitialize(@NonNull Context context) {
         return Completable.mergeArray(
                 preferencesManager.initialize(context),
-                networkManager.initialize(context)
+                networkManager.initialize(context),
+                genuinityManager.initialize(context)
         ).andThen(Completable.fromAction(() -> this.context = context))
                 .andThen(setupSecurityProviders())
                 .andThen(loadKeyStoreFromFile().onErrorComplete());
@@ -182,8 +187,8 @@ public class CryptoManager extends Manager {
     private Completable loadKeyStoreFromFile() {
         return getKeyStorePasswordOrHardcodedValue()
                 .flatMapCompletable(passwordChars -> Single.fromCallable(() -> context.openFileInput(KEYSTORE_FILE_NAME))
-                                .flatMapCompletable(inputStream -> bouncyCastleKeyStore.load(inputStream, passwordChars)
-                                        .doFinally(() -> inputStream.close())))
+                        .flatMapCompletable(inputStream -> bouncyCastleKeyStore.load(inputStream, passwordChars)
+                                .doFinally(() -> inputStream.close())))
                 .doOnSubscribe(disposable -> Timber.d("Loading keystore from file"))
                 .doOnError(throwable -> Timber.w("Unable to load keystore from file: %s", throwable.toString()));
     }
@@ -377,7 +382,8 @@ public class CryptoManager extends Manager {
                 .switchIfEmpty(restoreDailyKeyPairPublicKeyWrapper()
                         .doOnSuccess(restoredKey -> dailyKeyPairPublicKeyWrapper = restoredKey)
                         .switchIfEmpty(updateDailyKeyPairPublicKey()
-                                .andThen(Single.fromCallable(() -> dailyKeyPairPublicKeyWrapper))));
+                                .andThen(Single.fromCallable(() -> dailyKeyPairPublicKeyWrapper))))
+                .onErrorResumeNext(throwable -> Single.error(new DailyKeyUnavailableException(throwable)));
     }
 
     public Single<DailyKeyPairIssuer> getDailyKeyPair() {
@@ -426,22 +432,13 @@ public class CryptoManager extends Manager {
                     PublicKey issuerSigningKey = dailyKeyPairIssuer.getIssuer().publicHDSKPToPublicKey();
                     byte[] signature = decodeFromString(dailyKeyPairIssuer.getDailyKeyPair().getSignature()).blockingGet();
                     byte[] signedData = concatenate(encodedId, encodedCreationTimestamp, encodedPublicKey).blockingGet();
-
                     signatureProvider.verify(signedData, signature, issuerSigningKey).blockingAwait();
 
-                    long keyAge = TimeUtil.convertFromUnixTimestamp(creationUnixTimestamp)
-                            .map(creationTimestamp -> System.currentTimeMillis() - creationTimestamp)
-                            .blockingGet();
-
-                    if (keyAge > TimeUnit.DAYS.toMillis(7)) {
-                        throw new IllegalStateException("Daily key pair public key is older than 7 days");
-                    }
-
-                    DailyKeyPairPublicKeyWrapper wrapper = new DailyKeyPairPublicKeyWrapper();
-                    wrapper.setId(id);
-                    wrapper.setPublicKey(publicKey);
-                    return wrapper;
-                })).doOnSuccess(wrapper -> Timber.d("Fetched daily key pair public key from backend: %s", wrapper));
+                    long creationTimestamp = TimeUtil.convertFromUnixTimestamp(creationUnixTimestamp).blockingGet();
+                    return new DailyKeyPairPublicKeyWrapper(id, publicKey, creationTimestamp);
+                }))
+                .flatMap(fetchedKey -> assertKeyNotExpired(fetchedKey).andThen(Single.just(fetchedKey)))
+                .doOnSuccess(fetchedKey -> Timber.d("Fetched daily key pair public key from backend: %s", fetchedKey));
     }
 
     /**
@@ -452,7 +449,11 @@ public class CryptoManager extends Manager {
         Maybe<ECPublicKey> restoreKey = preferencesManager.restoreIfAvailable(DAILY_KEY_PAIR_PUBLIC_KEY_POINT_KEY, String.class)
                 .flatMapSingle(CryptoManager::decodeFromString)
                 .flatMapSingle(AsymmetricCipherProvider::decodePublicKey);
-        return Maybe.zip(restoreId, restoreKey, DailyKeyPairPublicKeyWrapper::new);
+        Maybe<Long> restoreCreationTimestamp = preferencesManager.restoreIfAvailable(DAILY_KEY_PAIR_CREATION_TIMESTAMP_KEY, Long.class);
+        return Maybe.zip(restoreId, restoreKey, restoreCreationTimestamp, DailyKeyPairPublicKeyWrapper::new)
+                .flatMapSingle(restoredKey -> assertKeyNotExpired(restoredKey).andThen(Single.just(restoredKey)))
+                .doOnError(throwable -> Timber.w("Unable to restore daily key pair: %s", throwable.toString()))
+                .onErrorComplete();
     }
 
     /**
@@ -465,7 +466,23 @@ public class CryptoManager extends Manager {
         Completable persistKey = AsymmetricCipherProvider.encode(wrapper.getPublicKey(), false)
                 .flatMap(CryptoManager::encodeToString)
                 .flatMapCompletable(encodedPublicKey -> preferencesManager.persist(DAILY_KEY_PAIR_PUBLIC_KEY_POINT_KEY, encodedPublicKey));
-        return Completable.mergeArray(persistId, persistKey);
+        Completable persistCreationTimestamp = preferencesManager.persist(DAILY_KEY_PAIR_CREATION_TIMESTAMP_KEY, wrapper.getCreationTimestamp());
+        return Completable.mergeArray(persistId, persistKey, persistCreationTimestamp);
+    }
+
+    /**
+     * Will complete if the specified key is not older than seven days
+     * or emit a {@link DailyKeyExpiredException} otherwise.
+     * Uses the {@link #genuinityManager} to make sure the system time is valid.
+     */
+    public Completable assertKeyNotExpired(@NonNull DailyKeyPairPublicKeyWrapper wrapper) {
+        return genuinityManager.assertIsGenuineTime()
+                .andThen(Completable.fromAction(() -> {
+                    long keyAge = System.currentTimeMillis() - wrapper.getCreationTimestamp();
+                    if (keyAge > TimeUnit.DAYS.toMillis(7)) {
+                        throw new DailyKeyExpiredException("Daily key pair public key is older than 7 days");
+                    }
+                }));
     }
 
     /*

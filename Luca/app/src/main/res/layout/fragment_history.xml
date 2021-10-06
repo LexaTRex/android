@@ -8,26 +8,14 @@
 
     <ImageView
         android:id="@+id/backImageView"
-        android:layout_width="24dp"
-        android:layout_height="0dp"
-        android:layout_centerVertical="true"
-        android:layout_marginStart="@dimen/spacing_default"
-        android:contentDescription="@string/action_finish"
-        android:scaleType="fitCenter"
-        android:src="@drawable/ic_back"
-        android:visibility="visible"
-        app:layout_constraintBottom_toBottomOf="@id/headingTextView"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@id/headingTextView"
-        app:tint="@android:color/white"
-        tools:visibility="visible" />
+        style="@style/BackButtonImageView"
+        tools:ignore="MissingConstraints" />
 
     <TextView
         android:id="@+id/headingTextView"
         style="@style/TextAppearance.Luca.Headline2"
+        android:layout_width="wrap_content"
         android:layout_margin="@dimen/spacing_default"
-        android:paddingStart="32dp"
-        android:paddingEnd="32dp"
         android:text="@string/navigation_history"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -84,6 +72,13 @@
         tools:ignore="ContentDescription"
         tools:visibility="visible" />
 
+    <androidx.constraintlayout.widget.Group
+        android:id="@+id/emptyStateGroup"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone"
+        app:constraint_referenced_ids="emptyTitleTextView,emptyDescriptionTextView,emptyImageView" />
+
     <ListView
         android:id="@+id/historyListView"
         android:layout_width="match_parent"
@@ -108,5 +103,12 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
+
+    <androidx.constraintlayout.widget.Group
+        android:id="@+id/historyContentGroup"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone"
+        app:constraint_referenced_ids="historyListView, primaryActionButton, deleteHistoryImageView" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

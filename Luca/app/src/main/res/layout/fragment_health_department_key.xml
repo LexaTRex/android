@@ -7,14 +7,8 @@
 
     <ImageView
         android:id="@+id/backImageView"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
-        android:layout_marginStart="@dimen/spacing_default"
-        android:src="@drawable/ic_back"
-        app:layout_constraintBottom_toTopOf="@id/headingSeparatorView"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:tint="?attr/colorOnSurface" />
+        style="@style/BackButtonImageView"
+        tools:ignore="MissingConstraints" />
 
     <TextView
         android:id="@+id/headingTextView"
@@ -32,13 +26,6 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/headingTextView" />
-
-    <androidx.constraintlayout.widget.Group
-        android:id="@+id/contentGroup"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:visibility="visible"
-        app:constraint_referenced_ids="descriptionTextView,transferKeyTextView,dateTextView,dateValueTextView,issuerTextView,issuerValueTextView,signedTextView,signedImageView,saveKeyMaterialButton" />
 
     <TextView
         android:id="@+id/transferKeyTextView"
@@ -144,6 +131,13 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
+
+    <androidx.constraintlayout.widget.Group
+        android:id="@+id/contentGroup"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="visible"
+        app:constraint_referenced_ids="descriptionTextView,transferKeyTextView,dateTextView,dateValueTextView,issuerTextView,issuerValueTextView,signedTextView,signedImageView,saveKeyMaterialButton" />
 
     <ProgressBar
         android:id="@+id/loadingProgressBar"

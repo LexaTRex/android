@@ -1,5 +1,9 @@
 package de.culture4life.luca.ui.registration;
 
+import static java.net.HttpURLConnection.HTTP_BAD_GATEWAY;
+import static de.culture4life.luca.registration.RegistrationManager.REGISTRATION_COMPLETED_KEY;
+import static de.culture4life.luca.registration.RegistrationManager.REGISTRATION_DATA_KEY;
+
 import android.app.Application;
 
 import androidx.annotation.NonNull;
@@ -28,6 +32,7 @@ import de.culture4life.luca.registration.RegistrationData;
 import de.culture4life.luca.registration.RegistrationManager;
 import de.culture4life.luca.ui.BaseViewModel;
 import de.culture4life.luca.ui.ViewError;
+import de.culture4life.luca.util.StringSanitizeUtil;
 import de.culture4life.luca.util.TimeUtil;
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.core.Completable;
@@ -37,10 +42,6 @@ import io.reactivex.rxjava3.core.Single;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 import io.reactivex.rxjava3.subjects.BehaviorSubject;
 import timber.log.Timber;
-
-import static de.culture4life.luca.registration.RegistrationManager.REGISTRATION_COMPLETED_KEY;
-import static de.culture4life.luca.registration.RegistrationManager.REGISTRATION_DATA_KEY;
-import static java.net.HttpURLConnection.HTTP_BAD_GATEWAY;
 
 public class RegistrationViewModel extends BaseViewModel {
 
@@ -178,6 +179,7 @@ public class RegistrationViewModel extends BaseViewModel {
 
     private Completable validateFormValueChanges(MutableLiveData<String> data, ValidationMethod validationMethod) {
         return Objects.requireNonNull(formValueSubjects.get(data))
+                .map(StringSanitizeUtil::sanitize)
                 .map(String::trim)
                 .doOnNext(data::postValue)
                 .debounce(DEBOUNCE_DURATION, TimeUnit.MILLISECONDS)
@@ -284,7 +286,11 @@ public class RegistrationViewModel extends BaseViewModel {
             if (!isInEditMode || SKIP_PHONE_NUMBER_VERIFICATION) {
                 registrationData.setPhoneNumber(phoneNumber.getValue());
             }
-            registrationData.setEmail(email.getValue());
+            String email = this.email.getValue();
+            if (email != null && (isValidEMailAddress(email) || email.isEmpty())) {
+                // email is optional and should only be set when valid or empty (to delete value)
+                registrationData.setEmail(email);
+            }
             registrationData.setStreet(street.getValue());
             registrationData.setHouseNumber(houseNumber.getValue());
             registrationData.setCity(city.getValue());
@@ -620,15 +626,6 @@ public class RegistrationViewModel extends BaseViewModel {
 
     static boolean isValidCity(String city) {
         return city.length() > 0;
-    }
-
-    static boolean isInteger(String s) {
-        try {
-            Integer.parseInt(s);
-            return true;
-        } catch (NumberFormatException | NullPointerException e) {
-            return false;
-        }
     }
 
     public LiveData<String> getFirstName() {

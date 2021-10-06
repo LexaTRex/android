@@ -9,31 +9,20 @@
 
     <ImageView
         android:id="@+id/backImageView"
-        android:layout_width="24dp"
-        android:layout_height="0dp"
-        android:layout_centerVertical="true"
-        android:layout_marginStart="@dimen/spacing_default"
-        android:contentDescription="@string/action_finish"
-        android:padding="4dp"
-        android:scaleType="fitCenter"
-        android:src="@drawable/ic_back"
-        app:layout_constraintBottom_toBottomOf="@id/headingTextView"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@id/headingTextView" />
+        style="@style/BackButtonImageView"
+        app:tint="?attr/colorSurface"
+        tools:ignore="MissingConstraints" />
 
     <TextView
         android:id="@+id/headingTextView"
         style="@style/TextAppearance.Luca.Headline2"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical"
+        android:layout_width="wrap_content"
         android:layout_margin="@dimen/spacing_default"
-        android:paddingStart="32dp"
         android:text="@string/venue_children_title"
-        android:textColor="@android:color/black"
+        android:textColor="?attr/colorSurface"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:ignore="RtlSymmetry" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <View
         android:id="@+id/headingSeparatorView"

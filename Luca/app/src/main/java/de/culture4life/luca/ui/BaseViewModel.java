@@ -4,6 +4,7 @@ import static de.culture4life.luca.notification.LucaNotificationManager.NOTIFICA
 
 import android.app.Application;
 import android.net.Uri;
+import android.os.Bundle;
 
 import androidx.annotation.CallSuper;
 import androidx.annotation.IdRes;
@@ -49,10 +50,10 @@ public abstract class BaseViewModel extends AndroidViewModel {
     protected final PreferencesManager preferencesManager;
 
     protected final CompositeDisposable modelDisposable = new CompositeDisposable();
+    protected final MutableLiveData<Bundle> arguments = new MutableLiveData<>();
     protected final MutableLiveData<Boolean> isLoading = new MutableLiveData<>(false);
     protected final MutableLiveData<Set<ViewError>> errors = new MutableLiveData<>(new HashSet<>());
     protected final MutableLiveData<ViewEvent<? extends Set<String>>> requiredPermissions = new MutableLiveData<>();
-    protected final MutableLiveData<Boolean> showCameraPreview = new MutableLiveData<>();
 
     protected NavController navigationController;
 
@@ -84,8 +85,18 @@ public abstract class BaseViewModel extends AndroidViewModel {
         return Completable.fromAction(() -> updateAsSideEffect(mutableLiveData, value));
     }
 
+    protected final <ValueType> Completable updateIfRequired(@NonNull MutableLiveData<ValueType> mutableLiveData, ValueType value) {
+        return Completable.fromAction(() -> updateAsSideEffectIfRequired(mutableLiveData, value));
+    }
+
     protected final <ValueType> void updateAsSideEffect(@NonNull MutableLiveData<ValueType> mutableLiveData, ValueType value) {
         mutableLiveData.postValue(value);
+    }
+
+    protected final <ValueType> void updateAsSideEffectIfRequired(@NonNull MutableLiveData<ValueType> mutableLiveData, ValueType value) {
+        if (mutableLiveData.getValue() != value) {
+            updateAsSideEffect(mutableLiveData, value);
+        }
     }
 
     protected final Completable updateRequiredPermissions() {
@@ -231,6 +242,15 @@ public abstract class BaseViewModel extends AndroidViewModel {
         return currentDestination != null && currentDestination.getId() == destinationId;
     }
 
+    public LiveData<Bundle> getArguments() {
+        return arguments;
+    }
+
+    @CallSuper
+    public Completable processArguments(@Nullable Bundle arguments) {
+        return updateIfRequired(this.arguments, arguments);
+    }
+
     public LiveData<Boolean> getIsLoading() {
         return isLoading;
     }
@@ -245,17 +265,6 @@ public abstract class BaseViewModel extends AndroidViewModel {
 
     public void setNavigationController(NavController navigationController) {
         this.navigationController = navigationController;
-    }
-
-    public Single<Boolean> isCameraConsentGiven() {
-        return preferencesManager.restoreOrDefault(KEY_CAMERA_CONSENT_GIVEN, false);
-    }
-
-    public void setCameraConsentAccepted() {
-        modelDisposable.add(preferencesManager.persist(KEY_CAMERA_CONSENT_GIVEN, true)
-                .subscribeOn(Schedulers.io())
-                .subscribe()
-        );
     }
 
     protected void export(Single<Uri> uri, Single<String> content) {
@@ -286,14 +295,6 @@ public abstract class BaseViewModel extends AndroidViewModel {
     @Override
     public String toString() {
         return this.getClass().getSimpleName();
-    }
-
-    public void showCameraPreview(boolean isActive) {
-        showCameraPreview.postValue(isActive);
-    }
-
-    public MutableLiveData<Boolean> getShowCameraPreview() {
-        return showCameraPreview;
     }
 
 }

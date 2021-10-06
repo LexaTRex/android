@@ -9,14 +9,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
-import android.widget.ImageView;
-import android.widget.ListView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.viewbinding.ViewBinding;
 
-import com.google.android.material.button.MaterialButton;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import java.util.List;
@@ -24,6 +22,7 @@ import java.util.concurrent.TimeUnit;
 
 import de.culture4life.luca.R;
 import de.culture4life.luca.dataaccess.AccessedTraceData;
+import de.culture4life.luca.databinding.FragmentHistoryBinding;
 import de.culture4life.luca.history.HistoryManager;
 import de.culture4life.luca.ui.BaseFragment;
 import de.culture4life.luca.ui.MainActivity;
@@ -38,19 +37,16 @@ public class HistoryFragment extends BaseFragment<HistoryViewModel> {
     public static final String KEY_WARNING_LEVEL_FILTER = "WarningLevel";
     public static final int NO_WARNING_LEVEL_FILTER = -1;
 
-    private TextView emptyTitleTextView;
-    private TextView emptyDescriptionTextView;
-    private TextView headingTextView;
-    private ImageView emptyImageView;
-    private ListView historyListView;
     private HistoryListAdapter historyListAdapter;
-    private MaterialButton shareHistoryButton;
     private int warningLevelFilter = NO_WARNING_LEVEL_FILTER;
-    private ImageView deleteHistoryImageView;
 
+    private FragmentHistoryBinding binding;
+
+    @Nullable
     @Override
-    protected int getLayoutResource() {
-        return R.layout.fragment_history;
+    protected ViewBinding getViewBinding() {
+        binding = FragmentHistoryBinding.inflate(getLayoutInflater());
+        return binding;
     }
 
     @Override
@@ -79,24 +75,24 @@ public class HistoryFragment extends BaseFragment<HistoryViewModel> {
     }
 
     private void initializeDeleteHistoryListener() {
-        deleteHistoryImageView = getView().findViewById(R.id.deleteHistoryImageView);
-        deleteHistoryImageView.setOnClickListener(v -> showClearHistoryConfirmationDialog());
+        binding.deleteHistoryImageView.setOnClickListener(v -> showClearHistoryConfirmationDialog());
     }
 
     private void initializeHistoryItemsViews() {
-        headingTextView = getView().findViewById(R.id.headingTextView);
-        headingTextView.setText(getTitleFor(warningLevelFilter));
-        historyListView = getView().findViewById(R.id.historyListView);
-        historyListAdapter = new HistoryListAdapter(getContext(), historyListView.getId(), warningLevelFilter == NO_WARNING_LEVEL_FILTER);
+        binding.headingTextView.setText(getTitleFor(warningLevelFilter));
+        historyListAdapter = new HistoryListAdapter(getContext(), binding.historyListView.getId(), warningLevelFilter == NO_WARNING_LEVEL_FILTER);
         historyListAdapter.setItemClickHandler(new HistoryListAdapter.ItemClickHandler() {
             @Override
-            public void showAccessedDataDetails(@NonNull HistoryListItem item) {
-                viewModel.onShowAccessedDataRequested(item.getAccessedTraceData(), warningLevelFilter);
+            public void showPrivateMeetingDetails(@NonNull HistoryListItem item) {
+                Bundle bundle = new Bundle();
+                MeetingHistoryItem dataListItem = MeetingHistoryItem.from(getContext(), item);
+                bundle.putSerializable(MeetingHistoryDetailFragment.KEY_PRIVATE_MEETING_ITEM, dataListItem);
+                safeNavigateFromNavController(R.id.action_historyFragment_to_meetingHistoryDetailFragment, bundle);
             }
 
             @Override
-            public void showAdditionalDescriptionDetails(@NonNull HistoryListItem item) {
-                showHistoryItemDetailsDialog(item, item.getAdditionalDescriptionDetails());
+            public void showAccessedDataDetails(@NonNull HistoryListItem item) {
+                viewModel.onShowAccessedDataRequested(item.getAccessedTraceData(), warningLevelFilter);
             }
 
             @Override
@@ -104,7 +100,7 @@ public class HistoryFragment extends BaseFragment<HistoryViewModel> {
                 showHistoryItemDetailsDialog(item, item.getAdditionalTitleDetails());
             }
         });
-        historyListView.setAdapter(historyListAdapter);
+        binding.historyListView.setAdapter(historyListAdapter);
         observe(viewModel.getHistoryItems(), items -> historyListAdapter.setHistoryItems(HistoryViewModel.filterHistoryListItems(items, warningLevelFilter)));
     }
 
@@ -124,11 +120,10 @@ public class HistoryFragment extends BaseFragment<HistoryViewModel> {
     }
 
     private void initializeShareHistoryViews() {
-        shareHistoryButton = getView().findViewById(R.id.primaryActionButton);
-        shareHistoryButton.setOnClickListener(button -> showShareHistorySelectionDialog());
+        binding.primaryActionButton.setOnClickListener(button -> showShareHistorySelectionDialog());
         observe(viewModel.getHistoryItems(), items -> {
             boolean hideButton = items.isEmpty() || warningLevelFilter != NO_WARNING_LEVEL_FILTER;
-            shareHistoryButton.setVisibility(hideButton ? View.GONE : View.VISIBLE);
+            binding.primaryActionButton.setVisibility(hideButton ? View.GONE : View.VISIBLE);
         });
         observe(viewModel.getTracingTanEvent(), tracingTanEvent -> {
             if (!tracingTanEvent.hasBeenHandled()) {
@@ -147,20 +142,13 @@ public class HistoryFragment extends BaseFragment<HistoryViewModel> {
     }
 
     private void initializeEmptyStateViews() {
-        emptyTitleTextView = getView().findViewById(R.id.emptyTitleTextView);
-        emptyDescriptionTextView = getView().findViewById(R.id.emptyDescriptionTextView);
-        emptyImageView = getView().findViewById(R.id.emptyImageView);
-        emptyDescriptionTextView.setText(getString(R.string.history_empty_description, HistoryManager.KEEP_DATA_DAYS));
+        binding.emptyDescriptionTextView.setText(getString(R.string.history_empty_description, HistoryManager.KEEP_DATA_DAYS));
 
         observe(viewModel.getHistoryItems(), items -> {
             int emptyStateVisibility = items.isEmpty() ? View.VISIBLE : View.GONE;
             int contentVisibility = !items.isEmpty() ? View.VISIBLE : View.GONE;
-            emptyTitleTextView.setVisibility(emptyStateVisibility);
-            emptyDescriptionTextView.setVisibility(emptyStateVisibility);
-            emptyImageView.setVisibility(emptyStateVisibility);
-            historyListView.setVisibility(contentVisibility);
-            shareHistoryButton.setVisibility(contentVisibility);
-            deleteHistoryImageView.setVisibility(contentVisibility);
+            binding.emptyStateGroup.setVisibility(emptyStateVisibility);
+            binding.historyContentGroup.setVisibility(contentVisibility);
         });
     }
 

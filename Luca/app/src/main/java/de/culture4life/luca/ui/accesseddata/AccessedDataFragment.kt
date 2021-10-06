@@ -6,15 +6,12 @@ import androidx.viewbinding.ViewBinding
 import de.culture4life.luca.R
 import de.culture4life.luca.databinding.FragmentAccessedDataBinding
 import de.culture4life.luca.ui.BaseFragment
+import de.culture4life.luca.ui.accesseddata.AccessedDataDetailFragment.Companion.KEY_ACCESSED_DATA_LIST_ITEM
 import de.culture4life.luca.ui.history.HistoryFragment
 import de.culture4life.luca.ui.history.HistoryFragment.NO_WARNING_LEVEL_FILTER
 import io.reactivex.rxjava3.core.Completable
 
 class AccessedDataFragment : BaseFragment<AccessedDataViewModel>() {
-
-    companion object {
-        const val KEY_TRACE_ID = "TraceId"
-    }
 
     private lateinit var binding: FragmentAccessedDataBinding
     private lateinit var accessedDataListAdapter: AccessedDataListAdapter
@@ -45,7 +42,7 @@ class AccessedDataFragment : BaseFragment<AccessedDataViewModel>() {
             accessedDataListView.setOnItemClickListener { _, _, position, _ ->
                 val item = accessedDataListAdapter.getItem(position - accessedDataListView.headerViewsCount)
                 val bundle = Bundle().apply {
-                    putSerializable(AccessedDataDetailFragment.KEY_ACCESSED_DATA_LIST_ITEM, item)
+                    putSerializable(KEY_ACCESSED_DATA_LIST_ITEM, item)
                 }
                 safeNavigateFromNavController(R.id.action_accessedDataFragment_to_accessedDataDetailFragment, bundle)
             }
@@ -69,6 +66,10 @@ class AccessedDataFragment : BaseFragment<AccessedDataViewModel>() {
                 accessedDataListView.visibility = contentVisibility
             }
         }
+    }
+
+    companion object {
+        const val KEY_TRACE_ID = "TraceId"
     }
 
 }

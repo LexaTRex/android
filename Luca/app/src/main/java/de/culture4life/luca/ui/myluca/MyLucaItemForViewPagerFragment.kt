@@ -8,8 +8,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import de.culture4life.luca.ui.myluca.viewholders.SingleMyLucaItemViewHolder
 
-class MyLucaItemForViewPagerFragment :
-    Fragment() {
+class MyLucaItemForViewPagerFragment : Fragment() {
 
     private val viewModel by activityViewModels<MyLucaViewModel>()
 
@@ -18,18 +17,18 @@ class MyLucaItemForViewPagerFragment :
         container: ViewGroup?,
         savedInstanceState: Bundle?,
     ): View {
-        val itemViewHolder = SingleMyLucaItemViewHolder(SingleLucaItemView(requireContext()))
+        val itemViewHolder = SingleMyLucaItemViewHolder(SingleLucaItemView(requireContext()).binding)
         viewModel.myLucaItems.value?.let { myLucaItems ->
             arguments?.getString(KEY_DOCUMENT_ID)?.let { itemId ->
                 myLucaItems.first { it.document.id == itemId }?.let { item ->
                     itemViewHolder.show(item)
                     itemViewHolder.setListeners(
-                        { viewModel.toggleExpanded(item) },
-                        { viewModel.requestDelete(item) })
+                        { viewModel.onItemExpandToggleRequested(item) },
+                        { viewModel.onItemDeletionRequested(item) })
                 }
             }
         }
-        return itemViewHolder.view
+        return itemViewHolder.binding.root
     }
 
     companion object {

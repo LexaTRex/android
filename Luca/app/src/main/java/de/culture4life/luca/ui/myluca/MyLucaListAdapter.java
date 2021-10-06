@@ -19,6 +19,7 @@ import java.util.Map;
 import de.culture4life.luca.R;
 import de.culture4life.luca.children.Child;
 import de.culture4life.luca.databinding.MyLucaListItemsSectionHeaderBinding;
+import de.culture4life.luca.document.Document;
 import de.culture4life.luca.registration.Person;
 import de.culture4life.luca.ui.myluca.viewholders.MultipleMyLucaItemViewHolder;
 import de.culture4life.luca.ui.myluca.viewholders.SectionHeaderViewHolder;
@@ -49,7 +50,7 @@ public class MyLucaListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         if (viewType == SINGLE_ITEM_VIEW_HOLDER) {
             SingleLucaItemView view = new SingleLucaItemView(parent.getContext());
-            return new SingleMyLucaItemViewHolder(view);
+            return new SingleMyLucaItemViewHolder(view.getBinding());
         } else if (viewType == MULTIPLE_ITEM_VIEW_HOLDER) {
             ViewGroup view = (ViewGroup) LayoutInflater.from(parent.getContext())
                     .inflate(R.layout.my_luca_list_items_viewpager, parent, false);
@@ -79,7 +80,7 @@ public class MyLucaListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
 
             holder.show(item);
             holder.setListeners(expandClickListener, deleteClickListener);
-            setLeftPaddingForChild(holder.getView(), itemsWrapper.isChildSection());
+            setLeftPaddingForChild(holder.getBinding().getRoot(), itemsWrapper.isChildSection());
         } else if (viewHolder.getItemViewType() == MULTIPLE_ITEM_VIEW_HOLDER) {
             Integer hashCode = items.hashCode();
             MyLucaItemViewPager viewPagerAdapter = new MyLucaItemViewPager(this.fragment, items);
@@ -95,8 +96,20 @@ public class MyLucaListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
             };
             multipleHolder.getViewPager().unregisterOnPageChangeCallback(pageChangeCallback);
             multipleHolder.getViewPager().registerOnPageChangeCallback(pageChangeCallback);
-            int viewPagerStarPos = viewPagerPositionMap.containsKey(hashCode) ? viewPagerPositionMap.get(hashCode) : items.size() - 1;
-            multipleHolder.getViewPager().setCurrentItem(viewPagerStarPos, false);
+
+            int viewPagerStartPosition = items.size() - 1; // show most recent item first
+            if (viewPagerPositionMap.containsKey(hashCode)) {
+                viewPagerStartPosition = viewPagerPositionMap.get(hashCode);
+            } else {
+                for (int itemIndex = items.size() - 1; itemIndex >= 0; itemIndex--) {
+                    Document document = items.get(itemIndex).document;
+                    if (document.isValidRecovery() || document.isValidVaccination()) {
+                        viewPagerStartPosition = itemIndex; // show last valid item first
+                        break;
+                    }
+                }
+            }
+            multipleHolder.getViewPager().setCurrentItem(viewPagerStartPosition, false);
 
             setLeftPaddingForChild(multipleHolder.getViewPager(), itemsWrapper.isChildSection());
         } else if (viewHolder.getItemViewType() == SECTION_HEADER_ITEM_VIEW_HOLDER) {

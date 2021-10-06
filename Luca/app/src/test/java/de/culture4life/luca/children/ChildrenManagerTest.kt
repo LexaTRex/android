@@ -3,6 +3,7 @@ package de.culture4life.luca.children
 import androidx.test.runner.AndroidJUnit4
 import de.culture4life.luca.LucaUnitTest
 import de.culture4life.luca.crypto.CryptoManager
+import de.culture4life.luca.genuinity.GenuinityManager
 import de.culture4life.luca.network.NetworkManager
 import de.culture4life.luca.preference.PreferencesManager
 import de.culture4life.luca.registration.RegistrationManager
@@ -18,9 +19,11 @@ import org.robolectric.annotation.Config
 @RunWith(AndroidJUnit4::class)
 @Config(sdk = [28])
 class ChildrenManagerTest : LucaUnitTest() {
+
     private val preferencesManager = PreferencesManager()
     private val networkManager = NetworkManager()
-    private val cryptoManager = CryptoManager(preferencesManager, networkManager)
+    private val genuinityManager = GenuinityManager(preferencesManager, networkManager)
+    private val cryptoManager = CryptoManager(preferencesManager, networkManager, genuinityManager)
     private val registrationManager = RegistrationManager(preferencesManager, networkManager, cryptoManager)
     private val childrenManager = ChildrenManager(preferencesManager, registrationManager)
 
@@ -156,4 +159,5 @@ class ChildrenManagerTest : LucaUnitTest() {
             .andThen(childrenManager.containsChild(child))
             .test().assertValue(false)
     }
+
 }

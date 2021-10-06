@@ -133,7 +133,7 @@ public class VenueDetailsViewModel extends BaseViewModel {
                     if (!enabled) {
                         disableAutomaticCheckout();
                     }
-                    return update(shouldEnableLocationServices, !enabled);
+                    return updateIfRequired(shouldEnableLocationServices, !enabled);
                 });
     }
 
@@ -183,22 +183,29 @@ public class VenueDetailsViewModel extends BaseViewModel {
     }
 
     private Completable keepAdditionalDataUpdated() {
-        return checkInManager.getAdditionalCheckInPropertiesAndChanges()
-                .flatMapCompletable(properties -> Completable.fromAction(() -> {
-                    Timber.d("Additional check-in properties: %s", properties);
-                    updateAsSideEffect(showAdditionalData, !properties.keySet().isEmpty());
-                    for (String key : properties.keySet()) {
-                        updateAsSideEffect(additionalDataTitle, getAdditionalDataTitle(key));
-                        updateAsSideEffect(additionalDataValue, getAdditionalDataValue(properties.get(key)));
+        return checkInManager.isCheckedInToPrivateMeeting()
+                .flatMapCompletable(inPrivateMeeting -> {
+                    if (inPrivateMeeting) {
+                        // don't show additional data in private meetings
+                        return Completable.complete();
+                    } else {
+                        return checkInManager.getAdditionalCheckInPropertiesAndChanges()
+                                .flatMapCompletable(properties -> Completable.fromAction(() -> {
+                                    Timber.d("Additional check-in properties: %s", properties);
+                                    updateAsSideEffect(showAdditionalData, !properties.keySet().isEmpty());
+                                    for (String key : properties.keySet()) {
+                                        updateAsSideEffect(additionalDataTitle, getAdditionalDataTitle(key));
+                                        updateAsSideEffect(additionalDataValue, getAdditionalDataValue(properties.get(key)));
+                                    }
+                                }));
                     }
-                }));
+                });
     }
 
     private Completable updateReadableCheckInTime(long timestamp) {
         return Single.fromCallable(() -> TimeUtil.getReadableTime(application, timestamp))
                 .flatMapCompletable(readableTime -> update(checkInTime, readableTime));
     }
-
 
     private Completable updateReadableCheckInDuration(long timestamp) {
         return Observable.interval(0, 1, TimeUnit.SECONDS)

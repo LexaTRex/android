@@ -4,12 +4,12 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
+    android:layout_marginStart="@dimen/spacing_default"
+    android:layout_marginEnd="@dimen/spacing_default"
+    android:layout_marginBottom="@dimen/spacing_default"
     android:background="@android:color/transparent"
     android:descendantFocusability="blocksDescendants"
-    android:paddingStart="@dimen/spacing_default"
-    android:paddingEnd="@dimen/spacing_default"
-    android:paddingBottom="@dimen/spacing_default">
+    android:orientation="vertical">
 
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/cardView"

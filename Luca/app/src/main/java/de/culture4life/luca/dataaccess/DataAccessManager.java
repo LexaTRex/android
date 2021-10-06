@@ -133,7 +133,7 @@ public class DataAccessManager extends Manager {
                                 .build();
 
                         WorkRequest updateWorkRequest = new PeriodicWorkRequest.Builder(
-                                UpdateWorker.class,
+                                DataAccessUpdateWorker.class,
                                 UPDATE_INTERVAL, TimeUnit.MILLISECONDS,
                                 UPDATE_FLEX_PERIOD, TimeUnit.MILLISECONDS
                         ).setInitialDelay(initialDelay, TimeUnit.MILLISECONDS)

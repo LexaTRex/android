@@ -10,19 +10,17 @@ import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.view.View;
-import android.widget.ImageView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.viewbinding.ViewBinding;
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
-import com.google.android.material.switchmaterial.SwitchMaterial;
-import com.ncorti.slidetoact.SlideToActView;
 import com.tbruyelle.rxpermissions3.Permission;
 
 import de.culture4life.luca.R;
+import de.culture4life.luca.databinding.FragmentVenueDetailsBinding;
 import de.culture4life.luca.ui.BaseFragment;
 import de.culture4life.luca.ui.ViewError;
 import de.culture4life.luca.ui.dialog.BaseDialogFragment;
@@ -37,28 +35,58 @@ public class VenueDetailsFragment extends BaseFragment<VenueDetailsViewModel> {
 
     private static final int REQUEST_ENABLE_LOCATION_SERVICES = 2;
 
-    private TextView subtitle;
-    private TextView title;
-    private TextView checkInTimeTextView;
-    private TextView additionalDataTitleTextView;
-    private TextView additionalDataValueTextView;
-    private TextView childCounterTextView;
-    private ImageView childAddingImageView;
-    private TextView checkInDurationTextView;
-    private ImageView automaticCheckOutInfoImageView;
-    private SwitchMaterial automaticCheckoutSwitch;
-    private SlideToActView slideToActView;
+    private FragmentVenueDetailsBinding binding;
+
     private Completable handleGrantedLocationAccess;
     private Completable handleDeniedLocationAccess;
 
+    @Nullable
     @Override
-    protected int getLayoutResource() {
-        return R.layout.fragment_venue_details;
+    protected ViewBinding getViewBinding() {
+        binding = FragmentVenueDetailsBinding.inflate(getLayoutInflater());
+        return binding;
     }
 
     @Override
     protected Class<VenueDetailsViewModel> getViewModelClass() {
         return VenueDetailsViewModel.class;
+    }
+
+    @Override
+    protected Completable initializeViews() {
+        return super.initializeViews()
+                .andThen(Completable.fromAction(() -> {
+                    observe(viewModel.getSubtitle(), value -> {
+                        binding.subtitle.setText(value);
+                        binding.subtitle.setVisibility(value == null ? View.GONE : View.VISIBLE);
+                    });
+
+                    observe(viewModel.getTitle(), value -> binding.title.setText(value));
+
+                    observe(viewModel.getCheckInTime(), value -> binding.checkInTimeTextView.setText(getFormattedString(R.string.venue_checked_in_time, value)));
+
+                    observe(viewModel.getAdditionalDataTitle(), value -> binding.additionalDataTitleTextView.setText(value));
+                    observe(viewModel.getAdditionalDataValue(), value -> binding.additionalDataValueTextView.setText(value));
+                    observe(viewModel.getShowAdditionalData(), value -> setAdditionalDataVisibility(value ? View.VISIBLE : View.GONE));
+
+                    binding.childCounterTextView.setOnClickListener(view -> viewModel.openChildrenView());
+                    observe(viewModel.getChildCounter(), counter -> {
+                        if (counter == 0) {
+                            binding.childCounterTextView.setVisibility(View.GONE);
+                        } else {
+                            binding.childCounterTextView.setVisibility(View.VISIBLE);
+                            binding.childCounterTextView.setText(String.valueOf(counter));
+                        }
+                    });
+
+                    binding.childAddingIconImageView.setOnClickListener(view -> viewModel.openChildrenView());
+                    observe(viewModel.getCheckInDuration(), value -> binding.checkInDurationTextView.setText(value));
+
+                    initializeAutomaticCheckoutViews();
+                    initializeSlideToActView();
+
+                    observe(viewModel.getBundle(), this::processBundle);
+                }));
     }
 
     @Override
@@ -75,58 +103,12 @@ public class VenueDetailsFragment extends BaseFragment<VenueDetailsViewModel> {
         if (arguments != null) {
             viewModel.setBundle(arguments);
         }
+
         viewDisposable.add(viewModel.updateLocationServicesStatus()
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeOn(Schedulers.io())
                 .doOnError(throwable -> Timber.w("Error updating location services status. %s", throwable.getMessage()))
                 .subscribe());
-    }
-
-    @Override
-    protected Completable initializeViews() {
-        return super.initializeViews()
-                .andThen(Completable.fromAction(() -> {
-                    subtitle = getView().findViewById(R.id.subtitle);
-                    observe(viewModel.getSubtitle(), value -> {
-                        subtitle.setText(value);
-                        subtitle.setVisibility(value == null ? View.GONE : View.VISIBLE);
-                    });
-
-                    title = getView().findViewById(R.id.title);
-                    observe(viewModel.getTitle(), value -> title.setText(value));
-
-                    checkInTimeTextView = getView().findViewById(R.id.checkInTimeTextView);
-                    observe(viewModel.getCheckInTime(), value -> checkInTimeTextView.setText(getFormattedString(R.string.venue_checked_in_time, value)));
-
-                    additionalDataTitleTextView = getView().findViewById(R.id.additionalDataTitleTextView);
-                    observe(viewModel.getAdditionalDataTitle(), value -> additionalDataTitleTextView.setText(value));
-                    additionalDataValueTextView = getView().findViewById(R.id.additionalDataValueTextView);
-                    observe(viewModel.getAdditionalDataValue(), value -> additionalDataValueTextView.setText(value));
-                    observe(viewModel.getShowAdditionalData(), value -> setAdditionalDataVisibility(value ? View.VISIBLE : View.GONE));
-
-                    childCounterTextView = getView().findViewById(R.id.childCounterTextView);
-                    childCounterTextView.setOnClickListener(view -> viewModel.openChildrenView());
-                    observe(viewModel.getChildCounter(), counter -> {
-                        if (counter == 0) {
-                            childCounterTextView.setVisibility(View.GONE);
-                        } else {
-                            childCounterTextView.setVisibility(View.VISIBLE);
-                            childCounterTextView.setText(String.valueOf(counter));
-                        }
-                    });
-
-                    childAddingImageView = getView().findViewById(R.id.childAddingIconImageView);
-                    childAddingImageView.setOnClickListener(view -> viewModel.openChildrenView());
-
-
-                    checkInDurationTextView = getView().findViewById(R.id.checkInDurationTextView);
-                    observe(viewModel.getCheckInDuration(), value -> checkInDurationTextView.setText(value));
-
-                    initializeAutomaticCheckoutViews();
-                    initializeSlideToActView();
-
-                    observe(viewModel.getBundle(), this::processBundle);
-                }));
     }
 
     @Override
@@ -136,16 +118,12 @@ public class VenueDetailsFragment extends BaseFragment<VenueDetailsViewModel> {
     }
 
     private void initializeAutomaticCheckoutViews() {
-        automaticCheckOutInfoImageView = getView().findViewById(R.id.automaticCheckoutInfoImageView);
-        automaticCheckOutInfoImageView.setOnClickListener(view -> showAutomaticCheckOutInfoDialog());
-
-        automaticCheckoutSwitch = getView().findViewById(R.id.automaticCheckoutToggle);
-
+        binding.automaticCheckoutInfoImageView.setOnClickListener(view -> showAutomaticCheckOutInfoDialog());
         observe(viewModel.getHasLocationRestriction(), hasLocationRestriction -> updateAutoCheckoutViewsVisibility());
         observe(viewModel.getIsGeofencingSupported(), isGeofencingSupported -> updateAutoCheckoutViewsVisibility());
 
-        automaticCheckoutSwitch.setOnCheckedChangeListener((compoundButton, isChecked) -> {
-            if (automaticCheckoutSwitch.isEnabled() && isChecked) {
+        binding.automaticCheckoutToggle.setOnCheckedChangeListener((compoundButton, isChecked) -> {
+            if (binding.automaticCheckoutToggle.isEnabled() && isChecked) {
                 viewModel.isLocationConsentGiven()
                         .flatMapCompletable(isConsentGiven -> {
                             if (isConsentGiven) {
@@ -162,28 +140,27 @@ public class VenueDetailsFragment extends BaseFragment<VenueDetailsViewModel> {
             }
         });
 
-        automaticCheckoutSwitch.setOnClickListener(view -> viewModel.setAutomaticCheckoutActiveAsDefault(automaticCheckoutSwitch.isChecked()));
+        binding.automaticCheckoutToggle.setOnClickListener(view -> viewModel.setAutomaticCheckoutActiveAsDefault(binding.automaticCheckoutToggle.isChecked()));
 
-        observe(viewModel.getShouldEnableAutomaticCheckOut(), isActive -> automaticCheckoutSwitch.setChecked(isActive));
+        observe(viewModel.getShouldEnableAutomaticCheckOut(), isActive -> binding.automaticCheckoutToggle.setChecked(isActive));
 
         observe(viewModel.getShouldEnableLocationServices(), shouldEnable -> {
             if (shouldEnable && !viewModel.isLocationServiceEnabled()) {
                 handleGrantedLocationAccess = Completable.fromAction(() -> {
-                    automaticCheckoutSwitch.setEnabled(false);
-                    automaticCheckoutSwitch.setChecked(true);
-                    automaticCheckoutSwitch.setEnabled(true);
+                    binding.automaticCheckoutToggle.setEnabled(false);
+                    binding.automaticCheckoutToggle.setChecked(true);
+                    binding.automaticCheckoutToggle.setEnabled(true);
                     viewModel.enableAutomaticCheckout();
                 });
-                handleDeniedLocationAccess = Completable.fromAction(() -> automaticCheckoutSwitch.setChecked(false));
+                handleDeniedLocationAccess = Completable.fromAction(() -> binding.automaticCheckoutToggle.setChecked(false));
                 showLocationServicesDisabledDialog();
             }
         });
     }
 
     private void initializeSlideToActView() {
-        slideToActView = getView().findViewById(R.id.slideToActView);
-        slideToActView.setOnSlideCompleteListener(view -> viewModel.onSlideCompleted());
-        slideToActView.setOnSlideUserFailedListener((view, isOutside) -> {
+        binding.slideToActView.setOnSlideCompleteListener(view -> viewModel.onSlideCompleted());
+        binding.slideToActView.setOnSlideUserFailedListener((view, isOutside) -> {
             if (AccessibilityServiceUtil.isGoogleTalkbackActive(getContext())) {
                 viewModel.onSlideCompleted();
             } else {
@@ -195,13 +172,13 @@ public class VenueDetailsFragment extends BaseFragment<VenueDetailsViewModel> {
             // Work-around because resetSlider fails on SDK 22 in onDraw():
             //  java.lang.IllegalArgumentException: width and height must be > 0
             //    at com.ncorti.slidetoact.SlideToActView.onDraw(SlideToActView.kt:525)
-            slideToActView.setAnimateCompletion(false);
+            binding.slideToActView.setAnimateCompletion(false);
         }
 
         observe(viewModel.getIsCheckedIn(), isCheckedIn -> {
-            slideToActView.setText(getString(isCheckedIn ? R.string.venue_check_out_action : R.string.venue_check_in_action));
-            slideToActView.setContentDescription(getString(isCheckedIn ? R.string.venue_check_out_content_description : R.string.venue_check_in_content_description));
-            checkInDurationTextView.setVisibility(isCheckedIn ? View.VISIBLE : View.GONE);
+            binding.slideToActView.setText(getString(isCheckedIn ? R.string.venue_check_out_action : R.string.venue_check_in_action));
+            binding.slideToActView.setContentDescription(getString(isCheckedIn ? R.string.venue_check_out_content_description : R.string.venue_check_in_content_description));
+            binding.checkInDurationTextView.setVisibility(isCheckedIn ? View.VISIBLE : View.GONE);
             if (!isCheckedIn) {
                 safeNavigateFromNavController(R.id.action_venueDetailFragment_to_checkInFragment, viewModel.getBundle().getValue());
                 AccessibilityServiceUtil.speak(getContext(), getString(R.string.venue_checked_out));
@@ -211,7 +188,7 @@ public class VenueDetailsFragment extends BaseFragment<VenueDetailsViewModel> {
 
         observe(viewModel.getIsLoading(), loading -> {
             if (!loading) {
-                slideToActView.resetSlider();
+                binding.slideToActView.resetSlider();
             }
         });
     }
@@ -219,9 +196,9 @@ public class VenueDetailsFragment extends BaseFragment<VenueDetailsViewModel> {
     private void updateAutoCheckoutViewsVisibility() {
         boolean hasLocationRestriction = viewModel.getHasLocationRestriction().getValue();
         boolean enable = hasLocationRestriction && viewModel.getIsGeofencingSupported().getValue();
-        getView().findViewById(R.id.automaticCheckOutTextView).setVisibility(enable ? View.VISIBLE : View.GONE);
-        getView().findViewById(R.id.automaticCheckoutInfoImageView).setVisibility(enable ? View.VISIBLE : View.GONE);
-        automaticCheckoutSwitch.setVisibility(hasLocationRestriction ? View.VISIBLE : View.GONE);
+        binding.automaticCheckOutTextView.setVisibility(enable ? View.VISIBLE : View.GONE);
+        binding.automaticCheckoutInfoImageView.setVisibility(enable ? View.VISIBLE : View.GONE);
+        binding.automaticCheckoutToggle.setVisibility(hasLocationRestriction ? View.VISIBLE : View.GONE);
     }
 
     @Override
@@ -274,7 +251,7 @@ public class VenueDetailsFragment extends BaseFragment<VenueDetailsViewModel> {
     }
 
     private void showRequestLocationPermissionRationale(@NonNull Permission permission, boolean permanentlyDenied) {
-        MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(getContext())
+        MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(requireContext())
                 .setNegativeButton(R.string.action_cancel, (dialog, which) -> viewModel.onEnablingAutomaticCheckOutFailed())
                 .setOnCancelListener(dialogInterface -> viewModel.onEnablingAutomaticCheckOutFailed())
                 .setOnDismissListener(dialogInterface -> viewModel.onEnablingAutomaticCheckOutFailed());
@@ -303,7 +280,7 @@ public class VenueDetailsFragment extends BaseFragment<VenueDetailsViewModel> {
     }
 
     private void showAutomaticCheckOutInfoDialog() {
-        MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(getContext())
+        MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(requireContext())
                 .setTitle(R.string.auto_checkout_info_title)
                 .setMessage(R.string.auto_checkout_info_description)
                 .setPositiveButton(R.string.action_ok, (dialog, which) -> dialog.cancel());
@@ -311,7 +288,7 @@ public class VenueDetailsFragment extends BaseFragment<VenueDetailsViewModel> {
     }
 
     private void showGrantLocationAccessDialog() {
-        MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(getContext())
+        MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(requireContext())
                 .setTitle(R.string.auto_checkout_location_access_title)
                 .setMessage(R.string.auto_checkout_location_access_description)
                 .setPositiveButton(R.string.action_enable, (dialog, which) -> {
@@ -319,25 +296,29 @@ public class VenueDetailsFragment extends BaseFragment<VenueDetailsViewModel> {
                     viewModel.enableAutomaticCheckout();
                 })
                 .setNegativeButton(R.string.action_cancel, (dialog, which) -> {
-                    automaticCheckoutSwitch.setChecked(false);
+                    binding.automaticCheckoutToggle.setChecked(false);
                     dialog.cancel();
                 });
         new BaseDialogFragment(builder).show();
     }
 
     private void showLocationServicesDisabledDialog() {
-        MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(getContext())
+        MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(requireContext())
                 .setTitle(R.string.auto_checkout_enable_location_title)
                 .setMessage(R.string.auto_checkout_enable_location_description)
                 .setPositiveButton(R.string.action_settings, (dialog, which) -> requestLocationServiceActivation())
-                .setNegativeButton(R.string.action_cancel, (dialog, which) -> handleDeniedLocationAccess.onErrorComplete()
-                        .doFinally(this::clearRequestResultActions)
-                        .subscribe());
+                .setNegativeButton(R.string.action_cancel, (dialog, which) -> {
+                    if (handleDeniedLocationAccess != null) {
+                        handleDeniedLocationAccess.onErrorComplete()
+                                .doFinally(this::clearRequestResultActions)
+                                .subscribe();
+                    }
+                });
         new BaseDialogFragment(builder).show();
     }
 
     private void showLocationChangeDialog() {
-        MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(getContext())
+        MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(requireContext())
                 .setTitle(R.string.venue_change_location_title)
                 .setMessage(R.string.venue_change_location_description)
                 .setPositiveButton(R.string.action_change, (dialog, which) -> viewModel.changeLocation())
@@ -373,8 +354,8 @@ public class VenueDetailsFragment extends BaseFragment<VenueDetailsViewModel> {
     }
 
     private void setAdditionalDataVisibility(int visibility) {
-        additionalDataTitleTextView.setVisibility(visibility);
-        additionalDataValueTextView.setVisibility(visibility);
+        binding.additionalDataTitleTextView.setVisibility(visibility);
+        binding.additionalDataValueTextView.setVisibility(visibility);
     }
 
 }

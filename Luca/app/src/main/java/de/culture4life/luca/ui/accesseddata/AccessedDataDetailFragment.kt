@@ -1,49 +1,37 @@
 package de.culture4life.luca.ui.accesseddata
 
-import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import androidx.fragment.app.Fragment
-import de.culture4life.luca.LucaApplication
+import androidx.viewbinding.ViewBinding
 import de.culture4life.luca.databinding.FragmentAccessedDataDetailBinding
+import de.culture4life.luca.ui.BaseFragment
 import de.culture4life.luca.ui.MainActivity
-import io.reactivex.rxjava3.schedulers.Schedulers
+import io.reactivex.rxjava3.core.Completable
 
-class AccessedDataDetailFragment : Fragment() {
+class AccessedDataDetailFragment : BaseFragment<AccessedDataDetailViewModel>() {
 
-    private lateinit var item: AccessedDataListItem
     private lateinit var binding: FragmentAccessedDataDetailBinding
 
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
+    override fun getViewBinding(): ViewBinding {
         binding = FragmentAccessedDataDetailBinding.inflate(layoutInflater)
-        item = arguments?.getSerializable(KEY_ACCESSED_DATA_LIST_ITEM) as AccessedDataListItem
-        markItemAsNotNew()
-        with(binding) {
-            headingTextView.text = item.title
-            healthDepartmentTextView.text = item.accessorName
-            locationTextView.text = item.locationName
-            timeTextView.text = item.checkInTimeRange
-            descriptionTextView.text = item.detailedMessage
-        }
-        return binding.root
+        return binding
     }
 
-    private fun markItemAsNotNew() {
-        (activity as MainActivity?)?.let { activity ->
-            (activity.application as LucaApplication?)?.let { application ->
-                val dataAccessManager = application.dataAccessManager
-                dataAccessManager.initialize(application)
-                    .andThen(dataAccessManager.markAsNotNew(item.traceId, item.warningLevel))
-                    .subscribeOn(Schedulers.io())
-                    .subscribe()
-            }
-            activity.updateHistoryBadge()
-        }
+    override fun getViewModelClass(): Class<AccessedDataDetailViewModel> {
+        return AccessedDataDetailViewModel::class.java
+    }
+
+    override fun initializeViews(): Completable {
+        return super.initializeViews()
+            .andThen(Completable.fromAction {
+                observe(viewModel.accessedDataItem) {
+                    binding.headingTextView.text = it.title
+                    binding.healthDepartmentTextView.text = it.accessorName
+                    binding.locationTextView.text = it.locationName
+                    binding.timeTextView.text = it.checkInTimeRange
+                    binding.descriptionTextView.text = it.detailedMessage
+                    viewModel.onItemSeen(it)
+                    (activity as MainActivity).updateHistoryBadge() // TODO: 04.10.21 activity should observe changes
+                }
+            })
     }
 
     companion object {

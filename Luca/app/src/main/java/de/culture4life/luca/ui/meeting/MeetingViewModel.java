@@ -24,7 +24,6 @@ import java.util.concurrent.TimeUnit;
 import de.culture4life.luca.BuildConfig;
 import de.culture4life.luca.R;
 import de.culture4life.luca.crypto.CryptoManager;
-import de.culture4life.luca.history.HistoryManager;
 import de.culture4life.luca.meeting.MeetingAdditionalData;
 import de.culture4life.luca.meeting.MeetingData;
 import de.culture4life.luca.meeting.MeetingGuestData;
@@ -34,6 +33,7 @@ import de.culture4life.luca.ui.BaseViewModel;
 import de.culture4life.luca.ui.ViewError;
 import de.culture4life.luca.ui.venue.VenueDetailsViewModel;
 import de.culture4life.luca.util.SerializationUtil;
+import de.culture4life.luca.util.TimeUtil;
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.core.Single;
@@ -48,10 +48,9 @@ public class MeetingViewModel extends BaseViewModel {
 
     private final MutableLiveData<Boolean> isHostingMeeting = new MutableLiveData<>();
     private final MutableLiveData<Bitmap> qrCode = new MutableLiveData<>();
+    private final MutableLiveData<String> startTime = new MutableLiveData<>();
     private final MutableLiveData<String> duration = new MutableLiveData<>();
-    private final MutableLiveData<String> membersCount = new MutableLiveData<>("0/0");
-    private final MutableLiveData<String> checkedInMemberNames = new MutableLiveData<>("");
-    private final MutableLiveData<String> checkedOutMemberNames = new MutableLiveData<>("");
+    private final MutableLiveData<List<Guest>> allGuests = new MutableLiveData<>();
     private final MutableLiveData<Bundle> bundle = new MutableLiveData<>();
 
     @Nullable
@@ -73,7 +72,10 @@ public class MeetingViewModel extends BaseViewModel {
                         cryptoManager.initialize(application)
                 ))
                 .andThen(meetingManager.isCurrentlyHostingMeeting()
-                        .flatMapCompletable(hosting -> update(isHostingMeeting, hosting)));
+                        .flatMapCompletable(hosting -> update(isHostingMeeting, hosting)))
+                .andThen(
+                        meetingManager.getCurrentMeetingDataIfAvailable().map(MeetingData::getCreationTimestamp)
+                                .flatMapCompletable(creationTimeStamp -> update(startTime, TimeUtil.getReadableTime(application, creationTimeStamp))));
     }
 
     @Override
@@ -105,29 +107,21 @@ public class MeetingViewModel extends BaseViewModel {
         return Observable.interval(0, 5, TimeUnit.SECONDS, Schedulers.io())
                 .flatMapCompletable(tick -> meetingManager.updateMeetingGuestData()
                         .andThen(updateGuests())
-                        .doOnError(throwable -> Timber.w("Unable to update members: %s", throwable.toString()))
+                        .doOnError(throwable -> Timber.w("Unable to update guests: %s", throwable.toString()))
                         .onErrorComplete());
     }
 
     private Completable updateGuests() {
         return meetingManager.getCurrentMeetingDataIfAvailable()
                 .flatMapCompletable(meetingData -> Completable.fromAction(() -> {
-                    List<String> checkedInList = new ArrayList<>();
-                    List<String> checkedOutList = new ArrayList<>();
+                    List<Guest> guests = new ArrayList<>();
 
                     for (MeetingGuestData guestData : meetingData.getGuestData()) {
                         String name = MeetingManager.getReadableGuestName(guestData);
                         boolean isCheckedOut = guestData.getCheckOutTimestamp() > 0 && guestData.getCheckOutTimestamp() < System.currentTimeMillis();
-                        if (isCheckedOut) {
-                            checkedOutList.add(name);
-                        } else {
-                            checkedInList.add(name);
-                        }
+                        guests.add(new Guest(name, !isCheckedOut));
                     }
-
-                    updateAsSideEffect(checkedInMemberNames, HistoryManager.createUnorderedList(checkedInList));
-                    updateAsSideEffect(checkedOutMemberNames, HistoryManager.createUnorderedList(checkedOutList));
-                    updateAsSideEffect(membersCount, checkedInList.size() + "/" + meetingData.getGuestData().size());
+                    updateAsSideEffect(allGuests, guests);
                 }));
     }
 
@@ -216,16 +210,12 @@ public class MeetingViewModel extends BaseViewModel {
         return duration;
     }
 
-    public LiveData<String> getMembersCount() {
-        return membersCount;
+    public LiveData<String> getStartTime() {
+        return startTime;
     }
 
-    public LiveData<String> getCheckedInMemberNames() {
-        return checkedInMemberNames;
-    }
-
-    public LiveData<String> getCheckedOutMemberNames() {
-        return checkedOutMemberNames;
+    public LiveData<List<Guest>> getAllGuests() {
+        return allGuests;
     }
 
     public LiveData<Bundle> getBundle() {

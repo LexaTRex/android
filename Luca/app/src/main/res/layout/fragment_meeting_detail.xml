@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/checked_in_light_green_gradient"
+    tools:context="de.culture4life.luca.ui.meeting.MeetingDetailFragment">
+
+    <TextView
+        android:id="@+id/headingTextView"
+        style="@style/TextAppearance.Luca.Headline2"
+        android:layout_width="wrap_content"
+        android:layout_margin="@dimen/spacing_default"
+        android:text="@string/meeting_heading"
+        android:textColor="@android:color/black"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageView
+        android:id="@+id/backImageView"
+        style="@style/BackButtonImageView"
+        app:tint="?attr/colorSurface"
+        tools:ignore="MissingConstraints" />
+
+    <View
+        android:id="@+id/headingSeparatorView"
+        style="@style/HeaderSeparatorView"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/headingTextView" />
+
+    <TextView
+        android:id="@+id/startLabelTextView"
+        style="@style/TextAppearance.Luca.Body1.BlackBold"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/spacing_default"
+        android:layout_marginTop="@dimen/spacing_default"
+        android:text="@string/meeting_details_start_time"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/headingSeparatorView" />
+
+    <TextView
+        android:id="@+id/startTimeTextView"
+        style="@style/TextAppearance.Luca.Body1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/spacing_default"
+        android:layout_marginTop="@dimen/spacing_default"
+        android:textColor="@android:color/black"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/startLabelTextView"
+        tools:text="23.08.2020 16:00 Uhr" />
+
+    <TextView
+        android:id="@+id/durationLabelTextView"
+        style="@style/TextAppearance.Luca.Body1.BlackBold"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/spacing_default"
+        android:layout_marginTop="@dimen/spacing_large"
+        android:text="@string/meeting_duration_heading"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/startTimeTextView" />
+
+    <TextView
+        android:id="@+id/durationTimeTextView"
+        style="@style/TextAppearance.Luca.Body1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/spacing_default"
+        android:layout_marginTop="@dimen/spacing_default"
+        android:textColor="@android:color/black"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/durationLabelTextView"
+        tools:text="00:50:02" />
+
+    <TextView
+        android:id="@+id/guestsNumberTextView"
+        style="@style/TextAppearance.Luca.Body1.BlackBold"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/spacing_default"
+        android:layout_marginTop="@dimen/spacing_large"
+        android:text="@string/meeting_details_guests"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/durationTimeTextView" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/guestsNamesRecyclerView"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginStart="@dimen/spacing_default"
+        android:layout_marginTop="@dimen/spacing_default"
+        android:clipToPadding="false"
+        android:fadingEdge="vertical"
+        android:paddingBottom="@dimen/spacing_default"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/guestsNumberTextView"
+        tools:listitem="@layout/guest_list_item" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

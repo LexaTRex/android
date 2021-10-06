@@ -5,10 +5,13 @@ import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.*
+import android.widget.ArrayAdapter
+import android.widget.LinearLayout
+import android.widget.TextView
 import androidx.core.view.isVisible
 import de.culture4life.luca.R
 import de.culture4life.luca.children.Child
+import de.culture4life.luca.databinding.ChildListItemBinding
 import io.reactivex.rxjava3.schedulers.Schedulers
 
 const val CHILD_NAME_VIEW_TYPE = 0
@@ -50,13 +53,15 @@ class ChildListAdapter(
     }
 
     private fun getChildView(position: Int, convertView: View?, container: ViewGroup): View {
-        val view = convertView ?: layoutInflater.inflate(R.layout.child_list_item, container, false)
-        getItem(position)?.let { childItem ->
-            val checkBox = view.findViewById<CheckBox>(R.id.includeChildCheckBox)
-            val nameTextView = view.findViewById<TextView>(R.id.childNameTextView)
-            val removeChildImageView = view.findViewById<ImageView>(R.id.removeChildImageView)
+        // for smooth scrolling
+        val binding = if (convertView == null) {
+            ChildListItemBinding.inflate(layoutInflater)
+        } else {
+            ChildListItemBinding.bind(convertView)
+        }
 
-            checkBox.apply {
+        getItem(position)?.let { childItem ->
+            binding.includeChildCheckBox.apply {
                 isChecked = childItem.isCheckedIn
                 isVisible = !darkStyle
                 setOnClickListener {
@@ -64,25 +69,25 @@ class ChildListAdapter(
                 }
             }
 
-            nameTextView.apply {
+            binding.childNameTextView.apply {
                 text = childItem.child.getFullName()
                 setTextColor(if (darkStyle) Color.WHITE else Color.BLACK)
                 if (!darkStyle) {
                     setOnClickListener {
                         toggleCheckIn(childItem)
-                        checkBox.toggle()
+                        binding.includeChildCheckBox.toggle()
 
                     }
                 }
             }
 
-            removeChildImageView.apply {
+            binding.removeChildImageView.apply {
                 setOnClickListener {
                     removeChildListener(childItem.child)
                 }
             }
         }
-        return view
+        return binding.root
     }
 
     private fun getAddChildButtonView(

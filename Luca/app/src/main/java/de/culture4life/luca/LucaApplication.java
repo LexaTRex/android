@@ -1,5 +1,7 @@
 package de.culture4life.luca;
 
+import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
+
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
@@ -59,8 +61,6 @@ import io.reactivex.rxjava3.schedulers.Schedulers;
 import rxdogtag2.RxDogTag;
 import timber.log.Timber;
 
-import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
-
 public class LucaApplication extends MultiDexApplication {
 
     public static final boolean IS_USING_STAGING_ENVIRONMENT = !BuildConfig.BUILD_TYPE.equals("production");
@@ -107,8 +107,8 @@ public class LucaApplication extends MultiDexApplication {
         locationManager = new LocationManager();
         networkManager = new NetworkManager();
         geofenceManager = new GeofenceManager();
-        cryptoManager = new CryptoManager(preferencesManager, networkManager);
         genuinityManager = new GenuinityManager(preferencesManager, networkManager);
+        cryptoManager = new CryptoManager(preferencesManager, networkManager, genuinityManager);
         registrationManager = new RegistrationManager(preferencesManager, networkManager, cryptoManager);
         childrenManager = new ChildrenManager(preferencesManager, registrationManager);
         historyManager = new HistoryManager(preferencesManager, childrenManager);
@@ -366,7 +366,10 @@ public class LucaApplication extends MultiDexApplication {
     }
 
     public Completable handleDeepLink(Uri uri) {
-        return Completable.fromAction(() -> deepLink = uri.toString());
+        return Completable.fromAction(() -> {
+            Timber.i("Setting deeplink: %s", uri);
+            deepLink = uri.toString();
+        });
     }
 
     public boolean isInDarkMode() {

@@ -17,4 +17,5 @@ class QrCodeBottomSheetViewModel(app: Application) : BaseViewModel(app) {
     fun onDebuggingCheckInRequested() {
         updateAsSideEffect(onDebuggingCheckInRequested, ViewEvent(true))
     }
+    
 }

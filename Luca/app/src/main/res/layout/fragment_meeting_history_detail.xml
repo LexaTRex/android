@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ui.history.MeetingHistoryDetailFragment">
+
+    <ImageView
+        android:id="@+id/backImageView"
+        style="@style/BackButtonImageView"
+        tools:ignore="MissingConstraints" />
+
+    <TextView
+        android:id="@+id/headingTextView"
+        style="@style/TextAppearance.Luca.Headline2"
+        android:layout_width="wrap_content"
+        android:layout_margin="@dimen/spacing_default"
+        android:text="@string/meeting_heading"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <View
+        android:id="@+id/headingSeparatorView"
+        style="@style/HeaderSeparatorView"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/headingTextView" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_constrainedHeight="true"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/headingSeparatorView">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="@dimen/spacing_default">
+
+            <TextView
+                android:id="@+id/subtitleTextView"
+                style="@style/TextAppearance.Luca.Body1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/spacing_default"
+                android:fontFamily="@font/montserrat_bold"
+                android:textSize="24sp"
+                android:textStyle="bold"
+                tools:text="@string/meeting_information_title" />
+
+            <TextView
+                android:id="@+id/descriptionTextView"
+                style="@style/TextAppearance.Luca.Body2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/spacing_default"
+                android:fontFamily="@font/montserrat_regular"
+                tools:text="@string/meeting_description_info" />
+
+            <TextView
+                android:id="@+id/guestsTitleView"
+                style="@style/TextAppearance.Luca.Body1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/spacing_default"
+                android:fontFamily="@font/montserrat_bold"
+                android:textSize="24sp"
+                android:textStyle="bold"
+                tools:text="@string/meeting_details_guests" />
+
+            <LinearLayout
+                android:id="@+id/guestsListContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" />
+
+        </LinearLayout>
+
+    </ScrollView>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

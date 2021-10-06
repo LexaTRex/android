@@ -1,11 +1,5 @@
 package de.culture4life.luca.crypto;
 
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.spy;
-import static de.culture4life.luca.crypto.AsymmetricCipherProviderTest.decodePrivateKey;
-import static de.culture4life.luca.crypto.AsymmetricCipherProviderTest.decodePublicKey;
-import static de.culture4life.luca.history.HistoryManager.SHARE_DATA_DURATION;
-
 import android.util.Base64;
 
 import androidx.annotation.NonNull;
@@ -29,6 +23,8 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
+import de.culture4life.luca.genuinity.GenuinityManager;
+import de.culture4life.luca.genuinity.NoGenuineTimeException;
 import de.culture4life.luca.network.NetworkManager;
 import de.culture4life.luca.network.endpoints.LucaEndpointsV3;
 import de.culture4life.luca.network.pojo.DailyKeyPair;
@@ -36,6 +32,12 @@ import de.culture4life.luca.network.pojo.DailyKeyPairIssuer;
 import de.culture4life.luca.network.pojo.Issuer;
 import de.culture4life.luca.preference.PreferencesManager;
 import io.reactivex.rxjava3.core.Single;
+
+import static de.culture4life.luca.crypto.AsymmetricCipherProviderTest.decodePrivateKey;
+import static de.culture4life.luca.crypto.AsymmetricCipherProviderTest.decodePublicKey;
+import static de.culture4life.luca.history.HistoryManager.SHARE_DATA_DURATION;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.spy;
 
 @Config(sdk = 28)
 @RunWith(AndroidJUnit4.class)
@@ -64,20 +66,20 @@ public class CryptoManagerTest {
             "BJGBT0vYL53gzK8WoWzg6ub2BIqvYPwquc9EnTYs+ZAabPSxlc9hL2H0M8xWM9oSepl56sTG6HpGAVQ7fChlf54="
     );
 
-    private static final DailyKeyPairIssuer DAILY_KEY_PAIR_ISSUER = new DailyKeyPairIssuer(
-            DAILY_KEY_PAIR,
-            ISSUER
-    );
-
     private CryptoManager cryptoManager;
     private NetworkManager networkManager;
+    private GenuinityManager genuinityManager;
 
     @Before
     public void setup() {
         PreferencesManager preferencesManager = new PreferencesManager();
         networkManager = spy(new NetworkManager());
-        cryptoManager = spy(new CryptoManager(preferencesManager, networkManager));
+        genuinityManager = spy(new GenuinityManager(preferencesManager, networkManager));
+        cryptoManager = spy(new CryptoManager(preferencesManager, networkManager, genuinityManager));
         cryptoManager.initialize(ApplicationProvider.getApplicationContext()).blockingAwait();
+
+        Single<Long> getCurrentTime = Single.fromCallable(System::currentTimeMillis);
+        doReturn(getCurrentTime).when(genuinityManager).fetchServerTime();
     }
 
     private void mockNetworkResponses(DailyKeyPair dailyKeyPair, Issuer issuer) {
@@ -183,6 +185,7 @@ public class CryptoManagerTest {
                         "SOME_UNIQUE_ISSUER_ID",
                         "SOME_ISSUER_NAME"
                 );
+
         mockNetworkResponses(dailyKeyPairIssuer.getDailyKeyPair(), dailyKeyPairIssuer.getIssuer());
 
         cryptoManager.updateDailyKeyPairPublicKey()
@@ -192,7 +195,18 @@ public class CryptoManagerTest {
     }
 
     @Test
-    public void updateDailyKeyPairPublicKey_createdAt_older_than_7_days_verifyFails() throws InterruptedException {
+    public void updateDailyKeyPairPublicKey_noGenuineTime_verifyFails() throws InterruptedException {
+        mockNetworkResponses(DAILY_KEY_PAIR, ISSUER);
+        doReturn(Single.just(false)).when(genuinityManager).isGenuineTime();
+
+        cryptoManager.updateDailyKeyPairPublicKey()
+                .test()
+                .await()
+                .assertError(NoGenuineTimeException.class);
+    }
+
+    @Test
+    public void updateDailyKeyPairPublicKey_createdAtOlderThanSevenDays_verifyFails() throws InterruptedException {
         DailyKeyPairIssuer dailyKeyPairIssuer =
                 CryptoTestHelper.INSTANCE.createDailyKeyPairAndIssuer(
                         1,
@@ -200,12 +214,13 @@ public class CryptoManagerTest {
                         "SOME_UNIQUE_ISSUER_ID",
                         "SOME_ISSUER_NAME"
                 );
+
         mockNetworkResponses(dailyKeyPairIssuer.getDailyKeyPair(), dailyKeyPairIssuer.getIssuer());
 
         cryptoManager.updateDailyKeyPairPublicKey()
                 .test()
                 .await()
-                .assertError(IllegalStateException.class);
+                .assertError(DailyKeyExpiredException.class);
     }
 
     @Test
@@ -296,9 +311,37 @@ public class CryptoManagerTest {
     }
 
     @Test
+    public void assertKeyNotExpired_validKey_completes() {
+        DailyKeyPairPublicKeyWrapper key = new DailyKeyPairPublicKeyWrapper(
+                0,
+                decodePublicKey(ENCODED_DAILY_KEY_PAIR_PUBLIC_KEY),
+                System.currentTimeMillis() - TimeUnit.DAYS.toMillis(6)
+        );
+        cryptoManager.assertKeyNotExpired(key)
+                .test()
+                .assertNoErrors()
+                .assertComplete();
+    }
+
+    @Test
+    public void assertKeyNotExpired_expiredKey_emitsError() {
+        DailyKeyPairPublicKeyWrapper key = new DailyKeyPairPublicKeyWrapper(
+                0,
+                decodePublicKey(ENCODED_DAILY_KEY_PAIR_PUBLIC_KEY),
+                System.currentTimeMillis() - TimeUnit.DAYS.toMillis(8)
+        );
+        cryptoManager.assertKeyNotExpired(key)
+                .test()
+                .assertError(DailyKeyExpiredException.class);
+    }
+
+    @Test
     public void generateSharedDiffieHellmanSecret() {
-        doReturn(Single.just(new DailyKeyPairPublicKeyWrapper(0, decodePublicKey(ENCODED_DAILY_KEY_PAIR_PUBLIC_KEY))))
-                .when(cryptoManager).getDailyKeyPairPublicKeyWrapper();
+        doReturn(Single.just(new DailyKeyPairPublicKeyWrapper(
+                0,
+                decodePublicKey(ENCODED_DAILY_KEY_PAIR_PUBLIC_KEY),
+                System.currentTimeMillis()
+        ))).when(cryptoManager).getDailyKeyPairPublicKeyWrapper();
         KeyPair userMasterKeyPair = new KeyPair(
                 decodePublicKey(ENCODED_GUEST_KEY_PAIR_PUBLIC_KEY),
                 decodePrivateKey(ENCODED_GUEST_KEY_PAIR_PRIVATE_KEY)

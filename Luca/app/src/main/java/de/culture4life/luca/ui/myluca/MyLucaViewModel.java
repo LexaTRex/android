@@ -1,15 +1,20 @@
 package de.culture4life.luca.ui.myluca;
 
+import static de.culture4life.luca.ui.accesseddata.AccessedDataDetailFragment.KEY_ACCESSED_DATA_LIST_ITEM;
+
 import android.app.Application;
 import android.os.Bundle;
 import android.webkit.URLUtil;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModelProvider;
 
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -34,7 +39,6 @@ import de.culture4life.luca.registration.RegistrationManager;
 import de.culture4life.luca.ui.BaseQrCodeViewModel;
 import de.culture4life.luca.ui.ViewError;
 import de.culture4life.luca.ui.ViewEvent;
-import de.culture4life.luca.ui.accesseddata.AccessedDataDetailFragment;
 import de.culture4life.luca.ui.accesseddata.AccessedDataListItem;
 import de.culture4life.luca.ui.checkin.CheckInViewModel;
 import de.culture4life.luca.ui.history.HistoryFragment;
@@ -57,6 +61,7 @@ public class MyLucaViewModel extends BaseQrCodeViewModel {
     private final ChildrenManager childrenManager;
     private final DataAccessManager dataAccessManager;
 
+    private final MutableLiveData<Bundle> bundle = new MutableLiveData<>();
     private final MutableLiveData<Person> user = new MutableLiveData<>();
     private final MutableLiveData<List<MyLucaListItem>> myLucaItems = new MutableLiveData<>();
     private final MutableLiveData<ViewEvent<MyLucaListItem>> itemToDelete = new MutableLiveData<>();
@@ -100,13 +105,12 @@ public class MyLucaViewModel extends BaseQrCodeViewModel {
                         childrenManager.initialize(application),
                         dataAccessManager.initialize(application)
                 ))
-                .andThen(update(showCameraPreview, false))
                 .andThen(updateUserName())
                 .andThen(invokeListUpdate())
                 .andThen(invokeIsGenuineTimeUpdate())
-                .andThen(handleApplicationDeepLinkIfAvailable())
                 .andThen(updateChildCounter())
-                .andThen(updateAccessNotifications());
+                .andThen(updateAccessNotifications())
+                .doOnComplete(this::handleApplicationDeepLinkIfAvailable);
     }
 
     @Override
@@ -117,39 +121,23 @@ public class MyLucaViewModel extends BaseQrCodeViewModel {
         );
     }
 
-    private Completable keepIsGenuineTimeUpdated() {
-        return genuinityManager.getIsGenuineTimeChanges()
-                .flatMapCompletable(genuineTime -> update(isGenuineTime, genuineTime));
-    }
-
-    public Completable invokeListUpdate() {
-        return Completable.fromAction(() -> modelDisposable.add(updateList()
-                .subscribeOn(Schedulers.io())
-                .subscribe(
-                        () -> {},
-                        throwable -> Timber.w("Unable to update my luca list: %s", throwable.toString())
-                )));
-    }
-
-    private Completable invokeIsGenuineTimeUpdate() {
-        return Completable.fromAction(() -> modelDisposable.add(genuinityManager.isGenuineTime()
-                .flatMapCompletable(genuineTime -> update(isGenuineTime, genuineTime))
-                .subscribe()));
-    }
-
-    public Completable invokeServerTimeOffsetUpdate() {
-        return Completable.fromAction(() -> modelDisposable.add(genuinityManager.invokeServerTimeOffsetUpdate()
-                .delaySubscription(1, TimeUnit.SECONDS)
-                .subscribeOn(Schedulers.io())
-                .subscribe()));
-    }
-
     public Completable updateUserName() {
         return registrationManager.getOrCreateRegistrationData()
                 .flatMapCompletable(registrationData -> update(user, registrationData.getPerson()));
     }
 
-    private Completable updateList() {
+    /*
+        List items
+     */
+
+    public Completable invokeListUpdate() {
+        return Completable.fromAction(() -> modelDisposable.add(updateListItems()
+                .onErrorComplete()
+                .subscribeOn(Schedulers.io())
+                .subscribe()));
+    }
+
+    private Completable updateListItems() {
         return loadListItems()
                 .toList()
                 .flatMapCompletable(items -> update(myLucaItems, items));
@@ -176,19 +164,11 @@ public class MyLucaViewModel extends BaseQrCodeViewModel {
         });
     }
 
-    public void requestDelete(@NonNull MyLucaListItem item) {
-        updateAsSideEffect(itemToDelete, new ViewEvent(item));
-    }
-
-    public void toggleExpanded(@NonNull MyLucaListItem item) {
-        updateAsSideEffect(itemToExpand, new ViewEvent(item));
-    }
-
     public Completable deleteListItem(@NonNull MyLucaListItem myLucaListItem) {
         return Completable.defer(() -> {
             Document document;
             if (myLucaListItem instanceof TestResultItem) {
-                document = ((TestResultItem) myLucaListItem).getDocument();
+                document = myLucaListItem.getDocument();
             } else {
                 return Completable.error(new IllegalArgumentException("Unable to delete item, unknown type"));
             }
@@ -210,19 +190,17 @@ public class MyLucaViewModel extends BaseQrCodeViewModel {
         });
     }
 
-    public void onAppointmentRequested() {
-        application.openUrl("https://www.luca-app.de/coronatest");
+    public void onItemDeletionRequested(@NonNull MyLucaListItem item) {
+        updateAsSideEffect(itemToDelete, new ViewEvent<>(item));
+    }
+
+    public void onItemExpandToggleRequested(@NonNull MyLucaListItem item) {
+        updateAsSideEffect(itemToExpand, new ViewEvent<>(item));
     }
 
     /*
         QR code scanning
      */
-
-    @Override
-    protected boolean canProcessImage() {
-        // currently showing an import related error
-        return importError == null || !errors.getValue().contains(importError);
-    }
 
     public boolean canProcessBarcode(@NonNull String barcodeData) {
         return Single.defer(() -> {
@@ -250,26 +228,28 @@ public class MyLucaViewModel extends BaseQrCodeViewModel {
             }
         }).doOnSubscribe(disposable -> {
             removeError(importError);
-            updateAsSideEffect(showCameraPreview, false);
+            updateAsSideEffect(getShowCameraPreview(), new CameraRequest(false, true));
             updateAsSideEffect(isLoading, true);
         }).doFinally(() -> updateAsSideEffect(isLoading, false));
     }
 
     public Completable process(@NonNull String barcodeData) {
-        return Single.defer(
-                () -> {
-                    if (DocumentManager.isTestResult(barcodeData)) {
-                        return getEncodedDocumentFromDeepLink(barcodeData);
-                    } else {
-                        return Single.just(barcodeData);
-                    }
-                })
-                .doOnSuccess(value -> {
-                    Timber.d("Processing barcodeData: %s", value);
-                    getNotificationManager().vibrate().subscribe();
-                })
-                .flatMapCompletable(this::parseAndValidateDocument);
+        // TODO: 21.09.21 better distinguish between processBarcode and process
+        return Single.defer(() -> {
+            if (DocumentManager.isTestResult(barcodeData)) {
+                return getEncodedDocumentFromDeepLink(barcodeData);
+            } else {
+                return Single.just(barcodeData);
+            }
+        }).doOnSuccess(value -> {
+            Timber.d("Processing barcodeData: %s", value);
+            getNotificationManager().vibrate().subscribe();
+        }).flatMapCompletable(this::parseAndValidateDocument);
     }
+
+    /*
+        Documents
+     */
 
     private Completable parseAndValidateDocument(@NonNull String encodedDocument) {
         return documentManager.parseAndValidateEncodedDocument(encodedDocument)
@@ -278,7 +258,7 @@ public class MyLucaViewModel extends BaseQrCodeViewModel {
                 .flatMapCompletable(testResult -> update(parsedDocument, new ViewEvent<>(testResult)))
                 .doOnSubscribe(disposable -> {
                     removeError(importError);
-                    updateAsSideEffect(showCameraPreview, false);
+                    updateAsSideEffect(getShowCameraPreview(), new CameraRequest(false, true));
                     updateAsSideEffect(isLoading, true);
                 })
                 .doOnError(throwable -> {
@@ -372,52 +352,6 @@ public class MyLucaViewModel extends BaseQrCodeViewModel {
                 .doFinally(() -> updateAsSideEffect(isLoading, false));
     }
 
-    void openChildrenView() {
-        navigationController.navigate(R.id.action_myLucaFragment_to_childrenFragment);
-    }
-
-    private Completable updateChildCounter() {
-        return childrenManager.getChildren()
-                .flatMapCompletable(children -> update(this.children, children));
-    }
-
-    private CompletableSource updateAccessNotifications() {
-        return dataAccessManager.getOrRestoreAccessedData()
-                .flattenAsObservable(AccessedData::getTraceData)
-                .filter(accessedTraceData -> accessedTraceData.getIsNew())
-                .flatMapSingle(accessedTraceData -> dataAccessManager.createAccessDataListItem(accessedTraceData))
-                .toList()
-                .map(accessedDataListItems -> {
-                    HashMap<Integer, AccessedDataListItem> notificationsPerLevel = new HashMap<>();
-                    for (AccessedDataListItem accessedDataListItem : accessedDataListItems) {
-                        notificationsPerLevel.put(accessedDataListItem.getWarningLevel(), accessedDataListItem);
-                    }
-                    return notificationsPerLevel;
-                })
-                .flatMapCompletable(notificationsPerLevel -> update(accessNotificationsPerLevel, notificationsPerLevel));
-    }
-
-    public void onShowAccessedDataRequested(int warningLevel) {
-        modelDisposable.add(dataAccessManager.getPreviouslyAccessedTraceData()
-                .filter(accessedTraceData -> accessedTraceData.getWarningLevel() == warningLevel)
-                .flatMapSingle(accessedTraceData -> dataAccessManager.createAccessDataListItem(accessedTraceData))
-                .toList()
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeOn(Schedulers.io())
-                .subscribe(accessedDataListItems -> {
-                    if (isCurrentDestinationId(R.id.myLucaFragment)) {
-                        Bundle bundle = new Bundle();
-                        if (accessedDataListItems.size() == 1) {
-                            bundle.putSerializable(AccessedDataDetailFragment.KEY_ACCESSED_DATA_LIST_ITEM, accessedDataListItems.get(0));
-                            navigationController.navigate(R.id.action_myLucaFragment_to_accessedDataDetailFragment, bundle);
-                        } else {
-                            bundle.putInt(HistoryFragment.KEY_WARNING_LEVEL_FILTER, warningLevel);
-                            navigationController.navigate(R.id.action_myLucaFragment_to_historyFragment, bundle);
-                        }
-                    }
-                }));
-    }
-
     protected static boolean hasNonMatchingBirthDate(@NonNull Document document, List<MyLucaListItem> myLucaItems) {
         if (document.getType() != Document.TYPE_VACCINATION) {
             return false;
@@ -445,10 +379,14 @@ public class MyLucaViewModel extends BaseQrCodeViewModel {
         Deep link handling
      */
 
-    private Completable handleApplicationDeepLinkIfAvailable() {
-        return application.getDeepLink()
-                .flatMapCompletable(this::handleDeepLink)
-                .onErrorComplete();
+    private void handleApplicationDeepLinkIfAvailable() {
+        modelDisposable.add(application.getDeepLink()
+                .flatMapCompletable(url -> handleDeepLink(url)
+                        .doOnComplete(() -> application.onDeepLinkHandled(url)))
+                .subscribe(
+                        () -> Timber.d("Handled application deep link"),
+                        throwable -> Timber.w("Unable handle application deep link: %s", throwable.toString())
+                ));
     }
 
     private Completable handleDeepLink(@NonNull String url) {
@@ -474,8 +412,102 @@ public class MyLucaViewModel extends BaseQrCodeViewModel {
             if (parts.length != 2) {
                 throw new IllegalArgumentException("Unable to get encoded document from URL");
             }
-            return parts[1];
+            return URLDecoder.decode(parts[1], StandardCharsets.UTF_8.name());
         });
+    }
+
+    /*
+        Children
+     */
+
+    void onChildrenManagementRequested() {
+        navigationController.navigate(R.id.action_myLucaFragment_to_childrenFragment);
+    }
+
+    private Completable updateChildCounter() {
+        return childrenManager.getChildren()
+                .flatMapCompletable(children -> update(this.children, children));
+    }
+
+    /*
+        Appointments
+     */
+
+    public void onAppointmentRequested() {
+        application.openUrl("https://www.luca-app.de/coronatest");
+    }
+
+    /*
+        Accessed data
+     */
+
+    private CompletableSource updateAccessNotifications() {
+        return dataAccessManager.getOrRestoreAccessedData()
+                .flattenAsObservable(AccessedData::getTraceData)
+                .filter(accessedTraceData -> accessedTraceData.getIsNew())
+                .flatMapSingle(accessedTraceData -> dataAccessManager.createAccessDataListItem(accessedTraceData))
+                .toList()
+                .map(accessedDataListItems -> {
+                    HashMap<Integer, AccessedDataListItem> notificationsPerLevel = new HashMap<>();
+                    for (AccessedDataListItem accessedDataListItem : accessedDataListItems) {
+                        notificationsPerLevel.put(accessedDataListItem.getWarningLevel(), accessedDataListItem);
+                    }
+                    return notificationsPerLevel;
+                })
+                .flatMapCompletable(notificationsPerLevel -> update(accessNotificationsPerLevel, notificationsPerLevel));
+    }
+
+    public void onShowAccessedDataRequested(int warningLevel) {
+        modelDisposable.add(dataAccessManager.getPreviouslyAccessedTraceData()
+                .filter(accessedTraceData -> accessedTraceData.getWarningLevel() == warningLevel)
+                .flatMapSingle(dataAccessManager::createAccessDataListItem)
+                .toList()
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.io())
+                .subscribe(accessedDataListItems -> {
+                    if (isCurrentDestinationId(R.id.myLucaFragment)) {
+                        Bundle bundle = new Bundle();
+                        if (accessedDataListItems.size() == 1) {
+                            bundle.putSerializable(KEY_ACCESSED_DATA_LIST_ITEM, accessedDataListItems.get(0));
+                            navigationController.navigate(R.id.action_myLucaFragment_to_accessedDataDetailFragment, bundle);
+                        } else {
+                            bundle.putInt(HistoryFragment.KEY_WARNING_LEVEL_FILTER, warningLevel);
+                            navigationController.navigate(R.id.action_myLucaFragment_to_historyFragment, bundle);
+                        }
+                    }
+                }));
+    }
+
+    /*
+        Genuity
+     */
+
+    private Completable keepIsGenuineTimeUpdated() {
+        return genuinityManager.getIsGenuineTimeChanges()
+                .flatMapCompletable(genuineTime -> update(isGenuineTime, genuineTime));
+    }
+
+    private Completable invokeIsGenuineTimeUpdate() {
+        return Completable.fromAction(() -> modelDisposable.add(genuinityManager.isGenuineTime()
+                .flatMapCompletable(genuineTime -> update(isGenuineTime, genuineTime))
+                .onErrorComplete()
+                .subscribe()));
+    }
+
+    public Completable invokeServerTimeOffsetUpdate() {
+        return Completable.fromAction(() -> modelDisposable.add(genuinityManager.invokeServerTimeOffsetUpdate()
+                .delaySubscription(1, TimeUnit.SECONDS)
+                .onErrorComplete()
+                .subscribeOn(Schedulers.io())
+                .subscribe()));
+    }
+
+    public LiveData<Bundle> getBundle() {
+        return bundle;
+    }
+
+    public void setBundle(@Nullable Bundle bundle) {
+        this.bundle.setValue(bundle);
     }
 
     public LiveData<List<MyLucaListItem>> getMyLucaItems() {

@@ -324,7 +324,17 @@ public class Document {
         if (validityStartTimestamp != 0) {
             return validityStartTimestamp;
         } else if (type == TYPE_VACCINATION && outcome == OUTCOME_FULLY_IMMUNE) {
-            return getTestingTimestamp() + TIME_UNTIL_VACCINATION_IS_VALID;
+            long vaccinationTimestamp = getTestingTimestamp();
+            if (procedures != null && !procedures.isEmpty()) {
+                int requiredDoses = procedures.get(0).getTotalSeriesOfDoses();
+                for (Procedure procedure : procedures) {
+                    if (procedure.getDoseNumber() >= requiredDoses) {
+                        vaccinationTimestamp = procedure.getTimestamp();
+                        break;
+                    }
+                }
+            }
+            return vaccinationTimestamp + TIME_UNTIL_VACCINATION_IS_VALID;
         } else if (type == TYPE_RECOVERY && outcome == OUTCOME_FULLY_IMMUNE) {
             return getTestingTimestamp() + TIME_UNTIL_RECOVERY_IS_VALID;
         } else if (type == TYPE_PCR && outcome == OUTCOME_POSITIVE) {
@@ -376,6 +386,17 @@ public class Document {
      */
     public boolean isValidRecovery() {
         if (type == TYPE_RECOVERY || (type == TYPE_PCR && outcome == OUTCOME_POSITIVE)) {
+            long now = System.currentTimeMillis();
+            return now > getValidityStartTimestamp() && now < getExpirationTimestamp();
+        }
+        return false;
+    }
+
+    /**
+     * @return true if this document is a currently valid vaccination certificate with full immunity.
+     */
+    public boolean isValidVaccination() {
+        if (type == TYPE_VACCINATION && outcome == OUTCOME_FULLY_IMMUNE) {
             long now = System.currentTimeMillis();
             return now > getValidityStartTimestamp() && now < getExpirationTimestamp();
         }

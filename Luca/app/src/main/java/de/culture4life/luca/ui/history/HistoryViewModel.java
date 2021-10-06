@@ -1,5 +1,9 @@
 package de.culture4life.luca.ui.history;
 
+import static de.culture4life.luca.history.HistoryManager.createCsv;
+import static de.culture4life.luca.ui.accesseddata.AccessedDataDetailFragment.KEY_ACCESSED_DATA_LIST_ITEM;
+import static de.culture4life.luca.ui.history.HistoryFragment.NO_WARNING_LEVEL_FILTER;
+
 import android.app.Application;
 import android.os.Bundle;
 
@@ -24,7 +28,6 @@ import de.culture4life.luca.history.MeetingEndedItem;
 import de.culture4life.luca.ui.BaseViewModel;
 import de.culture4life.luca.ui.ViewError;
 import de.culture4life.luca.ui.ViewEvent;
-import de.culture4life.luca.ui.accesseddata.AccessedDataDetailFragment;
 import de.culture4life.luca.ui.accesseddata.AccessedDataFragment;
 import de.culture4life.luca.util.TimeUtil;
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
@@ -34,9 +37,6 @@ import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 import timber.log.Timber;
 
-import static de.culture4life.luca.history.HistoryManager.createCsv;
-import static de.culture4life.luca.history.HistoryManager.createOrderedList;
-import static de.culture4life.luca.ui.history.HistoryFragment.NO_WARNING_LEVEL_FILTER;
 
 public class HistoryViewModel extends BaseViewModel {
 
@@ -170,13 +170,13 @@ public class HistoryViewModel extends BaseViewModel {
             merged.setTitle(end.getTitle());
             merged.setDescription(end.getDescription());
             merged.setAdditionalTitleDetails(end.getAdditionalTitleDetails());
-            merged.setAdditionalDescriptionDetails(end.getAdditionalDescriptionDetails());
             merged.setTime(application.getString(R.string.history_time_merged, start.getTime(), end.getTime()));
             merged.setTimestamp(end.getTimestamp());
             merged.setTitleIconResourceId(end.getTitleIconResourceId());
-            merged.setDescriptionIconResourceId(end.getDescriptionIconResourceId());
             merged.setRelatedId(end.getRelatedId());
             merged.setAccessedTraceData(end.getAccessedTraceData());
+            merged.setPrivateMeeting(end.isPrivateMeeting());
+            merged.setGuests(end.getGuests());
             return merged;
         });
     }
@@ -215,9 +215,6 @@ public class HistoryViewModel extends BaseViewModel {
                         String childrenCsv = createCsv(children);
                         builder = builder.append(application.getString(R.string.history_children_title, childrenCsv));
                         item.setDescription(builder.toString());
-                        String childrenList = createOrderedList(children);
-                        item.setAdditionalDescriptionDetails(application.getString(R.string.history_children_description, childrenList));
-                        item.setDescriptionIconResourceId(R.drawable.ic_information_outline);
                     }
                     break;
                 }
@@ -228,14 +225,15 @@ public class HistoryViewModel extends BaseViewModel {
                 case HistoryItem.TYPE_MEETING_ENDED: {
                     MeetingEndedItem meetingEndedItem = (MeetingEndedItem) historyItem;
                     item.setTitle(application.getString(R.string.history_meeting_ended_title));
+                    item.setPrivateMeeting(true);
+                    item.setAdditionalTitleDetails(application.getString(R.string.history_check_out_details, item.getRelatedId()));
+                    item.setTitleIconResourceId(R.drawable.ic_information_outline);
                     if (meetingEndedItem.getGuests().isEmpty()) {
                         item.setDescription(application.getString(R.string.history_meeting_empty_description));
                     } else {
                         String guestCsv = createCsv(meetingEndedItem.getGuests());
                         item.setDescription(application.getString(R.string.history_meeting_not_empty_description, guestCsv));
-                        String guestList = createOrderedList(meetingEndedItem.getGuests());
-                        item.setAdditionalDescriptionDetails(application.getString(R.string.history_meeting_ended_description, guestList));
-                        item.setDescriptionIconResourceId(R.drawable.ic_information_outline);
+                        item.setGuests(meetingEndedItem.getGuests());
                     }
                     break;
                 }
@@ -339,7 +337,7 @@ public class HistoryViewModel extends BaseViewModel {
                         .subscribeOn(Schedulers.io())
                         .subscribe(dataListItem -> {
                             if (isCurrentDestinationId(R.id.historyFragment)) {
-                                bundle.putSerializable(AccessedDataDetailFragment.KEY_ACCESSED_DATA_LIST_ITEM, dataListItem);
+                                bundle.putSerializable(KEY_ACCESSED_DATA_LIST_ITEM, dataListItem);
                                 navigationController.navigate(R.id.action_historyFragment_to_accessedDataDetailFragment, bundle);
                             }
                         }));

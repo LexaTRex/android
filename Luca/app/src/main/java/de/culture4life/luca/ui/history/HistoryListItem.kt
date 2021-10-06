@@ -10,10 +10,11 @@ data class HistoryListItem(
     var relatedId: String? = null,
     var description: String? = null,
     var additionalTitleDetails: String? = null,
-    var additionalDescriptionDetails: String? = null,
     @DrawableRes var titleIconResourceId: Int = 0,
     @DrawableRes var descriptionIconResourceId: Int = 0,
-    var accessedTraceData: List<AccessedTraceData> = listOf()
+    var accessedTraceData: List<AccessedTraceData> = listOf(),
+    var isPrivateMeeting: Boolean = false,
+    var guests: List<String> = listOf()
 ) {
 
     fun containsWarningLevel(warningLevel: Int): Boolean {

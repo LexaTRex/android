@@ -3,8 +3,9 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/addChildLayout"
-    android:layout_width="wrap_content"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:paddingTop="@dimen/spacing_default"
     android:contentDescription="@string/venue_children_add"
     android:orientation="horizontal"
     tools:background="@color/checked_in_light_green_gradient">

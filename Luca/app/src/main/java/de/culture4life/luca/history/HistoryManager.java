@@ -204,7 +204,7 @@ public class HistoryManager extends Manager {
     private Single<CheckOutItem> setChildren(@NonNull CheckOutItem item) {
         return childrenManager.getCheckedInChildren()
                 .flatMap(children -> Observable.fromIterable(children)
-                        .map(child -> child.getFullName()).toList())
+                        .map(child -> child.getFirstName()).toList())
                 .doOnSuccess(item::setChildren)
                 .map(names -> item);
     }

@@ -1,5 +1,7 @@
 package de.culture4life.luca.ui.registration;
 
+import static android.view.inputmethod.EditorInfo.IME_ACTION_DONE;
+
 import android.animation.ObjectAnimator;
 import android.text.Editable;
 import android.view.LayoutInflater;
@@ -7,16 +9,15 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.Observer;
+import androidx.viewbinding.ViewBinding;
 
-import com.google.android.material.button.MaterialButton;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
-import com.google.android.material.progressindicator.LinearProgressIndicator;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 
@@ -31,6 +32,7 @@ import java.util.concurrent.TimeUnit;
 import de.culture4life.luca.BuildConfig;
 import de.culture4life.luca.LucaApplication;
 import de.culture4life.luca.R;
+import de.culture4life.luca.databinding.FragmentRegistrationAllBinding;
 import de.culture4life.luca.network.NetworkManager;
 import de.culture4life.luca.ui.BaseFragment;
 import de.culture4life.luca.ui.DefaultTextWatcher;
@@ -42,25 +44,11 @@ import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 import timber.log.Timber;
 
-import static android.view.inputmethod.EditorInfo.IME_ACTION_DONE;
-
 public class RegistrationFragment extends BaseFragment<RegistrationViewModel> {
 
     private static final long DELAY_DURATION = RegistrationViewModel.DEBOUNCE_DURATION;
 
-    private LinearProgressIndicator progressIndicator;
-    private TextView headingTextView;
-    private TextView contactInfoTextView;
-    private TextView addressInfoTextView;
-    private RegistrationTextInputLayout firstNameLayout;
-    private RegistrationTextInputLayout lastNameLayout;
-    private RegistrationTextInputLayout phoneNumberLayout;
-    private RegistrationTextInputLayout emailLayout;
-    private RegistrationTextInputLayout streetLayout;
-    private RegistrationTextInputLayout houseNumberLayout;
-    private RegistrationTextInputLayout postalCodeLayout;
-    private RegistrationTextInputLayout cityNameLayout;
-    private MaterialButton confirmationButton;
+    private FragmentRegistrationAllBinding binding;
 
     private static HashMap<Integer, Integer> inputTextIdToHint = new HashMap<>();
 
@@ -76,9 +64,11 @@ public class RegistrationFragment extends BaseFragment<RegistrationViewModel> {
 
     private Observer<Boolean> completionObserver;
 
+    @Nullable
     @Override
-    protected int getLayoutResource() {
-        return R.layout.fragment_registration_all;
+    protected ViewBinding getViewBinding() {
+        binding = FragmentRegistrationAllBinding.inflate(getLayoutInflater());
+        return binding;
     }
 
     @Override
@@ -106,11 +96,7 @@ public class RegistrationFragment extends BaseFragment<RegistrationViewModel> {
     }
 
     private void initializeSharedViews() {
-        progressIndicator = getView().findViewById(R.id.registrationProgressIndicator);
         observe(viewModel.getProgress(), this::indicateProgress);
-
-        headingTextView = getView().findViewById(R.id.registrationHeading);
-        confirmationButton = getView().findViewById(R.id.registrationActionButton);
 
         if (viewModel.isInEditMode()) {
             initializeSharedViewsInEditMode();
@@ -125,23 +111,23 @@ public class RegistrationFragment extends BaseFragment<RegistrationViewModel> {
         });
 
         observe(viewModel.getIsLoading(), loading -> {
-            confirmationButton.setEnabled(!loading);
+            binding.registrationActionButton.setEnabled(!loading);
 
             // indeterminate state can only be changed while invisible
             // see: https://github.com/material-components/material-components-android/issues/1921
-            int visibility = progressIndicator.getVisibility();
-            progressIndicator.setVisibility(View.GONE);
-            progressIndicator.setIndeterminate(loading);
-            progressIndicator.setVisibility(visibility);
+            int visibility = binding.registrationProgressIndicator.getVisibility();
+            binding.registrationProgressIndicator.setVisibility(View.GONE);
+            binding.registrationProgressIndicator.setIndeterminate(loading);
+            binding.registrationProgressIndicator.setVisibility(visibility);
         });
     }
 
     private void initializeSharedViewsInRegistrationMode() {
-        headingTextView.setText(getString(R.string.registration_heading_name));
+        binding.registrationHeading.setText(getString(R.string.registration_heading_name));
         if (LucaApplication.IS_USING_STAGING_ENVIRONMENT || BuildConfig.DEBUG) {
-            headingTextView.setOnClickListener(v -> viewModel.useDebugRegistrationData().subscribe());
+            binding.registrationHeading.setOnClickListener(v -> viewModel.useDebugRegistrationData().subscribe());
         }
-        confirmationButton.setOnClickListener(v -> viewDisposable.add(Completable.fromAction(
+        binding.registrationActionButton.setOnClickListener(v -> viewDisposable.add(Completable.fromAction(
                 () -> {
                     if (isNameStepCompleted()) {
                         viewModel.updateRegistrationDataWithFormValuesAsSideEffect();
@@ -152,10 +138,10 @@ public class RegistrationFragment extends BaseFragment<RegistrationViewModel> {
     }
 
     private void initializeSharedViewsInEditMode() {
-        headingTextView.setText(getString(R.string.navigation_contact_data));
-        confirmationButton.setText(R.string.action_update);
+        binding.registrationHeading.setText(getString(R.string.navigation_contact_data));
+        binding.registrationActionButton.setText(R.string.action_update);
 
-        confirmationButton.setOnClickListener(v -> viewDisposable.add(Completable.mergeArray(
+        binding.registrationActionButton.setOnClickListener(v -> viewDisposable.add(Completable.mergeArray(
                 viewModel.updatePhoneNumberVerificationStatus(),
                 viewModel.updateShouldReImportingTestData()
         ).andThen(viewModel.getPhoneNumberVerificationStatus())
@@ -185,72 +171,59 @@ public class RegistrationFragment extends BaseFragment<RegistrationViewModel> {
     }
 
     private void initializeNameViews() {
-        firstNameLayout = getView().findViewById(R.id.firstNameLayout);
-        bindToLiveData(firstNameLayout, viewModel.getFirstName());
-
-        lastNameLayout = getView().findViewById(R.id.lastNameLayout);
-        bindToLiveData(lastNameLayout, viewModel.getLastName());
+        bindToLiveData(binding.firstNameLayout, viewModel.getFirstName());
+        bindToLiveData(binding.lastNameLayout, viewModel.getLastName());
 
         if (!viewModel.isInEditMode()) {
-            addConfirmationAction(lastNameLayout);
+            addConfirmationAction(binding.lastNameLayout);
         } else {
-            EditText editText = firstNameLayout.getEditText();
+            EditText editText = binding.firstNameLayout.getEditText();
             editText.post(() -> editText.setSelection(editText.getText().length()));
         }
     }
 
     private void initializeContactViews() {
-        contactInfoTextView = getView().findViewById(R.id.contactInfoTextView);
-        contactInfoTextView.setVisibility(View.GONE);
+        binding.contactInfoTextView.setVisibility(View.GONE);
 
-        phoneNumberLayout = getView().findViewById(R.id.phoneNumberLayout);
-        bindToLiveData(phoneNumberLayout, viewModel.getPhoneNumber());
+        bindToLiveData(binding.phoneNumberLayout, viewModel.getPhoneNumber());
 
-        emailLayout = getView().findViewById(R.id.emailLayout);
-        emailLayout.setRequired(false);
-        bindToLiveData(emailLayout, viewModel.getEmail());
+        binding.emailLayout.setRequired(false);
+        bindToLiveData(binding.emailLayout, viewModel.getEmail());
 
-        addConfirmationAction(emailLayout);
+        addConfirmationAction(binding.emailLayout);
         if (!viewModel.isInEditMode()) {
-            phoneNumberLayout.setVisibility(View.GONE);
-            emailLayout.setVisibility(View.GONE);
+            addConfirmationAction(binding.emailLayout);
+            binding.phoneNumberLayout.setVisibility(View.GONE);
+            binding.emailLayout.setVisibility(View.GONE);
         }
     }
 
     private void initializeAddressViews() {
-        addressInfoTextView = getView().findViewById(R.id.addressInfoTextView);
-        addressInfoTextView.setVisibility(View.GONE);
+        binding.addressInfoTextView.setVisibility(View.GONE);
 
-        streetLayout = getView().findViewById(R.id.streetLayout);
-        bindToLiveData(streetLayout, viewModel.getStreet());
-
-        houseNumberLayout = getView().findViewById(R.id.houseNumberLayout);
-        bindToLiveData(houseNumberLayout, viewModel.getHouseNumber());
-
-        postalCodeLayout = getView().findViewById(R.id.postalCodeLayout);
-        bindToLiveData(postalCodeLayout, viewModel.getPostalCode());
-
-        cityNameLayout = getView().findViewById(R.id.cityNameLayout);
-        bindToLiveData(cityNameLayout, viewModel.getCity());
-        addConfirmationAction(cityNameLayout);
+        bindToLiveData(binding.addressLayout.streetLayout, viewModel.getStreet());
+        bindToLiveData(binding.addressLayout.houseNumberLayout, viewModel.getHouseNumber());
+        bindToLiveData(binding.postalCodeLayout, viewModel.getPostalCode());
+        bindToLiveData(binding.cityNameLayout, viewModel.getCity());
+        addConfirmationAction(binding.cityNameLayout);
 
         if (!viewModel.isInEditMode()) {
-            streetLayout.setVisibility(View.GONE);
-            houseNumberLayout.setVisibility(View.GONE);
-            postalCodeLayout.setVisibility(View.GONE);
-            cityNameLayout.setVisibility(View.GONE);
+            binding.addressLayout.streetLayout.setVisibility(View.GONE);
+            binding.addressLayout.houseNumberLayout.setVisibility(View.GONE);
+            binding.postalCodeLayout.setVisibility(View.GONE);
+            binding.cityNameLayout.setVisibility(View.GONE);
         } else {
-            streetLayout.setRequired(true);
-            houseNumberLayout.setRequired(true);
-            postalCodeLayout.setRequired(true);
-            cityNameLayout.setRequired(true);
+            binding.addressLayout.streetLayout.setRequired(true);
+            binding.addressLayout.houseNumberLayout.setRequired(true);
+            binding.postalCodeLayout.setRequired(true);
+            binding.cityNameLayout.setRequired(true);
         }
     }
 
     private void addConfirmationAction(@NonNull TextInputLayout textInputLayout) {
         Objects.requireNonNull(textInputLayout.getEditText()).setImeOptions(IME_ACTION_DONE);
         Objects.requireNonNull(textInputLayout.getEditText())
-                .setOnEditorActionListener((textView, actionId, event) -> confirmationButton.callOnClick());
+                .setOnEditorActionListener((textView, actionId, event) -> binding.registrationActionButton.callOnClick());
     }
 
     private void bindToLiveData(RegistrationTextInputLayout textInputLayout, LiveData<String> textLiveData) {
@@ -288,23 +261,23 @@ public class RegistrationFragment extends BaseFragment<RegistrationViewModel> {
 
     private void indicateProgress(double progress) {
         int percent = (int) Math.max(0, Math.min(100, progress * 100));
-        ObjectAnimator.ofInt(progressIndicator, "progress", percent)
+        ObjectAnimator.ofInt(binding.registrationProgressIndicator, "progress", percent)
                 .setDuration(250)
                 .start();
     }
 
     private void showContactStep() {
-        headingTextView.setText(getString(R.string.registration_heading_contact));
+        binding.registrationHeading.setText(getString(R.string.registration_heading_contact));
 
-        firstNameLayout.setVisibility(View.GONE);
-        lastNameLayout.setVisibility(View.GONE);
+        binding.firstNameLayout.setVisibility(View.GONE);
+        binding.lastNameLayout.setVisibility(View.GONE);
 
-        contactInfoTextView.setVisibility(View.VISIBLE);
-        phoneNumberLayout.setVisibility(View.VISIBLE);
-        emailLayout.setVisibility(View.VISIBLE);
-        phoneNumberLayout.requestFocus();
+        binding.contactInfoTextView.setVisibility(View.VISIBLE);
+        binding.phoneNumberLayout.setVisibility(View.VISIBLE);
+        binding.emailLayout.setVisibility(View.VISIBLE);
+        binding.phoneNumberLayout.requestFocus();
 
-        confirmationButton.setOnClickListener(v -> viewDisposable.add(viewModel.updatePhoneNumberVerificationStatus()
+        binding.registrationActionButton.setOnClickListener(v -> viewDisposable.add(viewModel.updatePhoneNumberVerificationStatus()
                 .andThen(viewModel.getPhoneNumberVerificationStatus())
                 .flatMapCompletable(phoneNumberVerified -> Completable.fromAction(() -> {
                     if (!isContactStepCompleted()) {
@@ -476,21 +449,21 @@ public class RegistrationFragment extends BaseFragment<RegistrationViewModel> {
     }
 
     private void showAddressStep() {
-        headingTextView.setText(getString(R.string.registration_heading_address));
+        binding.registrationHeading.setText(getString(R.string.registration_heading_address));
 
-        phoneNumberLayout.setVisibility(View.GONE);
-        emailLayout.setVisibility(View.GONE);
-        contactInfoTextView.setVisibility(View.GONE);
+        binding.phoneNumberLayout.setVisibility(View.GONE);
+        binding.emailLayout.setVisibility(View.GONE);
+        binding.contactInfoTextView.setVisibility(View.GONE);
 
-        addressInfoTextView.setVisibility(View.VISIBLE);
-        streetLayout.setVisibility(View.VISIBLE);
-        houseNumberLayout.setVisibility(View.VISIBLE);
-        postalCodeLayout.setVisibility(View.VISIBLE);
-        cityNameLayout.setVisibility(View.VISIBLE);
-        streetLayout.requestFocus();
+        binding.addressInfoTextView.setVisibility(View.VISIBLE);
+        binding.addressLayout.streetLayout.setVisibility(View.VISIBLE);
+        binding.addressLayout.houseNumberLayout.setVisibility(View.VISIBLE);
+        binding.postalCodeLayout.setVisibility(View.VISIBLE);
+        binding.cityNameLayout.setVisibility(View.VISIBLE);
+        binding.addressLayout.streetLayout.requestFocus();
 
-        confirmationButton.setText(getString(R.string.action_finish));
-        confirmationButton.setOnClickListener(view -> viewDisposable.add(Completable.fromAction(
+        binding.registrationActionButton.setText(getString(R.string.action_finish));
+        binding.registrationActionButton.setOnClickListener(view -> viewDisposable.add(Completable.fromAction(
                 () -> {
                     if (!isAddressStepCompleted()) {
                         return;
@@ -507,15 +480,20 @@ public class RegistrationFragment extends BaseFragment<RegistrationViewModel> {
     }
 
     private boolean isNameStepCompleted() {
-        return areFieldsValidOrEmptyAndNotRequired(Arrays.asList(firstNameLayout, lastNameLayout));
+        return areFieldsValidOrEmptyAndNotRequired(Arrays.asList(binding.firstNameLayout, binding.lastNameLayout));
     }
 
     private boolean isContactStepCompleted() {
-        return areFieldsValidOrEmptyAndNotRequired(Collections.singletonList(phoneNumberLayout));
+        return areFieldsValidOrEmptyAndNotRequired(Collections.singletonList(binding.phoneNumberLayout));
     }
 
     private boolean isAddressStepCompleted() {
-        return areFieldsValidOrEmptyAndNotRequired(Arrays.asList(streetLayout, houseNumberLayout, postalCodeLayout, cityNameLayout));
+        return areFieldsValidOrEmptyAndNotRequired(Arrays.asList(
+                binding.addressLayout.streetLayout,
+                binding.addressLayout.houseNumberLayout,
+                binding.postalCodeLayout,
+                binding.cityNameLayout
+        ));
     }
 
     private boolean areAllStepsCompleted() {

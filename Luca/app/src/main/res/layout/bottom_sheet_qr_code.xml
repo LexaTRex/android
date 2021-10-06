@@ -20,7 +20,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/spacing_default"
-            android:text="@string/my_qr_code"
+            android:text="@string/check_in_show_your_qr_code_title"
             android:textColor="@android:color/white"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -30,7 +30,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/spacing_default"
-            android:text="@string/qr_code_description"
+            android:text="@string/check_in_show_your_qr_code_description"
             android:textColor="@android:color/white"
             app:layout_constraintTop_toBottomOf="@id/myQrCodeTextView" />
 

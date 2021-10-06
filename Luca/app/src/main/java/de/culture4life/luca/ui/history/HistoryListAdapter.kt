@@ -5,10 +5,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
-import android.widget.ImageView
-import android.widget.TextView
 import androidx.core.content.ContextCompat
 import de.culture4life.luca.R
+import de.culture4life.luca.databinding.HistoryListItemBinding
 
 class HistoryListAdapter(context: Context, resource: Int, private val showTimeLine: Boolean) :
     ArrayAdapter<HistoryListItem>(context, resource) {
@@ -38,77 +37,63 @@ class HistoryListAdapter(context: Context, resource: Int, private val showTimeLi
     }
 
     override fun getView(position: Int, convertView: View?, container: ViewGroup): View {
-        val view = convertView ?: layoutInflater.inflate(
-            R.layout.history_list_item, container, false
-        )
+        // for smooth scrolling
+        val binding = if (convertView == null) {
+            HistoryListItemBinding.inflate(layoutInflater)
+        } else {
+            HistoryListItemBinding.bind(convertView)
+        }
 
-        view.setOnClickListener(null)
+        binding.root.setOnClickListener(null)
 
         val item = getItem(position)!!
-        val dotView = view.findViewById<View>(R.id.dotView)
-        val topLineView = view.findViewById<View>(R.id.topLineView)
-        val bottomLineView = view.findViewById<View>(R.id.bottomLineView)
-        val titleTextView = view.findViewById<TextView>(R.id.itemTitleTextView)
-        val descriptionTextView = view.findViewById<TextView>(R.id.itemDescriptionTextView)
-        val titleImageView = view.findViewById<ImageView>(R.id.itemTitleImageView)
-        val descriptionImageView = view.findViewById<ImageView>(R.id.itemDescriptionImageView)
-        val timeTextView = view.findViewById<TextView>(R.id.itemTimeTextView)
 
-        topLineView.visibility = if (showTimeLine && position > 0) View.VISIBLE else View.GONE
-        bottomLineView.visibility = if (showTimeLine && position < count - 1) View.VISIBLE else View.GONE
-        titleTextView.text = item.title
-        descriptionTextView.text = item.description
-        descriptionTextView.visibility = if (item.description != null) View.VISIBLE else View.GONE
+        binding.topLineView.visibility = if (showTimeLine && position > 0) View.VISIBLE else View.GONE
+        binding.bottomLineView.visibility = if (showTimeLine && position < count - 1) View.VISIBLE else View.GONE
+        binding.itemTitleTextView.text = item.title
+        binding.itemDescriptionTextView.text = item.description
+        binding.itemDescriptionTextView.visibility = if (item.description != null) View.VISIBLE else View.GONE
 
-        with(titleImageView) {
+        with(binding.itemTitleImageView) {
             if (item.additionalTitleDetails != null) {
                 setImageResource(item.titleIconResourceId)
                 if (item.accessedTraceData.isNotEmpty()) {
-                    view.setOnClickListener { itemClickHandler?.showAccessedDataDetails(item) }
+                    binding.root.setOnClickListener { itemClickHandler?.showAccessedDataDetails(item) }
+                    visibility = View.VISIBLE
+                } else if (item.isPrivateMeeting) {
+                    binding.root.setOnClickListener { itemClickHandler?.showPrivateMeetingDetails(item) }
                     visibility = View.VISIBLE
                 } else {
                     visibility = View.GONE
                 }
-                view.setOnLongClickListener {
+                binding.root.setOnLongClickListener {
                     itemClickHandler?.showTraceInformation(item)
                     return@setOnLongClickListener true
                 }
             } else {
                 visibility = View.GONE
+                binding.root.setOnLongClickListener(null)
             }
         }
-        with(descriptionImageView) {
-            if (item.additionalDescriptionDetails != null) {
-                setImageResource(item.descriptionIconResourceId)
-                visibility = View.VISIBLE
-                setOnClickListener { itemClickHandler?.showAdditionalDescriptionDetails(item) }
-                descriptionTextView.setOnClickListener {
-                    itemClickHandler?.showAdditionalDescriptionDetails(item)
-                }
-            } else {
-                visibility = View.GONE
-                setOnClickListener(null)
-                descriptionTextView.setOnClickListener(null)
-            }
-        }
-        timeTextView.text = item.time
+
+        binding.itemTimeTextView.text = item.time
 
         val isNew = item.accessedTraceData.any { it.isNew }
         val color = ContextCompat.getColor(
             context,
-            if (isNew) R.color.highlightColor else R.color.primaryColor
+            if (isNew) R.color.highlightColor else android.R.color.white
         )
-        titleTextView.setTextColor(color)
-        dotView.background.setTint(color)
-        titleImageView.setColorFilter(color)
+        binding.itemTitleTextView.setTextColor(color)
+        binding.dotView.background.setTint(color)
+        binding.itemTitleImageView.setColorFilter(color)
 
-        return view
+        return binding.root
     }
 
     interface ItemClickHandler {
         fun showAccessedDataDetails(item: HistoryListItem)
-        fun showAdditionalDescriptionDetails(item: HistoryListItem)
         fun showTraceInformation(item: HistoryListItem)
+        fun showPrivateMeetingDetails(item: HistoryListItem)
     }
 
 }

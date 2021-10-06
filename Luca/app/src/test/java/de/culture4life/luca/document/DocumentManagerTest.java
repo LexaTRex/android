@@ -19,6 +19,7 @@ import de.culture4life.luca.crypto.CryptoManager;
 import de.culture4life.luca.document.provider.appointment.Appointment;
 import de.culture4life.luca.document.provider.eudcc.EudccDocumentProviderTest;
 import de.culture4life.luca.document.provider.opentestcheck.OpenTestCheckDocument;
+import de.culture4life.luca.genuinity.GenuinityManager;
 import de.culture4life.luca.history.HistoryManager;
 import de.culture4life.luca.network.NetworkManager;
 import de.culture4life.luca.network.pojo.DocumentProviderData;
@@ -58,7 +59,8 @@ public class DocumentManagerTest extends LucaUnitTest {
     public void setUp() {
         PreferencesManager preferencesManager = new PreferencesManager();
         NetworkManager networkManager = new NetworkManager();
-        CryptoManager cryptoManager = new CryptoManager(preferencesManager, networkManager);
+        GenuinityManager genuinityManager = new GenuinityManager(preferencesManager, networkManager);
+        CryptoManager cryptoManager = new CryptoManager(preferencesManager, networkManager, genuinityManager);
         registrationManager = spy(new RegistrationManager(preferencesManager, networkManager, cryptoManager));
         childrenManager = new ChildrenManager(preferencesManager, registrationManager);
         HistoryManager historyManager = new HistoryManager(preferencesManager, childrenManager);

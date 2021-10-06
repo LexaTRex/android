@@ -5,6 +5,7 @@ import android.util.AttributeSet
 import android.view.LayoutInflater
 import androidx.constraintlayout.widget.ConstraintLayout
 import de.culture4life.luca.R
+import de.culture4life.luca.databinding.MyLucaListItemBinding
 
 class SingleLucaItemView @JvmOverloads constructor(
     context: Context,
@@ -12,11 +13,7 @@ class SingleLucaItemView @JvmOverloads constructor(
     defStyleAttr: Int = 0,
 ) : ConstraintLayout(context, attrs, defStyleAttr) {
 
-    val layout: ConstraintLayout = LayoutInflater.from(context).inflate(
-        R.layout.my_luca_list_item,
-        this,
-        true
-    ) as ConstraintLayout
+    val binding: MyLucaListItemBinding = MyLucaListItemBinding.inflate(LayoutInflater.from(context), this, false)
 
     init {
         val params = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT)

@@ -1,9 +1,21 @@
+# Release 2.0.3
+
+- Support third vaccination certificates
+- Redesign add children screen
+- UX improvements
+
+With this update we support the import of certificates for the third vaccination. Further, we included bug fixes related to the check-in and we fixed some UI bugs.
+
 # Release 2.0.2
 
 - Bug fixes
 - UX improvements
 
 This update includes bug fixes related to the check-in as well as some UX improvements.
+
+# Release 2.0.1
+
+Prominent disclosure before asking for camera permission
 
 # Release 2.0.0
 

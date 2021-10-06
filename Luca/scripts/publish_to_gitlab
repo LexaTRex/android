@@ -7,18 +7,19 @@ GITLAB_REPO=git@gitlab.com:lucaapp/android.git
 VERSION=$(cat app/build.gradle | grep "versionName " | xargs -n1 | grep -v "versionName")
 DEPLOYMENT_BRANCH=deployment
 CURRENT_BRANCH=$(git branch --show-current)
+REMOTE_BRANCH=${1:-master}
 
-echo "Pushing version $VERSION from branch $CURRENT_BRANCH to Gitlab master"
+echo "Pushing version $VERSION from branch $CURRENT_BRANCH to Gitlab $REMOTE_BRANCH"
 sleep 3
 
 cd ..
 git branch -D $DEPLOYMENT_BRANCH
 git remote remove public-origin
 git remote add public-origin $GITLAB_REPO
-git pull public-origin master:$DEPLOYMENT_BRANCH
+git pull public-origin $REMOTE_BRANCH:$DEPLOYMENT_BRANCH
 git checkout $DEPLOYMENT_BRANCH
 git diff $DEPLOYMENT_BRANCH $CURRENT_BRANCH | git apply
 git add -A && git commit -m "Release $VERSION"
 
 echo "Check your git status and apply the following line if everything looks good:"
-echo git push -u public-origin $DEPLOYMENT_BRANCH:master
+echo git push -u public-origin $DEPLOYMENT_BRANCH:$REMOTE_BRANCH

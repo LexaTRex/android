@@ -12,13 +12,14 @@ import org.joda.time.DateTime
 import org.joda.time.DateTimeZone
 import java.util.*
 
-
 /**
  * Result from a scan or deep link of a EU Digital COVID Certificate (EUDCC)
  */
 @ExperimentalUnsignedTypes
-class EudccDocument(encodedData: String, val result: CertificateDecodingResult) :
-    ProvidedDocument() {
+class EudccDocument(
+    encodedData: String,
+    val result: CertificateDecodingResult
+) : ProvidedDocument() {
 
     companion object {
         private const val COVID19_DISEASE = "840539006"
@@ -54,10 +55,7 @@ class EudccDocument(encodedData: String, val result: CertificateDecodingResult) 
                     }
                 }
             }
-            throw DocumentParsingException(
-                "Could not parse EUDCC: ${error.error}",
-                error.error.error
-            )
+            throw DocumentParsingException("Could not parse EUDCC: ${error.error}", error.error.error)
         }
     }
 
@@ -107,13 +105,14 @@ class EudccDocument(encodedData: String, val result: CertificateDecodingResult) 
                 val procedures = ArrayList<Procedure>()
                 for (vaccination in vaccinations) {
                     verifyCovid19(vaccination.disease)
-                    val type = VACCINATION_TYPES[vaccination.medicinalProduct]
-                        ?: Procedure.Type.UNKNOWN
+                    val type = VACCINATION_TYPES[vaccination.medicinalProduct] ?: Procedure.Type.UNKNOWN
                     val procedure = Procedure(
-                        type, vaccination.dateOfVaccination.parseDate(),
-                        vaccination.doseNumber, vaccination.totalSeriesOfDoses
+                        type,
+                        vaccination.dateOfVaccination.parseDate(),
+                        vaccination.doseNumber,
+                        vaccination.totalSeriesOfDoses
                     )
-                    if (vaccination.totalSeriesOfDoses == vaccination.doseNumber) {
+                    if (vaccination.doseNumber >= vaccination.totalSeriesOfDoses) {
                         outcome = OUTCOME_FULLY_IMMUNE
                     }
                     procedures.add(procedure)
@@ -151,8 +150,7 @@ class EudccDocument(encodedData: String, val result: CertificateDecodingResult) 
                     validityStartTimestamp = it.certificateValidFrom.parseDate()
                     expirationTimestamp = it.certificateValidUntil.parseDate()
                 }
-                outcome =
-                    OUTCOME_FULLY_IMMUNE  // recoveries count as fully immune when in the validity time
+                outcome = OUTCOME_FULLY_IMMUNE // recoveries count as fully immune when in the validity time
             }
         }
     }
